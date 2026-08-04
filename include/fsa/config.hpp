@@ -42,5 +42,4 @@ constexpr int reciprocalLatency = -1;
 // TODO: 延迟未确定
 
 }  // namespace fsa
-
 #endif // !CONFIG_HPP
