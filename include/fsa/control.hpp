@@ -20,7 +20,7 @@ namespace fsa{
  * 
  */
 struct PECtrl{
-    /// @brief MacUnit选通，true时执行运算操作
+    /// @brief MacUnit选通，true时mac结果接入竖直输出
     bool mac = false;
 
     /// @brief in_c选通，true时取u_input，false取d_input
@@ -125,5 +125,4 @@ struct AccumulatorControl{
 };
 
 }  // namespace fsa
-
 #endif // !CONTROL_HPP
