@@ -91,9 +91,6 @@ struct SystolicArrayState{
 struct AccumulatorState{
     acc_t scale[SA_COLS]{};
 
-    /// @brief 倒数是否正在计算
-    bool reciprocal_busy[SA_COLS]{};
-
     /// @brief 每列的reciprocal计算的计数器
     reciprocal_counter_t reciprocal_counter[SA_COLS]{};
 };
