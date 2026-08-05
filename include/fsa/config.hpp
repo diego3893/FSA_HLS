@@ -32,7 +32,7 @@ constexpr int dmaLoadInflight = 16;
 constexpr int dmaStoreInflight = 8;
 
 /// @brief PWL区间数
-constexpr int exp2PwlPieces = 8;
+constexpr int exp2PWLPieces = 8;
 
 /// @brief 信号量槽位数量
 constexpr int N_SEMAPHORES = 32;
