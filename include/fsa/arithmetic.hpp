@@ -103,14 +103,14 @@ elem_t viewAasE(acc_t a);
  * @param intercept 截距
  * @return elem_t PWL结果
  */
-elem_t peExp2Pwl(elem_t x, elem_t slope, acc_t intercept);
+elem_t peExp2PWL(elem_t x, elem_t slope, acc_t intercept);
 
 /**
  * @brief 取得CMP当前需要发送的PWL截距
  * @param index exp2_counter的当前值
  * @return acc_t 当前分段的截距
  */
-acc_t exp2PwlIntercept(exp2_counter_t index);
+acc_t exp2PWLIntercept(exp2_counter_t index);
 
 /**
  * @brief Acc的exp2计算
@@ -118,7 +118,7 @@ acc_t exp2PwlIntercept(exp2_counter_t index);
  * @param x 输入数据
  * @return acc_t exp2结果
  */
-acc_t accExp2Pwl(acc_t x);
+acc_t accExp2PWL(acc_t x);
 
 /**
  * @brief 求倒数
