@@ -44,7 +44,7 @@ struct PEIO {
 
 /**
  * @brief PE状态复位
- * @param state 要复位的 PE 状态
+ * @param state 要复位的PE状态
  */
 void reset_pe_state(PEState& state);
 
