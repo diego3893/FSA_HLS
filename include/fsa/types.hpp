@@ -29,12 +29,14 @@ using sram_address_t = std::uint32_t;
 /// @brief 内存地址
 using memory_address_t = std::uint64_t;
 /// @brief 地址访问步长
-using stride_t = std::int32_t;
+using sram_stride_t = std::int32_t;
+using memory_stride_t = std::int32_t;
 /// @brief 硬件计数器
-using counter_t = std::uint32_t;
+using exp2_counter_t = std::uint32_t;
+using reciprocal_counter_t = std::uint32_t;
 // TODO: sram_addr 5位（pad和acc SRAM都用这个），mem_addr 根据AXI修改。无符号
-// TODO: stride细化为sram_stride 5位，mem_stride 21位。有符号
-// TODO: counter细化：exp2 3位和reciprocal 根据延迟定位数。无符号
+// TODO: sram_stride 5位，mem_stride 21位。有符号
+// TODO: exp2 3位和reciprocal 根据延迟定位数。无符号
 
 /// @brief 定长向量
 /// @tparam T 数据类型
