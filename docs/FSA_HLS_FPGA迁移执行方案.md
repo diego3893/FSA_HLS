@@ -216,11 +216,11 @@ constexpr int SA_COLS = 4;
 constexpr int SPAD_ROWS = 2 * SA_COLS + 4 * SA_ROWS;  // 24
 constexpr int ACC_ROWS = 1 + SA_ROWS;                 // 5
 
-// 名称对应 FSAParams.nMemPorts 和 HasArithmeticParams.exp2PwlPieces。
+// 名称对应 FSAParams.nMemPorts 和 HasArithmeticParams.exp2PWLPieces。
 constexpr int nMemPorts = 4;
 constexpr int dmaLoadInflight = 16;
 constexpr int dmaStoreInflight = 8;
-constexpr int exp2PwlPieces = 8;
+constexpr int exp2PWLPieces = 8;
 constexpr int N_SEMAPHORES = 32;
 
 // Chisel 中只有 reciprocalLatency 是显式传给 ExecutionPlan 的延迟参数。
@@ -590,8 +590,8 @@ elem_t cvtAtoE(acc_t a);
 acc_t viewEasA(elem_t e);
 elem_t viewAasE(acc_t a);
 
-elem_t peExp2Pwl(elem_t x, elem_t slope, acc_t intercept);
-acc_t accExp2Pwl(acc_t x);
+elem_t peExp2PWL(elem_t x, elem_t slope, acc_t intercept);
+acc_t accExp2PWL(acc_t x);
 acc_t reciprocal(acc_t value);
 
 elem_t elemZero();
@@ -616,7 +616,7 @@ acc_t attentionScale(int dk = SA_ROWS);
 - `accCmp()`：对应 `ArithmeticImpl.accCmp`，结果字段保持为 `out_max/out_diff`；
 - `cvtAtoE()`：对应原同名函数，执行真正的数值格式转换；
 - `viewEasA()/viewAasE()`：对应原同名函数，只做位视图转换；
-- `peExp2Pwl()/accExp2Pwl()`：分别对应 `FPMacUnit` 与 `FPAccUnit` 的 exp2 路径；
+- `peExp2PWL()/accExp2PWL()`：分别对应 `FPMacUnit` 与 `FPAccUnit` 的 exp2 路径；
 - `reciprocal()`：对应 `FPAccUnit` 中的 `RawFloat_Div`；
 - 常量函数：统一产生 0、1、负无穷和 attention scale。
 
@@ -940,7 +940,7 @@ void accumulator_step(
 1. 根据命令选择 `in_a`；
 2. 根据命令选择 `in_b`；
 3. 根据命令选择 `in_c`；
-4. 调用 `accUnit()` 或 `accExp2Pwl()`；
+4. 调用 `accUnit()` 或 `accExp2PWL()`；
 5. 在 `EXP_S1/EXP_S2/SET_SCALE/RECIPROCAL` 下更新 `next.scale[col]`；
 6. 产生要写回 AccRAM 的数据；
 7. 更新 reciprocal 的 busy/counter 状态。
