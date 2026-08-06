@@ -2,9 +2,19 @@
 
 FSA-HLS 是把原 [VCA-EPFL/FSA: FSA: Fusing FlashAttention within a Single Systolic Array](https://github.com/VCA-EPFL/FSA)Chisel 项目逐步迁移为 HLS C++ 的工程。
 
-本项目的目标不是在 CPU 上重新实现一次 FlashAttention，而是用适合 HLS 的 C++ 描述 FSA 的计算模块、片上存储和外围接口，最终将它们综合成 FPGA 硬件。
+## 快速运行C++模块测试
 
-## 1 迁移范围
+在PowerShell中进入项目根目录后，可以使用通用脚本编译并运行测试：
+
+```powershell
+# 运行PE测试，对应tests/test_pe.cpp
+.\run_test.cmd pe
+
+# 自动运行tests目录中的全部测试
+.\run_test.cmd all
+```
+
+## 迁移范围
 
 整个迁移分为两个阶段。
 
@@ -48,4 +58,3 @@ Accumulator ↔ Accumulator RAM
 - AXI4FSA 顶层接口。
 
 阶段二只通过阶段一预留的接口连接核心，不应重新修改 PE、CMP 等模块的内部算法。
-
