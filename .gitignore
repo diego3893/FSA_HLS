@@ -1,0 +1,5 @@
+# C++ test and compiler outputs
+/build/
+*.o
+*.obj
+*.exe
