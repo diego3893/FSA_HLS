@@ -45,10 +45,10 @@ template <typename T, std::size_t N>
 using FixedVector = std::array<T, N>;
 
 /// @brief elem_t类型的定长向量
-using ElemVector = FixedVector<elem_t, static_cast<std::size_t>(SA_ROWS)>;
+using ElemVector = FixedVector<elem_t, (std::size_t)SA_ROWS>;
 
 /// @brief acc_t类型的定长向量
-using AccVector = FixedVector<acc_t, static_cast<std::size_t>(SA_COLS)>;
+using AccVector = FixedVector<acc_t, (std::size_t)SA_COLS>;
 
 /// @brief Valid数据，valid=true时数据有效
 /// @tparam T 数据类型
