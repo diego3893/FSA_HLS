@@ -74,13 +74,30 @@ struct SystolicArrayState{
     /// @brief CMP状态
     CMPState cmp_array[SA_COLS]{};
 
-    /// @brief PE向右的Pipe寄存器
+    /**
+     * @brief CMP控制信号级间寄存器
+     * 
+     * CMP[col+1]本拍读取ctrl[col]，out_ctrl写入ctrl[col+1]
+     */
+    ValidData<CmpControl> cmp_ctrl_pipe[SA_COLS]{};
+
+    /**
+     * @brief PE控制信号级间寄存器
+     *
+     * PE[row][col+1]本拍读取ctrl[row][col]，out_ctrl写入ctrl[row][col+1]
+     */
+    ValidData<PECtrl> pe_ctrl_pipe[SA_ROWS][SA_COLS]{};
+
+    /// @brief CMP向PE发送的数据Pipe
+    ValidData<acc_t> cmp_d_output_pipe[SA_COLS]{};
+
+    /// @brief PE向右的Pipe
     ValidData<elem_t> r_output_pipe[SA_ROWS][SA_COLS]{};
 
-    /// @brief PE向下的Pipe寄存器
+    /// @brief PE向下的Pipe
     ValidData<acc_t> d_output_pipe[SA_ROWS][SA_COLS]{};
 
-    /// @brief PE向上的Pipe寄存器
+    /// @brief PE向上的Pipe
     ValidData<acc_t> u_output_pipe[SA_ROWS][SA_COLS]{};
 };
 
@@ -91,8 +108,18 @@ struct SystolicArrayState{
 struct AccumulatorState{
     acc_t scale[SA_COLS]{};
 
-    /// @brief 每列的reciprocal计算的计数器
+    /// @brief 是否正在等待多周期reciprocal
+    bool reciprocal_busy[SA_COLS]{};
+
+    /// @brief 当前列距离reciprocal结果返回还剩多少拍
     reciprocal_counter_t reciprocal_counter[SA_COLS]{};
+
+    /**
+     * @brief reciprocal启动时保存的scale
+     *
+     * 除法进行期间外部输入可能变化，所以不能在结果返回时重新读取scale
+     */
+    acc_t reciprocal_operand[SA_COLS]{};
 };
 
 }  // namespace fsa
