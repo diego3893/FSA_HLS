@@ -45,7 +45,7 @@ struct CMPState{
  * @tparam rows 输入向量长度
  * 
  */
-template <typename T, int rows>
+template <typename T, std::size_t rows>
 struct InputDelayerState{
     /// @brief 输出寄存器
     T out_delay_pipe[rows][rows]{};
