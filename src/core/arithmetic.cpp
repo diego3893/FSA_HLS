@@ -17,6 +17,7 @@ const acc_t EXP2_PWL_INTERCEPTS[exp2PWLPieces] = {
     (acc_t)0.890701711,
     (acc_t)0.862030923
 };
+static_assert(exp2PWLPieces==8, "PWL段数改变，重新计算slope/intercept");
 
 /**
  * @brief 确保PWL有效，并查找段号
