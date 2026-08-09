@@ -3,3 +3,4 @@
 *.o
 *.obj
 *.exe
+/third_party/vitis_hls/include/
