@@ -17,6 +17,13 @@ param(
     [string]$Test = "all"
 )
 
+# Keep PowerShell, g++, and the child test process on the same UTF-8 encoding.
+# Setting the code page inside one child executable can corrupt the surrounding
+# PowerShell/VS Code terminal stream, so encoding is configured once here.
+$Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[Console]::OutputEncoding = $Utf8NoBom
+$OutputEncoding = $Utf8NoBom
+
 # PSScriptRoot makes the script independent of the caller's current directory.
 $ProjectRoot = $PSScriptRoot
 $IncludeDirectory = Join-Path $ProjectRoot "include"
@@ -78,6 +85,8 @@ New-Item -ItemType Directory -Path $BuildDirectory -Force | Out-Null
 
 $CompilerOptions = @(
     "-std=c++14",
+    "-finput-charset=UTF-8",
+    "-fexec-charset=UTF-8",
     "-Wall",
     "-Wextra",
     "-Wpedantic",
