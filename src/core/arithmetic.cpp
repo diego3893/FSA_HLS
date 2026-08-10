@@ -2,65 +2,85 @@
 
 #include <cmath>
 #include <limits>
+#include <utils/x_hls_utils.h>
+#include <hls_math.h>
 
 namespace fsa{
 
-namespace{
-// TODO: 这是agent跑出来的数据，需要人为确认，并且做精度调整
-const acc_t EXP2_PWL_INTERCEPTS[exp2PWLPieces] = {
-    (acc_t)1.0,
-    (acc_t)0.993111670,
-    (acc_t)0.980478406,
-    (acc_t)0.963101327,
-    (acc_t)0.941854775,
-    (acc_t)0.917500854,
-    (acc_t)0.890701711,
-    (acc_t)0.862030923
+namespace {
+
+/// @brief 把分段编号写入截距的[26:24]
+const ap_uint<32> EXP2_PWL_INTERCEPT_BITS[exp2PWLPieces] = {
+    0x00800000,
+    0x017e3c91,
+    0x027b00a2,
+    0x03768dcf,
+    0x04711d65,
+    0x056ae156,
+    0x06640507,
+    0x075cae0f
 };
-static_assert(exp2PWLPieces==8, "PWL段数改变，重新计算slope/intercept");
+
+static_assert(
+    exp2PWLPieces == 8,
+    "EXP2_PWL_INTERCEPT_BITS只适用于8段PWL"
+);
 
 /**
- * @brief 确保PWL有效，并查找段号
+ * @brief 从编码截距中读取分段编号
  * 
- * @param intercept 截距值
- * @param index 分段编号
- * @return true 找到对应分段
- * @return false 未找到对应分段
+ * @param encoded_intercept 编码过后的截距
+ * @return exp2_counter_t 解码后的分段编号
  */
-bool findExp2PWLInterceptIndex(const acc_t intercept, exp2_counter_t& index){
-    for(exp2_counter_t piece=0; piece<(exp2_counter_t)exp2PWLPieces; ++piece){
-        if(intercept == EXP2_PWL_INTERCEPTS[piece]){
-            index = piece;
-            return true;
-        }
-    }
-    return false;
+exp2_counter_t decodeExp2PWLIndex(const acc_t encoded_intercept){
+    const fp_struct<acc_t> view(encoded_intercept);
+    const ap_uint<32> bits = view.data();
+    return bits.range(26, 24);
 }
 
 /**
- * @brief 求x小数部分对应的段号
+ * @brief 恢复截距的阶码部分
  * 
- * @param x 幂指数
- * @return exp2_counter_t 段号
+ * @param encoded_intercept 编码过后的截距
+ * @return acc_t 恢复后的FP32截距
+ */
+acc_t restoreExp2PWLIntercept(const acc_t encoded_intercept){
+    const fp_struct<acc_t> encoded_view(encoded_intercept);
+    ap_uint<32> bits = encoded_view.data();
+
+    // 阶码唯一有效位
+    const ap_uint<1> exponent_lsb = bits[23];
+
+    // 截距位于(0.5, 1]，原指数只能是0x7e或0x7f
+    // 恢复阶码
+    bits.range(30, 23) = (ap_uint<8>)0x7e | (ap_uint<8>)exponent_lsb;
+
+    const fp_struct<acc_t> restored_view(bits);
+    return restored_view.to_ieee();
+}
+
+/**
+ * @brief 计算x的小数部分属于哪个分段
+ * 
+ * @param x 完整指数
+ * @return exp2_counter_t 分段编号 
  */
 exp2_counter_t exp2PWLPieceForX(const elem_t x){
     const acc_t x_acc = (acc_t)x;
-    const acc_t integer_part = std::trunc(x_acc);
-    const acc_t fractional_magnitude = std::fabs(x_acc - integer_part);
-    // 8段均分，因此可以直接映射
-    exp2_counter_t piece = (exp2_counter_t)(fractional_magnitude * (acc_t)exp2PWLPieces);
-    // 边界保护
-    if(piece >= (exp2_counter_t)exp2PWLPieces){
-        piece = (exp2_counter_t)(exp2PWLPieces - 1);
-    }
+
+    const int integer_part = hls::trunc(x_acc);
+    const acc_t fractional_part = x_acc - (acc_t)integer_part;
+
+    exp2_counter_t piece =
+        (exp2_counter_t)(hls::fabs(fractional_part) * (acc_t)exp2PWLPieces);
+
     return piece;
 }
 
 }  // namespace
 
 acc_t peMac(const elem_t in_a, const elem_t in_b, const acc_t in_c){
-    // TODO: 应为融合乘加，此处精度有误
-    return (acc_t)in_a*(acc_t)in_b + in_c;
+    return hls::fma((acc_t)in_a, (acc_t)in_b, in_c);
 }
 
 PeMacUnitOutput peMacUnit(const elem_t in_a, const elem_t in_b, 
@@ -73,54 +93,65 @@ PeMacUnitOutput peMacUnit(const elem_t in_a, const elem_t in_b,
         return output;
     }
 
-    // TODO: 是否需要从一个raw做两次转换？
-    output.out_elemType = peExp2PWL(in_a, in_b, in_c);
-    output.out_accType = (acc_t)output.out_elemType;
+    output.out_accType = peExp2PWL(in_a, in_b, in_c);
+    output.out_elemType = cvtAtoE(output.out_accType);
 
-    exp2_counter_t intercept_index = 0;
-    const bool intercept_index_valid = findExp2PWLInterceptIndex(in_c, intercept_index);
-    output.out_exp2 = intercept_index_valid && intercept_index == exp2PWLPieceForX(in_a);
+    const exp2_counter_t intercept_index = decodeExp2PWLIndex(in_c);
+
+    output.out_exp2 = intercept_index==exp2PWLPieceForX(in_a);
+
     return output;
 }
 
 acc_t accUnit(const acc_t in_a, const acc_t in_b, const acc_t in_c){
-    return in_a*in_b + in_c;
+    return hls::fma(in_a, in_b, in_c);
 }
 
 CmpUnitOutput accCmp(const acc_t in_a, const acc_t in_b){
     CmpUnitOutput output{};
-    // TODO: 正确实现为浮点减法之后看符号位
-    output.out_max = (in_a>=in_b) ? in_a : in_b;
-    output.out_diff = in_a-in_b;
+    output.out_diff = hls::fma(in_a, (acc_t)1.0F, -in_b);
+    const fp_struct<acc_t> diff_view(output.out_diff);
+    output.out_max = diff_view.sign[0] ? in_b : in_a;
     return output;
 }
 
 elem_t cvtAtoE(const acc_t a){
-    // TODO: 目前的实现不好，在舍入上可能有问题
     return (elem_t)a;
 }
 
 acc_t viewEasA(const elem_t e){
-    // TODO: 需要改为按位操作
-    return (acc_t)e;
+    const fp_struct<elem_t> elem_view(e);
+    ap_uint<32> acc_bits = 0;
+    acc_bits.range(15, 0) = elem_view.data();
+    const fp_struct<acc_t> acc_view(acc_bits);
+    return acc_view.to_ieee();
 }
 
 elem_t viewAasE(const acc_t a){
-    // TODO: 需要改为按位操作
-    return (elem_t)a;
+    const fp_struct<acc_t> acc_view(a);
+    ap_uint<16> elem_bits = acc_view.data().range(15, 0);
+    const fp_struct<elem_t> elem_view(elem_bits);
+    return elem_view.to_ieee();
 }
 
-elem_t peExp2PWL(const elem_t x, const elem_t slope, const acc_t intercept){
+acc_t peExp2PWL(const elem_t x, const elem_t slope, 
+                const acc_t encoded_intercept){
     const acc_t x_acc = (acc_t)x;
-    const int integer_part = (int)std::trunc(x_acc);
-    const acc_t fractional_part = x_acc - (acc_t)integer_part;
-    const acc_t fractional_exp2 = (acc_t)slope*fractional_part + intercept;
-    return (elem_t)std::ldexp(fractional_exp2, integer_part);
+    const int integer_part = (int)hls::trunc(x_acc);
+    const acc_t fractional_part = x_acc-(acc_t)integer_part;
+
+    const acc_t intercept = restoreExp2PWLIntercept(encoded_intercept);
+
+    const acc_t fractional_result = 
+                    hls::fma(fractional_part, (acc_t)slope, intercept);
+
+    return hls::ldexp(fractional_result, integer_part);
 }
 
 acc_t exp2PWLIntercept(const exp2_counter_t index){
-    const exp2_counter_t bounded_index = index % (exp2_counter_t)exp2PWLPieces;
-    return EXP2_PWL_INTERCEPTS[bounded_index];
+    const ap_uint<32> bits = EXP2_PWL_INTERCEPT_BITS[index.to_uint()];
+    const fp_struct<acc_t> view(bits);
+    return view.to_ieee();
 }
 
 acc_t accExp2PWL(const acc_t x){
@@ -149,12 +180,7 @@ acc_t accMinimum(){
     return -std::numeric_limits<acc_t>::infinity();
 }
 
-acc_t attentionScale(const int dk){
-    // TODO: 直接写成一个constexpr会不会更好？
-    if(dk <= 0){
-        return accZero();
-    }
-    const acc_t log2_e = std::log2(std::exp((acc_t)1.0F));
-    return log2_e / std::sqrt((acc_t)dk);
+acc_t attentionScale(){
+    return (acc_t)0.7213475204F;
 }
 }  // namespace fsa
