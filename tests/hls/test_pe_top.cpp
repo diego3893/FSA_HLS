@@ -424,8 +424,13 @@ void testExp2AllPieces(){
 /** @brief 检查exp2Done的置位、保护和清除行为。 */
 void testExp2Done(){
     const fsa::elem_t x = (fsa::elem_t)-0.3125F;
-    const int matching_piece = goldExp2Piece(x);
     const fsa::elem_t expected = goldExp2(x);
+
+    /*
+     * 第一次命中后，PE.reg已经由原来的x变成了正数exp2(x)。
+     * 因此后续可能再次命中的分段，应根据新的reg计算，而不是根据原x计算。
+     */
+    const int repeated_piece = goldExp2Piece(expected);
 
     resetPe();
     loadRegFromLeft(x);
@@ -435,7 +440,7 @@ void testExp2Done(){
      * 再发送一次匹配截距，但故意把斜率改成0。
      * 如果exp2Done没有阻止重复写入，reg会被错误结果覆盖。
      */
-    sendExp2Piece(matching_piece, (fsa::elem_t)0.0F);
+    sendExp2Piece(repeated_piece, (fsa::elem_t)0.0F);
     expect(sameElemBits(readRegAndClear(), expected),
            "exp2Done: duplicate matching piece overwrote reg");
 
@@ -449,10 +454,10 @@ void testExp2Done(){
     runPe(leave_exp2);
 
     /* exp2Done清除后，同一个匹配段应允许再次写入。 */
-    sendExp2Piece(matching_piece, (fsa::elem_t)0.0F);
+    sendExp2Piece(repeated_piece, (fsa::elem_t)0.0F);
     const fsa::elem_t rewritten = readRegAndClear();
     const fsa::elem_t rewritten_expected =
-        (fsa::elem_t)EXP2_GOLD_INTERCEPTS[matching_piece];
+        (fsa::elem_t)EXP2_GOLD_INTERCEPTS[repeated_piece];
 
     expect(sameElemBits(rewritten, rewritten_expected),
            "exp2Done: leaving exp2 mode did not enable the next exp2 write");
