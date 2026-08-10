@@ -1,5 +1,6 @@
 # C++ test and compiler outputs
 /build/
+/hls/*/build/
 *.o
 *.obj
 *.exe
