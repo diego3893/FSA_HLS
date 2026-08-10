@@ -31,7 +31,7 @@ struct PeMacUnitOutput{
     /// @brief elem_t结果，左右方向使用
     elem_t out_elemType{};
 
-    /// @brief PWL分段是否与x匹配
+    /// @brief PWL分段是否与x匹配，即当前PWL结果是否有效
     bool out_exp2 = false;
 };
 
@@ -98,17 +98,17 @@ elem_t viewAasE(acc_t a);
 /**
  * @brief PE的PWL计算
  * 
- * @param x 小数部分
+ * @param x 指数
  * @param slope 斜率
- * @param intercept 截距
- * @return elem_t PWL结果
+ * @param intercept 编码截距
+ * @return acc_t PWL结果
  */
-elem_t peExp2PWL(elem_t x, elem_t slope, acc_t intercept);
+acc_t peExp2PWL(elem_t x, elem_t slope, acc_t intercept);
 
 /**
  * @brief 取得CMP当前需要发送的PWL截距
  * @param index exp2_counter的当前值
- * @return acc_t 当前分段的截距
+ * @return acc_t 返回编码后的截距
  */
 acc_t exp2PWLIntercept(exp2_counter_t index);
 
@@ -159,10 +159,9 @@ acc_t accMinimum();
 /**
  * @brief 计算attentionScale
  * 
- * @param dk 缩放因子，默认SA_ROWS
  * @return acc_t log2(e)/sqrt(dk)
  */
-acc_t attentionScale(int dk = SA_ROWS);
+acc_t attentionScale();
 
 }  // namespace fsa
 
