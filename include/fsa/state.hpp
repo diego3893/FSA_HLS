@@ -33,7 +33,6 @@ namespace fsa{
     struct CMPState{
         acc_t oldMax{};
         acc_t newMax{};
-        // TODO: rst为-INF，不是0
 
         /// @brief exp2 PWL截距编号
         exp2_counter_t exp2_counter = 0;

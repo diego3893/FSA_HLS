@@ -63,7 +63,7 @@ namespace fsa{
         T bits{};
     };
 
-    /// @brief Decoupled数据，valid&&ready时传输成功，valid=T时数据有效
+    /// @brief Decoupled数据，valid&&ready时传输成功，valid=true时数据有效
     /// @tparam T 数据类型
     template <typename T>
     struct DecoupledData{
@@ -78,7 +78,7 @@ namespace fsa{
         semaphore_value_t value = 0;
     };
 
-    /// @brief 产生一个valid=F的数据
+    /// @brief 产生一个valid=false的数据
     /// @tparam T 数据类型
     /// @return 生成的传输值
     template <typename T>
@@ -86,7 +86,7 @@ namespace fsa{
         return ValidData<T>{false, T{}};
     }
 
-    /// @brief 产生一个valid=T的数据
+    /// @brief 产生一个valid=true的数据
     /// @tparam T 数据类型
     /// @param value 需要被包装的数据
     /// @return 生成的传输值

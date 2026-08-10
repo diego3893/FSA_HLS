@@ -51,7 +51,7 @@ namespace fsa{
             // 阶码唯一有效位
             const ap_uint<1> exponent_lsb = bits[23];
 
-            // 截距位于(0.5, 1]，原指数只能是0x7e或0x7f
+            // 截距位于(0.5, 1]，原阶码只能是0x7e或0x7f
             // 恢复阶码
             bits.range(30, 23) = (ap_uint<8>)0x7e | (ap_uint<8>)exponent_lsb;
 
