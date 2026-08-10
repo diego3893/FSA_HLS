@@ -11,6 +11,7 @@ namespace fsa{
     }
 
     void cmp_step(const CMPState& current, CMPState& next, CMPIO& io){
+        #pragma HLS INLINE
         next = current;
 
         const CmpControlCmd cmd = io.in_ctrl.bits.cmd;
