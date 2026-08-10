@@ -24,7 +24,6 @@ using elem_t = half;
 
 /// @brief 累加精度，竖直方向数据
 using acc_t = float;
-// TODO: elem_t FP16，acc_t FP32
 
 /// @brief 片上SRAM行地址
 using sram_address_t = ap_uint<5>;
@@ -36,9 +35,8 @@ using memory_stride_t = ap_int<21>;
 /// @brief 硬件计数器
 using exp2_counter_t = ap_uint<3>;
 using reciprocal_counter_t = std::uint32_t;
-// TODO: sram_addr 5位（pad和acc SRAM都用这个），mem_addr 根据AXI修改。无符号
-// TODO: sram_stride 5位，mem_stride 21位。有符号
-// TODO: exp2 3位和reciprocal 根据延迟定位数。无符号
+// TODO: mem_addr 根据AXI修改。无符号
+// TODO: reciprocal 根据延迟定位数。无符号
 
 /// @brief 信号量编号
 using semaphore_id_t = ap_uint<5>;
@@ -78,7 +76,6 @@ struct DecoupledData{
 struct Semaphore{
     semaphore_id_t id = 0;
     semaphore_value_t value = 0;
-    // TODO: id5位，value3位
 };
 
 /// @brief 产生一个valid=F的数据
