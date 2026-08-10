@@ -4,6 +4,8 @@ FSA-HLS 是把原 [VCA-EPFL/FSA: FSA: Fusing FlashAttention within a Single Syst
 
 ## 快速运行C++模块测试
 
+### 适用于cpp_version分支
+
 在PowerShell中进入项目根目录后，可以使用通用脚本编译并运行测试：
 
 ```powershell
@@ -13,6 +15,18 @@ FSA-HLS 是把原 [VCA-EPFL/FSA: FSA: Fusing FlashAttention within a Single Syst
 # 自动运行tests目录中的全部测试
 .\run_test.cmd all
 ```
+
+### 适用于主分支
+
+- 环境要求：Vitis HLS 2024.2
+
+在linux环境中，进入项目根目录
+
+```shell
+./run_hls.sh pe
+```
+
+可以启动PE模块的综合和仿真，相应的报告和ip保存于`./hls/pe/build/`中
 
 ## 迁移范围
 
