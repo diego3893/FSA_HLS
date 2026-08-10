@@ -15,38 +15,38 @@
 
 namespace fsa{
 
-/**
- * @brief Acc的全部端口
- *
- */
-struct AccumulatorIO{
-    /// @brief 本拍要执行的指令
-    ValidData<AccumulatorControl> ctrl_in;
+    /**
+     * @brief Acc的全部端口
+     *
+     */
+    struct AccumulatorIO{
+        /// @brief 本拍要执行的指令
+        ValidData<AccumulatorControl> ctrl_in;
 
-    /// @brief 来自SA的输入
-    AccVector sa_in;
+        /// @brief 来自SA的输入
+        AccVector sa_in;
 
-    /// @brief 来自Acc SRAM的输入
-    AccVector sram_in;
+        /// @brief 来自Acc SRAM的输入
+        AccVector sram_in;
 
-    /// @brief 写回Acc SRAM的输出
-    AccVector sram_out;
-};
+        /// @brief 写回Acc SRAM的输出
+        AccVector sram_out;
+    };
 
-/**
- * @brief 复位Acc
- * @param state 要复位的Acc状态
- */
-void reset_accumulator_state(AccumulatorState& state);
+    /**
+     * @brief 复位Acc
+     * @param state 要复位的Acc状态
+     */
+    void reset_accumulator_state(AccumulatorState& state);
 
-/**
- * @brief Acc的一个时钟步骤
- * @param current 本拍开始时状态
- * @param next 本拍结束后状态
- * @param io 本拍输入以及计算得到的sram_out
- */
-void accumulator_step(const AccumulatorState& current, 
-                      AccumulatorState& next, AccumulatorIO& io);
+    /**
+     * @brief Acc的一个时钟步骤
+     * @param current 本拍开始时状态
+     * @param next 本拍结束后状态
+     * @param io 本拍输入以及计算得到的sram_out
+     */
+    void accumulator_step(const AccumulatorState& current, 
+                        AccumulatorState& next, AccumulatorIO& io);
 
 }  // namespace fsa
 
