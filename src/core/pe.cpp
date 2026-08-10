@@ -10,6 +10,7 @@ void reset_pe_state(PEState& state){
 }
 
 void pe_step(const PEState& current, PEState& next, PEIO& io){
+    #pragma HLS INLINE
     next = current;
     const PECtrl& ctrl = io.in_ctrl.bits;
     const bool fire = io.in_ctrl.valid;
