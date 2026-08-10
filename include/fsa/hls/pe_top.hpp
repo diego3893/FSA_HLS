@@ -13,20 +13,45 @@
 #include "fsa/control.hpp"
 
 namespace fsa{
-struct PETopInput{
-    bool reset = false;
-    ValidData<PECtrl> ctrl{};
-    ValidData<acc_t> u_input{};
-    ValidData<acc_t> d_input{};
-    ValidData<elem_t> l_input{};
-};
 
-struct PETopOutput{
-    ValidData<PECtrl> ctrl{};
-    ValidData<acc_t> u_output{};
-    ValidData<acc_t> d_output{};
-    ValidData<elem_t> r_output{};
-};
+    /**
+     * @brief PE顶层输入
+     * 
+     */
+    struct PETopInput{
+        /// @brief 复位信号
+        bool reset = false;
+
+        /// @brief 输入控制信号
+        ValidData<PECtrl> ctrl{};
+
+        /// @brief 上方输入数据
+        ValidData<acc_t> u_input{};
+
+        /// @brief 下方输入数据
+        ValidData<acc_t> d_input{};
+
+        /// @brief 左侧输入数据
+        ValidData<elem_t> l_input{};
+    };
+
+    /**
+     * @brief PE顶层输出
+     * 
+     */
+    struct PETopOutput{
+        /// @brief 输出控制信号
+        ValidData<PECtrl> ctrl{};
+
+        /// @brief 上方输出数据
+        ValidData<acc_t> u_output{};
+
+        /// @brief 下方输出数据
+        ValidData<acc_t> d_output{};
+
+        /// @brief 右侧输出数据
+        ValidData<elem_t> r_output{};
+    };
 } // namespace fsa
 
 /**
