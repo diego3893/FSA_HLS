@@ -60,7 +60,7 @@ namespace fsa{
         }
 
         if(prop_exp2_intercepts){
-            next.exp2_counter = (current.exp2_counter+1) % (exp2_counter_t)exp2PWLPieces;
+            next.exp2_counter = current.exp2_counter+1;
         }
 
         if(do_reset){
