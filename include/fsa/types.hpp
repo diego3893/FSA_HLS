@@ -12,31 +12,38 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <ap_int.h>
+#include <hls_half.h>
 
 #include "fsa/config.hpp"
 
 namespace fsa{
 
 /// @brief 元素精度，水平方向数据
-using elem_t = float;
+using elem_t = half;
 
 /// @brief 累加精度，竖直方向数据
 using acc_t = float;
 // TODO: elem_t FP16，acc_t FP32
 
 /// @brief 片上SRAM行地址
-using sram_address_t = std::uint32_t;
+using sram_address_t = ap_uint<5>;
 /// @brief 内存地址
 using memory_address_t = std::uint64_t;
 /// @brief 地址访问步长
-using sram_stride_t = std::int32_t;
-using memory_stride_t = std::int32_t;
+using sram_stride_t = ap_int<5>;
+using memory_stride_t = ap_int<21>;
 /// @brief 硬件计数器
-using exp2_counter_t = std::uint32_t;
+using exp2_counter_t = ap_uint<3>;
 using reciprocal_counter_t = std::uint32_t;
 // TODO: sram_addr 5位（pad和acc SRAM都用这个），mem_addr 根据AXI修改。无符号
 // TODO: sram_stride 5位，mem_stride 21位。有符号
 // TODO: exp2 3位和reciprocal 根据延迟定位数。无符号
+
+/// @brief 信号量编号
+using semaphore_id_t = ap_uint<5>;
+/// @brief 信号值
+using semaphore_value_t = ap_uint<3>;
 
 /// @brief 定长向量
 /// @tparam T 数据类型
@@ -69,8 +76,8 @@ struct DecoupledData{
 
 /// @brief 信号量
 struct Semaphore{
-    std::uint8_t id = 0;
-    std::uint8_t value = 0;
+    semaphore_id_t id = 0;
+    semaphore_value_t value = 0;
     // TODO: id5位，value3位
 };
 
