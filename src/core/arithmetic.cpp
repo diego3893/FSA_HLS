@@ -27,6 +27,174 @@ namespace fsa{
         );
 
         /**
+         * @brief 使用IEEE符号位、阶码和尾数实现向零取整
+         *
+         * 等价于先执行 trunc(value)，再转换为int。
+         * 例如：
+         *   3.75  ->  3
+         *  -3.75  -> -3
+         *   0.75  ->  0
+         *
+         * @param value FP32输入
+         * @return int 向零取整结果
+         */
+        int truncToIntBits(const acc_t value){
+            const fp_struct<acc_t> view(value);
+            const ap_uint<32> bits = view.data();
+
+            const bool sign = bits[31];
+            const ap_uint<8> exponent_bits = bits.range(30, 23);
+            const ap_uint<23> mantissa = bits.range(22, 0);
+
+            // FP32阶码偏置是127。
+            const int exponent = (int)exponent_bits - 127;
+
+            // 零、非规格化数以及绝对值小于1的数，向零取整后都是0。
+            if(exponent_bits == 0 || exponent < 0){
+                return 0;
+            }
+
+            // NaN、Inf或超出int范围时进行饱和处理。
+            // FSA正常的exp2输入不应该进入这个分支。
+            if(exponent_bits == 0xff || exponent >= 31){
+                return sign ? (-2147483647 - 1) : 2147483647;
+            }
+
+            // FP32正常数的有效数字是：
+            // 1.mantissa
+            //
+            // 补上隐藏的最高位1后，共24位。
+            ap_uint<32> significand = 0;
+            significand[23] = 1;
+            significand.range(22, 0) = mantissa;
+
+            ap_uint<32> magnitude;
+
+            if(exponent >= 23){
+                magnitude = significand << (exponent - 23);
+            }else{
+                magnitude = significand >> (23 - exponent);
+            }
+
+            const int result = (int)magnitude;
+
+            return sign ? -result : result;
+        }
+
+        /**
+         * @brief 对FP32执行value * 2^exponent
+         *
+         * 主要通过修改IEEE阶码实现。
+         *
+         * 当前PWL中fractional_result应当是正常有限浮点数。
+         * 函数同时处理：
+         *   - 零
+         *   - Inf/NaN
+         *   - 结果上溢
+         *   - 结果下溢为非规格化数
+         *
+         * @param value 需要缩放的FP32数据
+         * @param exponent 2的指数
+         * @return acc_t value * 2^exponent
+         */
+        acc_t ldexpByBits(const acc_t value, const int exponent){
+            const fp_struct<acc_t> input_view(value);
+            ap_uint<32> bits = input_view.data();
+
+            const ap_uint<8> old_exponent_bits = bits.range(30, 23);
+            const ap_uint<23> mantissa = bits.range(22, 0);
+
+            // 零或者非规格化输入。
+            //
+            // 当前PWL的fractional_result应位于正常数范围，
+            // 因此非规格化输入正常情况下不会出现。
+            if(old_exponent_bits == 0){
+                return value;
+            }
+
+            // Inf和NaN保持不变。
+            if(old_exponent_bits == 0xff){
+                return value;
+            }
+
+            const int new_exponent = (int)old_exponent_bits + exponent;
+
+            // 结果仍然是正常浮点数：只需要修改阶码。
+            if(new_exponent > 0 && new_exponent < 255){
+                bits.range(30, 23) = (ap_uint<8>)new_exponent;
+
+                const fp_struct<acc_t> output_view(bits);
+                return output_view.to_ieee();
+            }
+
+            // 上溢：返回带原符号的无穷大。
+            if(new_exponent >= 255){
+                bits.range(30, 23) = (ap_uint<8>)0xff;
+                bits.range(22, 0) = 0;
+
+                const fp_struct<acc_t> output_view(bits);
+                return output_view.to_ieee();
+            }
+
+            /*
+            * 下溢到非规格化数。
+            *
+            * 正常FP32有效数字：
+            *   1.mantissa
+            *
+            * 先补上隐藏的最高位1，然后右移。
+            */
+            ap_uint<25> significand = 0;
+            significand[23] = 1;
+            significand.range(22, 0) = mantissa;
+
+            const int right_shift = 1 - new_exponent;
+
+            // 数值太小，结果变成带符号的0。
+            if(right_shift > 24){
+                bits.range(30, 0) = 0;
+
+                const fp_struct<acc_t> output_view(bits);
+                return output_view.to_ieee();
+            }
+
+            ap_uint<25> shifted = significand >> right_shift;
+
+            /*
+            * 舍入到最近偶数RNE。
+            *
+            * remainder：被移出去的部分
+            * halfway：正好位于中点的数值
+            */
+            const ap_uint<25> mask =
+                (((ap_uint<25>)1 << right_shift) - 1);
+
+            const ap_uint<25> remainder = significand & mask;
+            const ap_uint<25> halfway =
+                (ap_uint<25>)1 << (right_shift - 1);
+
+            const bool round_up =
+                (remainder > halfway) ||
+                ((remainder == halfway) && shifted[0]);
+
+            if(round_up){
+                shifted = shifted + 1;
+            }
+
+            // 舍入后可能刚好成为最小正常数。
+            if(shifted[23]){
+                bits.range(30, 23) = (ap_uint<8>)1;
+                bits.range(22, 0) = 0;
+            }else{
+                bits.range(30, 23) = 0;
+                bits.range(22, 0) = shifted.range(22, 0);
+            }
+
+            const fp_struct<acc_t> output_view(bits);
+            return output_view.to_ieee();
+        }
+
+        /**
          * @brief 从编码截距中读取分段编号
          * 
          * @param encoded_intercept 编码过后的截距
@@ -68,7 +236,7 @@ namespace fsa{
         exp2_counter_t exp2PWLPieceForX(const elem_t x){
             const acc_t x_acc = (acc_t)x;
 
-            const int integer_part = hls::trunc(x_acc);
+            const int integer_part = truncToIntBits(x_acc);
             const acc_t fractional_part = x_acc - (acc_t)integer_part;
 
             exp2_counter_t piece =
@@ -117,6 +285,8 @@ namespace fsa{
     }
 
     elem_t cvtAtoE(const acc_t a){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
         return (elem_t)a;
     }
 
@@ -138,7 +308,7 @@ namespace fsa{
     acc_t peExp2PWL(const elem_t x, const elem_t slope, 
                     const acc_t encoded_intercept){
         const acc_t x_acc = (acc_t)x;
-        const int integer_part = (int)hls::trunc(x_acc);
+        const int integer_part = truncToIntBits(x_acc);
         const acc_t fractional_part = x_acc-(acc_t)integer_part;
 
         const acc_t intercept = restoreExp2PWLIntercept(encoded_intercept);
@@ -146,7 +316,7 @@ namespace fsa{
         const acc_t fractional_result = 
                         hls::fma(fractional_part, (acc_t)slope, intercept);
 
-        return hls::ldexp(fractional_result, integer_part);
+        return ldexpByBits(fractional_result, integer_part);
     }
 
     acc_t exp2PWLIntercept(const exp2_counter_t index){
