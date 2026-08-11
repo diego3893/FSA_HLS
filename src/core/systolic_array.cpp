@@ -30,7 +30,6 @@ namespace fsa{
     void systolic_array_step(const SystolicArrayState& current,
                             SystolicArrayState& next, SystolicArrayIO& io){
         #pragma HLS INLINE
-        next = current;
 
         for(int col=0; col<SA_COLS; ++col){
             #pragma HLS UNROLL
