@@ -9,7 +9,7 @@ void systolic_array_top(const fsa::SystolicArrayInput& input,
     #pragma HLS INTERFACE ap_none port=input
     #pragma HLS INTERFACE ap_none port=output
 
-    #pragma HLS PIPELINE II=1
+    #pragma HLS PIPELINE II=13
 
     static fsa::SystolicArrayState current{};
     
