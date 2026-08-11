@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 
+#include "fsa/arithmetic.hpp"
 #include "fsa/hls/systolic_array_top.hpp"
 
 namespace {
@@ -177,7 +178,11 @@ void testMatrixMultiply(){
                    ", col "+std::to_string(col));
 
             if(key>=0 && key<TEST_SIZE){
-                result[col][key] = (float)output.acc_out[col].bits;
+                // CMP UPDATE为了让PE后续通过load_reg_ui恢复FP16的S，
+                // 会把FP16位模式装进acc_t低16位，而不是输出普通FP32数值。
+                // 因此这里先按位取回elem_t，再转换成软件侧float进行比较。
+                result[col][key] =
+                    (float)fsa::viewAasE(output.acc_out[col].bits);
                 received[col][key] = true;
             }
         }

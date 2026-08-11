@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string>
 
+#include "fsa/arithmetic.hpp"
 #include "fsa/hls/input_delayer_top.hpp"
 #include "fsa/hls/output_delayer_top.hpp"
 #include "fsa/hls/systolic_array_top.hpp"
@@ -245,8 +246,10 @@ void testJointMatrixMultiply(){
         if(cycle>=3*TEST_SIZE && cycle<4*TEST_SIZE){
             const int key = cycle-3*TEST_SIZE;
             for(int query=0; query<TEST_SIZE; ++query){
-                result[query][key] =
-                    (float)aligned_output.out[(std::size_t)query];
+                // CMP UPDATE输出的是封装在acc_t低16位中的FP16位模式。
+                // OutputDelayer只改变时序和顺序，不改变该编码，因此在这里解码。
+                result[query][key] = (float)fsa::viewAasE(
+                    aligned_output.out[(std::size_t)query]);
                 received[query][key] = true;
             }
         }else if(cycle==4*TEST_SIZE){
