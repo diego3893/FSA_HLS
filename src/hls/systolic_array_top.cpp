@@ -9,6 +9,8 @@ void systolic_array_top(const fsa::SystolicArrayInput& input,
     #pragma HLS INTERFACE ap_none port=input
     #pragma HLS INTERFACE ap_none port=output
 
+    #pragma HLS PIPELINE II=1
+
     static fsa::SystolicArrayState current{};
     
     #pragma HLS ARRAY_PARTITION variable=current.mesh type=complete dim=0
@@ -48,7 +50,7 @@ void systolic_array_top(const fsa::SystolicArrayInput& input,
     #pragma HLS ARRAY_PARTITION variable=next.r_output_pipe type=complete dim=0
     #pragma HLS ARRAY_PARTITION variable=next.d_output_pipe type=complete dim=0
     #pragma HLS ARRAY_PARTITION variable=next.u_output_pipe type=complete dim=0
-    
+
     fsa::systolic_array_step(current, next, io);
 
     for(int col=0; col<fsa::SA_COLS; ++col){
