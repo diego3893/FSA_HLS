@@ -40,6 +40,15 @@ void systolic_array_top(const fsa::SystolicArrayInput& input,
     }
 
     fsa::SystolicArrayState next{};
+    #pragma HLS ARRAY_PARTITION variable=next.mesh type=complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=next.cmp_array type=complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=next.cmp_ctrl_pipe type=complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=next.pe_ctrl_pipe type=complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=next.cmp_d_output_pipe type=complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=next.r_output_pipe type=complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=next.d_output_pipe type=complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=next.u_output_pipe type=complete dim=0
+    
     fsa::systolic_array_step(current, next, io);
 
     for(int col=0; col<fsa::SA_COLS; ++col){
