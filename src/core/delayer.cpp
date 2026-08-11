@@ -11,8 +11,11 @@ namespace fsa{
          */
         template <typename T, std::size_t rows>
         void resetDelayerState(InputDelayerState<T, rows>& state){
+            #pragma HLS INLINE
             for(std::size_t lane=0; lane<rows; ++lane){
+                #pragma HLS UNROLL
                 for(std::size_t stage=0; stage<rows; ++stage){
+                    #pragma HLS UNROLL
                     state.out_delay_pipe[lane][stage] = T{};
                 }
             }
@@ -45,23 +48,33 @@ namespace fsa{
             const bool delay_output,
             const bool rev_output,
             FixedVector<T, rows>& output){
+            #pragma HLS INLINE
             next = current;
 
             T in_data[rows]{};
             T out_delay[rows]{};
             T selected_output[rows]{};
 
+            #pragma HLS ARRAY_PARTITION variable=in_data complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=out_delay complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=selected_output complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=current.out_delay_pipe complete dim=0
+            #pragma HLS ARRAY_PARTITION variable=next.out_delay_pipe complete dim=0
+
             for(std::size_t lane=0; lane<rows; ++lane){
+                #pragma HLS UNROLL
                 const std::size_t input_lane = rev_input ? rows-1-lane : lane;
                 in_data[lane] = input[input_lane];
             }
 
             out_delay[0] = in_data[0];
             for(std::size_t lane=1; lane<rows; ++lane){
+                #pragma HLS UNROLL
                 out_delay[lane] = current.out_delay_pipe[lane][lane-1];
 
                 next.out_delay_pipe[lane][0] = in_data[lane];
                 for(std::size_t stage=1; stage<lane; ++stage){
+                    #pragma HLS UNROLL
                     next.out_delay_pipe[lane][stage] = current.out_delay_pipe[lane][stage-1];
                 }
             }
@@ -75,10 +88,12 @@ namespace fsa{
             }
 
             for(std::size_t lane=0; lane<rows; ++lane){
+                #pragma HLS UNROLL
                 selected_output[lane] = delay ? out_delay[lane] : in_data[lane];
             }
 
             for(std::size_t lane=0; lane<rows; ++lane){
+                #pragma HLS UNROLL
                 const std::size_t output_lane = rev_out ? rows-1-lane : lane;
                 output[output_lane] = selected_output[lane];
             }
@@ -97,6 +112,7 @@ namespace fsa{
 
     void input_delayer_step(const ElemInputDelayerState& current,
                 ElemInputDelayerState& next, InputDelayerIO& io){
+        #pragma HLS INLINE
         delayerStep(
             current,
             next,
@@ -111,6 +127,7 @@ namespace fsa{
 
     void output_delayer_step(const OutputDelayerState& current,
                 OutputDelayerState& next, OutputDelayerIO& io){
+        #pragma HLS INLINE
         delayerStep(
             current,
             next,
