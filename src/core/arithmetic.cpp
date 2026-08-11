@@ -85,6 +85,7 @@ namespace fsa{
 
     PeMacUnitOutput peMacUnit(const elem_t in_a, const elem_t in_b, 
                             const acc_t in_c, const bool in_exp2){
+        #pragma HLS PIPELINE II=1
         PeMacUnitOutput output{};
         if(!in_exp2){
             output.out_accType = peMac(in_a, in_b, in_c);
