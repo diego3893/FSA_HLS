@@ -5,7 +5,8 @@
  * 本测试完成三件事：
  * 1. 使用load_reg_li把Q装入4x4 PE阵列；
  * 2. 在testbench中手动生成InputDelayer应产生的阶梯错拍K数据；
- * 3. 计算S=Q*K^T，经CMP原样回送并从SA底部读取全部16个结果。
+ * 3. 计算S=Q*K^T，经CMP原样回送并从SA底部读取全部16个结果；
+ * 4. 使用CMP的PROP_MAX输出并校验每个query对应的rowmax。
  */
 #include <cmath>
 #include <iostream>
@@ -50,12 +51,17 @@ bool almostEqual(const fsa::acc_t actual, const float expected){
     return std::fabs((float)actual-expected)<0.05F;
 }
 
-void calculateGolden(float golden[TEST_SIZE][TEST_SIZE]){
+void calculateGolden(float golden[TEST_SIZE][TEST_SIZE],
+                     float rowmax[TEST_SIZE]){
     for(int query=0; query<TEST_SIZE; ++query){
+        rowmax[query] = -1.0e30F;
         for(int key=0; key<TEST_SIZE; ++key){
             golden[query][key] = 0.0F;
             for(int feature=0; feature<TEST_SIZE; ++feature){
                 golden[query][key] += Q[query][feature]*K[key][feature];
+            }
+            if(golden[query][key]>rowmax[query]){
+                rowmax[query] = golden[query][key];
             }
         }
     }
@@ -127,15 +133,18 @@ fsa::ValidData<fsa::PECtrl> makePECtrl(const bool mac_active,
 
 void testMatrixMultiply(){
     float golden[TEST_SIZE][TEST_SIZE]{};
+    float golden_rowmax[TEST_SIZE]{};
     float result[TEST_SIZE][TEST_SIZE]{};
     bool received[TEST_SIZE][TEST_SIZE]{};
-    calculateGolden(golden);
+    float result_rowmax[TEST_SIZE]{};
+    bool rowmax_received[TEST_SIZE]{};
+    calculateGolden(golden, golden_rowmax);
 
     resetSA();
     loadStationaryQ();
 
-    // 最后一个结果从底部出现于compute_cycle=4*TEST_SIZE-1。
-    constexpr int LAST_COMPUTE_CYCLE = 4*TEST_SIZE-1;
+    // 最后一列的rowmax从底部出现于compute_cycle=4*TEST_SIZE。
+    constexpr int LAST_COMPUTE_CYCLE = 4*TEST_SIZE;
 
     for(int cycle=0; cycle<=LAST_COMPUTE_CYCLE; ++cycle){
         fsa::SystolicArrayInput input{};
@@ -144,6 +153,11 @@ void testMatrixMultiply(){
         if(cycle>=TEST_SIZE && cycle<2*TEST_SIZE){
             fsa::CmpControl cmp{};
             cmp.cmd = fsa::CmpControlCmd::UPDATE;
+            input.cmp_ctrl = fsa::make_valid(cmp);
+        }else if(cycle==2*TEST_SIZE){
+            // PROP_MAX实际向下输出0-newMax，也就是-rowmax。
+            fsa::CmpControl cmp{};
+            cmp.cmd = fsa::CmpControlCmd::PROP_MAX;
             input.cmp_ctrl = fsa::make_valid(cmp);
         }
 
@@ -159,7 +173,8 @@ void testMatrixMultiply(){
             // CMP回送的数据形成向下波前，第row行比第0行晚row拍启动。
             const int first_flow_cycle = TEST_SIZE+1+row;
             const bool flow_down_active =
-                cycle>=first_flow_cycle && cycle<first_flow_cycle+TEST_SIZE;
+                cycle>=first_flow_cycle &&
+                cycle<first_flow_cycle+TEST_SIZE+1;
 
             input.pe_ctrl[row] = makePECtrl(mac_active, flow_down_active);
         }
@@ -173,7 +188,8 @@ void testMatrixMultiply(){
 
             // 第col列相对第0列多col拍横向延迟。
             const int key = cycle-(2*TEST_SIZE+1)-col;
-            expect(key>=0 && key<TEST_SIZE,
+            // key=0..3是S的4个key，key=4是紧随其后的rowmax。
+            expect(key>=0 && key<=TEST_SIZE,
                    "unexpected valid output at cycle "+std::to_string(cycle)+
                    ", col "+std::to_string(col));
 
@@ -184,6 +200,10 @@ void testMatrixMultiply(){
                 result[col][key] =
                     (float)fsa::viewAasE(output.acc_out[col].bits);
                 received[col][key] = true;
+            }else if(key==TEST_SIZE){
+                // PROP_MAX输出的是普通FP32格式的-rowmax，不需要viewAasE解包。
+                result_rowmax[col] = -(float)output.acc_out[col].bits;
+                rowmax_received[col] = true;
             }
         }
     }
@@ -200,6 +220,14 @@ void testMatrixMultiply(){
         }
     }
 
+    for(int query=0; query<TEST_SIZE; ++query){
+        expect(rowmax_received[query],
+               "missing rowmax["+std::to_string(query)+"]");
+        expect(almostEqual((fsa::acc_t)result_rowmax[query],
+                           golden_rowmax[query]),
+               "wrong rowmax["+std::to_string(query)+"]");
+    }
+
     std::cout << "S = Q * K^T" << std::endl;
     for(int row=0; row<TEST_SIZE; ++row){
         std::cout << "  [";
@@ -209,7 +237,7 @@ void testMatrixMultiply(){
                 std::cout << ", ";
             }
         }
-        std::cout << "]" << std::endl;
+        std::cout << "]  rowmax=" << result_rowmax[row] << std::endl;
     }
 }
 
