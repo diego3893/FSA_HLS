@@ -10,18 +10,18 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ $# -ge 1 ]]; then
     MODULE="$1"
 else
-    read -r -p "请输入要综合的模块（pe/cmp）：" MODULE
+    read -r -p "请输入要综合的模块（pe/cmp/input_delayer/output_delayer）：" MODULE
 fi
 
 # 统一转换为小写，允许输入PE、CMP等大写形式。
 MODULE="${MODULE,,}"
 
 case "$MODULE" in
-    pe|cmp)
+    pe|cmp|input_delayer|output_delayer)
         ;;
     *)
         echo "[ERROR] 不支持的模块：$MODULE" >&2
-        echo "用法：$0 pe|cmp" >&2
+        echo "用法：$0 pe|cmp|input_delayer|output_delayer" >&2
         exit 1
         ;;
 esac
@@ -47,4 +47,3 @@ else
     echo "[ERROR] 找不到vitis-run或vitis_hls，请先加载Vitis环境。" >&2
     exit 1
 fi
-
