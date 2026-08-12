@@ -27,6 +27,10 @@ case "$MODULE" in
 esac
 
 TCL_FILE="$PROJECT_ROOT/hls/$MODULE/run_hls.tcl"
+MODULE_DIR="$PROJECT_ROOT/hls/$MODULE"
+TEMP_BUILD_DIR="$MODULE_DIR/build"
+FINAL_BUILD_DIR="$MODULE_DIR/${MODULE}_build"
+ZIP_FILE="$MODULE_DIR/${MODULE}_build.zip"
 
 if [[ ! -f "$TCL_FILE" ]]; then
     echo "[ERROR] 找不到Tcl脚本：$TCL_FILE" >&2
@@ -47,3 +51,23 @@ else
     echo "[ERROR] 找不到vitis-run或vitis_hls，请先加载Vitis环境。" >&2
     exit 1
 fi
+
+# Tcl脚本当前统一把结果写入hls/<模块>/build。
+# HLS全部成功后，将它改名为更容易区分模块的<模块>_build。
+if [[ ! -d "$TEMP_BUILD_DIR" ]]; then
+    echo "[ERROR] HLS完成后没有找到构建目录：$TEMP_BUILD_DIR" >&2
+    exit 1
+fi
+
+rm -rf -- "$FINAL_BUILD_DIR"
+mv -- "$TEMP_BUILD_DIR" "$FINAL_BUILD_DIR"
+
+# 始终只保留本次生成的最新版压缩包。
+rm -f -- "$ZIP_FILE"
+(
+    cd "$MODULE_DIR"
+    zip -r "${MODULE}_build.zip" "${MODULE}_build/"
+)
+
+echo "[HLS] 构建目录：$FINAL_BUILD_DIR"
+echo "[HLS] 压缩文件：$ZIP_FILE"
