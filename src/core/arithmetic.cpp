@@ -287,6 +287,7 @@ namespace fsa{
     elem_t cvtAtoE(const acc_t a){
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=1
+        #pragma HLS LATENCY min=1 max=1
         return (elem_t)a;
     }
 
