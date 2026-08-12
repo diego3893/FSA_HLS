@@ -26,14 +26,6 @@ namespace fsa{
             "EXP2_PWL_INTERCEPT_BITS只适用于8段PWL"
         );
 
-        acc_t registerAccResult(const acc_t value){
-            #pragma HLS INLINE off
-            #pragma HLS PIPELINE II=1
-            #pragma HLS LATENCY min=1 max=1
-
-            return value;
-        }
-
         /**
          * @brief 使用IEEE符号位、阶码和尾数实现向零取整
          *
@@ -270,11 +262,7 @@ namespace fsa{
             return output;
         }
 
-        const acc_t raw_result = peExp2PWL(in_a, in_b, in_c);
-
-        const acc_t registered_result = registerAccResult(raw_result);
-
-        output.out_accType = registered_result;
+        output.out_accType = peExp2PWL(in_a, in_b, in_c);
         output.out_elemType = cvtAtoE(output.out_accType);
 
         const exp2_counter_t intercept_index = decodeExp2PWLIndex(in_c);
@@ -317,6 +305,9 @@ namespace fsa{
 
     acc_t peExp2PWL(const elem_t x, const elem_t slope, 
                     const acc_t encoded_intercept){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LATENCY min=13 max=13
         const acc_t x_acc = (acc_t)x;
         const int integer_part = truncToIntBits(x_acc);
         const acc_t fractional_part = x_acc-(acc_t)integer_part;
