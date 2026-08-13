@@ -100,6 +100,53 @@ namespace fsa{
         ValidData<acc_t> u_output_pipe[SA_ROWS][SA_COLS]{};
     };
 
+    /// @brief FP32 reciprocal恢复除法器的控制阶段
+    enum class ReciprocalPhase : std::uint8_t{
+        IDLE = 0,
+        ITER = 1,
+        DONE = 2
+    };
+
+    /**
+     * @brief 单列FP32 reciprocal恢复除法器的跨拍状态
+     *
+     * 除法器固定计算1.0/denominator。普通有限数先拆成符号、
+     * 无偏指数和24位规格化有效数，再使用恢复除法每拍生成两个商位。
+     */
+    struct ReciprocalDividerState{
+        ReciprocalPhase phase = ReciprocalPhase::IDLE;
+
+        /// @brief 恢复除法余数；24位余数左移一位需要25位
+        ap_uint<25> remainder = 0;
+
+        /// @brief 规格化后的24位除数有效数，包含隐藏位
+        ap_uint<24> divisor = 0;
+
+        /// @brief 1位整数位、23位小数位、guard和round，共26位
+        ap_uint<26> quotient = 0;
+
+        /// @brief 已经执行了多少个两商位ITER周期
+        reciprocal_iter_count_t iter_count = 0;
+
+        /// @brief 规格化结果的无偏指数
+        ap_int<10> result_exponent = 0;
+
+        /// @brief reciprocal结果符号；1.0为正，因此等于除数符号
+        bool result_sign = false;
+
+        /// @brief 输入是否为zero/Inf/NaN等无需普通尾数除法的特殊值
+        bool special = false;
+
+        /// @brief 特殊值对应的最终IEEE-754 FP32位模式
+        ap_uint<32> special_result_bits = 0;
+
+        /// @brief 除数有效数是否恰好为1.0，即输入是否为2的幂
+        bool exact_power_of_two = false;
+
+        /// @brief 最近一次完成并经过RNE舍入的结果
+        acc_t result = 0.0F;
+    };
+
     /**
      * @brief Acc内部状态
      * 
@@ -107,18 +154,8 @@ namespace fsa{
     struct AccumulatorState{
         acc_t scale[SA_COLS]{};
 
-        /// @brief 是否正在等待多周期reciprocal
-        bool reciprocal_busy[SA_COLS]{};
-
-        /// @brief 当前列距离reciprocal结果返回还剩多少拍
-        reciprocal_counter_t reciprocal_counter[SA_COLS]{};
-
-        /**
-         * @brief reciprocal启动时保存的scale
-         *
-         * 除法进行期间外部输入可能变化，所以不能在结果返回时重新读取scale
-         */
-        acc_t reciprocal_operand[SA_COLS]{};
+        /// @brief 每列一套恢复除法器，对应原Scala的每列一个FPAccUnit
+        ReciprocalDividerState reciprocal[SA_COLS]{};
     };
 
 }  // namespace fsa

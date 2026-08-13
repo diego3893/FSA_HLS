@@ -37,9 +37,33 @@ namespace fsa{
     /// @brief 信号量槽位数量
     constexpr int N_SEMAPHORES = 32;
 
-    /// @brief 倒数计算的延迟
-    constexpr int reciprocalLatency = -1;
-    // TODO: 延迟未确定
+    /// @brief 恢复除法器每拍组合产生的商位数
+    constexpr int reciprocalBitsPerCycle = 2;
+
+    /**
+     * @brief reciprocal为RNE舍入生成的商位数
+     *
+     * FP32有效数共24位（含隐藏位），再保留guard和round两位。
+     * 最终没有被商寄存器保存的余数用于产生sticky位。
+     */
+    constexpr int reciprocalQuotientBits = 24+2;
+
+    /// @brief 恢复除法的迭代拍数，当前为ceil(26/2)=13
+    constexpr int reciprocalIterationCycles =
+        (reciprocalQuotientBits+reciprocalBitsPerCycle-1)
+        /reciprocalBitsPerCycle;
+
+    /**
+     * @brief 从接收请求到结果有效所占用的固定控制窗口
+     *
+     * 1拍IDLE接收请求 + 13拍ITER + 1拍DONE规格化并舍入。
+     */
+    constexpr int reciprocalLatency = 1+reciprocalIterationCycles+1;
+
+    static_assert(
+        reciprocalQuotientBits%reciprocalBitsPerCycle==0,
+        "当前恢复除法器要求商位数能被每拍商位数整除"
+    );
 
 }  // namespace fsa
 #endif // !CONFIG_HPP
