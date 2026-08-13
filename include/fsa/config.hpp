@@ -37,6 +37,22 @@ namespace fsa{
     /// @brief acc_t的硬件位宽
     constexpr int accWidth = 32;
 
+    /// @brief Scratchpad一整行包含的sub-bank数量
+    constexpr int SPAD_SUB_BANKS = (SA_ROWS*elemWidth)/(beatBytes*8);
+
+    /// @brief Accumulator SRAM一整行包含的sub-bank数量
+    constexpr int ACC_SUB_BANKS = (SA_COLS*accWidth)/(beatBytes*8);
+
+    static_assert(
+        (SA_ROWS*elemWidth)%(beatBytes*8)==0,
+        "Scratchpad行宽必须能被DMA beat宽度整除"
+    );
+
+    static_assert(
+        (SA_COLS*accWidth)%(beatBytes*8)==0,
+        "Accumulator SRAM行宽必须能被DMA beat宽度整除"
+    );
+
     /// @brief 外部内存访问端口数
     constexpr int nMemPorts = 4;
 
