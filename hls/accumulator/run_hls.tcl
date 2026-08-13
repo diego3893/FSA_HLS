@@ -13,7 +13,7 @@ open_project -reset $HLS_PROJECT_DIR
 
 set_top accumulator_top
 
-set CFLAGS "-std=c++14 -I\"[file join $PROJECT_ROOT include]\""
+set CFLAGS "-std=c++14 -I[file join $PROJECT_ROOT include]"
 
 add_files [file join $PROJECT_ROOT "src/hls/accumulator_top.cpp"]  \
     -cflags $CFLAGS
