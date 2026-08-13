@@ -236,7 +236,7 @@ namespace fsa{
         exp2_counter_t exp2PWLPieceForX(const elem_t x){
             const acc_t x_acc = (acc_t)x;
 
-            const int integer_part = truncToIntBits(x_acc);
+            const int integer_part = hls::trunc(x_acc);
             const acc_t fractional_part = x_acc - (acc_t)integer_part;
 
             exp2_counter_t piece =
@@ -312,7 +312,7 @@ namespace fsa{
         #pragma HLS PIPELINE II=1
         #pragma HLS LATENCY min=13 max=13
         const acc_t x_acc = (acc_t)x;
-        const int integer_part = truncToIntBits(x_acc);
+        const int integer_part = hls::trunc(x_acc);
         const acc_t fractional_part = x_acc-(acc_t)integer_part;
 
         const acc_t intercept = restoreExp2PWLIntercept(encoded_intercept);
@@ -320,7 +320,7 @@ namespace fsa{
         const acc_t fractional_result = 
                         hls::fma(fractional_part, (acc_t)slope, intercept);
 
-        return ldexpByBits(fractional_result, integer_part);
+        return hls::ldexp(fractional_result, integer_part);
     }
 
     acc_t exp2PWLIntercept(const exp2_counter_t index){
