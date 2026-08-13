@@ -10,18 +10,18 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ $# -ge 1 ]]; then
     MODULE="$1"
 else
-    read -r -p "请输入模块（pe/cmp/input_delayer/output_delayer/sa/delayer_sa）：" MODULE
+    read -r -p "请输入模块（pe/cmp/input_delayer/output_delayer/sa/delayer_sa/accumulator）：" MODULE
 fi
 
 # 统一转换为小写，允许输入PE、CMP等大写形式。
 MODULE="${MODULE,,}"
 
 case "$MODULE" in
-    pe|cmp|input_delayer|output_delayer|sa|delayer_sa)
+    pe|cmp|input_delayer|output_delayer|sa|delayer_sa|accumulator)
         ;;
     *)
         echo "[ERROR] 不支持的模块：$MODULE" >&2
-        echo "用法：$0 pe|cmp|input_delayer|output_delayer|sa|delayer_sa" >&2
+        echo "用法：$0 pe|cmp|input_delayer|output_delayer|sa|delayer_sa|accumulator" >&2
         exit 1
         ;;
 esac
