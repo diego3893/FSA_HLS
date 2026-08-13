@@ -27,6 +27,31 @@ namespace fsa{
 
     /// @brief 片上SRAM行地址
     using sram_address_t = ap_uint<5>;
+
+    /**
+     * @brief 计算索引count个对象至少需要的位数
+     * 
+     * @param count 对象数量
+     * @return 保存该索引所需的位数
+     */
+    constexpr int bankedSramIndexWidth(const int count){
+        int width = 0;
+        int maximum_index = count-1;
+        while(maximum_index>0){
+            ++width;
+            maximum_index >>= 1;
+        }
+        return width==0 ? 1 : width;
+    }
+
+    /**
+     * @brief BankedSRAM中sub-bank编号的定宽整数类型
+     * 
+     * @tparam NSubBanks 一整行包含的sub-bank数量
+     */
+    template <int NSubBanks>
+    using sub_bank_index_t = ap_uint<bankedSramIndexWidth(NSubBanks)>;
+
     /// @brief 内存地址
     using memory_address_t = std::uint64_t;
     /// @brief 地址访问步长
