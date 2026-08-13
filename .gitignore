@@ -4,3 +4,8 @@
 *.obj
 *.exe
 /third_party/vitis_hls/include/
+
+# Vitis HLS generated projects and reports
+/hls/*/build*/
+/third_party/vitis_hls_include_2024.2/
+/third_party/vitis_hls_include_2024.2.zip

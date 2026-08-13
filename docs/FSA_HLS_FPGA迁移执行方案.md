@@ -1,3 +1,4 @@
+
 # FSA 使用 HLS 迁移到 FPGA：本科生文件规划大纲
 
 > 适用对象：学过计算机组成原理、C/C++ 和基础数字电路，了解 FlashAttention 基本公式，但不熟悉 Scala/Chisel、大型 FPGA 工程和 HLS。
@@ -18,7 +19,7 @@
 6. 当前没有测试环境时，可以进行哪些静态检查。
 
 整个迁移仍分成两个阶段：
-
+1
 ```text
 阶段一：迁移核心计算部分
 PE、CMP、Delayer、Systolic Array、Accumulator、片上存储和控制器

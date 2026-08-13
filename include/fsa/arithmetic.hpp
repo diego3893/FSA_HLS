@@ -121,14 +121,6 @@ namespace fsa{
     acc_t accExp2PWL(acc_t x);
 
     /**
-     * @brief 求倒数
-     * 
-     * @param value 输入数据
-     * @return acc_t 1/value
-     */
-    acc_t reciprocal(acc_t value);
-
-    /**
      * @brief 产生elem_t的0
      * 
      * @return elem_t 0

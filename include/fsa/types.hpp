@@ -34,9 +34,8 @@ namespace fsa{
     using memory_stride_t = ap_int<21>;
     /// @brief 硬件计数器
     using exp2_counter_t = ap_uint<3>;
-    using reciprocal_counter_t = std::uint32_t;
+    using reciprocal_iter_count_t = ap_uint<4>;
     // TODO: mem_addr 根据AXI修改。无符号
-    // TODO: reciprocal 根据延迟定位数。无符号
 
     /// @brief 信号量编号
     using semaphore_id_t = ap_uint<5>;

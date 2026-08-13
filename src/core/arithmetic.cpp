@@ -21,10 +21,66 @@ namespace fsa{
             0x075cae0f
         };
 
+        /**
+         * @brief Accumulator内置PWL斜率的FP32位模式
+         *
+         * 与PE不同，Accumulator不会逐拍接收斜率和编码截距，而是根据
+         * 输入的小数部分直接读取同一分段的斜率和普通FP32截距。
+         */
+        const ap_uint<32> ACC_EXP2_PWL_SLOPE_BITS[exp2PWLPieces] = {
+            0x3f29f9c9,
+            0x3f1bde51,
+            0x3f0eee96,
+            0x3f0311b7,
+            0x3ef061c9,
+            0x3edc6e66,
+            0x3eca22e7,
+            0x3eb95c1e
+        };
+
+        /// @brief Accumulator内置PWL截距的普通FP32位模式
+        const ap_uint<32> ACC_EXP2_PWL_INTERCEPT_BITS[exp2PWLPieces] = {
+            0x3f800000,
+            0x3f7e3c91,
+            0x3f7b00a2,
+            0x3f768dcf,
+            0x3f711d65,
+            0x3f6ae156,
+            0x3f640507,
+            0x3f5cae0f
+        };
+
         static_assert(
             exp2PWLPieces == 8,
-            "EXP2_PWL_INTERCEPT_BITS只适用于8段PWL"
+            "当前PE和Accumulator的PWL常量表只适用于8段PWL"
         );
+
+        /**
+         * @brief 把32位IEEE-754位模式解释为acc_t数值
+         *
+         * 这里是位视图转换，不是把无符号整数的数值转换为float。
+         */
+        acc_t accFloatFromBits(const ap_uint<32> bits){
+            const fp_struct<acc_t> view(bits);
+            return view.to_ieee();
+        }
+
+        /**
+         * @brief 根据[-1, 0]内的小数部分选择Accumulator PWL分段
+         *
+         * 绝对值只用于计算分段编号；真正的FMA仍使用带符号小数部分。
+         */
+        unsigned int accExp2PieceForFraction(const acc_t fractional_part){
+            const acc_t scaled_fraction =
+                hls::fabs(fractional_part)*(acc_t)exp2PWLPieces;
+            unsigned int index = static_cast<unsigned int>(scaled_fraction);
+
+            // 防止浮点边界误差造成数组越界。
+            if(index >= static_cast<unsigned int>(exp2PWLPieces)){
+                index = static_cast<unsigned int>(exp2PWLPieces-1);
+            }
+            return index;
+        }
 
         /**
          * @brief 从编码截距中读取分段编号
@@ -155,13 +211,18 @@ namespace fsa{
     }
 
     acc_t accExp2PWL(const acc_t x){
-        // TODO：应使用PWL计算，可能需要构造查找表
-        return std::exp2(x);
-    }
+        const int integer_part = static_cast<int>(hls::trunc(x));
+        const acc_t fractional_part = x-static_cast<acc_t>(integer_part);
+        const unsigned int index = accExp2PieceForFraction(fractional_part);
 
-    acc_t reciprocal(const acc_t value){
-        // TODO: 应为多周期除法器，带有busy状态
-        return (acc_t)1.0F/value;
+        const acc_t slope =
+            accFloatFromBits(ACC_EXP2_PWL_SLOPE_BITS[index]);
+        const acc_t intercept =
+            accFloatFromBits(ACC_EXP2_PWL_INTERCEPT_BITS[index]);
+
+        const acc_t fractional_result =
+            hls::fma(fractional_part, slope, intercept);
+        return hls::ldexp(fractional_result, integer_part);
     }
 
     elem_t elemZero(){
