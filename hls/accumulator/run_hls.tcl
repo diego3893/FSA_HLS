@@ -1,9 +1,6 @@
-# 初次运行默认执行C Simulation和C Synthesis。
-# CSim、综合报告检查通过后，再把RUN_COSIM改成1执行C/RTL Co-simulation。
 set RUN_CSIM  1
-set RUN_SYNTH 1
-set RUN_COSIM 0
-set EXPORT_IP 0
+set RUN_COSIM 1
+set EXPORT_IP 1
 
 set SCRIPT_DIR   [file dirname [file normalize [info script]]]
 set PROJECT_ROOT [file normalize [file join $SCRIPT_DIR "../.."]]
@@ -39,10 +36,7 @@ if {$RUN_CSIM} {
     csim_design
 }
 
-# Co-simulation和导出IP都依赖综合结果。
-if {$RUN_SYNTH || $RUN_COSIM || $EXPORT_IP} {
-    csynth_design
-}
+csynth_design
 
 if {$RUN_COSIM} {
     cosim_design -rtl verilog
