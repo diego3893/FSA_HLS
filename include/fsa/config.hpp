@@ -22,6 +22,21 @@ namespace fsa{
     /// @brief Accumulator SRAM行数
     constexpr int ACC_ROWS = 1 + SA_ROWS;
 
+    /// @brief Scratchpad SRAM的物理bank数量
+    constexpr int spadBanks = 2;
+
+    /// @brief Accumulator SRAM的物理bank数量
+    constexpr int accBanks = 2;
+
+    /// @brief BankedSRAM窄端口一次传输的字节数
+    constexpr int beatBytes = 8;
+
+    /// @brief elem_t的硬件位宽
+    constexpr int elemWidth = 16;
+
+    /// @brief acc_t的硬件位宽
+    constexpr int accWidth = 32;
+
     /// @brief 外部内存访问端口数
     constexpr int nMemPorts = 4;
 
