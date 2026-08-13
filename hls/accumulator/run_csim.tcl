@@ -6,9 +6,11 @@ open_project -reset $HLS_PROJECT_DIR
 
 # 本脚本保留为accumulator_step核心函数的快速C Simulation。
 # Accumulator HLS顶层的CSim、综合和Co-sim请运行同目录run_hls.tcl。
-    set_top accumulator_step
+set_top accumulator_step
 
-set CFLAGS "-std=c++14 -I\"[file join $PROJECT_ROOT include]\""
+# add_files -cflags会自行把整段CFLAGS传给编译器。这里不能把双引号
+# 写进-I路径，否则Vitis 2024.2会把引号视作目录名的一部分。
+set CFLAGS "-std=c++14 -I[file join $PROJECT_ROOT include]"
 
 add_files [file join $PROJECT_ROOT "src/core/accumulator.cpp"] -cflags $CFLAGS
 add_files [file join $PROJECT_ROOT "src/core/arithmetic.cpp"]  -cflags $CFLAGS

@@ -13,7 +13,9 @@ open_project -reset $HLS_PROJECT_DIR
 
 set_top accumulator_top
 
-set CFLAGS "-std=c++14 -I\"[file join $PROJECT_ROOT include]\""
+# add_files -cflags会自行把整段CFLAGS传给编译器。这里不能把双引号
+# 写进-I路径，否则Vitis 2024.2会把引号视作目录名的一部分。
+set CFLAGS "-std=c++14 -I[file join $PROJECT_ROOT include]"
 
 add_files [file join $PROJECT_ROOT "src/hls/accumulator_top.cpp"]  \
     -cflags $CFLAGS
