@@ -329,7 +329,7 @@ namespace fsa{
                     const acc_t encoded_intercept){
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=1
-        #pragma HLS LATENCY min=13 max=13
+        
         const acc_t x_acc = (acc_t)x;
         const int integer_part = truncToIntBits(x_acc);
         const acc_t fractional_part = x_acc-(acc_t)integer_part;
