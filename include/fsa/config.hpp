@@ -85,10 +85,9 @@ namespace fsa{
         /reciprocalBitsPerCycle;
 
     /**
-     * @brief 从接收请求到结果有效所占用的固定物理时钟窗口
+     * @brief 从接收请求到结果有效所占用的固定控制窗口
      *
-     * MOD: RECIPROCAL改为单次ap_ctrl_hs事务，内部按1拍初始化、13拍
-     * ITER和1拍完成调度；最终拍数必须以reciprocal transaction报告确认。
+     * 1拍IDLE接收请求 + 13拍ITER + 1拍DONE规格化并舍入。
      */
     constexpr int reciprocalLatency = 1+reciprocalIterationCycles+1;
 

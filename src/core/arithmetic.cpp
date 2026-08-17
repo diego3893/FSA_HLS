@@ -292,7 +292,6 @@ namespace fsa{
     }
 
     acc_t accUnit(const acc_t in_a, const acc_t in_b, const acc_t in_c){
-        // MOD: 统一由Vitis HLS浮点库描述FMA，避免C/RTL使用不同函数。
         return hls::fma(in_a, in_b, in_c);
     }
 
@@ -350,37 +349,6 @@ namespace fsa{
     }
 
     acc_t accExp2PWL(const acc_t x){
-        /**
-         * MOD: 在浮点转int前先处理IEEE边界。否则Inf/NaN或巨大有限数
-         * static_cast<int>的结果未定义，并可能让PWL表发生非法索引。
-         */
-        const fp_struct<acc_t> input_view(x);
-        const ap_uint<32> input_bits = input_view.data();
-        const bool input_sign = input_bits[31];
-        const ap_uint<8> input_exponent = input_bits.range(30, 23);
-        const ap_uint<23> input_fraction = input_bits.range(22, 0);
-
-        if(input_exponent==(ap_uint<8>)0xff){
-            if(input_fraction!=0){
-                // 统一规范化为正quiet NaN，便于C/RTL按位验证。
-                return accFloatFromBits((ap_uint<32>)0x7fc00000);
-            }
-            if(input_sign){
-                // 2^(-Inf)=+0。
-                return accZero();
-            }
-            // 2^(+Inf)=+Inf。
-            return accFloatFromBits((ap_uint<32>)0x7f800000);
-        }
-
-        // FP32中2^128上溢；2^-150恰好在0与最小次正规数中点，RNE为0。
-        if(x >= (acc_t)128.0F){
-            return accFloatFromBits((ap_uint<32>)0x7f800000);
-        }
-        if(x <= (acc_t)-150.0F){
-            return accZero();
-        }
-
         const int integer_part = static_cast<int>(hls::trunc(x));
         const acc_t fractional_part = x-static_cast<acc_t>(integer_part);
         const unsigned int index = accExp2PieceForFraction(fractional_part);

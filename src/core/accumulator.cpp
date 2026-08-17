@@ -293,8 +293,6 @@ namespace fsa{
 
     void reset_accumulator_state(AccumulatorState& state){
         for(int col=0; col<SA_COLS; ++col){
-            // MOD: 四列复位寄存器同拍清零，避免生成四拍复位循环。
-            #pragma HLS UNROLL
             state.scale[col] = accZero();
             state.reciprocal[col] = ReciprocalDividerState{};
         }
@@ -303,189 +301,50 @@ namespace fsa{
 
     void accumulator_step(const AccumulatorState& current,
                         AccumulatorState& next, AccumulatorIO& io){
-        // MOD: 内联普通命令路径，使列UNROLL与顶层调度作用于同一层级。
-        #pragma HLS INLINE
-
         next = current;
-
-        // MOD: 无写回时保持确定值；下游只在sram_write_valid时写SRAM。
-        io.command_ready = true;
-        io.sram_write_valid = false;
-        io.reciprocal_busy = false;
-        io.reciprocal_result_valid = false;
-
-        bool current_reciprocal_busy = false;
-        for(int col=0; col<SA_COLS; ++col){
-            #pragma HLS UNROLL
-            io.sram_out[(std::size_t)col] = current.scale[col];
-            current_reciprocal_busy = current_reciprocal_busy
-                || current.reciprocal[col].phase!=ReciprocalPhase::IDLE;
-        }
 
         const bool valid = io.ctrl_in.valid;
         const AccumulatorCmd cmd = io.ctrl_in.bits.cmd;
+
+        const bool exp_s1 = cmd == AccumulatorCmd::EXP_S1;
+        const bool exp_s2 = cmd == AccumulatorCmd::EXP_S2;
+        const bool acc_sa = cmd == AccumulatorCmd::ACC_SA;
+        const bool set = cmd == AccumulatorCmd::SET_SCALE;
         const bool reciprocal_cmd = cmd == AccumulatorCmd::RECIPROCAL;
 
-        /**
-         * MOD: reciprocal运行期间拒绝所有新命令，四列FSM仍每拍自动推进。
-         * command_ready描述本拍输入是否会被接受；reciprocal_busy描述提交
-         * next状态后是否仍有在途请求。
-         */
-        io.command_ready = !current_reciprocal_busy;
-        const bool start_reciprocal =
-            valid && reciprocal_cmd && io.command_ready;
-
-        if(current_reciprocal_busy || start_reciprocal){
-            bool all_results_valid = true;
-            bool any_next_busy = false;
-
-            for(int col=0; col<SA_COLS; ++col){
-                // MOD: complete UNROLL生成四套独立恢复除法数据通路。
-                #pragma HLS UNROLL
-                const ReciprocalTickOutput reciprocal_output = divider_tick(
-                    current.reciprocal[col],
-                    next.reciprocal[col],
-                    start_reciprocal,
-                    current.scale[col]
-                );
-
-                all_results_valid = all_results_valid
-                    && reciprocal_output.valid;
-
-                if(reciprocal_output.valid){
-                    io.sram_out[(std::size_t)col] = reciprocal_output.value;
-                    next.scale[col] = reciprocal_output.value;
-                }
-
-                any_next_busy = any_next_busy
-                    || next.reciprocal[col].phase!=ReciprocalPhase::IDLE;
-            }
-
-            io.reciprocal_result_valid = all_results_valid;
-            // reciprocal只更新内部scale，不直接触发Accumulator SRAM写回。
-            io.sram_write_valid = false;
-            io.reciprocal_busy = any_next_busy;
-            return;
-        }
-
-        if(!valid){
-            return;
-        }
-
-        /**
-         * MOD: 主四列计算循环完全展开。这里使用按命令分支，而不是先无条件
-         * 计算所有候选值，可避免invalid/reciprocal拍无意义地启动浮点单元。
-         */
         for(int col=0; col<SA_COLS; ++col){
-            #pragma HLS UNROLL
-            const std::size_t index = (std::size_t)col;
+            const acc_t in_a = exp_s1 ? io.sa_in[(std::size_t)col]
+                                    : current.scale[col];
+            const acc_t in_b = exp_s1 ? attentionScale()
+                                    : io.sram_in[(std::size_t)col];
+            const acc_t in_c = acc_sa ? io.sa_in[(std::size_t)col]
+                                    : accZero();
 
-            switch(cmd){
-            case AccumulatorCmd::EXP_S1:
-                io.sram_out[index] = accUnit(
-                    io.sa_in[index],
-                    attentionScale(),
-                    accZero()
-                );
-                next.scale[col] = io.sram_out[index];
-                break;
+            acc_t unit_output = exp_s2 ? accExp2PWL(in_a)
+                                    : accUnit(in_a, in_b, in_c);
 
-            case AccumulatorCmd::EXP_S2:
-                io.sram_out[index] = accExp2PWL(current.scale[col]);
-                next.scale[col] = io.sram_out[index];
-                break;
+            const ReciprocalTickOutput reciprocal_output = divider_tick(
+                current.reciprocal[col],
+                next.reciprocal[col],
+                valid && reciprocal_cmd,
+                current.scale[col]
+            );
 
-            case AccumulatorCmd::ACC_SA:
-                io.sram_out[index] = accUnit(
-                    current.scale[col],
-                    io.sram_in[index],
-                    io.sa_in[index]
-                );
-                break;
-
-            case AccumulatorCmd::ACC:
-                io.sram_out[index] = accUnit(
-                    current.scale[col],
-                    io.sram_in[index],
-                    accZero()
-                );
-                break;
-
-            case AccumulatorCmd::SET_SCALE:
-                next.scale[col] = io.sram_in[index];
-                break;
-
-            case AccumulatorCmd::RECIPROCAL:
-                // 已在上面的start_reciprocal分支处理。
-                break;
-
-            default:
-                // MOD: 非法3位命令编码不更新任何状态，也不产生写回。
-                break;
+            if(reciprocal_output.valid){
+                unit_output = reciprocal_output.value;
             }
-        }
 
-        // MOD: 只有ACC/ACC_SA对应Accumulator SRAM读改写。
-        io.sram_write_valid = cmd==AccumulatorCmd::ACC
-            || cmd==AccumulatorCmd::ACC_SA;
-    }
+            io.sram_out[(std::size_t)col] = unit_output;
 
-    void accumulator_reciprocal_transaction(
-        acc_t scale[SA_COLS],
-        AccVector& result
-    ){
-        /**
-         * MOD: 保持函数边界，生成可在综合报告中单独核对的固定延迟模块。
-         * LATENCY是约束而非证明；构建后必须确认实际Latency恰好为15。
-         */
-        #pragma HLS INLINE off
-        #pragma HLS LATENCY min=15 max=15
-
-        ReciprocalDividerState lane_state[SA_COLS];
-        #pragma HLS ARRAY_PARTITION variable=lane_state \
-            type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=result \
-            type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=scale \
-            type=complete dim=1
-
-        /**
-         * 15次循环迭代分别对应：
-         *   step 0      ：IDLE接收请求；
-         *   step 1..13  ：13次ITER，每拍产生两个商位；
-         *   step 14     ：DONE规格化、RNE舍入并输出。
-         */
-        for(int step=0; step<reciprocalLatency; ++step){
-            #pragma HLS PIPELINE II=1
-
-            for(int col=0; col<SA_COLS; ++col){
-                // MOD: 四列同时推进，生成四套独立reciprocal数据通路。
-                #pragma HLS UNROLL
-                if(step==0){
-                    begin_reciprocal(lane_state[col], scale[col]);
-                }else if(step<=reciprocalIterationCycles){
-                    ap_uint<25> remainder = lane_state[col].remainder;
-                    ap_uint<26> quotient = lane_state[col].quotient;
-
-                    if(!lane_state[col].special
-                            && !lane_state[col].exact_power_of_two){
-                        for(int bit=0; bit<reciprocalBitsPerCycle; ++bit){
-                            #pragma HLS UNROLL
-                            div_step(
-                                remainder,
-                                quotient,
-                                lane_state[col].divisor
-                            );
-                        }
-                    }
-
-                    lane_state[col].remainder = remainder;
-                    lane_state[col].quotient = quotient;
-                }else{
-                    const acc_t reciprocal_value =
-                        normalize_and_round(lane_state[col]);
-                    result[(std::size_t)col] = reciprocal_value;
-                    scale[col] = reciprocal_value;
+            // reciprocal结果完成的优先级最高，而且不依赖请求valid持续置位。
+            // 因此一拍start脉冲也不会在若干拍后丢失计算结果。
+            if(reciprocal_output.valid){
+                next.scale[col] = unit_output;
+            }else if(valid){
+                if(exp_s1 || exp_s2){
+                    next.scale[col] = unit_output;
+                }else if(set){
+                    next.scale[col] = io.sram_in[(std::size_t)col];
                 }
             }
         }

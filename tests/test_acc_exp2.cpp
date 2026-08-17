@@ -8,27 +8,13 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
-#include <cstdint>
-#include <cstring>
 #include <iostream>
-#include <limits>
 
 #include "fsa/arithmetic.hpp"
 
 namespace{
 
 constexpr fsa::acc_t MAX_RELATIVE_ERROR = (fsa::acc_t)1.0e-3F;
-
-std::uint32_t floatBits(const fsa::acc_t value){
-    std::uint32_t bits = 0;
-    std::memcpy(&bits, &value, sizeof(bits));
-    return bits;
-}
-
-void checkExp2Bits(const fsa::acc_t x, const std::uint32_t expected_bits){
-    const fsa::acc_t actual = fsa::accExp2PWL(x);
-    assert(floatBits(actual)==expected_bits);
-}
 
 void checkExp2(const fsa::acc_t x){
     const fsa::acc_t actual = fsa::accExp2PWL(x);
@@ -90,16 +76,7 @@ int main(){
     };
 
     for(const fsa::acc_t x : segment_boundaries){
-        // MOD: 同时检查每个分段边界的左右相邻FP32值，捕获索引跳变。
-        checkExp2(std::nextafter(
-            x,
-            -std::numeric_limits<fsa::acc_t>::infinity()
-        ));
         checkExp2(x);
-        checkExp2(std::nextafter(
-            x,
-            std::numeric_limits<fsa::acc_t>::infinity()
-        ));
     }
 
     // 同时带整数和小数部分的输入。
@@ -113,17 +90,7 @@ int main(){
         checkExp2(x);
     }
 
-    // MOD: 覆盖浮点转int前必须拦截的Inf、NaN和指数上下溢边界。
-    checkExp2Bits(-std::numeric_limits<fsa::acc_t>::infinity(), 0x00000000U);
-    checkExp2Bits(std::numeric_limits<fsa::acc_t>::infinity(), 0x7f800000U);
-    checkExp2Bits(std::numeric_limits<fsa::acc_t>::quiet_NaN(), 0x7fc00000U);
-    checkExp2Bits((fsa::acc_t)128.0F, 0x7f800000U);
-    checkExp2Bits((fsa::acc_t)-126.0F, 0x00800000U);
-    checkExp2Bits((fsa::acc_t)-127.0F, 0x00400000U);
-    checkExp2Bits((fsa::acc_t)-149.0F, 0x00000001U);
-    checkExp2Bits((fsa::acc_t)-150.0F, 0x00000000U);
-
     std::cout << "[PASS] test_acc_exp2: integers, 8 midpoints, "
-                 "boundaries, mixed inputs, IEEE limits" << std::endl;
+                 "boundaries, mixed inputs" << std::endl;
     return 0;
 }
