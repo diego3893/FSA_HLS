@@ -102,14 +102,25 @@ namespace fsa{
 
             for(int port=0; port<NFullRead; ++port){
                 #pragma HLS UNROLL
-                io.fullRead[(std::size_t)port].data =
-                    state.full_read_data[(std::size_t)port];
+                for(int element=0; element<State::FullDataSize; ++element){
+                    #pragma HLS UNROLL
+                    io.fullRead[(std::size_t)port]
+                        .data[(std::size_t)element] =
+                            state.full_read_data[(std::size_t)port]
+                                                [(std::size_t)element];
+                }
             }
 
             for(int port=0; port<NNarrowRead; ++port){
                 #pragma HLS UNROLL
-                io.narrowRead[(std::size_t)port].data =
-                    state.narrow_read_data[(std::size_t)port];
+                for(int element=0;
+                        element<State::NarrowDataSize; ++element){
+                    #pragma HLS UNROLL
+                    io.narrowRead[(std::size_t)port]
+                        .data[(std::size_t)element] =
+                            state.narrow_read_data[(std::size_t)port]
+                                                  [(std::size_t)element];
+                }
             }
 
             // 先按端口顺序计算ready。这里使用请求之间的bank/sub-bank
@@ -389,8 +400,13 @@ namespace fsa{
                         #pragma HLS UNROLL
                         if(read_enable && !full_read_selected &&
                                 selected_port==port){
-                            state.narrow_read_data[(std::size_t)port] =
-                                read_data;
+                            for(int element=0;
+                                    element<SubBankSize; ++element){
+                                #pragma HLS UNROLL
+                                state.narrow_read_data[(std::size_t)port]
+                                    [(std::size_t)element] =
+                                        read_data[(std::size_t)element];
+                            }
                         }
                     }
                 }
@@ -441,7 +457,12 @@ namespace fsa{
                         if(!write_enable && selected){
                             write_enable = true;
                             write_address = request.addr;
-                            write_data = request.data;
+                            for(int element=0;
+                                    element<SubBankSize; ++element){
+                                #pragma HLS UNROLL
+                                write_data[(std::size_t)element] =
+                                    request.data[(std::size_t)element];
+                            }
                         }
                     }
 
