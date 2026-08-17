@@ -212,6 +212,18 @@ void testSpRAMTop(){
     expect(!output.narrow_write_ready[0],
            "sp out-of-range write should not be ready");
 
+    /* Scratchpad只有一个sub-bank，编号1必须被拒绝。 */
+    fsa::SpRAMTopInput invalid_sub_bank{};
+    invalid_sub_bank.narrow_write_valid[0] = true;
+    invalid_sub_bank.narrow_write_addr[0] = 0;
+    invalid_sub_bank.narrow_write_sub_bank_idx[0] = 1;
+    invalid_sub_bank.narrow_write_data[0] = rejected;
+    output = runSpRAM(invalid_sub_bank);
+    expect(!output.narrow_write_ready[0],
+           "sp invalid sub-bank should not be ready");
+    expectElemRow(readSpRow(0), row0,
+                  "sp invalid sub-bank preserves memory");
+
     fsa::SpRAMTopInput invalid_read{};
     invalid_read.full_read_valid = true;
     invalid_read.full_read_addr = fsa::SPAD_ROWS;
