@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vivado HLS IP 上板测试"
+  short_description: "根据HLS IP与testbench生成可上传服务器的Vivado上板测试包"
+  default_prompt: "使用 $vivado-hls-ip-board-test，根据HLS IP、源码和testbench生成NM37上板测试包。"
