@@ -147,17 +147,31 @@ namespace fsa{
               int NFullRead, int NFullWrite,
               int NNarrowRead, int NNarrowWrite>
     struct BankedSRAMIO{
+        static_assert(NFullRead>=0 && NFullWrite>=0 &&
+                      NNarrowRead>=0 && NNarrowWrite>=0,
+                      "SRAM端口数量不能为负数");
+
+        // 消除array<T, 0>造成的越界问题
+        static constexpr int FullReadStorage =
+            NFullRead>0 ? NFullRead : 1;
+        static constexpr int FullWriteStorage =
+            NFullWrite>0 ? NFullWrite : 1;
+        static constexpr int NarrowReadStorage =
+            NNarrowRead>0 ? NNarrowRead : 1;
+        static constexpr int NarrowWriteStorage =
+            NNarrowWrite>0 ? NNarrowWrite : 1;
+
         std::array<SRAMFullRead<T, RowSize, NSubBanks>,
-                   (std::size_t)NFullRead> fullRead{};
+                   (std::size_t)FullReadStorage> fullRead{};
 
         std::array<SRAMFullWrite<T, RowSize, NSubBanks>,
-                   (std::size_t)NFullWrite> fullWrite{};
+                   (std::size_t)FullWriteStorage> fullWrite{};
 
         std::array<SRAMNarrowRead<T, RowSize, NSubBanks>,
-                   (std::size_t)NNarrowRead> narrowRead{};
+                   (std::size_t)NarrowReadStorage> narrowRead{};
 
         std::array<SRAMNarrowWrite<T, RowSize, NSubBanks>,
-                   (std::size_t)NNarrowWrite> narrowWrite{};
+                   (std::size_t)NarrowWriteStorage> narrowWrite{};
     };
 
     /// @brief Scratchpad SRAM全部读写端口

@@ -192,6 +192,12 @@ namespace fsa{
         /// @brief narrow read返回的元素数量
         static constexpr int NarrowDataSize = SubBankSize;
 
+        // 消除array<T, 0>造成的越界问题
+        static constexpr int FullReadStorage =
+            NFullRead>0 ? NFullRead : 1;
+        static constexpr int NarrowReadStorage =
+            NNarrowRead>0 ? NNarrowRead : 1;
+
         using FullData = std::array<T, (std::size_t)RowSize>;
         using NarrowData = std::array<T, (std::size_t)SubBankSize>;
 
@@ -199,10 +205,12 @@ namespace fsa{
         T banks[NBanks][NSubBanks][Rows][SubBankSize]{};
 
         /// @brief full read的一拍读响应寄存器
-        std::array<FullData, (std::size_t)NFullRead> full_read_data{};
+        std::array<FullData, (std::size_t)FullReadStorage>
+            full_read_data{};
 
         /// @brief narrow read的一拍读响应寄存器
-        std::array<NarrowData, (std::size_t)NNarrowRead> narrow_read_data{};
+        std::array<NarrowData, (std::size_t)NarrowReadStorage>
+            narrow_read_data{};
     };
 
     /// @brief Scratchpad SRAM状态
