@@ -10,24 +10,31 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ $# -ge 1 ]]; then
     MODULE="$1"
 else
-    read -r -p "请输入模块（pe/cmp/input_delayer/output_delayer/sa/delayer_sa/accumulator）：" MODULE
+    read -r -p "请输入模块（pe/cmp/input_delayer/output_delayer/sa/delayer_sa/accumulator/sram）：" MODULE
 fi
 
 # 统一转换为小写，允许输入PE、CMP等大写形式。
 MODULE="${MODULE,,}"
+HLS_SUBDIR="$MODULE"
 
 case "$MODULE" in
     pe|cmp|input_delayer|output_delayer|sa|delayer_sa|accumulator)
         ;;
+    sram|banked_sram)
+        # sram一次运行Scratchpad和Accumulator SRAM两个HLS顶层。
+        # banked_sram保留为旧名称的兼容别名。
+        MODULE="sram"
+        HLS_SUBDIR="banked_sram"
+        ;;
     *)
         echo "[ERROR] 不支持的模块：$MODULE" >&2
-        echo "用法：$0 pe|cmp|input_delayer|output_delayer|sa|delayer_sa|accumulator" >&2
+        echo "用法：$0 pe|cmp|input_delayer|output_delayer|sa|delayer_sa|accumulator|sram" >&2
         exit 1
         ;;
 esac
 
-TCL_FILE="$PROJECT_ROOT/hls/$MODULE/run_hls.tcl"
-MODULE_DIR="$PROJECT_ROOT/hls/$MODULE"
+TCL_FILE="$PROJECT_ROOT/hls/$HLS_SUBDIR/run_hls.tcl"
+MODULE_DIR="$PROJECT_ROOT/hls/$HLS_SUBDIR"
 TEMP_BUILD_DIR="$MODULE_DIR/build"
 FINAL_BUILD_DIR="$MODULE_DIR/${MODULE}_build"
 ZIP_FILE="$MODULE_DIR/${MODULE}_build.zip"
@@ -39,6 +46,9 @@ fi
 
 echo "[HLS] 模块：$MODULE"
 echo "[HLS] 脚本：$TCL_FILE"
+if [[ "$MODULE" == "sram" ]]; then
+    echo "[HLS] SRAM顶层：sp_ram_top、acc_ram_top"
+fi
 
 cd "$PROJECT_ROOT"
 
