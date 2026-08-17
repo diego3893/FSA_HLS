@@ -4,5 +4,4 @@
 *.o
 *.obj
 *.exe
-/third_party/vitis_hls/include//hls/*/*_build/
-/hls/*/*_build.zip
+/third_party/vitis_hls/include/
