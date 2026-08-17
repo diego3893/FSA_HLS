@@ -158,5 +158,64 @@ namespace fsa{
         ReciprocalDividerState reciprocal[SA_COLS]{};
     };
 
+    /**
+     * @brief BankedSRAM跨step保存的硬件状态
+     * 
+     * @tparam T 元素类型
+     * @tparam Rows 行数
+     * @tparam RowSize 一行的元素个数
+     * @tparam NSubBanks sub-bank个数
+     * @tparam NFullRead 整行读端口数量
+     * @tparam NFullWrite 整行写端口数量
+     * @tparam NNarrowRead 窄读端口数量
+     * @tparam NNarrowWrite 窄写端口数量
+     */
+    template <typename T, int Rows, int RowSize,
+              int NBanks, int NSubBanks,
+              int NFullRead, int NFullWrite,
+              int NNarrowRead, int NNarrowWrite>
+    struct BankedSRAMState{
+        static_assert(Rows>0, "Rows必须大于0");
+        static_assert(RowSize>0, "RowSize必须大于0");
+        static_assert(NSubBanks>0, "NSubBanks必须大于0");
+        static_assert((NBanks&(NBanks-1))==0,
+                      "NBanks必须是2的幂，才能用地址低位选择bank");
+        static_assert(RowSize%NSubBanks==0,
+                      "RowSize必须能被NSubBanks整除");
+
+        /// @brief 每个sub-bank保存的元素数量
+        static constexpr int SubBankSize = RowSize/NSubBanks;
+
+        /// @brief full read返回的元素数量
+        static constexpr int FullDataSize = RowSize;
+
+        /// @brief narrow read返回的元素数量
+        static constexpr int NarrowDataSize = SubBankSize;
+
+        using FullData = std::array<T, (std::size_t)RowSize>;
+        using NarrowData = std::array<T, (std::size_t)SubBankSize>;
+
+        /// @brief 物理SRAM存储阵列
+        T banks[NBanks][NSubBanks][Rows][SubBankSize]{};
+
+        /// @brief full read的一拍读响应寄存器
+        std::array<FullData, (std::size_t)NFullRead> full_read_data{};
+
+        /// @brief narrow read的一拍读响应寄存器
+        std::array<NarrowData, (std::size_t)NNarrowRead> narrow_read_data{};
+    };
+
+    /// @brief Scratchpad SRAM状态
+    using SpRAMState = BankedSRAMState<
+        elem_t, SPAD_ROWS, SA_ROWS,
+        spadBanks, SPAD_SUB_BANKS,
+        1, 0, 0, nMemPorts>;
+
+    /// @brief Accumulator SRAM状态
+    using AccRAMState = BankedSRAMState<
+        acc_t, ACC_ROWS, SA_COLS,
+        accBanks, ACC_SUB_BANKS,
+        1, 1, nMemPorts, 0>;
+
 }  // namespace fsa
 #endif // !STATE_HPP
