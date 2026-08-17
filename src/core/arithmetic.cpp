@@ -292,15 +292,8 @@ namespace fsa{
     }
 
     acc_t accUnit(const acc_t in_a, const acc_t in_b, const acc_t in_c){
-        // MOD: Vitis 2024.2 的 hls::fma C 仿真模型会在某些抵消边界
-        // （例如 (1+2^-23)*(1-2^-24)-1）退化成先乘后加并返回 0。
-        // 主机仿真使用标准库的真正融合 FMA；综合仍保留 hls::fma，
-        // 由 C/RTL co-sim 验证生成的浮点 FMA 与位级参考一致。
-#ifndef __SYNTHESIS__
-        return std::fma(in_a, in_b, in_c);
-#else
+        // MOD: 统一由Vitis HLS浮点库描述FMA，避免C/RTL使用不同函数。
         return hls::fma(in_a, in_b, in_c);
-#endif
     }
 
     CmpUnitOutput accCmp(const acc_t in_a, const acc_t in_b){
