@@ -112,14 +112,9 @@ namespace fsa{
                     state.narrow_read_data[(std::size_t)port];
             }
 
-            // 当前端口是否被更高请求zhanyong
-            bool read_occupied[NBanks][NSubBanks]{};
-            bool write_occupied[NBanks][NSubBanks]{};
-
-            #pragma HLS ARRAY_PARTITION variable=read_occupied type=complete dim=0
-            #pragma HLS ARRAY_PARTITION variable=write_occupied type=complete dim=0
-
-            // full read仲裁
+            // 先按端口顺序计算ready。这里使用请求之间的bank/sub-bank
+            // 比较，而不通过运行时bank_idx写入临时占用数组，避免UNROLL后
+            // 形成多个动态索引写口。
             for(int port=0; port<NFullRead; ++port){
                 #pragma HLS UNROLL
                 auto& request = io.fullRead[(std::size_t)port];
@@ -132,19 +127,29 @@ namespace fsa{
                     const bool selected =
                         request.subBankMask[(std::size_t)sub_bank];
 
-                    if(selected && read_occupied[bank_idx][sub_bank]){
-                        request_ready = false;
-                    }
+                    for(int previous_port=0;
+                            previous_port<NFullRead; ++previous_port){
+                        #pragma HLS UNROLL
+                        const auto& previous =
+                            io.fullRead[(std::size_t)previous_port];
+                        const bool previous_valid =
+                            previous_port<port && previous.valid &&
+                            addressInRange<Rows>(previous.addr);
+                        const bool conflict =
+                            selected && previous_valid &&
+                            getBankIdx<NBanks>(previous.addr)==bank_idx &&
+                            previous.subBankMask[(std::size_t)sub_bank];
 
-                    if(request.valid && address_valid && selected){
-                        read_occupied[bank_idx][sub_bank] = true;
+                        if(conflict){
+                            request_ready = false;
+                        }
                     }
                 }
 
                 request.ready = request_ready;
             }
 
-            // narrow read应该在full read的优先级之后
+            // narrow read优先级低于所有full read，也低于更早的narrow read。
             for(int port=0; port<NNarrowRead; ++port){
                 #pragma HLS UNROLL
                 auto& request = io.narrowRead[(std::size_t)port];
@@ -152,16 +157,63 @@ namespace fsa{
                 const int bank_idx = getBankIdx<NBanks>(request.addr);
                 const int sub_bank_idx = (int)request.subBankIdx.to_uint();
                 const bool sub_bank_valid = sub_bank_idx<NSubBanks;
+                bool request_ready = address_valid && sub_bank_valid;
 
-                request.ready = address_valid && sub_bank_valid &&
-                    !read_occupied[bank_idx][sub_bank_idx];
+                for(int previous_port=0;
+                        previous_port<NFullRead; ++previous_port){
+                    #pragma HLS UNROLL
+                    const auto& previous =
+                        io.fullRead[(std::size_t)previous_port];
+                    bool previous_selected = false;
 
-                if(request.valid && address_valid && sub_bank_valid){
-                    read_occupied[bank_idx][sub_bank_idx] = true;
+                    for(int sub_bank=0;
+                            sub_bank<NSubBanks; ++sub_bank){
+                        #pragma HLS UNROLL
+                        if(sub_bank_idx==sub_bank &&
+                                previous.subBankMask[
+                                    (std::size_t)sub_bank]){
+                            previous_selected = true;
+                        }
+                    }
+
+                    const bool previous_valid =
+                        previous.valid &&
+                        addressInRange<Rows>(previous.addr);
+                    const bool conflict =
+                        sub_bank_valid && previous_valid &&
+                        getBankIdx<NBanks>(previous.addr)==bank_idx &&
+                        previous_selected;
+
+                    if(conflict){
+                        request_ready = false;
+                    }
                 }
+
+                for(int previous_port=0;
+                        previous_port<NNarrowRead; ++previous_port){
+                    #pragma HLS UNROLL
+                    const auto& previous =
+                        io.narrowRead[(std::size_t)previous_port];
+                    const int previous_sub_bank_idx =
+                        (int)previous.subBankIdx.to_uint();
+                    const bool previous_valid =
+                        previous_port<port && previous.valid &&
+                        addressInRange<Rows>(previous.addr) &&
+                        previous_sub_bank_idx<NSubBanks;
+                    const bool conflict =
+                        sub_bank_valid && previous_valid &&
+                        getBankIdx<NBanks>(previous.addr)==bank_idx &&
+                        previous_sub_bank_idx==sub_bank_idx;
+
+                    if(conflict){
+                        request_ready = false;
+                    }
+                }
+
+                request.ready = request_ready;
             }
 
-            // full write仲裁
+            // write端口使用与read端口相同的固定优先级。
             for(int port=0; port<NFullWrite; ++port){
                 #pragma HLS UNROLL
                 auto& request = io.fullWrite[(std::size_t)port];
@@ -174,19 +226,29 @@ namespace fsa{
                     const bool selected =
                         request.subBankMask[(std::size_t)sub_bank];
 
-                    if(selected && write_occupied[bank_idx][sub_bank]){
-                        request_ready = false;
-                    }
+                    for(int previous_port=0;
+                            previous_port<NFullWrite; ++previous_port){
+                        #pragma HLS UNROLL
+                        const auto& previous =
+                            io.fullWrite[(std::size_t)previous_port];
+                        const bool previous_valid =
+                            previous_port<port && previous.valid &&
+                            addressInRange<Rows>(previous.addr);
+                        const bool conflict =
+                            selected && previous_valid &&
+                            getBankIdx<NBanks>(previous.addr)==bank_idx &&
+                            previous.subBankMask[(std::size_t)sub_bank];
 
-                    if(request.valid && address_valid && selected){
-                        write_occupied[bank_idx][sub_bank] = true;
+                        if(conflict){
+                            request_ready = false;
+                        }
                     }
                 }
 
                 request.ready = request_ready;
             }
 
-            // narrow write应该在full write之后
+            // narrow write优先级低于所有full write和更早的narrow write。
             for(int port=0; port<NNarrowWrite; ++port){
                 #pragma HLS UNROLL
                 auto& request = io.narrowWrite[(std::size_t)port];
@@ -194,103 +256,203 @@ namespace fsa{
                 const int bank_idx = getBankIdx<NBanks>(request.addr);
                 const int sub_bank_idx = (int)request.subBankIdx.to_uint();
                 const bool sub_bank_valid = sub_bank_idx<NSubBanks;
+                bool request_ready = address_valid && sub_bank_valid;
 
-                request.ready = address_valid && sub_bank_valid &&
-                    !write_occupied[bank_idx][sub_bank_idx];
+                for(int previous_port=0;
+                        previous_port<NFullWrite; ++previous_port){
+                    #pragma HLS UNROLL
+                    const auto& previous =
+                        io.fullWrite[(std::size_t)previous_port];
+                    bool previous_selected = false;
 
-                if(request.valid && address_valid && sub_bank_valid){
-                    write_occupied[bank_idx][sub_bank_idx] = true;
+                    for(int sub_bank=0;
+                            sub_bank<NSubBanks; ++sub_bank){
+                        #pragma HLS UNROLL
+                        if(sub_bank_idx==sub_bank &&
+                                previous.subBankMask[
+                                    (std::size_t)sub_bank]){
+                            previous_selected = true;
+                        }
+                    }
+
+                    const bool previous_valid =
+                        previous.valid &&
+                        addressInRange<Rows>(previous.addr);
+                    const bool conflict =
+                        sub_bank_valid && previous_valid &&
+                        getBankIdx<NBanks>(previous.addr)==bank_idx &&
+                        previous_selected;
+
+                    if(conflict){
+                        request_ready = false;
+                    }
                 }
+
+                for(int previous_port=0;
+                        previous_port<NNarrowWrite; ++previous_port){
+                    #pragma HLS UNROLL
+                    const auto& previous =
+                        io.narrowWrite[(std::size_t)previous_port];
+                    const int previous_sub_bank_idx =
+                        (int)previous.subBankIdx.to_uint();
+                    const bool previous_valid =
+                        previous_port<port && previous.valid &&
+                        addressInRange<Rows>(previous.addr) &&
+                        previous_sub_bank_idx<NSubBanks;
+                    const bool conflict =
+                        sub_bank_valid && previous_valid &&
+                        getBankIdx<NBanks>(previous.addr)==bank_idx &&
+                        previous_sub_bank_idx==sub_bank_idx;
+
+                    if(conflict){
+                        request_ready = false;
+                    }
+                }
+
+                request.ready = request_ready;
             }
 
-            // 同步读，握手成功则保存。先读后写
-            for(int port=0; port<NFullRead; ++port){
+            // 为每个固定bank/sub-bank只生成一个物理读口。先选择本拍
+            // 获胜请求，再执行一次静态bank索引的读取并路由到响应寄存器。
+            for(int bank=0; bank<NBanks; ++bank){
                 #pragma HLS UNROLL
-                const auto& request = io.fullRead[(std::size_t)port];
+                for(int sub_bank=0; sub_bank<NSubBanks; ++sub_bank){
+                    #pragma HLS UNROLL
+                    bool read_enable = false;
+                    bool full_read_selected = false;
+                    int selected_port = 0;
+                    sram_address_t read_address = 0;
 
-                if(request.valid && request.ready){
-                    const int bank_idx = getBankIdx<NBanks>(request.addr);
-                    const int address = (int)request.addr.to_uint();
-
-                    for(int sub_bank=0; sub_bank<NSubBanks; ++sub_bank){
+                    for(int port=0; port<NFullRead; ++port){
                         #pragma HLS UNROLL
-                        if(request.subBankMask[(std::size_t)sub_bank]){
-                            for(int element=0; element<SubBankSize; ++element){
+                        const auto& request =
+                            io.fullRead[(std::size_t)port];
+                        const bool selected =
+                            request.valid && request.ready &&
+                            getBankIdx<NBanks>(request.addr)==bank &&
+                            request.subBankMask[(std::size_t)sub_bank];
+
+                        if(!read_enable && selected){
+                            read_enable = true;
+                            full_read_selected = true;
+                            selected_port = port;
+                            read_address = request.addr;
+                        }
+                    }
+
+                    for(int port=0; port<NNarrowRead; ++port){
+                        #pragma HLS UNROLL
+                        const auto& request =
+                            io.narrowRead[(std::size_t)port];
+                        const bool selected =
+                            request.valid && request.ready &&
+                            getBankIdx<NBanks>(request.addr)==bank &&
+                            (int)request.subBankIdx.to_uint()==sub_bank;
+
+                        if(!read_enable && selected){
+                            read_enable = true;
+                            full_read_selected = false;
+                            selected_port = port;
+                            read_address = request.addr;
+                        }
+                    }
+
+                    typename State::NarrowData read_data{};
+                    if(read_enable){
+                        const int address =
+                            (int)read_address.to_uint();
+                        for(int element=0; element<SubBankSize; ++element){
+                            #pragma HLS UNROLL
+                            read_data[(std::size_t)element] =
+                                state.banks[bank][sub_bank]
+                                           [address][element];
+                        }
+                    }
+
+                    for(int port=0; port<NFullRead; ++port){
+                        #pragma HLS UNROLL
+                        if(read_enable && full_read_selected &&
+                                selected_port==port){
+                            for(int element=0;
+                                    element<SubBankSize; ++element){
                                 #pragma HLS UNROLL
                                 const int row_element =
                                     sub_bank*SubBankSize+element;
-
                                 state.full_read_data[(std::size_t)port]
                                     [(std::size_t)row_element] =
-                                        state.banks[bank_idx][sub_bank]
-                                                   [address][element];
+                                        read_data[(std::size_t)element];
                             }
+                        }
+                    }
+
+                    for(int port=0; port<NNarrowRead; ++port){
+                        #pragma HLS UNROLL
+                        if(read_enable && !full_read_selected &&
+                                selected_port==port){
+                            state.narrow_read_data[(std::size_t)port] =
+                                read_data;
                         }
                     }
                 }
             }
 
-            for(int port=0; port<NNarrowRead; ++port){
+            // 同理，每个固定bank/sub-bank只生成一个物理写口。
+            // 读选择和数据获取位于写入之前，保持同拍读写返回旧值。
+            for(int bank=0; bank<NBanks; ++bank){
                 #pragma HLS UNROLL
-                const auto& request = io.narrowRead[(std::size_t)port];
+                for(int sub_bank=0; sub_bank<NSubBanks; ++sub_bank){
+                    #pragma HLS UNROLL
+                    bool write_enable = false;
+                    sram_address_t write_address = 0;
+                    typename State::NarrowData write_data{};
 
-                if(request.valid && request.ready){
-                    const int bank_idx = getBankIdx<NBanks>(request.addr);
-                    const int sub_bank_idx =
-                        (int)request.subBankIdx.to_uint();
-                    const int address = (int)request.addr.to_uint();
-
-                    for(int element=0; element<SubBankSize; ++element){
+                    for(int port=0; port<NFullWrite; ++port){
                         #pragma HLS UNROLL
-                        state.narrow_read_data[(std::size_t)port]
-                                              [(std::size_t)element] =
-                            state.banks[bank_idx][sub_bank_idx]
-                                       [address][element];
-                    }
-                }
-            }
+                        const auto& request =
+                            io.fullWrite[(std::size_t)port];
+                        const bool selected =
+                            request.valid && request.ready &&
+                            getBankIdx<NBanks>(request.addr)==bank &&
+                            request.subBankMask[(std::size_t)sub_bank];
 
-            // valid&&ready的full write一次性更新所有被mask选中的sub-bank
-            for(int port=0; port<NFullWrite; ++port){
-                #pragma HLS UNROLL
-                const auto& request = io.fullWrite[(std::size_t)port];
-
-                if(request.valid && request.ready){
-                    const int bank_idx = getBankIdx<NBanks>(request.addr);
-                    const int address = (int)request.addr.to_uint();
-
-                    for(int sub_bank=0; sub_bank<NSubBanks; ++sub_bank){
-                        #pragma HLS UNROLL
-                        if(request.subBankMask[(std::size_t)sub_bank]){
-                            for(int element=0; element<SubBankSize; ++element){
+                        if(!write_enable && selected){
+                            write_enable = true;
+                            write_address = request.addr;
+                            for(int element=0;
+                                    element<SubBankSize; ++element){
                                 #pragma HLS UNROLL
                                 const int row_element =
                                     sub_bank*SubBankSize+element;
-
-                                state.banks[bank_idx][sub_bank]
-                                           [address][element] =
+                                write_data[(std::size_t)element] =
                                     request.data[(std::size_t)row_element];
                             }
                         }
                     }
-                }
-            }
 
-            for(int port=0; port<NNarrowWrite; ++port){
-                #pragma HLS UNROLL
-                const auto& request = io.narrowWrite[(std::size_t)port];
-
-                if(request.valid && request.ready){
-                    const int bank_idx = getBankIdx<NBanks>(request.addr);
-                    const int sub_bank_idx =
-                        (int)request.subBankIdx.to_uint();
-                    const int address = (int)request.addr.to_uint();
-
-                    for(int element=0; element<SubBankSize; ++element){
+                    for(int port=0; port<NNarrowWrite; ++port){
                         #pragma HLS UNROLL
-                        state.banks[bank_idx][sub_bank_idx]
-                                   [address][element] =
-                            request.data[(std::size_t)element];
+                        const auto& request =
+                            io.narrowWrite[(std::size_t)port];
+                        const bool selected =
+                            request.valid && request.ready &&
+                            getBankIdx<NBanks>(request.addr)==bank &&
+                            (int)request.subBankIdx.to_uint()==sub_bank;
+
+                        if(!write_enable && selected){
+                            write_enable = true;
+                            write_address = request.addr;
+                            write_data = request.data;
+                        }
+                    }
+
+                    if(write_enable){
+                        const int address =
+                            (int)write_address.to_uint();
+                        for(int element=0; element<SubBankSize; ++element){
+                            #pragma HLS UNROLL
+                            state.banks[bank][sub_bank][address][element] =
+                                write_data[(std::size_t)element];
+                        }
                     }
                 }
             }
