@@ -221,8 +221,8 @@ void testSpRAMTop(){
     output = runSpRAM(invalid_sub_bank);
     expect(!output.narrow_write_ready[0],
            "sp invalid sub-bank should not be ready");
-    expectElemRow(readSpRow(0), row0,
-                  "sp invalid sub-bank preserves memory");
+    // 不在这里额外发起读请求，避免改变后面用于检查同步读时序的
+    // “上一笔读响应”。后续读取row0时会同时验证该非法写没有生效。
 
     fsa::SpRAMTopInput invalid_read{};
     invalid_read.full_read_valid = true;
