@@ -3,18 +3,25 @@
 
 void accumulator_top(
     const fsa::AccumulatorTopInput& input,
-    fsa::AccumulatorTopOutput& output
+    fsa::AccVector& sram_out,
+    bool& sram_write_valid,
+    bool& reciprocal_result
 ){
-    // 与PE顶层保持相同的事务控制协议
+    /**
+     * MOD: 保留可靠的事务背压；一次RECIPROCAL请求在事务内部完成15个
+     * 固定阶段，外部不再发送14笔空事务。实际物理拍数由综合报告确认。
+     */
     #pragma HLS INTERFACE ap_ctrl_hs port=return
 
-    // 把输入、输出结构体紧密打包成顶层位向量
+    // 把输入、四列输出紧密打包成顶层位向量。
     #pragma HLS AGGREGATE variable=input compact=bit
-    #pragma HLS AGGREGATE variable=output compact=bit
+    #pragma HLS AGGREGATE variable=sram_out compact=bit
 
-    // 数据端口本身不增加valid/ready，统一由ap_start/ap_done控制
+    // MOD: 两类有效标志分开，避免reciprocal结果被误当成SRAM写使能。
     #pragma HLS INTERFACE ap_none port=input
-    #pragma HLS INTERFACE ap_none port=output
+    #pragma HLS INTERFACE ap_none port=sram_out
+    #pragma HLS INTERFACE ap_none port=sram_write_valid
+    #pragma HLS INTERFACE ap_none port=reciprocal_result
 
     /**
      * 跨顶层调用保存Accumulator状态。
@@ -22,6 +29,9 @@ void accumulator_top(
      * scale和reciprocal分别对应每列独立的寄存器及除法器状态。
      */
     static fsa::AccumulatorState current{};
+
+    // MOD: ap_rst同时清除业务状态；input.reset仍保留为显式业务复位。
+    #pragma HLS RESET variable=current
 
     // 四列需要在同一逻辑步骤内并行访问
     #pragma HLS ARRAY_PARTITION variable=current.scale \
@@ -31,7 +41,28 @@ void accumulator_top(
 
     if(input.reset){
         fsa::reset_accumulator_state(current);
-        output = fsa::AccumulatorTopOutput{};
+        sram_out = fsa::AccVector{};
+        sram_write_valid = false;
+        reciprocal_result = false;
+        return;
+    }
+
+    sram_write_valid = false;
+    reciprocal_result = false;
+
+    /**
+     * MOD: reciprocal单事务快路径。分母在事务开始时从scale锁存，四列
+     * 并行运行固定15阶段，最后原子写回scale。
+     */
+    if(input.ctrl.valid
+            && input.ctrl.bits.cmd==fsa::AccumulatorCmd::RECIPROCAL){
+        fsa::accumulator_reciprocal_transaction(
+            current.scale,
+            sram_out
+        );
+
+        // reciprocal只更新内部scale；wrapper在ap_done拍产生result_valid。
+        reciprocal_result = true;
         return;
     }
 
@@ -73,12 +104,14 @@ void accumulator_top(
 
     fsa::accumulator_step(current, next, io);
 
-    // Accumulator核心输出映射到顶层输出
+    // Accumulator核心输出映射到顶层输出。
     for(int col=0; col<fsa::SA_COLS; ++col){
         #pragma HLS UNROLL
-        output.sram_out[(std::size_t)col] =
+        sram_out[(std::size_t)col] =
             io.sram_out[(std::size_t)col];
     }
+
+    sram_write_valid = io.sram_write_valid;
 
     // 模拟时钟沿：统一提交下一状态
     current = next;

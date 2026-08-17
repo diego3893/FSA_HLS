@@ -28,24 +28,20 @@ namespace fsa{
         AccVector sram_in{};
     };
 
-    /**
-     * @brief Accumulator顶层输出
-     */
-    struct AccumulatorTopOutput{
-        /// @brief 写回Accumulator RAM的数据
-        AccVector sram_out{};
-    };
-
 }  // namespace fsa
 
 /**
  * @brief Accumulator的HLS顶层函数
  *
- * 一次调用表示Accumulator推进一个逻辑步骤。
+ * MOD: 保持ap_ctrl_hs，RECIPROCAL在一次事务内按固定15阶段调度。生成RTL
+ * 外再由rtl/accumulator_protocol_wrapper.sv把ap_idle/ap_done映射成明确的
+ * busy/result_valid物理时钟信号；实际15拍必须由新综合报告确认。
  */
 void accumulator_top(
     const fsa::AccumulatorTopInput& input,
-    fsa::AccumulatorTopOutput& output
+    fsa::AccVector& sram_out,
+    bool& sram_write_valid,
+    bool& reciprocal_result
 );
 
 #endif  // ACCUMULATOR_TOP_HPP

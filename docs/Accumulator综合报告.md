@@ -1,5 +1,11 @@
 # Accumulator 综合报告
 
+> **MOD（2026-08-17）**：本报告记录的是修改前的 baseline 构建。源码现已改为
+> “四列 complete UNROLL + RECIPROCAL 单次事务内部15阶段 + 显式协议包装层”。
+> 下文 8～23 拍、II 9～24、15 DSP 和 359 拍推导仅用于旧版对照，不能作为
+> 当前源码的综合结论。新源码尚需在 Vitis HLS 2024.2 重新执行 C synthesis、
+> C/RTL co-simulation，并以新报告确认顶层 reciprocal latency、实例数和资源。
+
 ## 1. 综合配置
 
 | 项目 | 配置 |
