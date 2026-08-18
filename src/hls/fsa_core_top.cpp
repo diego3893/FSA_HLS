@@ -223,8 +223,6 @@ void fsa_core_top(
 
     // 4. 与Chisel FSA.scala一致，OutputDelayer直接连接SA输出bits。
     fsa::OutputDelayerIO output_delayer_io{};
-    #pragma HLS ARRAY_PARTITION variable=output_delayer_io.in type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=output_delayer_io.out type=complete dim=1
     for(int col=0; col<fsa::SA_COLS; ++col){
         #pragma HLS UNROLL
         output_delayer_io.in[(std::size_t)col] = sa_io.acc_out[col].bits;
