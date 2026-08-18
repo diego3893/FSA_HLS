@@ -43,7 +43,8 @@ namespace{
 
     void expect(const bool condition, const std::string& message){
         if(!condition){
-            std::cerr << "[FAIL] logical cycle " << logical_cycle
+            // tick()返回前已经把logical_cycle加一；失败应标记刚完成的拍。
+            std::cerr << "[FAIL] logical cycle " << logical_cycle-1
                       << ": " << message << std::endl;
             ++failure_count;
         }
@@ -272,7 +273,8 @@ namespace{
             }
         }
 
-        // 排空横向控制pipe，并清除InputDelayer直通输入。
+        // 排空SA横向控制pipe。此时数据位允许保持旧值；控制valid无效，
+        // 所以这些数据不会被PE消费，也不要求InputDelayer输出为零。
         for(int cycle=0; cycle<TEST_SIZE-1; ++cycle){
             tick(fsa::FsaCoreTopInput{});
         }
@@ -388,14 +390,18 @@ namespace{
 
             for(int row=0; row<TEST_SIZE; ++row){
                 const int key = cycle-(TEST_SIZE-1-row);
-                const float expected =
-                    key>=0 && key<TEST_SIZE ? K[key][row] : 0.0F;
-                expect(almostEqual(
-                           (float)output.delayer_out[(std::size_t)row],
-                           expected),
-                       "wrong delayed K at compute cycle "+
-                           std::to_string(cycle)+", row "+
-                           std::to_string(row));
+                const bool mac_active = key>=0 && key<TEST_SIZE;
+
+                // valid=false时数据位是don't-care，可能保留Scratchpad上一行。
+                // 只检查本拍真正由PE控制消费、参与MAC的Delayer lane。
+                if(mac_active){
+                    expect(almostEqual(
+                               (float)output.delayer_out[(std::size_t)row],
+                               K[key][row]),
+                           "wrong active delayed K at compute cycle "+
+                               std::to_string(cycle)+", row "+
+                               std::to_string(row));
+                }
             }
 
             if(cycle>=3*TEST_SIZE && cycle<4*TEST_SIZE){
