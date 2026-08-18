@@ -76,6 +76,7 @@ namespace{
     ){
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=16
+        #pragma HLS LATENCY max=17
 
         #pragma HLS ARRAY_PARTITION variable=current.mesh type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=current.cmp_array type=complete dim=1

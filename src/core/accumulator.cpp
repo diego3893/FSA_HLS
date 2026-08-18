@@ -374,6 +374,7 @@ namespace fsa{
                         AccumulatorState& next, AccumulatorIO& io){
         
         #pragma HLS INLINE
+        #pragma HLS LATENCY max=18
 
         static_assert(
             SA_COLS==4,
