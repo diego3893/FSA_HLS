@@ -373,7 +373,7 @@ namespace fsa{
     void accumulator_step(const AccumulatorState& current,
                         AccumulatorState& next, AccumulatorIO& io){
         
-        #pragma HLS INLINE
+        #pragma HLS INLINE off
         #pragma HLS LATENCY max=18
 
         static_assert(
