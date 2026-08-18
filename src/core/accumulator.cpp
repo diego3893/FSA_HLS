@@ -289,6 +289,70 @@ namespace fsa{
             return output;
         }
 
+        /**
+         * @brief 推进一列Accumulator状态并产生该列SRAM写回数据
+         *
+         * lane是每个调用点传入的编译期常量。FUNCTION_INSTANTIATE让
+         * Vitis HLS为四个lane生成不同的RTL实现；INLINE off继续保留
+         * 每列独立层次，避免PWL、FP32乘加和恢复除法器跨列复用。
+         */
+        void accumulator_lane_step(
+            const int lane,
+            const acc_t current_scale,
+            const ReciprocalDividerState& current_reciprocal,
+            acc_t& next_scale,
+            ReciprocalDividerState& next_reciprocal,
+            const bool valid,
+            const AccumulatorCmd cmd,
+            const acc_t sa_in,
+            const acc_t sram_in,
+            acc_t& sram_out
+        ){
+            #pragma HLS INLINE off
+            #pragma HLS FUNCTION_INSTANTIATE variable=lane
+
+            // 每个lane只读本列current，并只写本列next。
+            next_scale = current_scale;
+            next_reciprocal = current_reciprocal;
+
+            const bool exp_s1 = cmd == AccumulatorCmd::EXP_S1;
+            const bool exp_s2 = cmd == AccumulatorCmd::EXP_S2;
+            const bool acc_sa = cmd == AccumulatorCmd::ACC_SA;
+            const bool set = cmd == AccumulatorCmd::SET_SCALE;
+            const bool reciprocal_cmd = cmd == AccumulatorCmd::RECIPROCAL;
+
+            const acc_t in_a = exp_s1 ? sa_in : current_scale;
+            const acc_t in_b = exp_s1 ? attentionScale() : sram_in;
+            const acc_t in_c = acc_sa ? sa_in : accZero();
+
+            acc_t unit_output = exp_s2 ? accExp2PWL(in_a)
+                                    : accUnit(in_a, in_b, in_c);
+
+            const ReciprocalTickOutput reciprocal_output = divider_tick(
+                current_reciprocal,
+                next_reciprocal,
+                valid && reciprocal_cmd,
+                current_scale
+            );
+
+            if(reciprocal_output.valid){
+                unit_output = reciprocal_output.value;
+            }
+
+            sram_out = unit_output;
+
+            // reciprocal结果完成的优先级最高，而且不依赖请求valid持续置位。
+            if(reciprocal_output.valid){
+                next_scale = unit_output;
+            }else if(valid){
+                if(exp_s1 || exp_s2){
+                    next_scale = unit_output;
+                }else if(set){
+                    next_scale = sram_in;
+                }
+            }
+        }
+
     }  // namespace
 
     void reset_accumulator_state(AccumulatorState& state){
@@ -311,6 +375,11 @@ namespace fsa{
         
         #pragma HLS INLINE
 
+        static_assert(
+            SA_COLS==4,
+            "当前Accumulator硬件层次显式实现四个独立lane"
+        );
+
         #pragma HLS ARRAY_PARTITION variable=current.scale \
             type=complete dim=1
         #pragma HLS ARRAY_PARTITION variable=current.reciprocal \
@@ -328,54 +397,37 @@ namespace fsa{
         #pragma HLS ARRAY_PARTITION variable=io.sram_out \
             type=complete dim=1
 
-        next = current;
-
         const bool valid = io.ctrl_in.valid;
         const AccumulatorCmd cmd = io.ctrl_in.bits.cmd;
 
-        const bool exp_s1 = cmd == AccumulatorCmd::EXP_S1;
-        const bool exp_s2 = cmd == AccumulatorCmd::EXP_S2;
-        const bool acc_sa = cmd == AccumulatorCmd::ACC_SA;
-        const bool set = cmd == AccumulatorCmd::SET_SCALE;
-        const bool reciprocal_cmd = cmd == AccumulatorCmd::RECIPROCAL;
-
-        for(int col=0; col<SA_COLS; ++col){
-            #pragma HLS UNROLL
-            const acc_t in_a = exp_s1 ? io.sa_in[(std::size_t)col]
-                                    : current.scale[col];
-            const acc_t in_b = exp_s1 ? attentionScale()
-                                    : io.sram_in[(std::size_t)col];
-            const acc_t in_c = acc_sa ? io.sa_in[(std::size_t)col]
-                                    : accZero();
-
-            acc_t unit_output = exp_s2 ? accExp2PWL(in_a)
-                                    : accUnit(in_a, in_b, in_c);
-
-            const ReciprocalTickOutput reciprocal_output = divider_tick(
-                current.reciprocal[col],
-                next.reciprocal[col],
-                valid && reciprocal_cmd,
-                current.scale[col]
-            );
-
-            if(reciprocal_output.valid){
-                unit_output = reciprocal_output.value;
-            }
-
-            io.sram_out[(std::size_t)col] = unit_output;
-
-            // reciprocal结果完成的优先级最高，而且不依赖请求valid持续置位。
-            // 因此一拍start脉冲也不会在若干拍后丢失计算结果。
-            if(reciprocal_output.valid){
-                next.scale[col] = unit_output;
-            }else if(valid){
-                if(exp_s1 || exp_s2){
-                    next.scale[col] = unit_output;
-                }else if(set){
-                    next.scale[col] = io.sram_in[(std::size_t)col];
-                }
-            }
-        }
+        /**
+         * 四个调用点分别传入常量lane编号，配合FUNCTION_INSTANTIATE
+         * 形成四个独立函数实现，使每列拥有自己的完整运算资源。
+         */
+        accumulator_lane_step(
+            0,
+            current.scale[0], current.reciprocal[0],
+            next.scale[0], next.reciprocal[0], valid, cmd,
+            io.sa_in[0], io.sram_in[0], io.sram_out[0]
+        );
+        accumulator_lane_step(
+            1,
+            current.scale[1], current.reciprocal[1],
+            next.scale[1], next.reciprocal[1], valid, cmd,
+            io.sa_in[1], io.sram_in[1], io.sram_out[1]
+        );
+        accumulator_lane_step(
+            2,
+            current.scale[2], current.reciprocal[2],
+            next.scale[2], next.reciprocal[2], valid, cmd,
+            io.sa_in[2], io.sram_in[2], io.sram_out[2]
+        );
+        accumulator_lane_step(
+            3,
+            current.scale[3], current.reciprocal[3],
+            next.scale[3], next.reciprocal[3], valid, cmd,
+            io.sa_in[3], io.sram_in[3], io.sram_out[3]
+        );
     }
 
 }  // namespace fsa
