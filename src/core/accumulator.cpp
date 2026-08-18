@@ -292,7 +292,14 @@ namespace fsa{
     }  // namespace
 
     void reset_accumulator_state(AccumulatorState& state){
+        #pragma HLS INLINE
+
+        #pragma HLS ARRAY_PARTITION variable=state.scale \
+            type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=state.reciprocal \
+            type=complete dim=1
         for(int col=0; col<SA_COLS; ++col){
+            #pragma HLS UNROLL
             state.scale[col] = accZero();
             state.reciprocal[col] = ReciprocalDividerState{};
         }
@@ -301,6 +308,26 @@ namespace fsa{
 
     void accumulator_step(const AccumulatorState& current,
                         AccumulatorState& next, AccumulatorIO& io){
+        
+        #pragma HLS INLINE
+
+        #pragma HLS ARRAY_PARTITION variable=current.scale \
+            type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=current.reciprocal \
+            type=complete dim=1
+
+        #pragma HLS ARRAY_PARTITION variable=next.scale \
+            type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=next.reciprocal \
+            type=complete dim=1
+
+        #pragma HLS ARRAY_PARTITION variable=io.sa_in \
+            type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=io.sram_in \
+            type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=io.sram_out \
+            type=complete dim=1
+
         next = current;
 
         const bool valid = io.ctrl_in.valid;
@@ -313,6 +340,7 @@ namespace fsa{
         const bool reciprocal_cmd = cmd == AccumulatorCmd::RECIPROCAL;
 
         for(int col=0; col<SA_COLS; ++col){
+            #pragma HLS UNROLL
             const acc_t in_a = exp_s1 ? io.sa_in[(std::size_t)col]
                                     : current.scale[col];
             const acc_t in_b = exp_s1 ? attentionScale()
