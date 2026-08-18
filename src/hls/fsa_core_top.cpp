@@ -145,23 +145,6 @@ void fsa_core_top(
     #pragma HLS ARRAY_PARTITION variable=current.acc_ram.narrow_read_data type=complete dim=2
     #pragma HLS ARRAY_PARTITION variable=current.acc_dma_response_valid type=complete dim=1
 
-    #pragma HLS ARRAY_PARTITION variable=input.pe_ctrl type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=input.spad_write_valid type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=input.spad_write_addr type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=input.spad_write_sub_bank type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=input.spad_write_data type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=input.acc_dma_read_valid type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=input.acc_dma_read_addr type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=input.acc_dma_read_sub_bank type=complete dim=1
-
-    #pragma HLS ARRAY_PARTITION variable=output.spad_write_ready type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=output.acc_dma_read_ready type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=output.acc_dma_response_valid type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=output.acc_dma_read_data type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=output.delayer_out type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=output.aligned_sa_out type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=output.accumulator_out type=complete dim=1
-
     if(input.reset){
         resetCoreState(current);
         output = fsa::FsaCoreTopOutput{};
