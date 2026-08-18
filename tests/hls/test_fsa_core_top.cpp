@@ -16,6 +16,7 @@ namespace{
     constexpr int TEST_SIZE = 4;
     constexpr int Q_BASE_ADDRESS = 0;
     constexpr int K_BASE_ADDRESS = TEST_SIZE;
+    constexpr int ROWMAX_ACC_ADDRESS = 0;
 
     static_assert(fsa::SA_ROWS==TEST_SIZE && fsa::SA_COLS==TEST_SIZE,
                   "test_fsa_core_top requires a 4x4 SA");
@@ -364,15 +365,17 @@ namespace{
                 }
             }
 
-            // 提前一拍发ZERO常量RMW请求，使下一拍对齐的S写入accRAM。
-            if(cycle>=3*TEST_SIZE-1 && cycle<4*TEST_SIZE-1){
+            // CMP UPDATE产生的S是封装在acc_t低16位中的FP16位模式，不能
+            // 作为普通FP32送入Accumulator。改用随后产生的普通FP32
+            // -rowmax验证Accumulator和accRAM之间的RMW回路。
+            if(cycle==4*TEST_SIZE-1){
                 input.acc_read.valid = true;
                 input.acc_read.is_constant = true;
-                input.acc_read.addr = cycle-(3*TEST_SIZE-1);
+                input.acc_read.addr = ROWMAX_ACC_ADDRESS;
                 input.acc_read.rmw = true;
                 input.acc_constant_value = (fsa::acc_t)0.0F;
             }
-            if(cycle>=3*TEST_SIZE && cycle<4*TEST_SIZE){
+            if(cycle==4*TEST_SIZE){
                 fsa::AccumulatorControl ctrl{};
                 ctrl.cmd = fsa::AccumulatorCmd::ACC_SA;
                 input.acc_ctrl = fsa::make_valid(ctrl);
@@ -406,15 +409,6 @@ namespace{
 
             if(cycle>=3*TEST_SIZE && cycle<4*TEST_SIZE){
                 const int key = cycle-3*TEST_SIZE;
-                expect(output.acc_write_valid,
-                       "RMW write-valid missing for key "+
-                           std::to_string(key));
-                expect(output.acc_write_ready,
-                       "RMW write was backpressured for key "+
-                           std::to_string(key));
-                expect((int)output.acc_write_addr.to_uint()==key,
-                       "RMW write used the wrong delayed address");
-
                 for(int query=0; query<TEST_SIZE; ++query){
                     aligned_result[query][key] = (float)fsa::viewAasE(
                         output.aligned_sa_out[(std::size_t)query]
@@ -423,23 +417,31 @@ namespace{
                     expect(almostEqual(
                                aligned_result[query][key],
                                golden[query][key]),
-                           "wrong aligned S["+
-                               std::to_string(query)+"]["+
-                               std::to_string(key)+"]");
+                            "wrong aligned S["+
+                                std::to_string(query)+"]["+
+                                std::to_string(key)+"]");
                 }
-            }else{
-                expect(!output.acc_write_valid,
-                       "unexpected RMW write outside result window");
             }
 
             if(cycle==4*TEST_SIZE){
+                expect(output.acc_write_valid,
+                       "rowmax RMW write-valid was missing");
+                expect(output.acc_write_ready,
+                       "rowmax RMW write was backpressured");
+                expect((int)output.acc_write_addr.to_uint()==
+                           ROWMAX_ACC_ADDRESS,
+                       "rowmax RMW used the wrong delayed address");
+
                 for(int query=0; query<TEST_SIZE; ++query){
                     const float rowmax =
                         -output.aligned_sa_out[(std::size_t)query];
                     expect(almostEqual(rowmax, golden_rowmax[query]),
-                           "wrong aligned rowmax["+
-                               std::to_string(query)+"]");
+                               "wrong aligned rowmax["+
+                                   std::to_string(query)+"]");
                 }
+            }else{
+                expect(!output.acc_write_valid,
+                       "unexpected RMW write outside rowmax cycle");
             }
         }
 
@@ -450,18 +452,14 @@ namespace{
             }
         }
 
-        // 每个accRAM行保存一个key对应的四个query结果。
-        for(int key=0; key<TEST_SIZE; ++key){
-            const fsa::AccVector stored = readAccRow(key);
-            for(int query=0; query<TEST_SIZE; ++query){
-                const float decoded = (float)fsa::viewAasE(
-                    stored[(std::size_t)query]
-                );
-                expect(almostEqual(decoded, golden[query][key]),
-                       "wrong accRAM RMW result at key "+
-                           std::to_string(key)+", query "+
-                           std::to_string(query));
-            }
+        // -rowmax是普通FP32数据，RMW读回后直接按acc_t比较，不做位模式解包。
+        const fsa::AccVector stored = readAccRow(ROWMAX_ACC_ADDRESS);
+        for(int query=0; query<TEST_SIZE; ++query){
+            expect(almostEqual(
+                       stored[(std::size_t)query],
+                       -golden_rowmax[query]),
+                   "wrong accRAM rowmax RMW result at query "+
+                       std::to_string(query));
         }
     }
 
