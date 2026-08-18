@@ -5,8 +5,9 @@
 | 项目 | 配置 |
 |---|---|
 | HLS 工具 | Vitis HLS 2024.2（Build 5238294） |
-| 报告时间 | 2026-08-13 11:47:56 CST |
+| C 综合时间 | 2026-08-18 14:49:31 CST |
 | 顶层函数 | `accumulator_top` |
+| 构建目录 | `build/accumulator_build/solution1` |
 | 目标器件 | `xcvu37p_CIV-fsvh2892-2-e` |
 | 目标时钟周期 | 10 ns（100 MHz） |
 | Clock Uncertainty | 2.70 ns |
@@ -16,7 +17,7 @@
 | 输出接口 | `output_r`，128 bit，`ap_none` |
 | 数据列数 | 4 |
 
-本报告依据 `build/accumulator_build/solution1/` 中的最新 C 仿真、C 综合、C/RTL 协同仿真和 IP 导出结果更新。参与本次构建的源文件修改时间均早于综合报告生成时间。
+本报告依据 `build/accumulator_build/solution1/` 中 2026-08-18 14:49 后生成的最新 C 仿真、C 综合、C/RTL 协同仿真和 IP 导出结果更新。最新源码修改时间早于本次构建，构建版本与当前源码一致。
 
 ## 2. 流程结果
 
@@ -29,17 +30,7 @@
 | Vivado 综合、布局布线 | 未进行 |
 | FPGA 上板 | 未验证 |
 
-当前 HLS 脚本设置为：
-
-```tcl
-set RUN_CSIM  1
-set RUN_COSIM 1
-set EXPORT_IP 1
-```
-
-当前流程已完成 C 仿真、C 综合、Verilog C/RTL 协同仿真和 Vivado IP 导出。
-
-C 仿真结果：
+当前 HLS 脚本启用了 C 仿真、协同仿真和 IP 导出。C 仿真输出：
 
 ```text
 [PASS] test_accumulator_top: RESET, invalid, SET_SCALE,
@@ -54,75 +45,103 @@ ACC, ACC_SA, EXP_S1, EXP_S2, RECIPROCAL
 |---|---:|
 | Target Clock Period | 10.000 ns |
 | HLS 有效时序预算 | 7.300 ns |
-| Estimated Clock Period | **6.819 ns** |
-| 估算时序余量 | **+0.481 ns** |
-| Estimated Fmax | 146.65 MHz |
-| Latency | 8～23 拍 |
-| Initiation Interval | 9～24 拍 |
+| Estimated Clock Period | **6.516 ns** |
+| 估算时序余量 | **+0.784 ns** |
+| Estimated Fmax | 153.47 MHz |
+| Latency | 1～18 拍 |
+| Initiation Interval | 2～19 拍 |
 | Pipeline | no |
 
-顶层估算周期为 6.819 ns，小于 7.300 ns 有效预算，正余量为 0.481 ns，因此 100 MHz HLS 时序估算通过。它仍只是 HLS 估算，最终频率需以 Vivado 布局布线 WNS 为准。
+顶层估算周期为 6.516 ns，小于 7.300 ns 有效预算，日志中没有 `HLS 200-871` 时序违例，因此 100 MHz HLS 时序估算通过。最终频率仍需以 Vivado 布局布线后的 WNS 为准。
 
-`accumulator_top` 未做函数级流水化。复位、普通命令和内部多周期操作走不同的控制路径，所以顶层 Latency 为 8～23 拍，Interval 为 9～24 拍。
+`accumulator_top` 仍是非流水 `ap_ctrl_hs` 事务。不同命令的延迟不同，系统必须等待 `ap_done`，不能假定每拍都能启动新事务。
 
-### 3.2 子模块与关键循环
+### 3.2 单列计算模块
 
-| 模块或循环 | Estimated Period | Latency | II / Interval | Pipeline |
-|---|---:|---:|---:|---|
-| `accumulator_step` | 6.819 ns | 20 拍 | Interval=20 | no |
-| 四列复位循环 `VITIS_LOOP_295_1` | 1.346 ns | 迭代循环 4 拍，包装模块 6 拍 | II=1，模块 Interval=5 | yes |
-| 四列计算循环 `VITIS_LOOP_315_1` | 归属 `accumulator_step` | 18 拍 | II=1 | yes |
-| `begin_reciprocal` | 6.394 ns | 1 拍 | II=1 | yes |
-| `normalize_and_round` | 5.016 ns | 0 拍 | II=1 | yes |
+| 模块 | Estimated Period | Latency | Interval | Pipeline | DSP | FF | LUT |
+|---|---:|---:|---:|---|---:|---:|---:|
+| `accumulator_lane_step` | 6.516 ns | 6～17 拍 | 6～17 拍 | no | 5 | 1,599 | 5,044 |
+| `begin_reciprocal` | 6.394 ns | 1 拍 | 1 拍 | no | 0 | 169 | 783 |
+| `normalize_and_round` | 5.016 ns | 0 拍 | 0 拍 | no | 0 | 0 | 1,000 |
 
-`VITIS_LOOP_315_1` 的 Trip Count 为 4，单次迭代延迟为 16 拍，通过 II=1 的循环流水线处理四列，整个循环延迟为 18 拍。
+当前版本把普通 FP32 乘加、8 段 `accExp2PWL` 和 reciprocal 单步逻辑都放入每列独立的 `accumulator_lane_step`。`accExp2PWL` 与 `divider_tick` 已内联，不再生成独立综合报告或独立 RTL 模块，因此上一构建中 `accExp2PWL` 独立模块的 15 拍 latency 已不再适用于当前硬件层次。
 
-这里的“循环 II=1”只表示相邻列的迭代可每拍启动，不代表 Accumulator 顶层可每拍接收新事务。顶层仍是 `Pipeline=no`，最小 Interval 为 9 拍。
+### 3.3 四列并行结构
 
-### 3.3 四列综合结构
+源码为四个调用点传入常量 lane 编号，并使用：
 
-综合日志中生成的主要浮点运算单元为：
+```cpp
+#pragma HLS INLINE off
+#pragma HLS FUNCTION_INSTANTIATE variable=lane
+```
 
-| 运算单元 | 实例数 | 单实例 DSP | DSP 小计 |
-|---|---:|---:|---:|
-| FP32 加法 | 2 | 2 | 4 |
-| FP32 乘法 | 3 | 3 | 9 |
-| FP32 减法 | 1 | 2 | 2 |
-| **合计** | 6 | - | **15** |
+综合报告和顶层 RTL 均显示 4 个 `accumulator_lane_step` 实例。每个实例包含：
 
-资源总数表明，HLS 没有为四列各复制一套完整浮点 datapath，而是通过 II=1 的列循环流水线在连续拍处理四列。因此，不能只根据数组 `ARRAY_PARTITION` 判断四列是四套算术硬件的完全空间并行。
+- 1 个 FP32 加减单元，使用 2 DSP；
+- 1 个 FP32 乘法单元，使用 3 DSP；
+- 1 套 PWL 查表和组合逻辑；
+- 1 套独立 reciprocal 状态推进与舍入逻辑。
+
+因此四列已从上一构建的共享计算 datapath 改为四套空间并行 datapath。四列 `EXP_S2` 同时计算，不再串行复用单个 PWL 实例。
 
 ### 3.4 C/RTL 协同仿真
 
 | 项目 | 最小值 | 平均值 | 最大值 |
 |---|---:|---:|---:|
-| Latency | 6 拍 | 22 拍 | 23 拍 |
-| Interval | 7 拍 | 23 拍 | 24 拍 |
+| Latency | 1 拍 | 7 拍 | 17 拍 |
+| Interval | 2 拍 | 8 拍 | 18 拍 |
 
-- 总执行时间：1,525 拍
+- 总执行时间：520 拍
 - RTL：Verilog
 - 仿真器：XSIM
 - 状态：`Pass`
 
-协同仿真的最大 Latency/Interval 为 23/24 拍，与 C 综合报告上界一致。协同仿真观测到的最小值为 6/7 拍，比 C 综合摘要的 8/9 拍更小；这不影响最坏延迟与事务间隔的判定。
+逐事务记录与 testbench 调用顺序对应如下：
+
+| 事务类型 | 协同仿真 Latency | Interval |
+|---|---:|---:|
+| reset | 1 拍 | 2 拍 |
+| 多数普通状态推进 | 7 拍 | 8 拍 |
+| reciprocal 启动 | 8 拍 | 9 拍 |
+| `EXP_S2`（编号 8，第 9 次顶层调用） | **17 拍** | **18 拍** |
+
+`EXP_S2` 的当前顶层实测 latency 为 17 拍，位于 C 综合给出的最坏 18 拍上界内。若外部控制必须使用固定预算，应至少按综合上界 18 拍预留；更稳妥的方式是等待 `ap_done`。
+
+reciprocal 的 `reciprocalLatency=15` 仍表示 1 次启动、13 次 ITER 和 1 次 DONE，共 15 个**逻辑 step**，不是 15 个物理时钟周期。每个逻辑 step 都对应一次多拍顶层事务。
 
 ## 4. 资源使用
 
 | 资源 | 本次构建 | 整个器件可用 | 整个器件占比 | 单个 SLR 占比（HLS 报告） |
 |---|---:|---:|---:|---:|
 | BRAM_18K | 0 | 4,032 | 0% | 0% |
-| DSP | **15** | 9,024 | 约 0.17% | 小于 1% |
-| FF | **5,636** | 2,607,360 | 约 0.22% | 小于 1% |
-| LUT | **8,052** | 1,303,680 | 约 0.62% | 1% |
+| DSP | **20** | 9,024 | 约 0.22% | 小于 1% |
+| FF | **8,236** | 2,607,360 | 约 0.32% | 小于 1% |
+| LUT | **20,633** | 1,303,680 | 约 1.58% | 4% |
 | URAM | 0 | 960 | 0% | 0% |
 
-顶层实例资源中，`accumulator_step` 占 15 DSP、3,406 FF 和 7,459 LUT；四列复位循环包装模块占 5 FF 和 49 LUT。加上顶层寄存器与多路选择器后，总量为 5,636 FF 和 8,052 LUT。
+四个 lane 实例的资源完全一致：
 
-`accumulator_step` 内的 3 组小型 ROM 被实现为分布式 FF/LUT，未占用 BRAM。
+| 结构 | 数量 | 单实例资源 | 小计 |
+|---|---:|---:|---:|
+| `accumulator_lane_step` | 4 | 5 DSP、1,599 FF、5,044 LUT | 20 DSP、6,396 FF、20,176 LUT |
+
+其余资源来自顶层状态寄存器、多路选择器和少量控制逻辑。每个 lane 内部有 3 个小型 PWL ROM，使用 96 FF、99 LUT、1,144 bit；四列共 12 个 ROM，合计 384 FF、396 LUT、4,576 bit，未使用 BRAM 或 URAM。
+
+与上一构建相比：
+
+| 项目 | 上一构建（共享 datapath） | 当前构建（4 lane） | 变化 |
+|---|---:|---:|---:|
+| 最大 Latency | 80 拍 | 18 拍 | 降低 62 拍 |
+| 最大 Interval | 81 拍 | 19 拍 | 降低 62 拍 |
+| DSP | 10 | 20 | +10 |
+| FF | 4,711 | 8,236 | +3,525 |
+| LUT | 7,067 | 20,633 | +13,566 |
+
+当前实现以更高资源占用换取四列并行和显著更低的事务延迟。其中 LUT 增长最明显，需要在 Vivado 实现阶段继续检查布线和 WNS。
 
 ## 5. 功能验证范围
 
-当前 C testbench 通过正式 `accumulator_top` 接口覆盖：
+当前 C testbench 只通过正式 `accumulator_top` 接口覆盖：
 
 - 显式复位及复位当拍零输出；
 - `ctrl.valid=false` 时的状态保持；
@@ -130,10 +149,10 @@ ACC, ACC_SA, EXP_S1, EXP_S2, RECIPROCAL
 - `ACC`：`scale * sram_in`；
 - `ACC_SA`：`scale * sram_in + sa_in`；
 - `EXP_S1`：注意力缩放前处理；
-- `EXP_S2`：PWL `exp2` 及结果写回 scale；
+- `EXP_S2`：8 段 PWL `exp2` 及结果写回 scale；
 - `RECIPROCAL`：普通有限数、正负零、Infinity 和负数；
-- 单拍 `RECIPROCAL` 启动后的固定 15 个逻辑 step 控制窗口；
-- 倒数运行中复位可取消多周期状态。
+- 一次 `RECIPROCAL` 启动、13 次 ITER 和 1 次 DONE，共固定 15 个逻辑 step；
+- reciprocal 运行中复位可取消多周期状态。
 
 上述 testbench 已用于 Verilog C/RTL 协同仿真并通过，说明当前测试向量下 RTL 与 C 模型行为一致。
 
@@ -141,49 +160,51 @@ ACC, ACC_SA, EXP_S1, EXP_S2, RECIPROCAL
 
 本次综合的主要非致命警告为：
 
-1. `accumulator.cpp:202` 的变量索引位段选择可能导致较差 QoR，它位于倒数结果的次规格化舍入处理中。
-2. `std::array<float, 4>` 索引辅助函数因调用签名差异被 HLS 复制，可能影响资源 QoR。
-3. `output_r` 使用 `ap_none`，HLS 提醒与其他模块交互时可能需要关联的 data-valid 信号。
-4. `current.scale` 和四列 reciprocal 状态寄存器被报告为 power-on initialization，最终集成时需核对复位与初始状态行为。
-5. XSIM 检测到 `LIBRARY_PATH` 环境变量可能影响 C 编译器；本次协同仿真仍正常通过。
-6. 当前仍没有 Vivado 布局布线数据。
+1. `accumulator.cpp:202` 的变量索引位段选择可能导致较差 QoR，位置在 reciprocal 次规格化结果的舍入处理中。
+2. `std::array<float, 4>` 索引辅助函数因调用签名差异被 HLS 复制，可能增加资源。
+3. HLS 对匿名命名空间中的辅助函数进行了合法化重命名；这是名称处理警告，不影响功能。
+4. `output_r` 使用 `ap_none`，输出有效时刻必须结合 `ap_done` 判断。
+5. `current.scale` 和 reciprocal 状态寄存器被报告为 power-on initialization，最终集成时需核对复位与初始状态行为。
+6. XSIM 检测到 `LIBRARY_PATH` 环境变量可能影响 C 编译器；本次协同仿真仍正常通过。
+7. 当前仍没有 Vivado 布局布线数据；HLS 估算不能代替最终 WNS。
 
 ## 7. 当前合格性结论
 
 | 检查项 | 结论 |
 |---|---|
 | C 模型功能 | 合格 |
-| 跨顶层调用状态保存 | C 仿真和 C/RTL 协同仿真合格 |
-| 固定 15 个逻辑 step 倒数控制 | C 仿真和 C/RTL 协同仿真合格 |
+| 四列独立状态与并行 datapath | 综合层次显示 4 个 lane，合格 |
+| 固定 15 个逻辑 step reciprocal 控制 | C 仿真和 C/RTL 协同仿真合格 |
 | C 综合 | 完成 |
-| 循环约束 | 全部满足 |
-| 100 MHz HLS 时序估算 | 通过，正余量 0.481 ns |
+| 100 MHz HLS 时序估算 | 通过，正余量 0.784 ns |
 | C/RTL 行为一致性 | 合格，Verilog `Pass` |
 | Vivado IP 导出 | 完成 |
+| 顶层固定低延迟/逐拍吞吐 | 最大 Latency/Interval 降至 18/19 拍，但仍非流水 |
 | 最终实现时序 | **未验证** |
 | FPGA 上板 | **未验证** |
 
 综合结论：
 
-> 当前 4 列 Accumulator 的 C 仿真、C 综合、Verilog C/RTL 协同仿真和 Vivado IP 导出已完成。Testbench 覆盖 RESET、invalid、SET_SCALE、ACC、ACC_SA、EXP_S1、EXP_S2 和 RECIPROCAL，C 仿真与 C/RTL 协同仿真均通过。顶层 HLS 估算周期为 6.819 ns，在 7.300 ns 有效预算内；顶层最大 Latency 为 23 拍，最大 Interval 为 24 拍。四列核心计算通过 Trip Count=4、II=1 的循环流水线处理，使用 15 DSP、5,636 FF 和 8,052 LUT。当前版本可作为“功能、C/RTL 一致性、HLS 时序估算和 IP 导出均通过”的基准；最终 100 MHz 时序仍需 Vivado 布局布线确认。
+> 当前 4 列 Accumulator 已完成 C 仿真、C 综合、Verilog C/RTL 协同仿真和 Vivado IP 导出。HLS 估算周期为 6.516 ns，在 7.300 ns 有效预算内。四列现在各有一个完整 `accumulator_lane_step` 实例，顶层最大 Latency/Interval 从上一构建的 80/81 拍降至 18/19 拍，`EXP_S2` 协同仿真实测为 17/18 拍；相应资源增加到 20 DSP、8,236 FF 和 20,633 LUT。最终 100 MHz 时序仍需 Vivado 布局布线确认。
 
 ## 8. 后续工作
 
-1. 保留当前构建作为 Accumulator 功能、C/RTL 一致性和 HLS 时序通过的基准。
-2. 在顶层集成中确认 `output_r` 的 `ap_none` 时序语义与下游 SRAM 写入控制匹配。
-3. 评估变量索引位段选择和 `std::array` 辅助函数复制对 LUT 的影响。
-4. 将导出 IP 加入 Vivado 工程，完成综合、布局布线并检查 WNS。
+1. 当前不存在独立 `accExp2PWL` RTL latency；若调度的是 `accumulator_top` 的 `EXP_S2` 命令，应使用 `ap_done`，固定预算至少按 18 拍预留。
+2. 在系统级调度中保留 `ap_ctrl_hs` 握手，因为当前顶层仍非流水，最大 Interval 为 19 拍。
+3. 优化 `accumulator.cpp:202` 的变量索引位段选择，并评估四套 lane 带来的 LUT 增长。
+4. 在顶层集成中确认 `output_r` 的 `ap_none` 时序语义与下游 SRAM 写入控制匹配。
+5. 将导出 IP 加入 Vivado 工程，完成综合、布局布线并检查 100 MHz WNS 和跨 lane 布线压力。
 
 ## 9. 结果文件
 
 ```text
 build/accumulator_build/solution1/csim/report/accumulator_top_csim.log
 build/accumulator_build/solution1/syn/report/accumulator_top_csynth.rpt
-build/accumulator_build/solution1/syn/report/accumulator_step_csynth.rpt
-build/accumulator_build/solution1/syn/report/accumulator_top_Pipeline_VITIS_LOOP_295_1_csynth.rpt
+build/accumulator_build/solution1/syn/report/p_anonymous_namespace_accumulator_lane_step_csynth.rpt
 build/accumulator_build/solution1/syn/report/p_anonymous_namespace_begin_reciprocal_csynth.rpt
 build/accumulator_build/solution1/syn/report/p_anonymous_namespace_normalize_and_round_csynth.rpt
 build/accumulator_build/solution1/sim/report/accumulator_top_cosim.rpt
+build/accumulator_build/solution1/sim/report/verilog/result.transaction.rpt
 build/accumulator_build/solution1/sim/report/verilog/accumulator_top.log
 build/accumulator_build/solution1/solution1.log
 build/accumulator_build/solution1/impl/export.zip
