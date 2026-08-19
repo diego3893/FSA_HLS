@@ -75,7 +75,7 @@ namespace{
         fsa::SystolicArrayIO& io
     ){
         #pragma HLS INLINE off
-        #pragma HLS PIPELINE II=16
+        #pragma HLS PIPELINE II=1
         #pragma HLS LATENCY max=17
 
         #pragma HLS ARRAY_PARTITION variable=current.mesh type=complete dim=0
