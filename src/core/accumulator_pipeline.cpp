@@ -299,17 +299,35 @@ namespace{
         result = fastLaneBody(cmd, scale, sa_in, sram_in);
     }
 
-    void exp2Lane(
-        const int lane,
-        const acc_t input,
-        acc_t& result
-    ){
+    acc_t exp2LaneBody(const acc_t input){
+        #pragma HLS INLINE
+        return accExp2PWL(input);
+    }
+
+    // 与fast path相同，使用四个不同函数名固定四套EXP2硬件层次。
+    // 未参与计算的lane参数无法阻止HLS跨调用点共享同一个模块。
+    void exp2Lane0(const acc_t input, acc_t& result){
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=1
-        #pragma HLS FUNCTION_INSTANTIATE variable=lane
-        (void)lane;
+        result = exp2LaneBody(input);
+    }
 
-        result = accExp2PWL(input);
+    void exp2Lane1(const acc_t input, acc_t& result){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        result = exp2LaneBody(input);
+    }
+
+    void exp2Lane2(const acc_t input, acc_t& result){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        result = exp2LaneBody(input);
+    }
+
+    void exp2Lane3(const acc_t input, acc_t& result){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        result = exp2LaneBody(input);
     }
 
     bool isFastFmaCommand(const AccumulatorCmd cmd){
@@ -461,10 +479,10 @@ void accumulator_pipeline_tick(
                 next.scale[col] = input.sram_in[(std::size_t)col];
             }
         }else if(input.cmd == AccumulatorCmd::EXP_S2){
-            exp2Lane(0, current.scale[0], next.exp2_result[0]);
-            exp2Lane(1, current.scale[1], next.exp2_result[1]);
-            exp2Lane(2, current.scale[2], next.exp2_result[2]);
-            exp2Lane(3, current.scale[3], next.exp2_result[3]);
+            exp2Lane0(current.scale[0], next.exp2_result[0]);
+            exp2Lane1(current.scale[1], next.exp2_result[1]);
+            exp2Lane2(current.scale[2], next.exp2_result[2]);
+            exp2Lane3(current.scale[3], next.exp2_result[3]);
             next.exp2_countdown = accumulatorExp2Latency;
             next.slow_operation = AccumulatorSlowOperation::EXP_S2;
             next.scale_busy = true;
@@ -520,6 +538,35 @@ void accumulator_pipeline_tick_inplace(
         scale_before[col] = state.scale[col];
     }
 
+    // 四路FMA每个tick无条件启动。是否接受token只门控流水valid和元数据，
+    // 不再把scale_update_pending/ready组合路径串到浮点运算调用之前。
+    const acc_t sa0 = input.sa_in[0];
+    const acc_t sa1 = input.sa_in[1];
+    const acc_t sa2 = input.sa_in[2];
+    const acc_t sa3 = input.sa_in[3];
+    const acc_t sram0 = input.sram_in[0];
+    const acc_t sram1 = input.sram_in[1];
+    const acc_t sram2 = input.sram_in[2];
+    const acc_t sram3 = input.sram_in[3];
+    acc_t fast_result0 = 0.0F;
+    acc_t fast_result1 = 0.0F;
+    acc_t fast_result2 = 0.0F;
+    acc_t fast_result3 = 0.0F;
+    fastLane0(input.cmd, scale_before[0], sa0, sram0, fast_result0);
+    fastLane1(input.cmd, scale_before[1], sa1, sram1, fast_result1);
+    fastLane2(input.cmd, scale_before[2], sa2, sram2, fast_result2);
+    fastLane3(input.cmd, scale_before[3], sa3, sram3, fast_result3);
+
+    const bool accepted = input.valid && ready_before;
+    const bool accepted_fast = accepted && isFastFmaCommand(input.cmd);
+    const bool accepted_scale_update =
+        accepted_fast && input.cmd == AccumulatorCmd::EXP_S1;
+
+    // pending状态只保留短布尔反馈，不依赖FMA调用的完成调度。
+    state.scale_update_pending =
+        (state.scale_update_pending && !completed.scale_update) ||
+        accepted_scale_update;
+
     output = AccumulatorPipelineOutput{};
     output.input_ready = ready_before;
     output.result = completed.result;
@@ -535,7 +582,6 @@ void accumulator_pipeline_tick_inplace(
             #pragma HLS UNROLL
             state.scale[col] = completed.result.data[(std::size_t)col];
         }
-        state.scale_update_pending = false;
     }
 
     if(busy_before){
@@ -586,9 +632,8 @@ void accumulator_pipeline_tick_inplace(
         }
     }
 
-    const bool accepted = input.valid && ready_before;
     if(accepted){
-        if(isFastFmaCommand(input.cmd)){
+        if(accepted_fast){
             AccumulatorFastStage stage{};
             stage.result.valid = true;
             stage.result.write_addr = input.write_addr;
@@ -596,42 +641,21 @@ void accumulator_pipeline_tick_inplace(
             stage.result.tag = input.tag;
             stage.scale_update = input.cmd == AccumulatorCmd::EXP_S1;
 
-            const acc_t sa0 = input.sa_in[0];
-            const acc_t sa1 = input.sa_in[1];
-            const acc_t sa2 = input.sa_in[2];
-            const acc_t sa3 = input.sa_in[3];
-            const acc_t sram0 = input.sram_in[0];
-            const acc_t sram1 = input.sram_in[1];
-            const acc_t sram2 = input.sram_in[2];
-            const acc_t sram3 = input.sram_in[3];
-            acc_t result0 = 0.0F;
-            acc_t result1 = 0.0F;
-            acc_t result2 = 0.0F;
-            acc_t result3 = 0.0F;
-
-            fastLane0(input.cmd, scale_before[0], sa0, sram0, result0);
-            fastLane1(input.cmd, scale_before[1], sa1, sram1, result1);
-            fastLane2(input.cmd, scale_before[2], sa2, sram2, result2);
-            fastLane3(input.cmd, scale_before[3], sa3, sram3, result3);
-            stage.result.data[0] = result0;
-            stage.result.data[1] = result1;
-            stage.result.data[2] = result2;
-            stage.result.data[3] = result3;
+            stage.result.data[0] = fast_result0;
+            stage.result.data[1] = fast_result1;
+            stage.result.data[2] = fast_result2;
+            stage.result.data[3] = fast_result3;
             state.fast_pipe[0] = stage;
-
-            if(stage.scale_update){
-                state.scale_update_pending = true;
-            }
         }else if(input.cmd == AccumulatorCmd::SET_SCALE){
             for(int col=0; col<SA_COLS; ++col){
                 #pragma HLS UNROLL
                 state.scale[col] = input.sram_in[(std::size_t)col];
             }
         }else if(input.cmd == AccumulatorCmd::EXP_S2){
-            exp2Lane(0, scale_before[0], state.exp2_result[0]);
-            exp2Lane(1, scale_before[1], state.exp2_result[1]);
-            exp2Lane(2, scale_before[2], state.exp2_result[2]);
-            exp2Lane(3, scale_before[3], state.exp2_result[3]);
+            exp2Lane0(scale_before[0], state.exp2_result[0]);
+            exp2Lane1(scale_before[1], state.exp2_result[1]);
+            exp2Lane2(scale_before[2], state.exp2_result[2]);
+            exp2Lane3(scale_before[3], state.exp2_result[3]);
             state.exp2_countdown = accumulatorExp2Latency;
             state.slow_operation = AccumulatorSlowOperation::EXP_S2;
             state.scale_busy = true;
