@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vitis HLS 综合报告"
+  short_description: "读取Vitis HLS构建目录并编写或更新证据化综合报告与关键风险结论"
+  default_prompt: "使用 $vitis-hls-build-report，读取我给出的构建目录，并按我选择的编写或修改模式处理综合报告。"
