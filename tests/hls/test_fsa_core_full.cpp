@@ -14,6 +14,19 @@
 #include "fsa/arithmetic.hpp"
 #include "fsa/hls/fsa_core_top.hpp"
 
+#ifdef FSA_LOCAL_MATH_STUBS
+namespace hls{
+    float fabs(const float value){ return std::fabs(value); }
+    float fma(const float a, const float b, const float c){
+        return std::fma(a, b, c);
+    }
+    float trunc(const float value){ return std::trunc(value); }
+    float ldexp(const float value, const int exponent){
+        return std::ldexp(value, exponent);
+    }
+}
+#endif
+
 namespace{
 
     constexpr int N = 4;
