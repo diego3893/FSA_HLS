@@ -52,10 +52,71 @@ fsa::AccumulatorPipelineOutput tick(
     fsa::AccumulatorPipelineState& state,
     const fsa::AccumulatorToken& input = fsa::AccumulatorToken{}
 ){
-    fsa::AccumulatorPipelineState next{};
+    const fsa::AccumulatorPipelineState reference_current = state;
+    fsa::AccumulatorPipelineState reference_next{};
+    fsa::AccumulatorPipelineOutput reference_output{};
+    fsa::accumulator_pipeline_tick(
+        reference_current,
+        reference_next,
+        input,
+        reference_output
+    );
+
     fsa::AccumulatorPipelineOutput output{};
-    fsa::accumulator_pipeline_tick(state, next, input, output);
-    state = next;
+    fsa::accumulator_pipeline_tick_inplace(state, input, output);
+
+    assert(output.input_ready == reference_output.input_ready);
+    assert(output.scale_busy == reference_output.scale_busy);
+    assert(output.slow_done == reference_output.slow_done);
+    assert(output.result.valid == reference_output.result.valid);
+    assert(output.result.write_addr == reference_output.result.write_addr);
+    assert(output.result.write_enable == reference_output.result.write_enable);
+    assert(output.result.tag == reference_output.result.tag);
+
+    assert(state.scale_update_pending == reference_next.scale_update_pending);
+    assert(state.scale_busy == reference_next.scale_busy);
+    assert(state.slow_operation == reference_next.slow_operation);
+    assert(state.exp2_countdown == reference_next.exp2_countdown);
+
+    for(int col=0; col<fsa::SA_COLS; ++col){
+        assert(fpEqual(
+            output.result.data[(std::size_t)col],
+            reference_output.result.data[(std::size_t)col]
+        ));
+        assert(fpEqual(state.scale[col], reference_next.scale[col]));
+        assert(fpEqual(
+            state.exp2_result[col],
+            reference_next.exp2_result[col]
+        ));
+
+        const fsa::ReciprocalDividerState& actual = state.reciprocal[col];
+        const fsa::ReciprocalDividerState& expected =
+            reference_next.reciprocal[col];
+        assert(actual.phase == expected.phase);
+        assert(actual.remainder == expected.remainder);
+        assert(actual.divisor == expected.divisor);
+        assert(actual.quotient == expected.quotient);
+        assert(actual.iter_count == expected.iter_count);
+        assert(actual.result_exponent == expected.result_exponent);
+        assert(actual.result_sign == expected.result_sign);
+        assert(actual.special == expected.special);
+        assert(actual.special_result_bits == expected.special_result_bits);
+        assert(actual.exact_power_of_two == expected.exact_power_of_two);
+        assert(fpEqual(actual.result, expected.result));
+    }
+
+    for(int stage=0; stage<fsa::accumulatorFastLatency; ++stage){
+        const fsa::AccumulatorFastStage& actual = state.fast_pipe[stage];
+        const fsa::AccumulatorFastStage& expected =
+            reference_next.fast_pipe[stage];
+        assert(actual.scale_update == expected.scale_update);
+        assert(actual.result.valid == expected.result.valid);
+        assert(actual.result.write_addr == expected.result.write_addr);
+        assert(actual.result.write_enable == expected.result.write_enable);
+        assert(actual.result.tag == expected.result.tag);
+        expectVector(actual.result.data, expected.result.data);
+    }
+
     return output;
 }
 

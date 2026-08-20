@@ -118,6 +118,19 @@ namespace fsa{
         AccumulatorPipelineOutput& output
     );
 
+    /**
+     * @brief 原地推进一次Accumulator逻辑tick
+     *
+     * 该接口与accumulator_pipeline_tick逐tick等价，但只更新一个状态对象，
+     * 避免批处理HLS顶层形成整个AccumulatorPipelineState的复制反馈路径。
+     * 软件参考和FSA_core接入仍可继续使用显式current/next接口。
+     */
+    void accumulator_pipeline_tick_inplace(
+        AccumulatorPipelineState& state,
+        const AccumulatorToken& input,
+        AccumulatorPipelineOutput& output
+    );
+
 }  // namespace fsa
 
 #endif  // ACCUMULATOR_PIPELINE_HPP

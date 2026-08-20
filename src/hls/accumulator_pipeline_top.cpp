@@ -9,14 +9,11 @@ namespace{
         fsa::AccumulatorPipelineOutput& output
     ){
         #pragma HLS INLINE
-        fsa::AccumulatorPipelineState next{};
-        fsa::accumulator_pipeline_tick(
+        fsa::accumulator_pipeline_tick_inplace(
             pipeline_state,
-            next,
             input,
             output
         );
-        pipeline_state = next;
     }
 
 }  // namespace
@@ -55,6 +52,10 @@ void accumulator_pipeline_batch_top(
         fsa::reset_accumulator_pipeline_state(pipeline_state);
     }
 
+    // EXP_S2接受时写入结果，倒计时18个逻辑tick后才首次读取提交。
+    // 明确真实RAW距离，避免HLS把条件慢路径保守视为相邻迭代依赖。
+    #pragma HLS DEPENDENCE variable=pipeline_state.exp2_result \
+        inter RAW distance=18 true
     for(int cycle=0; cycle<fsa::accumulatorPipelineBatchCycles; ++cycle){
         #pragma HLS PIPELINE II=1
         tickPipeline(input[cycle], output[cycle]);

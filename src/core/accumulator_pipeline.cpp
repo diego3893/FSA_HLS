@@ -233,8 +233,25 @@ namespace{
         return output;
     }
 
-    void fastLane(
-        const int lane,
+    acc_t fastLaneBody(
+        const AccumulatorCmd cmd,
+        const acc_t scale,
+        const acc_t sa_in,
+        const acc_t sram_in
+    ){
+        #pragma HLS INLINE
+
+        const bool exp_s1 = cmd == AccumulatorCmd::EXP_S1;
+        const bool acc_sa = cmd == AccumulatorCmd::ACC_SA;
+        const acc_t in_a = exp_s1 ? sa_in : scale;
+        const acc_t in_b = exp_s1 ? attentionScale() : sram_in;
+        const acc_t in_c = acc_sa ? sa_in : accZero();
+        return accUnit(in_a, in_b, in_c);
+    }
+
+    // 四个不同名称且禁止内联的wrapper明确表达四列独立FMA硬件。
+    // 不能只依赖未参与计算的lane参数，否则综合器可以合法共享实例。
+    void fastLane0(
         const AccumulatorCmd cmd,
         const acc_t scale,
         const acc_t sa_in,
@@ -243,15 +260,43 @@ namespace{
     ){
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=1
-        #pragma HLS FUNCTION_INSTANTIATE variable=lane
-        (void)lane;
+        result = fastLaneBody(cmd, scale, sa_in, sram_in);
+    }
 
-        const bool exp_s1 = cmd == AccumulatorCmd::EXP_S1;
-        const bool acc_sa = cmd == AccumulatorCmd::ACC_SA;
-        const acc_t in_a = exp_s1 ? sa_in : scale;
-        const acc_t in_b = exp_s1 ? attentionScale() : sram_in;
-        const acc_t in_c = acc_sa ? sa_in : accZero();
-        result = accUnit(in_a, in_b, in_c);
+    void fastLane1(
+        const AccumulatorCmd cmd,
+        const acc_t scale,
+        const acc_t sa_in,
+        const acc_t sram_in,
+        acc_t& result
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        result = fastLaneBody(cmd, scale, sa_in, sram_in);
+    }
+
+    void fastLane2(
+        const AccumulatorCmd cmd,
+        const acc_t scale,
+        const acc_t sa_in,
+        const acc_t sram_in,
+        acc_t& result
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        result = fastLaneBody(cmd, scale, sa_in, sram_in);
+    }
+
+    void fastLane3(
+        const AccumulatorCmd cmd,
+        const acc_t scale,
+        const acc_t sa_in,
+        const acc_t sram_in,
+        acc_t& result
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        result = fastLaneBody(cmd, scale, sa_in, sram_in);
     }
 
     void exp2Lane(
@@ -302,10 +347,6 @@ void accumulator_pipeline_tick(
     #pragma HLS ARRAY_PARTITION variable=next.fast_pipe type=complete dim=1
     #pragma HLS ARRAY_PARTITION variable=next.exp2_result type=complete dim=1
     #pragma HLS ARRAY_PARTITION variable=next.reciprocal type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=input.sa_in type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=input.sram_in type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=output.result.data type=complete dim=1
-
     next = current;
     output = AccumulatorPipelineOutput{};
 
@@ -388,22 +429,27 @@ void accumulator_pipeline_tick(
             stage.result.tag = input.tag;
             stage.scale_update = input.cmd == AccumulatorCmd::EXP_S1;
 
-            fastLane(
-                0, input.cmd, current.scale[0],
-                input.sa_in[0], input.sram_in[0], stage.result.data[0]
-            );
-            fastLane(
-                1, input.cmd, current.scale[1],
-                input.sa_in[1], input.sram_in[1], stage.result.data[1]
-            );
-            fastLane(
-                2, input.cmd, current.scale[2],
-                input.sa_in[2], input.sram_in[2], stage.result.data[2]
-            );
-            fastLane(
-                3, input.cmd, current.scale[3],
-                input.sa_in[3], input.sram_in[3], stage.result.data[3]
-            );
+            const acc_t sa0 = input.sa_in[0];
+            const acc_t sa1 = input.sa_in[1];
+            const acc_t sa2 = input.sa_in[2];
+            const acc_t sa3 = input.sa_in[3];
+            const acc_t sram0 = input.sram_in[0];
+            const acc_t sram1 = input.sram_in[1];
+            const acc_t sram2 = input.sram_in[2];
+            const acc_t sram3 = input.sram_in[3];
+            acc_t result0 = 0.0F;
+            acc_t result1 = 0.0F;
+            acc_t result2 = 0.0F;
+            acc_t result3 = 0.0F;
+
+            fastLane0(input.cmd, current.scale[0], sa0, sram0, result0);
+            fastLane1(input.cmd, current.scale[1], sa1, sram1, result1);
+            fastLane2(input.cmd, current.scale[2], sa2, sram2, result2);
+            fastLane3(input.cmd, current.scale[3], sa3, sram3, result3);
+            stage.result.data[0] = result0;
+            stage.result.data[1] = result1;
+            stage.result.data[2] = result2;
+            stage.result.data[3] = result3;
             next.fast_pipe[0] = stage;
 
             if(stage.scale_update){
@@ -438,6 +484,175 @@ void accumulator_pipeline_tick(
     }
 
     output.scale_busy = next.scale_busy;
+}
+
+void accumulator_pipeline_tick_inplace(
+    AccumulatorPipelineState& state,
+    const AccumulatorToken& input,
+    AccumulatorPipelineOutput& output
+){
+    #pragma HLS INLINE
+
+    static_assert(
+        SA_COLS == 4,
+        "当前流水Accumulator硬件层次显式实现四个独立lane"
+    );
+
+    #pragma HLS ARRAY_PARTITION variable=state.scale type=complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=state.fast_pipe type=complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=state.exp2_result type=complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=state.reciprocal type=complete dim=1
+
+    // 所有决策都基于tick开始时的控制状态，保持与current/next接口一致。
+    const bool ready_before =
+        !state.scale_update_pending && !state.scale_busy;
+    const bool busy_before = state.scale_busy;
+    const AccumulatorSlowOperation slow_operation_before =
+        state.slow_operation;
+    const ap_uint<6> exp2_countdown_before = state.exp2_countdown;
+    const AccumulatorFastStage completed =
+        state.fast_pipe[accumulatorFastLatency-1];
+
+    acc_t scale_before[SA_COLS]{};
+    #pragma HLS ARRAY_PARTITION variable=scale_before type=complete dim=1
+    for(int col=0; col<SA_COLS; ++col){
+        #pragma HLS UNROLL
+        scale_before[col] = state.scale[col];
+    }
+
+    output = AccumulatorPipelineOutput{};
+    output.input_ready = ready_before;
+    output.result = completed.result;
+
+    for(int stage=accumulatorFastLatency-1; stage>0; --stage){
+        #pragma HLS UNROLL
+        state.fast_pipe[stage] = state.fast_pipe[stage-1];
+    }
+    state.fast_pipe[0] = AccumulatorFastStage{};
+
+    if(completed.scale_update){
+        for(int col=0; col<SA_COLS; ++col){
+            #pragma HLS UNROLL
+            state.scale[col] = completed.result.data[(std::size_t)col];
+        }
+        state.scale_update_pending = false;
+    }
+
+    if(busy_before){
+        if(slow_operation_before == AccumulatorSlowOperation::EXP_S2){
+            if(exp2_countdown_before <= 1){
+                for(int col=0; col<SA_COLS; ++col){
+                    #pragma HLS UNROLL
+                    state.scale[col] = state.exp2_result[col];
+                }
+                state.scale_busy = false;
+                state.slow_operation = AccumulatorSlowOperation::NONE;
+                state.exp2_countdown = 0;
+                output.slow_done = true;
+            }else{
+                state.exp2_countdown = exp2_countdown_before-1;
+            }
+        }else if(slow_operation_before ==
+                    AccumulatorSlowOperation::RECIPROCAL){
+            ReciprocalTickOutput reciprocal_output[SA_COLS]{};
+            #pragma HLS ARRAY_PARTITION variable=reciprocal_output type=complete dim=1
+
+            for(int col=0; col<SA_COLS; ++col){
+                #pragma HLS UNROLL
+                const ReciprocalDividerState reciprocal_before =
+                    state.reciprocal[col];
+                reciprocal_output[col] = reciprocalTick(
+                    reciprocal_before,
+                    state.reciprocal[col],
+                    false,
+                    scale_before[col]
+                );
+            }
+
+            bool all_done = true;
+            for(int col=0; col<SA_COLS; ++col){
+                #pragma HLS UNROLL
+                all_done = all_done && reciprocal_output[col].valid;
+            }
+            if(all_done){
+                for(int col=0; col<SA_COLS; ++col){
+                    #pragma HLS UNROLL
+                    state.scale[col] = reciprocal_output[col].value;
+                }
+                state.scale_busy = false;
+                state.slow_operation = AccumulatorSlowOperation::NONE;
+                output.slow_done = true;
+            }
+        }
+    }
+
+    const bool accepted = input.valid && ready_before;
+    if(accepted){
+        if(isFastFmaCommand(input.cmd)){
+            AccumulatorFastStage stage{};
+            stage.result.valid = true;
+            stage.result.write_addr = input.write_addr;
+            stage.result.write_enable = input.write_enable;
+            stage.result.tag = input.tag;
+            stage.scale_update = input.cmd == AccumulatorCmd::EXP_S1;
+
+            const acc_t sa0 = input.sa_in[0];
+            const acc_t sa1 = input.sa_in[1];
+            const acc_t sa2 = input.sa_in[2];
+            const acc_t sa3 = input.sa_in[3];
+            const acc_t sram0 = input.sram_in[0];
+            const acc_t sram1 = input.sram_in[1];
+            const acc_t sram2 = input.sram_in[2];
+            const acc_t sram3 = input.sram_in[3];
+            acc_t result0 = 0.0F;
+            acc_t result1 = 0.0F;
+            acc_t result2 = 0.0F;
+            acc_t result3 = 0.0F;
+
+            fastLane0(input.cmd, scale_before[0], sa0, sram0, result0);
+            fastLane1(input.cmd, scale_before[1], sa1, sram1, result1);
+            fastLane2(input.cmd, scale_before[2], sa2, sram2, result2);
+            fastLane3(input.cmd, scale_before[3], sa3, sram3, result3);
+            stage.result.data[0] = result0;
+            stage.result.data[1] = result1;
+            stage.result.data[2] = result2;
+            stage.result.data[3] = result3;
+            state.fast_pipe[0] = stage;
+
+            if(stage.scale_update){
+                state.scale_update_pending = true;
+            }
+        }else if(input.cmd == AccumulatorCmd::SET_SCALE){
+            for(int col=0; col<SA_COLS; ++col){
+                #pragma HLS UNROLL
+                state.scale[col] = input.sram_in[(std::size_t)col];
+            }
+        }else if(input.cmd == AccumulatorCmd::EXP_S2){
+            exp2Lane(0, scale_before[0], state.exp2_result[0]);
+            exp2Lane(1, scale_before[1], state.exp2_result[1]);
+            exp2Lane(2, scale_before[2], state.exp2_result[2]);
+            exp2Lane(3, scale_before[3], state.exp2_result[3]);
+            state.exp2_countdown = accumulatorExp2Latency;
+            state.slow_operation = AccumulatorSlowOperation::EXP_S2;
+            state.scale_busy = true;
+        }else if(input.cmd == AccumulatorCmd::RECIPROCAL){
+            for(int col=0; col<SA_COLS; ++col){
+                #pragma HLS UNROLL
+                const ReciprocalDividerState reciprocal_before =
+                    state.reciprocal[col];
+                reciprocalTick(
+                    reciprocal_before,
+                    state.reciprocal[col],
+                    true,
+                    scale_before[col]
+                );
+            }
+            state.slow_operation = AccumulatorSlowOperation::RECIPROCAL;
+            state.scale_busy = true;
+        }
+    }
+
+    output.scale_busy = state.scale_busy;
 }
 
 }  // namespace fsa

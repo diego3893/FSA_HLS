@@ -48,6 +48,21 @@ int main(){
     accumulator_pipeline_batch_top(true, input, output);
 
     int failures = 0;
+    if(!output[0].input_ready){
+        std::cerr << "[FAIL] SET_SCALE was not accepted" << std::endl;
+        ++failures;
+    }
+
+    for(int index=0; index<token_count; ++index){
+        const int cycle = first_acc_cycle+index;
+        if(!output[cycle].input_ready || output[cycle].scale_busy ||
+                output[cycle].slow_done){
+            std::cerr << "[FAIL] fast input was not accepted at cycle="
+                      << cycle << std::endl;
+            ++failures;
+        }
+    }
+
     for(int index=0; index<token_count; ++index){
         const int cycle = first_acc_cycle+index+
             fsa::accumulatorFastLatency;
