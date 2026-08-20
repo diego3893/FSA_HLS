@@ -225,5 +225,33 @@ namespace fsa{
         accBanks, ACC_SUB_BANKS,
         1, 1, nMemPorts, 0>;
 
+    /// @brief FSA核心数据通路跨logical step保存的系统级状态
+    struct FsaCoreDatapathState{
+        SpRAMState sp_ram{};
+        ElemInputDelayerState input_delayer{};
+        SystolicArrayState sa{};
+        OutputDelayerState output_delayer{};
+        AccumulatorState accumulator{};
+        AccRAMState acc_ram{};
+
+        // Scratchpad同步读响应对应的布局和常量元数据。
+        bool sp_response_valid = false;
+        bool sp_response_is_constant = false;
+        bool sp_rev_input = false;
+        bool sp_delay_output = false;
+        bool sp_rev_output = false;
+        elem_t sp_constant_value{};
+
+        // accRAM同步读响应对应的常量选择和RMW元数据。
+        bool acc_response_valid = false;
+        bool acc_response_is_constant = false;
+        acc_t acc_constant_value{};
+        bool acc_write_valid = false;
+        sram_address_t acc_write_addr = 0;
+
+        // BankedSRAM不提供response-valid，单独延迟DMA窄读握手。
+        bool acc_dma_response_valid[nMemPorts]{};
+    };
+
 }  // namespace fsa
 #endif // !STATE_HPP
