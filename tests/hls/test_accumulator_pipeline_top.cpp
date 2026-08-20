@@ -11,9 +11,13 @@
 
 namespace{
 
-bool almostEqual(const fsa::acc_t actual, const fsa::acc_t expected){
+bool almostEqual(
+    const fsa::acc_t actual,
+    const fsa::acc_t expected,
+    const fsa::acc_t tolerance = (fsa::acc_t)1.0e-5F
+){
     return std::fabs(actual-expected) <=
-        (fsa::acc_t)1.0e-5F*((fsa::acc_t)1.0F+std::fabs(expected));
+        tolerance*((fsa::acc_t)1.0F+std::fabs(expected));
 }
 
 }  // namespace
@@ -45,6 +49,26 @@ int main(){
         }
     }
 
+    // 在fast流水排空后实际执行一次四列EXP_S2，并用后续ACC读回scale。
+    constexpr int slow_set_cycle = 74;
+    constexpr int exp2_cycle = slow_set_cycle+1;
+    constexpr int slow_done_cycle = exp2_cycle+
+        fsa::accumulatorExp2Latency;
+    constexpr int post_exp2_acc_cycle = slow_done_cycle+1;
+    constexpr int post_exp2_result_cycle = post_exp2_acc_cycle+
+        fsa::accumulatorFastLatency;
+
+    input[slow_set_cycle].valid = true;
+    input[slow_set_cycle].cmd = fsa::AccumulatorCmd::SET_SCALE;
+    input[slow_set_cycle].sram_in = {{0.0F, 1.0F, -1.0F, 2.0F}};
+
+    input[exp2_cycle].valid = true;
+    input[exp2_cycle].cmd = fsa::AccumulatorCmd::EXP_S2;
+
+    input[post_exp2_acc_cycle].valid = true;
+    input[post_exp2_acc_cycle].cmd = fsa::AccumulatorCmd::ACC;
+    input[post_exp2_acc_cycle].sram_in = {{1.0F, 1.0F, 1.0F, 1.0F}};
+
     accumulator_pipeline_batch_top(true, input, output);
 
     int failures = 0;
@@ -60,6 +84,47 @@ int main(){
             std::cerr << "[FAIL] fast input was not accepted at cycle="
                       << cycle << std::endl;
             ++failures;
+        }
+    }
+
+    if(!output[slow_set_cycle].input_ready ||
+            !output[exp2_cycle].input_ready ||
+            !output[exp2_cycle].scale_busy){
+        std::cerr << "[FAIL] EXP_S2 was not accepted" << std::endl;
+        ++failures;
+    }
+
+    for(int cycle=exp2_cycle+1; cycle<slow_done_cycle; ++cycle){
+        if(output[cycle].input_ready || !output[cycle].scale_busy ||
+                output[cycle].slow_done){
+            std::cerr << "[FAIL] EXP_S2 busy window cycle="
+                      << cycle << std::endl;
+            ++failures;
+        }
+    }
+
+    if(output[slow_done_cycle].input_ready ||
+            output[slow_done_cycle].scale_busy ||
+            !output[slow_done_cycle].slow_done ||
+            !output[post_exp2_acc_cycle].input_ready){
+        std::cerr << "[FAIL] EXP_S2 completion handshake" << std::endl;
+        ++failures;
+    }
+
+    const fsa::AccVector exp2_expected = {{1.0F, 2.0F, 0.5F, 4.0F}};
+    if(!output[post_exp2_result_cycle].result.valid){
+        std::cerr << "[FAIL] post-EXP_S2 result missing" << std::endl;
+        ++failures;
+    }else{
+        for(int col=0; col<fsa::SA_COLS; ++col){
+            if(!almostEqual(
+                    output[post_exp2_result_cycle]
+                        .result.data[(std::size_t)col],
+                    exp2_expected[(std::size_t)col],
+                    (fsa::acc_t)1.0e-3F)){
+                std::cerr << "[FAIL] EXP_S2 data col=" << col << std::endl;
+                ++failures;
+            }
         }
     }
 
@@ -94,7 +159,7 @@ int main(){
     }
 
     std::cout << "[PASS] test_accumulator_pipeline_top: 64 contiguous "
-                 "ACC_SA tokens with aligned result/address/tag"
+                 "ACC_SA tokens plus four-lane EXP_S2"
               << std::endl;
     return 0;
 }
