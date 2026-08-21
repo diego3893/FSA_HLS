@@ -330,12 +330,6 @@ void fsa_core_request_top(
     static fsa::FsaCoreDatapathState state{};
     static bool online_sequence_active = false;
 
-    #pragma HLS ARRAY_PARTITION variable=input.q type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=input.k type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=input.v type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=output.l type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=output.o type=complete dim=0
-
     #pragma HLS ARRAY_PARTITION variable=state.input_delayer.out_delay_pipe type=complete dim=0
     #pragma HLS ARRAY_PARTITION variable=state.output_delayer.out_delay_pipe type=complete dim=0
     #pragma HLS ARRAY_PARTITION variable=state.sa.mesh type=complete dim=0
