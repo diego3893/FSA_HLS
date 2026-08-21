@@ -60,6 +60,31 @@ OutputDelayer
 Accumulator ↔ Accumulator RAM
 ```
 
+### 请求级核心顶层
+
+`fsa_core_request_top` 是当前不做指令重叠的请求级入口。外部一次提供一个
+4×4 Q/K/V tile，顶层内部使用单 FSM `MatrixEngineController` 顺序执行：
+
+```text
+Q/K/V写入Scratchpad
+-> LOAD_STATIONARY
+-> ATTENTION_SCORE_COMPUTE
+-> ATTENTION_VALUE_COMPUTE
+-> 可选LSE_NORM_SCALE和LSE_NORM
+-> 从Accumulator RAM返回L/O
+```
+
+- 第一块设置 `initialize=true, finalize=false`；
+- 中间块设置 `initialize=false, finalize=false`，复用非零旧 L/O 和 CMP max；
+- 最后一块设置 `initialize=false, finalize=true`，完成 O/L 归一化；
+- 只有一个KV block时设置 `initialize=true, finalize=true`。
+
+当前版本有意不实现 Chisel 的双 FSM `conflictFree` 指令重叠。HLS 入口为：
+
+```bash
+./run_hls.sh fsa_core_request
+```
+
 ### 阶段二：DMA 与外围部分
 
 阶段二负责迁移：
