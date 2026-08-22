@@ -64,7 +64,7 @@ namespace{
 
     template <int Rows, int Cols>
     void packElemMatrix(
-        const float source[Rows][Cols],
+        const float (&source)[Rows][Cols],
         fsa::dma_word_t destination[fsa::DMA_QKV_WORDS]
     ){
         for(int word=0; word<fsa::DMA_QKV_WORDS; ++word){
