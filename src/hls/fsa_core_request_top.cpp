@@ -317,15 +317,11 @@ namespace{
 
 }  // namespace
 
-void fsa_core_request_top(
+void fsa::fsa_core_request_run(
     const fsa::FsaCoreRequestInput& input,
     fsa::FsaCoreRequestOutput& output
 ){
-    #pragma HLS INTERFACE ap_ctrl_hs port=return
-    #pragma HLS AGGREGATE variable=input compact=bit
-    #pragma HLS AGGREGATE variable=output compact=bit
-    #pragma HLS INTERFACE ap_none port=input
-    #pragma HLS INTERFACE ap_none port=output
+    #pragma HLS INLINE off
 
     static fsa::FsaCoreDatapathState state{};
     static bool online_sequence_active = false;
@@ -480,4 +476,17 @@ void fsa_core_request_top(
     }
 
     output.request_done = !output.protocol_error;
+}
+
+void fsa_core_request_top(
+    const fsa::FsaCoreRequestInput& input,
+    fsa::FsaCoreRequestOutput& output
+){
+    #pragma HLS INTERFACE ap_ctrl_hs port=return
+    #pragma HLS AGGREGATE variable=input compact=bit
+    #pragma HLS AGGREGATE variable=output compact=bit
+    #pragma HLS INTERFACE ap_none port=input
+    #pragma HLS INTERFACE ap_none port=output
+
+    fsa::fsa_core_request_run(input, output);
 }

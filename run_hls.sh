@@ -10,7 +10,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ $# -ge 1 ]]; then
     MODULE="$1"
 else
-    read -r -p "请输入模块（pe/cmp/input_delayer/output_delayer/sa/delayer_sa/accumulator/accumulator_pipeline/fsa_core/fsa_core_execute/fsa_core_request/fsa_core_full/sram）：" MODULE
+    read -r -p "请输入模块（pe/cmp/input_delayer/output_delayer/sa/delayer_sa/accumulator/accumulator_pipeline/fsa_core/fsa_core_execute/fsa_core_request/fsa_dma/fsa_core_full/sram）：" MODULE
 fi
 
 # 统一转换为小写，允许输入PE、CMP等大写形式。
@@ -18,7 +18,7 @@ MODULE="${MODULE,,}"
 HLS_SUBDIR="$MODULE"
 
 case "$MODULE" in
-    pe|cmp|input_delayer|output_delayer|sa|delayer_sa|accumulator|accumulator_pipeline|fsa_core|fsa_core_execute|fsa_core_request|fsa_core_full)
+    pe|cmp|input_delayer|output_delayer|sa|delayer_sa|accumulator|accumulator_pipeline|fsa_core|fsa_core_execute|fsa_core_request|fsa_dma|fsa_core_full)
         ;;
     sram|banked_sram)
         # sram一次运行Scratchpad和Accumulator SRAM两个HLS顶层。
@@ -28,7 +28,7 @@ case "$MODULE" in
         ;;
     *)
         echo "[ERROR] 不支持的模块：$MODULE" >&2
-        echo "用法：$0 pe|cmp|input_delayer|output_delayer|sa|delayer_sa|accumulator|accumulator_pipeline|fsa_core|fsa_core_execute|fsa_core_request|fsa_core_full|sram" >&2
+        echo "用法：$0 pe|cmp|input_delayer|output_delayer|sa|delayer_sa|accumulator|accumulator_pipeline|fsa_core|fsa_core_execute|fsa_core_request|fsa_dma|fsa_core_full|sram" >&2
         exit 1
         ;;
 esac

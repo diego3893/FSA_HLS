@@ -85,6 +85,25 @@ Q/K/V写入Scratchpad
 ./run_hls.sh fsa_core_request
 ```
 
+### 固定tile DMA顶层
+
+`fsa_dma_top` 是当前最小的DDR功能闭环入口。外部通过AXI-Lite设置Q、K、
+VT和OL四个64位DDR基地址以及`causal`，写`ap_start`后，IP使用一个64-bit
+AXI master串行完成搬入、单个4×4 tile计算和写回。
+
+- Q布局：`[query][feature]`，16个FP16，共4个64-bit beat；
+- K布局：`[key][feature]`，16个FP16，共4个64-bit beat；
+- VT布局：`[value_feature][key]`，16个FP16，共4个64-bit beat；
+- OL布局：先放4个FP32的L，再放query-major的16个FP32 O，共10个beat；
+- 每次start都是独立请求，当前不支持多个KV block、outstanding或DMA/计算重叠；
+- `status=0`表示成功，`status=1`表示计算核协议错误。
+
+HLS入口为：
+
+```bash
+./run_hls.sh fsa_dma
+```
+
 ### 阶段二：DMA 与外围部分
 
 阶段二负责迁移：

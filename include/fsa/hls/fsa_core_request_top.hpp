@@ -49,6 +49,17 @@ namespace fsa{
         acc_t o[SA_COLS][SA_ROWS]{};
     };
 
+    /**
+     * @brief 不带外部接口pragma的请求核入口，供不同HLS系统顶层复用。
+     *
+     * 状态和fsa_core_request_top相同；一个HLS solution中只能由一个系统顶层
+     * 调用它，不能把它当作第二套并行计算核。
+     */
+    void fsa_core_request_run(
+        const FsaCoreRequestInput& input,
+        FsaCoreRequestOutput& output
+    );
+
 }  // namespace fsa
 
 void fsa_core_request_top(
