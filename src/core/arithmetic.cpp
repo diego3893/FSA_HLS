@@ -330,6 +330,13 @@ namespace fsa{
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=1
         #pragma HLS LATENCY min=13 max=13
+
+        // 矩形阵列用FP16 -INF标记填充K行；其softmax概率必须为0。
+        const fp_struct<elem_t> x_view(x);
+        if(x_view.data()==(ap_uint<16>)0xfc00){
+            return accZero();
+        }
+
         const acc_t x_acc = (acc_t)x;
         const int integer_part = truncToIntBits(x_acc);
         const acc_t fractional_part = x_acc-(acc_t)integer_part;
@@ -380,6 +387,15 @@ namespace fsa{
     }
 
     acc_t attentionScale(){
-        return (acc_t)0.7213475204F;
+        #pragma HLS INLINE
+        return (acc_t)ATTENTION_SCALE_ACC_VALUE;
+    }
+
+    elem_t elemAttentionScale(){
+        #pragma HLS INLINE
+        const fp_struct<elem_t> view(
+            (ap_uint<16>)ATTENTION_SCALE_ELEM_BITS
+        );
+        return view.to_ieee();
     }
 }  // namespace fsa

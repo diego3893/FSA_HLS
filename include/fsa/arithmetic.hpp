@@ -149,11 +149,19 @@ namespace fsa{
     acc_t accMinimum();
 
     /**
-     * @brief 计算attentionScale
-     * 
-     * @return acc_t log2(e)/sqrt(dk)
+     * @brief 返回编译期生成的FP32 attentionScale
+     *
+     * @return acc_t log2(e)/sqrt(SA_ROWS)
      */
     acc_t attentionScale();
+
+    /**
+     * @brief 返回编译期生成的FP16 attentionScale
+     *
+     * 直接使用binary16位模式，避免硬件中出现FP32到FP16转换。
+     * @return elem_t log2(e)/sqrt(SA_ROWS)
+     */
+    elem_t elemAttentionScale();
 
 }  // namespace fsa
 
