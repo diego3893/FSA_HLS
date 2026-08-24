@@ -1,6 +1,6 @@
 /**
  * @file fsa_dma_top.hpp
- * @brief 外部只提供DDR地址和start的固定tile FlashAttention顶层
+ * @brief 一次启动完成完整L x head_dim FlashAttention的系统顶层
  */
 #ifndef FSA_DMA_TOP_HPP
 #define FSA_DMA_TOP_HPP
@@ -14,22 +14,25 @@ namespace fsa{
 
     enum class FsaDmaStatus : std::uint8_t{
         OK = 0,
-        CORE_PROTOCOL_ERROR = 1
+        INVALID_SEQUENCE_LENGTH = 1,
+        CORE_PROTOCOL_ERROR = 2
     };
 
 }  // namespace fsa
 
 /**
- * @brief 串行完成Q/K/VT搬入、单个4x4 FA tile和OL写回。
+ * @brief 从DDR读取row-major Q/K/V，一次事务产生完整row-major O。
  *
- * q、k、vt和ol都是由AXI-Lite设置的64-bit DDR基地址。函数返回对应
- * ap_done；status为0表示本次事务成功。
+ * Q、K、V为[sequence_length][SA_ROWS] FP16，O为同形状FP32。
+ * SA_ROWS是head dimension，SA_COLS是序列tile大小。L只通过AXI-Lite
+ * 标量端口输入，不会写回DDR。
  */
 void fsa_dma_top(
-    const fsa::dma_word_t q[fsa::DMA_QKV_WORDS],
-    const fsa::dma_word_t k[fsa::DMA_QKV_WORDS],
-    const fsa::dma_word_t vt[fsa::DMA_QKV_WORDS],
-    fsa::dma_word_t ol[fsa::DMA_OL_WORDS],
+    const fsa::dma_word_t q[fsa::DMA_MAX_QKV_WORDS],
+    const fsa::dma_word_t k[fsa::DMA_MAX_QKV_WORDS],
+    const fsa::dma_word_t v[fsa::DMA_MAX_QKV_WORDS],
+    fsa::dma_word_t o[fsa::DMA_MAX_O_WORDS],
+    ap_uint<32> sequence_length,
     bool causal,
     ap_uint<8>& status
 );

@@ -21,6 +21,14 @@ namespace{
         "L/O布局超出Accumulator RAM容量"
     );
     static_assert(
+        fsa::SA_COLS<=fsa::SA_ROWS,
+        "当前矩形请求核要求序列tile不大于head dimension"
+    );
+    static_assert(
+        fsa::SA_COLS<=255,
+        "causalCounter当前使用8-bit，SA_COLS不能超过255"
+    );
+    static_assert(
         fsa::ACC_SUB_BANKS<=fsa::nMemPorts,
         "请求顶层读回一整行时需要每个acc sub-bank一个端口"
     );
@@ -367,6 +375,10 @@ void fsa::fsa_core_request_run(
     if(!input.request_valid){
         return;
     }
+    if(input.active_keys==0 || input.active_keys>fsa::SA_COLS){
+        output.protocol_error = true;
+        return;
+    }
     if(!input.initialize && !online_sequence_active){
         output.protocol_error = true;
         return;
@@ -408,6 +420,9 @@ void fsa::fsa_core_request_run(
     score.acc.addr = L_ADDRESS;
     score.acc.zero = input.initialize;
     score.acc.causal = input.causal;
+    score.acc.activeRows = input.active_keys;
+    score.acc.queryBase = input.query_base;
+    score.acc.keyBase = input.key_base;
     executeInstruction(
         state,
         score,

@@ -25,6 +25,13 @@ namespace fsa{
         bool finalize = true;
         bool causal = false;
 
+        /// @brief k/v前active_keys行有效，范围为1..SA_COLS。
+        std::uint16_t active_keys = SA_COLS;
+
+        /// @brief 用于跨tile causal mask的全局序列下标。
+        std::uint32_t query_base = 0;
+        std::uint32_t key_base = 0;
+
         elem_t q[SA_COLS][SA_ROWS]{};
         elem_t k[SA_ROWS][SA_ROWS]{};
         elem_t v[SA_ROWS][SA_ROWS]{};
