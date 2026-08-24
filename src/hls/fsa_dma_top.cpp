@@ -68,8 +68,8 @@ void fsa_dma_top(
     const bool causal,
     ap_uint<8>& status
 ){
-    #pragma HLS ALLOCATION function instances=dma_load_elem_row limit=1
-    #pragma HLS ALLOCATION function instances=dma_store_acc_row limit=1
+    #pragma HLS ALLOCATION function instances=fsa::dma_load_elem_row limit=1
+    #pragma HLS ALLOCATION function instances=fsa::dma_store_acc_row limit=1
 
     #pragma HLS INTERFACE m_axi port=q offset=slave bundle=gmem depth=FSA_DMA_AXI_QKV_DEPTH
     #pragma HLS INTERFACE m_axi port=k offset=slave bundle=gmem depth=FSA_DMA_AXI_QKV_DEPTH
