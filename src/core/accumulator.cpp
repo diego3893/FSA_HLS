@@ -197,14 +197,17 @@ namespace fsa{
             bool guard = false;
             bool sticky = remainder_sticky;
 
-            if(subnormal_shift <= reciprocalQuotientBits){
+            if(subnormal_shift>0 &&
+                    subnormal_shift<=reciprocalQuotientBits){
                 truncated = (ap_uint<24>)(quotient >> subnormal_shift);
-                guard = quotient[subnormal_shift-1];
 
-                // guard以下的所有商位与未除尽余数共同形成sticky。
+                // 使用静态bit索引生成guard/sticky，避免变量bit-select影响
+                // QoR；subnormal_shift的显式下界也排除了bit -1。
                 for(int bit=0; bit<reciprocalQuotientBits; ++bit){
                     #pragma HLS UNROLL
-                    if(bit < subnormal_shift-1 && quotient[bit]){
+                    if(bit==subnormal_shift-1){
+                        guard = quotient[bit];
+                    }else if(bit<subnormal_shift-1 && quotient[bit]){
                         sticky = true;
                     }
                 }

@@ -304,7 +304,32 @@ int main(){
     );
 
     // ------------------------------------------------------------------
-    // 测试9：zero、Infinity、负数与负零的固定延迟特殊值处理。
+    // 测试9：最大有限数的倒数落入次正规数，覆盖静态舍入位选择路径。
+    // ------------------------------------------------------------------
+    const fsa::acc_t maximum =
+        std::numeric_limits<fsa::acc_t>::max();
+    const fsa::acc_t reciprocal_subnormal_input[fsa::SA_COLS] = {
+        maximum,
+        -maximum,
+        maximum,
+        -maximum
+    };
+    const fsa::acc_t reciprocal_subnormal_expected[fsa::SA_COLS] = {
+        (fsa::acc_t)(1.0F/maximum),
+        (fsa::acc_t)(-1.0F/maximum),
+        (fsa::acc_t)(1.0F/maximum),
+        (fsa::acc_t)(-1.0F/maximum)
+    };
+    runReciprocalCase(
+        current,
+        next,
+        io,
+        reciprocal_subnormal_input,
+        reciprocal_subnormal_expected
+    );
+
+    // ------------------------------------------------------------------
+    // 测试10：zero、Infinity、负数与负零的固定延迟特殊值处理。
     // ------------------------------------------------------------------
     const fsa::acc_t infinity =
         std::numeric_limits<fsa::acc_t>::infinity();

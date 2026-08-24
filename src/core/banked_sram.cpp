@@ -18,19 +18,6 @@ namespace fsa{
         }
 
         /**
-         * @brief 将逻辑地址转换为可安全用于物理数组的下标
-         *
-         * 非法请求会在ready计算阶段被拒绝；这里仍显式钳位到0，避免HLS
-         * 静态分析把宽地址直接用于Rows深度数组并报告潜在越界。
-         */
-        template <int Rows>
-        int boundedArrayIndex(const sram_address_t& addr){
-            #pragma HLS INLINE
-            const unsigned int raw = addr.to_uint();
-            return raw<(unsigned int)Rows ? (int)raw : 0;
-        }
-
-        /**
          * @brief 使用逻辑地址低位选择物理bank
          * 
          * @tparam NBanks bank数
@@ -382,14 +369,19 @@ namespace fsa{
                     }
 
                     typename State::NarrowData read_data{};
-                    if(read_enable){
-                        const int address =
-                            boundedArrayIndex<Rows>(read_address);
-                        for(int element=0; element<SubBankSize; ++element){
-                            #pragma HLS UNROLL
-                            read_data[(std::size_t)element] =
-                                state.banks[bank][sub_bank]
-                                           [address][element];
+                    // 用静态row索引选择动态地址，避免把位宽更大的逻辑地址
+                    // 直接作为Rows深度数组下标。ready已经拒绝非法地址；若
+                    // 没有合法行命中，read_data保持为0。
+                    for(int row=0; row<Rows; ++row){
+                        #pragma HLS UNROLL
+                        if(read_enable &&
+                                read_address.to_uint()==(unsigned int)row){
+                            for(int element=0;
+                                    element<SubBankSize; ++element){
+                                #pragma HLS UNROLL
+                                read_data[(std::size_t)element] =
+                                    state.banks[bank][sub_bank][row][element];
+                            }
                         }
                     }
 
@@ -479,13 +471,18 @@ namespace fsa{
                         }
                     }
 
-                    if(write_enable){
-                        const int address =
-                            boundedArrayIndex<Rows>(write_address);
-                        for(int element=0; element<SubBankSize; ++element){
-                            #pragma HLS UNROLL
-                            state.banks[bank][sub_bank][address][element] =
-                                write_data[(std::size_t)element];
+                    // 与读路径相同，物理数组只使用编译期可证明合法的row
+                    // 下标；非法逻辑地址不会获得ready，也不会命中任何行。
+                    for(int row=0; row<Rows; ++row){
+                        #pragma HLS UNROLL
+                        if(write_enable &&
+                                write_address.to_uint()==(unsigned int)row){
+                            for(int element=0;
+                                    element<SubBankSize; ++element){
+                                #pragma HLS UNROLL
+                                state.banks[bank][sub_bank][row][element] =
+                                    write_data[(std::size_t)element];
+                            }
                         }
                     }
                 }
