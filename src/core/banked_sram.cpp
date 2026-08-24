@@ -18,6 +18,19 @@ namespace fsa{
         }
 
         /**
+         * @brief 将逻辑地址转换为可安全用于物理数组的下标
+         *
+         * 非法请求会在ready计算阶段被拒绝；这里仍显式钳位到0，避免HLS
+         * 静态分析把宽地址直接用于Rows深度数组并报告潜在越界。
+         */
+        template <int Rows>
+        int boundedArrayIndex(const sram_address_t& addr){
+            #pragma HLS INLINE
+            const unsigned int raw = addr.to_uint();
+            return raw<(unsigned int)Rows ? (int)raw : 0;
+        }
+
+        /**
          * @brief 使用逻辑地址低位选择物理bank
          * 
          * @tparam NBanks bank数
@@ -371,7 +384,7 @@ namespace fsa{
                     typename State::NarrowData read_data{};
                     if(read_enable){
                         const int address =
-                            (int)read_address.to_uint();
+                            boundedArrayIndex<Rows>(read_address);
                         for(int element=0; element<SubBankSize; ++element){
                             #pragma HLS UNROLL
                             read_data[(std::size_t)element] =
@@ -468,7 +481,7 @@ namespace fsa{
 
                     if(write_enable){
                         const int address =
-                            (int)write_address.to_uint();
+                            boundedArrayIndex<Rows>(write_address);
                         for(int element=0; element<SubBankSize; ++element){
                             #pragma HLS UNROLL
                             state.banks[bank][sub_bank][address][element] =
