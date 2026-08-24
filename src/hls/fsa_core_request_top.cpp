@@ -78,6 +78,21 @@ namespace{
         }
     }
 
+    /**
+     * @brief 在调度译码和共享Core之间锁存一拍控制输入
+     *
+     * 保留独立RTL层次并流水化该拷贝，使phase/instruction译码产生的
+     * mux输出先进入寄存器，下一拍才送入advanceDatapath。这个边界用来
+     * 切断“调度mux -> advanceDatapath入口”组合路径。
+     */
+    fsa::FsaCoreStepInput registerDatapathInput(
+        const fsa::FsaCoreStepInput& input
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        return input;
+    }
+
     void advanceDatapath(
         fsa::FsaCoreDatapathState& state,
         const fsa::FsaCoreStepInput& input,
@@ -89,9 +104,8 @@ namespace{
         // 再从该调用点推进同一套SA、Accumulator和片上状态通路。
         #pragma HLS INLINE off
         // 最新综合中累加器状态回写依赖使本函数的实际Interval为20。
-        // 将II对齐该可实现值，并多保留一个latency周期供调度器切分组合路径。
+        // 将II对齐该可实现值；时序切分由上游显式寄存器边界完成。
         #pragma HLS PIPELINE II=20
-        #pragma HLS LATENCY min=38
         fsa::fsa_core_datapath_step(state, input, output);
         executed_steps = executed_steps+1;
 
@@ -177,6 +191,7 @@ void fsa::fsa_core_request_run(
 ){
     #pragma HLS INLINE off
     #pragma HLS ALLOCATION function instances=advanceDatapath limit=1
+    #pragma HLS ALLOCATION function instances=registerDatapathInput limit=1
 
     static fsa::FsaCoreDatapathState state{};
     static bool online_sequence_active = false;
@@ -234,9 +249,9 @@ void fsa::fsa_core_request_run(
         ? REQUEST_INSTRUCTION_COUNT
         : REQUEST_BASE_INSTRUCTION_COUNT;
 
-    // 所有阶段只生成step_input；完整Core只在循环底部调用一次。上一版共享Core
-    // 延迟37拍时外层迭代延迟和实际II均为38；本版再给Core增加一拍，
-    // 因此外层II同步调整为39，避免循环迭代延迟再次使目标差1拍。
+    // 所有阶段只生成step_input；完整Core只在循环底部调用一次。上一版外层
+    // 目标II=39、实际II=39；本版保持该已收敛目标，仅在Core之前增加
+    // 独立的II=1输入寄存器级并取消Core的latency下限。
     for(unsigned scheduler_iteration=0;
             scheduler_iteration<MAX_REQUEST_SCHEDULER_ITERATIONS;
             ++scheduler_iteration){
@@ -333,10 +348,15 @@ void fsa::fsa_core_request_run(
             break;
         }
 
+        // 调度译码和共享Core之间保留一拍寄存器，避免两段
+        // 组合逻辑落在同一条时序路径上。
+        const fsa::FsaCoreStepInput registered_step_input =
+            registerDatapathInput(step_input);
+
         fsa::FsaCoreStepOutput step_output{};
         advanceDatapath(
             state,
-            step_input,
+            registered_step_input,
             step_output,
             output.executed_steps,
             output.protocol_error
