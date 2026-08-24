@@ -19,6 +19,7 @@ namespace hls{
     float ldexp(const float value, const int exponent){
         return std::ldexp(value, exponent);
     }
+    float sqrt(const float value){ return std::sqrt(value); }
 }
 #endif
 

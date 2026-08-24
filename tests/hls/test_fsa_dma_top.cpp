@@ -1,6 +1,6 @@
 /**
  * @file test_fsa_dma_top.cpp
- * @brief 验证64-bit DDR布局、VT搬入、单tile FA和query-major OL写回
+ * @brief 验证一次启动完成非整tile的L x head_dim完整attention
  */
 
 #include <cmath>
@@ -20,39 +20,27 @@ namespace hls{
     float ldexp(const float value, const int exponent){
         return std::ldexp(value, exponent);
     }
+    float sqrt(const float value){ return std::sqrt(value); }
 }
 #endif
 
 namespace{
 
-    constexpr int N = 4;
+    constexpr int D = fsa::SA_ROWS;
+    constexpr int TILE = fsa::SA_COLS;
+    constexpr int L = 2*TILE+1;
+    constexpr int O_WORDS = L*fsa::DMA_O_WORDS_PER_ROW;
 
-    static_assert(
-        fsa::SA_ROWS==N && fsa::SA_COLS==N,
-        "test_fsa_dma_top requires the 4x4 configuration"
-    );
+    static_assert(TILE<=D, "test要求SA_COLS不大于SA_ROWS");
+    static_assert(L<=fsa::MAX_SEQUENCE_LENGTH, "测试序列超过配置上限");
 
-    const float Q[N][N] = {
-        {1.0F, 0.0F, 1.0F, 0.0F},
-        {0.0F, 1.0F, 0.0F, 1.0F},
-        {1.0F, 1.0F, 0.0F, 0.0F},
-        {0.0F, 0.0F, 1.0F, 1.0F}
-    };
-
-    const float K[N][N] = {
-        {1.0F, 0.0F, 0.0F, 0.0F},
-        {0.0F, 1.0F, 0.0F, 0.0F},
-        {0.0F, 0.0F, 1.0F, 0.0F},
-        {0.0F, 0.0F, 0.0F, 1.0F}
-    };
-
-    const float V[N][N] = {
-        {1.0F, 2.0F, 0.0F, 1.0F},
-        {2.0F, 0.0F, 1.0F, 1.0F},
-        {0.0F, 1.0F, 2.0F, 1.0F},
-        {1.0F, 1.0F, 1.0F, 2.0F}
-    };
-
+    float Q[L][D]{};
+    float K[L][D]{};
+    float V[L][D]{};
+    fsa::dma_word_t q_memory[fsa::DMA_MAX_QKV_WORDS]{};
+    fsa::dma_word_t k_memory[fsa::DMA_MAX_QKV_WORDS]{};
+    fsa::dma_word_t v_memory[fsa::DMA_MAX_QKV_WORDS]{};
+    fsa::dma_word_t o_memory[fsa::DMA_MAX_O_WORDS+2]{};
     int failures = 0;
 
     void expect(const bool condition, const std::string& message){
@@ -62,51 +50,53 @@ namespace{
         }
     }
 
-    template <int Rows, int Cols>
-    void packElemMatrix(
-        const float (&source)[Rows][Cols],
-        fsa::dma_word_t destination[fsa::DMA_QKV_WORDS]
-    ){
-        for(int word=0; word<fsa::DMA_QKV_WORDS; ++word){
-            fsa::elem_t values[fsa::DMA_ELEMS_PER_WORD]{};
-            for(int lane=0; lane<fsa::DMA_ELEMS_PER_WORD; ++lane){
-                const int linear = word*fsa::DMA_ELEMS_PER_WORD+lane;
-                values[lane] = (fsa::elem_t)source[linear/Cols][linear%Cols];
+    void initializeMatrices(){
+        for(int token=0; token<L; ++token){
+            for(int feature=0; feature<D; ++feature){
+                Q[token][feature] =
+                    (float)(((token+2*feature)%5)-2)*0.25F;
+                K[token][feature] =
+                    (float)(((2*token+feature)%7)-3)*0.25F;
+                V[token][feature] =
+                    (float)(((token+feature)%6)-2)*0.5F;
             }
-            destination[word] = fsa::dma_pack_elem_word(values);
         }
     }
 
-    void packTransposedV(
-        fsa::dma_word_t destination[fsa::DMA_QKV_WORDS]
+    void packMatrix(
+        const float source[L][D],
+        fsa::dma_word_t destination[fsa::DMA_MAX_QKV_WORDS]
     ){
-        for(int word=0; word<fsa::DMA_QKV_WORDS; ++word){
-            fsa::elem_t values[fsa::DMA_ELEMS_PER_WORD]{};
-            for(int lane=0; lane<fsa::DMA_ELEMS_PER_WORD; ++lane){
-                const int linear = word*fsa::DMA_ELEMS_PER_WORD+lane;
-                const int value_feature = linear/N;
-                const int key = linear%N;
-                values[lane] = (fsa::elem_t)V[key][value_feature];
+        for(int token=0; token<L; ++token){
+            for(int word=0; word<fsa::DMA_QKV_WORDS_PER_ROW; ++word){
+                fsa::elem_t values[fsa::DMA_ELEMS_PER_WORD]{};
+                for(int lane=0; lane<fsa::DMA_ELEMS_PER_WORD; ++lane){
+                    values[lane] = (fsa::elem_t)source[token]
+                        [word*fsa::DMA_ELEMS_PER_WORD+lane];
+                }
+                destination[token*fsa::DMA_QKV_WORDS_PER_ROW+word] =
+                    fsa::dma_pack_elem_word(values);
             }
-            destination[word] = fsa::dma_pack_elem_word(values);
         }
     }
 
-    float readOlValue(
-        const fsa::dma_word_t ol[fsa::DMA_OL_WORDS],
-        const int index
+    float readOutput(
+        const fsa::dma_word_t memory[fsa::DMA_MAX_O_WORDS+2],
+        const int token,
+        const int feature
     ){
-        const int word = index/fsa::DMA_ACCS_PER_WORD;
-        const int lane = index%fsa::DMA_ACCS_PER_WORD;
-        return (float)fsa::dma_unpack_acc(ol[word], lane);
+        const int word = token*fsa::DMA_O_WORDS_PER_ROW+
+            feature/fsa::DMA_ACCS_PER_WORD;
+        const int lane = feature%fsa::DMA_ACCS_PER_WORD;
+        return (float)fsa::dma_unpack_acc(memory[word], lane);
     }
 
-    void golden(float expected_l[N], float expected_o[N][N]){
-        for(int query=0; query<N; ++query){
-            float scores[N]{};
+    void golden(float expected[L][D]){
+        for(int query=0; query<L; ++query){
+            float scores[L]{};
             float row_max = -1.0e30F;
-            for(int key=0; key<N; ++key){
-                for(int feature=0; feature<N; ++feature){
+            for(int key=0; key<L; ++key){
+                for(int feature=0; feature<D; ++feature){
                     scores[key] += Q[query][feature]*K[key][feature];
                 }
                 if(scores[key]>row_max){
@@ -114,19 +104,18 @@ namespace{
                 }
             }
 
-            for(int key=0; key<N; ++key){
+            float row_sum = 0.0F;
+            for(int key=0; key<L; ++key){
                 const float probability = std::exp(
-                    (scores[key]-row_max)/std::sqrt((float)N)
+                    (scores[key]-row_max)/std::sqrt((float)D)
                 );
-                expected_l[query] += probability;
-                for(int value_feature=0;
-                        value_feature<N; ++value_feature){
-                    expected_o[query][value_feature] +=
-                        probability*V[key][value_feature];
+                row_sum += probability;
+                for(int feature=0; feature<D; ++feature){
+                    expected[query][feature] += probability*V[key][feature];
                 }
             }
-            for(int value_feature=0; value_feature<N; ++value_feature){
-                expected_o[query][value_feature] /= expected_l[query];
+            for(int feature=0; feature<D; ++feature){
+                expected[query][feature] /= row_sum;
             }
         }
     }
@@ -134,27 +123,25 @@ namespace{
 }  // namespace
 
 int main(){
-    fsa::dma_word_t q_memory[fsa::DMA_QKV_WORDS]{};
-    fsa::dma_word_t k_memory[fsa::DMA_QKV_WORDS]{};
-    fsa::dma_word_t vt_memory[fsa::DMA_QKV_WORDS]{};
-    packElemMatrix(Q, q_memory);
-    packElemMatrix(K, k_memory);
-    packTransposedV(vt_memory);
+    initializeMatrices();
 
-    constexpr int CANARY_WORDS = 2;
-    fsa::dma_word_t ol_memory[fsa::DMA_OL_WORDS+CANARY_WORDS]{};
+    packMatrix(Q, q_memory);
+    packMatrix(K, k_memory);
+    packMatrix(V, v_memory);
+
     const fsa::dma_word_t canary =
         (fsa::dma_word_t)0x5a5aa5a55a5aa5a5ULL;
-    for(int word=0; word<fsa::DMA_OL_WORDS+CANARY_WORDS; ++word){
-        ol_memory[word] = canary;
+    for(int word=0; word<fsa::DMA_MAX_O_WORDS+2; ++word){
+        o_memory[word] = canary;
     }
 
     ap_uint<8> status = 0xff;
     fsa_dma_top(
         q_memory,
         k_memory,
-        vt_memory,
-        ol_memory,
+        v_memory,
+        o_memory,
+        (ap_uint<32>)L,
         false,
         status
     );
@@ -166,33 +153,20 @@ int main(){
         "DMA top returned an error status"
     );
     expect(
-        ol_memory[fsa::DMA_OL_WORDS]==canary &&
-            ol_memory[fsa::DMA_OL_WORDS+1]==canary,
-        "OL DMA wrote beyond the fixed output region"
+        o_memory[O_WORDS]==canary && o_memory[O_WORDS+1]==canary,
+        "O DMA wrote beyond the complete output matrix"
     );
 
-    float expected_l[N]{};
-    float expected_o[N][N]{};
-    golden(expected_l, expected_o);
-
-    for(int query=0; query<N; ++query){
-        const float actual_l = readOlValue(ol_memory, query);
-        expect(
-            std::isfinite(actual_l) &&
-                std::fabs(actual_l-expected_l[query])<=0.12F,
-            "L mismatch at query "+std::to_string(query)
-        );
-
-        for(int value_feature=0; value_feature<N; ++value_feature){
-            const int ol_index = N+query*N+value_feature;
-            const float actual_o = readOlValue(ol_memory, ol_index);
+    float expected[L][D]{};
+    golden(expected);
+    for(int query=0; query<L; ++query){
+        for(int feature=0; feature<D; ++feature){
+            const float actual = readOutput(o_memory, query, feature);
             expect(
-                std::isfinite(actual_o) &&
-                    std::fabs(
-                        actual_o-expected_o[query][value_feature]
-                    )<=0.12F,
+                std::isfinite(actual) &&
+                    std::fabs(actual-expected[query][feature])<=0.18F,
                 "O mismatch at query "+std::to_string(query)+
-                    ", feature "+std::to_string(value_feature)
+                    ", feature "+std::to_string(feature)
             );
         }
     }
@@ -202,8 +176,8 @@ int main(){
                   << failures << " check(s) failed" << std::endl;
         return 1;
     }
-    std::cout << "[PASS] test_fsa_dma_top: DDR Q/K/VT layout, FA and "
-                 "query-major OL writeback are correct"
-              << std::endl;
+    std::cout << "[PASS] test_fsa_dma_top: one start produced complete "
+              << L << "x" << D << " O with " << TILE
+              << "-token tiles" << std::endl;
     return 0;
 }

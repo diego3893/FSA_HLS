@@ -24,6 +24,7 @@ namespace hls{
     float ldexp(const float value, const int exponent){
         return std::ldexp(value, exponent);
     }
+    float sqrt(const float value){ return std::sqrt(value); }
 }
 #endif
 
@@ -321,7 +322,7 @@ namespace{
             }else if(cycle==2*N+1){
                 setSpConstant(input, (fsa::elem_t)1.0F);
             }else if(cycle==2*N+2){
-                setSpConstant(input, (fsa::elem_t)fsa::attentionScale());
+                setSpConstant(input, fsa::elemAttentionScale());
             }else if(cycle>=EXP2_START-1 && cycle<EXP2_START-1+
                     fsa::exp2PWLPieces){
                 setSpConstant(

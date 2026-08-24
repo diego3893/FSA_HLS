@@ -7,8 +7,8 @@
 
 #ifdef FSA_EXECUTION_PLAN_STANDALONE
 namespace fsa{
-    acc_t attentionScale(){
-        return 0.721347520F;
+    elem_t elemAttentionScale(){
+        return (elem_t)ATTENTION_SCALE_ACC_VALUE;
     }
 }
 #endif
@@ -178,7 +178,7 @@ namespace{
                 expect(
                     std::fabs(
                         (float)step.sp_constant_value-
-                        (float)(fsa::elem_t)fsa::attentionScale()
+                        (float)fsa::elemAttentionScale()
                     )<0.001F,
                     "SCORE attentionScale constant"
                 );
