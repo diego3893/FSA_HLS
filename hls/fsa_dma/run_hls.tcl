@@ -1,6 +1,6 @@
 set RUN_CSIM  1
 set RUN_COSIM 1
-set EXPORT_IP 1
+set EXPORT_IP 0
 
 set SCRIPT_DIR [file dirname [file normalize [info script]]]
 set PROJECT_ROOT [file normalize [file join $SCRIPT_DIR "../.."]]
