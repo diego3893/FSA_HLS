@@ -49,7 +49,11 @@ namespace{
         ap_uint<16>& executed_steps,
         bool& protocol_error
     ){
-        #pragma HLS INLINE
+        // 这是请求层唯一允许实例化完整Core datapath的位置。外层的预装载、
+        // 指令执行、复位和读回函数只负责生成逐拍控制，并全部内联回请求层；
+        // advanceDatapath本身禁止内联，配合fsa_core_request_run中的ALLOCATION
+        // 约束，让所有顺序阶段复用同一套SA、Accumulator和片上状态通路。
+        #pragma HLS INLINE off
         fsa::fsa_core_datapath_step(state, input, output);
         executed_steps = executed_steps+1;
 
@@ -79,6 +83,7 @@ namespace{
         ap_uint<16>& executed_steps,
         bool& protocol_error
     ){
+        #pragma HLS INLINE
         const unsigned step_count =
             fsa::execution_plan_length(instruction);
         fsa::MatrixEngineControllerState controller{};
@@ -148,6 +153,7 @@ namespace{
         ap_uint<16>& executed_steps,
         bool& protocol_error
     ){
+        #pragma HLS INLINE
         constexpr int ELEMENTS_PER_SUB_BANK =
             fsa::SA_ROWS/fsa::SPAD_SUB_BANKS;
 
@@ -184,6 +190,7 @@ namespace{
         ap_uint<16>& executed_steps,
         bool& protocol_error
     ){
+        #pragma HLS INLINE
         for(int query=0; query<fsa::SA_COLS; ++query){
             fsa::elem_t row[fsa::SA_ROWS]{};
             #pragma HLS ARRAY_PARTITION variable=row type=complete dim=1
@@ -240,6 +247,7 @@ namespace{
         ap_uint<16>& executed_steps,
         bool& protocol_error
     ){
+        #pragma HLS INLINE
         fsa::CmpControl reset{};
         reset.cmd = fsa::CmpControlCmd::RESET;
 
@@ -267,6 +275,7 @@ namespace{
         ap_uint<16>& executed_steps,
         bool& protocol_error
     ){
+        #pragma HLS INLINE
         constexpr int ELEMENTS_PER_SUB_BANK =
             fsa::SA_COLS/fsa::ACC_SUB_BANKS;
 
@@ -322,6 +331,7 @@ void fsa::fsa_core_request_run(
     fsa::FsaCoreRequestOutput& output
 ){
     #pragma HLS INLINE off
+    #pragma HLS ALLOCATION function instances=advanceDatapath limit=1
 
     static fsa::FsaCoreDatapathState state{};
     static bool online_sequence_active = false;
