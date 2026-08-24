@@ -90,7 +90,8 @@ namespace{
         #pragma HLS INLINE off
         // 当前状态回写依赖决定了最小可实现Interval为18；显式写出实际目标，
         // 避免工具按默认II=1反复报告不可满足的依赖约束。
-        #pragma HLS PIPELINE II=18
+        #pragma HLS PIPELINE II=19
+        #pragma HLS LATENCY min=37
         fsa::fsa_core_datapath_step(state, input, output);
         executed_steps = executed_steps+1;
 
@@ -238,7 +239,7 @@ void fsa::fsa_core_request_run(
     for(unsigned scheduler_iteration=0;
             scheduler_iteration<MAX_REQUEST_SCHEDULER_ITERATIONS;
             ++scheduler_iteration){
-        #pragma HLS PIPELINE II=36
+        #pragma HLS PIPELINE II=37
         #pragma HLS LOOP_TRIPCOUNT min=50 max=20000
 
         fsa::FsaCoreStepInput step_input{};
