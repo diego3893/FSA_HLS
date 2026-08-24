@@ -4,14 +4,6 @@
 
 namespace{
 
-    void resetCore(){
-        #pragma HLS INLINE
-        fsa::FsaCoreRequestInput reset{};
-        reset.reset = true;
-        fsa::FsaCoreRequestOutput ignored{};
-        fsa::fsa_core_request_run(reset, ignored);
-    }
-
     void loadRequestTile(
         const fsa::dma_word_t q[fsa::DMA_MAX_QKV_WORDS],
         const fsa::dma_word_t k[fsa::DMA_MAX_QKV_WORDS],
@@ -27,6 +19,7 @@ namespace{
         #pragma HLS ARRAY_PARTITION variable=request.k type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=request.v type=complete dim=0
 
+        request.reset = query_base==0 && key_base==0;
         request.request_valid = true;
         request.initialize = key_base==0;
         request.finalize = key_base+fsa::SA_COLS>=length;
@@ -97,7 +90,6 @@ void fsa_dma_top(
     );
 
     // 一次ap_start对应一次完整事务，跨query/KV tile都由本层循环完成。
-    resetCore();
     for(unsigned query_base=0;
             query_base<length; query_base+=fsa::SA_COLS){
         #pragma HLS LOOP_TRIPCOUNT min=1 max=4096

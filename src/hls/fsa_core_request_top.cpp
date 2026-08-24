@@ -2,7 +2,6 @@
 
 #include "fsa/execution_plan.hpp"
 #include "fsa/fsa_core_datapath.hpp"
-#include "fsa/matrix_engine_controller.hpp"
 
 namespace{
 
@@ -33,6 +32,35 @@ namespace{
         "请求顶层读回一整行时需要每个acc sub-bank一个端口"
     );
 
+    enum class RequestPhase{
+        RESET_ONLINE_MAX,
+        PRELOAD_Q,
+        PRELOAD_K,
+        PRELOAD_V,
+        EXECUTE_INSTRUCTION,
+        READ_L_REQUEST,
+        READ_L_RESPONSE,
+        READ_O_REQUEST,
+        READ_O_RESPONSE,
+        DONE
+    };
+
+    constexpr unsigned REQUEST_INSTRUCTION_COUNT = 5;
+    constexpr unsigned REQUEST_BASE_INSTRUCTION_COUNT = 3;
+    constexpr unsigned SPAD_ELEMENTS_PER_SUB_BANK =
+        fsa::SA_ROWS/fsa::SPAD_SUB_BANKS;
+    constexpr unsigned ACC_ELEMENTS_PER_SUB_BANK =
+        fsa::SA_COLS/fsa::ACC_SUB_BANKS;
+
+    // 给矩形阵列和最大head dimension保留宽松但有限的调度上界。
+    // 循环不会展开；该常量只帮助HLS分析可变长请求循环。
+    constexpr unsigned MAX_REQUEST_SCHEDULER_ITERATIONS =
+        fsa::SA_COLS+
+        (fsa::SA_COLS+2*fsa::SA_ROWS)*fsa::SPAD_SUB_BANKS+
+        16*fsa::SA_ROWS+16*fsa::SA_COLS+
+        8*fsa::exp2PWLPieces+fsa::reciprocalLatency+64+
+        2*(1+fsa::SA_ROWS);
+
     void mapPlanToDatapath(
         const fsa::ExecutionPlanStep& plan,
         fsa::FsaCoreStepInput& step_input
@@ -57,10 +85,8 @@ namespace{
         ap_uint<16>& executed_steps,
         bool& protocol_error
     ){
-        // 这是请求层唯一允许实例化完整Core datapath的位置。外层的预装载、
-        // 指令执行、复位和读回函数只负责生成逐拍控制，并全部内联回请求层；
-        // advanceDatapath本身禁止内联，配合fsa_core_request_run中的ALLOCATION
-        // 约束，让所有顺序阶段复用同一套SA、Accumulator和片上状态通路。
+        // 本函数在请求调度循环中只有一个静态调用点。所有阶段先生成本拍控制，
+        // 再从该调用点推进同一套SA、Accumulator和片上状态通路。
         #pragma HLS INLINE off
         fsa::fsa_core_datapath_step(state, input, output);
         executed_steps = executed_steps+1;
@@ -85,250 +111,57 @@ namespace{
         return instruction;
     }
 
-    bool executeInstruction(
-        fsa::FsaCoreDatapathState& datapath_state,
-        const fsa::MatrixInstruction& instruction,
-        ap_uint<16>& executed_steps,
-        bool& protocol_error
-    ){
-        #pragma HLS INLINE
-        const unsigned step_count =
-            fsa::execution_plan_length(instruction);
-        fsa::MatrixEngineControllerState controller{};
-        fsa::reset_matrix_engine_controller_state(controller);
-
-        fsa::MatrixEngineControllerInput accept{};
-        accept.instruction_valid = true;
-        accept.instruction = instruction;
-
-        fsa::MatrixEngineControllerState accepted_state{};
-        fsa::MatrixEngineControllerOutput accepted_output{};
-        fsa::matrix_engine_controller_step(
-            controller,
-            accepted_state,
-            accept,
-            accepted_output
-        );
-        controller = accepted_state;
-        if(!accepted_output.instruction_accepted){
-            protocol_error = true;
-            return false;
-        }
-
-        bool done = false;
-        for(unsigned timer=0; timer<step_count; ++timer){
-            #pragma HLS LOOP_TRIPCOUNT min=5 max=28
-            #pragma HLS PIPELINE
-
-            fsa::MatrixEngineControllerState next_controller{};
-            fsa::MatrixEngineControllerOutput controller_output{};
-            fsa::matrix_engine_controller_step(
-                controller,
-                next_controller,
-                fsa::MatrixEngineControllerInput{},
-                controller_output
-            );
-
-            if(controller_output.plan.valid){
-                fsa::FsaCoreStepInput step_input{};
-                mapPlanToDatapath(controller_output.plan, step_input);
-                fsa::FsaCoreStepOutput step_output{};
-                advanceDatapath(
-                    datapath_state,
-                    step_input,
-                    step_output,
-                    executed_steps,
-                    protocol_error
-                );
-            }
-
-            controller = next_controller;
-            if(controller_output.instruction_done){
-                done = true;
-            }
-        }
-
-        if(!done){
-            protocol_error = true;
-        }
-        return done;
-    }
-
-    void writeSpadRow(
-        fsa::FsaCoreDatapathState& state,
-        const int address,
-        const fsa::elem_t row[fsa::SA_ROWS],
-        ap_uint<16>& executed_steps,
-        bool& protocol_error
-    ){
-        #pragma HLS INLINE
-        constexpr int ELEMENTS_PER_SUB_BANK =
-            fsa::SA_ROWS/fsa::SPAD_SUB_BANKS;
-
-        for(int sub_bank=0;
-                sub_bank<fsa::SPAD_SUB_BANKS; ++sub_bank){
-            fsa::FsaCoreStepInput step_input{};
-            step_input.spad_write_valid[0] = true;
-            step_input.spad_write_addr[0] = address;
-            step_input.spad_write_sub_bank[0] = sub_bank;
-            for(int element=0;
-                    element<ELEMENTS_PER_SUB_BANK; ++element){
-                #pragma HLS UNROLL
-                step_input.spad_write_data[0][element] =
-                    row[sub_bank*ELEMENTS_PER_SUB_BANK+element];
-            }
-
-            fsa::FsaCoreStepOutput step_output{};
-            advanceDatapath(
-                state,
-                step_input,
-                step_output,
-                executed_steps,
-                protocol_error
-            );
-            if(!step_output.spad_write_ready[0]){
-                protocol_error = true;
-            }
-        }
-    }
-
-    void preloadQKV(
-        fsa::FsaCoreDatapathState& state,
+    fsa::MatrixInstruction requestInstruction(
         const fsa::FsaCoreRequestInput& input,
-        ap_uint<16>& executed_steps,
-        bool& protocol_error
+        const unsigned index
     ){
         #pragma HLS INLINE
-        for(int query=0; query<fsa::SA_COLS; ++query){
-            fsa::elem_t row[fsa::SA_ROWS]{};
-            #pragma HLS ARRAY_PARTITION variable=row type=complete dim=1
-            for(int feature=0; feature<fsa::SA_ROWS; ++feature){
-                #pragma HLS UNROLL
-                row[feature] = input.q[query][feature];
-            }
-            writeSpadRow(
-                state,
-                Q_BASE_ADDRESS+query,
-                row,
-                executed_steps,
-                protocol_error
-            );
+        switch(index){
+        case 0:{
+            fsa::MatrixInstruction instruction =
+                baseInstruction(fsa::MxFunc::LOAD_STATIONARY);
+            instruction.spad.addr = Q_BASE_ADDRESS+fsa::SA_COLS-1;
+            instruction.spad.stride = -1;
+            return instruction;
         }
-
-        for(int key=0; key<fsa::SA_ROWS; ++key){
-            fsa::elem_t row[fsa::SA_ROWS]{};
-            #pragma HLS ARRAY_PARTITION variable=row type=complete dim=1
-            for(int feature=0; feature<fsa::SA_ROWS; ++feature){
-                #pragma HLS UNROLL
-                row[feature] = input.k[key][feature];
-            }
-            writeSpadRow(
-                state,
-                K_BASE_ADDRESS+key,
-                row,
-                executed_steps,
-                protocol_error
-            );
+        case 1:{
+            fsa::MatrixInstruction instruction =
+                baseInstruction(fsa::MxFunc::ATTENTION_SCORE_COMPUTE);
+            instruction.spad.addr = K_BASE_ADDRESS;
+            instruction.spad.revInput = true;
+            instruction.spad.delayOutput = true;
+            instruction.spad.revOutput = true;
+            instruction.acc.addr = L_ADDRESS;
+            instruction.acc.zero = input.initialize;
+            instruction.acc.causal = input.causal;
+            instruction.acc.activeRows = input.active_keys;
+            instruction.acc.queryBase = input.query_base;
+            instruction.acc.keyBase = input.key_base;
+            return instruction;
         }
-
-        // ATTENTION_VALUE读取的是V转置后的Scratchpad布局。
-        for(int value_feature=0;
-                value_feature<fsa::SA_ROWS; ++value_feature){
-            fsa::elem_t row[fsa::SA_ROWS]{};
-            #pragma HLS ARRAY_PARTITION variable=row type=complete dim=1
-            for(int key=0; key<fsa::SA_ROWS; ++key){
-                #pragma HLS UNROLL
-                row[key] = input.v[key][value_feature];
-            }
-            writeSpadRow(
-                state,
-                VT_BASE_ADDRESS+value_feature,
-                row,
-                executed_steps,
-                protocol_error
-            );
+        case 2:{
+            fsa::MatrixInstruction instruction =
+                baseInstruction(fsa::MxFunc::ATTENTION_VALUE_COMPUTE);
+            instruction.spad.addr = VT_BASE_ADDRESS;
+            instruction.spad.revInput = true;
+            instruction.spad.delayOutput = true;
+            instruction.spad.revOutput = false;
+            instruction.acc.addr = O_BASE_ADDRESS;
+            instruction.acc.zero = input.initialize;
+            return instruction;
         }
-    }
-
-    void resetOnlineMax(
-        fsa::FsaCoreDatapathState& state,
-        ap_uint<16>& executed_steps,
-        bool& protocol_error
-    ){
-        #pragma HLS INLINE
-        fsa::CmpControl reset{};
-        reset.cmd = fsa::CmpControlCmd::RESET;
-
-        // RESET token沿CMP列传播；需要SA_COLS个step覆盖全部CMP。
-        for(int cycle=0; cycle<fsa::SA_COLS; ++cycle){
-            fsa::FsaCoreStepInput step_input{};
-            if(cycle==0){
-                step_input.cmp_ctrl = fsa::make_valid(reset);
-            }
-            fsa::FsaCoreStepOutput step_output{};
-            advanceDatapath(
-                state,
-                step_input,
-                step_output,
-                executed_steps,
-                protocol_error
-            );
+        case 3:{
+            fsa::MatrixInstruction instruction =
+                baseInstruction(fsa::MxFunc::ATTENTION_LSE_NORM_SCALE);
+            instruction.acc.addr = L_ADDRESS;
+            return instruction;
         }
-    }
-
-    void readAccRow(
-        fsa::FsaCoreDatapathState& state,
-        const int address,
-        fsa::acc_t row[fsa::SA_COLS],
-        ap_uint<16>& executed_steps,
-        bool& protocol_error
-    ){
-        #pragma HLS INLINE
-        constexpr int ELEMENTS_PER_SUB_BANK =
-            fsa::SA_COLS/fsa::ACC_SUB_BANKS;
-
-        fsa::FsaCoreStepInput request{};
-        for(int sub_bank=0; sub_bank<fsa::ACC_SUB_BANKS; ++sub_bank){
-            #pragma HLS UNROLL
-            request.acc_dma_read_valid[sub_bank] = true;
-            request.acc_dma_read_addr[sub_bank] = address;
-            request.acc_dma_read_sub_bank[sub_bank] = sub_bank;
+        default:{
+            fsa::MatrixInstruction instruction =
+                baseInstruction(fsa::MxFunc::ATTENTION_LSE_NORM);
+            instruction.acc.addr = O_BASE_ADDRESS;
+            return instruction;
         }
-
-        fsa::FsaCoreStepOutput request_output{};
-        advanceDatapath(
-            state,
-            request,
-            request_output,
-            executed_steps,
-            protocol_error
-        );
-        for(int sub_bank=0; sub_bank<fsa::ACC_SUB_BANKS; ++sub_bank){
-            #pragma HLS UNROLL
-            if(!request_output.acc_dma_read_ready[sub_bank]){
-                protocol_error = true;
-            }
-        }
-
-        fsa::FsaCoreStepOutput response{};
-        advanceDatapath(
-            state,
-            fsa::FsaCoreStepInput{},
-            response,
-            executed_steps,
-            protocol_error
-        );
-        for(int sub_bank=0; sub_bank<fsa::ACC_SUB_BANKS; ++sub_bank){
-            #pragma HLS UNROLL
-            if(!response.acc_dma_response_valid[sub_bank]){
-                protocol_error = true;
-            }
-            for(int element=0;
-                    element<ELEMENTS_PER_SUB_BANK; ++element){
-                #pragma HLS UNROLL
-                row[sub_bank*ELEMENTS_PER_SUB_BANK+element] =
-                    response.acc_dma_read_data[sub_bank][element];
-            }
         }
     }
 
@@ -370,7 +203,9 @@ void fsa::fsa_core_request_run(
     if(input.reset){
         fsa::reset_fsa_core_datapath_state(state);
         online_sequence_active = false;
-        return;
+        if(!input.request_valid){
+            return;
+        }
     }
     if(!input.request_valid){
         return;
@@ -384,123 +219,241 @@ void fsa::fsa_core_request_run(
         return;
     }
 
-    if(input.initialize){
-        resetOnlineMax(
+    RequestPhase phase = input.initialize
+        ? RequestPhase::RESET_ONLINE_MAX
+        : RequestPhase::PRELOAD_Q;
+    unsigned phase_index = 0;
+    unsigned sub_bank = 0;
+    unsigned instruction_index = 0;
+    unsigned instruction_timer = 0;
+    const unsigned instruction_count = input.finalize
+        ? REQUEST_INSTRUCTION_COUNT
+        : REQUEST_BASE_INSTRUCTION_COUNT;
+
+    // 所有阶段只生成step_input；完整Core只在循环底部调用一次。
+    // 不对本循环做PIPELINE，避免HLS为不同阶段创建独立流水调度区。
+    for(unsigned scheduler_iteration=0;
+            scheduler_iteration<MAX_REQUEST_SCHEDULER_ITERATIONS;
+            ++scheduler_iteration){
+        #pragma HLS LOOP_TRIPCOUNT min=50 max=20000
+
+        fsa::FsaCoreStepInput step_input{};
+        bool issue_step = true;
+
+        switch(phase){
+        case RequestPhase::RESET_ONLINE_MAX:{
+            if(phase_index==0){
+                fsa::CmpControl reset{};
+                reset.cmd = fsa::CmpControlCmd::RESET;
+                step_input.cmp_ctrl = fsa::make_valid(reset);
+            }
+            break;
+        }
+
+        case RequestPhase::PRELOAD_Q:
+        case RequestPhase::PRELOAD_K:
+        case RequestPhase::PRELOAD_V:{
+            const unsigned address = phase==RequestPhase::PRELOAD_Q
+                ? Q_BASE_ADDRESS+phase_index
+                : (phase==RequestPhase::PRELOAD_K
+                    ? K_BASE_ADDRESS+phase_index
+                    : VT_BASE_ADDRESS+phase_index);
+            step_input.spad_write_valid[0] = true;
+            step_input.spad_write_addr[0] = address;
+            step_input.spad_write_sub_bank[0] = sub_bank;
+
+            for(unsigned element=0;
+                    element<SPAD_ELEMENTS_PER_SUB_BANK; ++element){
+                #pragma HLS UNROLL
+                const unsigned feature =
+                    sub_bank*SPAD_ELEMENTS_PER_SUB_BANK+element;
+                if(phase==RequestPhase::PRELOAD_Q){
+                    step_input.spad_write_data[0][element] =
+                        input.q[phase_index][feature];
+                }else if(phase==RequestPhase::PRELOAD_K){
+                    step_input.spad_write_data[0][element] =
+                        input.k[phase_index][feature];
+                }else{
+                    // ATTENTION_VALUE使用按feature行存放的V转置布局。
+                    step_input.spad_write_data[0][element] =
+                        input.v[feature][phase_index];
+                }
+            }
+            break;
+        }
+
+        case RequestPhase::EXECUTE_INSTRUCTION:{
+            const fsa::MatrixInstruction instruction =
+                requestInstruction(input, instruction_index);
+            const fsa::ExecutionPlanStep plan =
+                fsa::make_execution_plan_step(
+                    instruction,
+                    instruction_timer
+                );
+            issue_step = plan.valid;
+            if(plan.valid){
+                mapPlanToDatapath(plan, step_input);
+            }else{
+                output.protocol_error = true;
+            }
+            break;
+        }
+
+        case RequestPhase::READ_L_REQUEST:
+        case RequestPhase::READ_O_REQUEST:{
+            const unsigned address = phase==RequestPhase::READ_L_REQUEST
+                ? L_ADDRESS
+                : O_BASE_ADDRESS+phase_index;
+            for(int bank=0; bank<fsa::ACC_SUB_BANKS; ++bank){
+                #pragma HLS UNROLL
+                step_input.acc_dma_read_valid[bank] = true;
+                step_input.acc_dma_read_addr[bank] = address;
+                step_input.acc_dma_read_sub_bank[bank] = bank;
+            }
+            break;
+        }
+
+        case RequestPhase::READ_L_RESPONSE:
+        case RequestPhase::READ_O_RESPONSE:
+            // 空step只推进一次状态，使上一拍DMA窄读响应可见。
+            break;
+
+        case RequestPhase::DONE:
+            issue_step = false;
+            break;
+        }
+
+        if(!issue_step){
+            break;
+        }
+
+        fsa::FsaCoreStepOutput step_output{};
+        advanceDatapath(
             state,
+            step_input,
+            step_output,
             output.executed_steps,
             output.protocol_error
         );
-        online_sequence_active = true;
-    }
 
-    preloadQKV(
-        state,
-        input,
-        output.executed_steps,
-        output.protocol_error
-    );
+        switch(phase){
+        case RequestPhase::RESET_ONLINE_MAX:
+            ++phase_index;
+            if(phase_index==(unsigned)fsa::SA_COLS){
+                online_sequence_active = true;
+                phase = RequestPhase::PRELOAD_Q;
+                phase_index = 0;
+            }
+            break;
 
-    fsa::MatrixInstruction load =
-        baseInstruction(fsa::MxFunc::LOAD_STATIONARY);
-    load.spad.addr = Q_BASE_ADDRESS+fsa::SA_COLS-1;
-    load.spad.stride = -1;
-    executeInstruction(
-        state,
-        load,
-        output.executed_steps,
-        output.protocol_error
-    );
+        case RequestPhase::PRELOAD_Q:
+        case RequestPhase::PRELOAD_K:
+        case RequestPhase::PRELOAD_V:{
+            if(!step_output.spad_write_ready[0]){
+                output.protocol_error = true;
+            }
+            ++sub_bank;
+            if(sub_bank==(unsigned)fsa::SPAD_SUB_BANKS){
+                sub_bank = 0;
+                ++phase_index;
+                const unsigned row_count = phase==RequestPhase::PRELOAD_Q
+                    ? fsa::SA_COLS
+                    : fsa::SA_ROWS;
+                if(phase_index==row_count){
+                    if(phase==RequestPhase::PRELOAD_Q){
+                        phase = RequestPhase::PRELOAD_K;
+                    }else if(phase==RequestPhase::PRELOAD_K){
+                        phase = RequestPhase::PRELOAD_V;
+                    }else{
+                        phase = RequestPhase::EXECUTE_INSTRUCTION;
+                        instruction_index = 0;
+                        instruction_timer = 0;
+                    }
+                    phase_index = 0;
+                }
+            }
+            break;
+        }
 
-    fsa::MatrixInstruction score =
-        baseInstruction(fsa::MxFunc::ATTENTION_SCORE_COMPUTE);
-    score.spad.addr = K_BASE_ADDRESS;
-    score.spad.revInput = true;
-    score.spad.delayOutput = true;
-    score.spad.revOutput = true;
-    score.acc.addr = L_ADDRESS;
-    score.acc.zero = input.initialize;
-    score.acc.causal = input.causal;
-    score.acc.activeRows = input.active_keys;
-    score.acc.queryBase = input.query_base;
-    score.acc.keyBase = input.key_base;
-    executeInstruction(
-        state,
-        score,
-        output.executed_steps,
-        output.protocol_error
-    );
+        case RequestPhase::EXECUTE_INSTRUCTION:{
+            const fsa::MatrixInstruction instruction =
+                requestInstruction(input, instruction_index);
+            const unsigned instruction_length =
+                fsa::execution_plan_length(instruction);
+            ++instruction_timer;
+            if(instruction_timer==instruction_length){
+                instruction_timer = 0;
+                ++instruction_index;
+                if(instruction_index==instruction_count){
+                    if(input.finalize){
+                        online_sequence_active = false;
+                        output.normalized = true;
+                    }
+                    phase = RequestPhase::READ_L_REQUEST;
+                }
+            }
+            break;
+        }
 
-    fsa::MatrixInstruction value =
-        baseInstruction(fsa::MxFunc::ATTENTION_VALUE_COMPUTE);
-    value.spad.addr = VT_BASE_ADDRESS;
-    value.spad.revInput = true;
-    value.spad.delayOutput = true;
-    value.spad.revOutput = false;
-    value.acc.addr = O_BASE_ADDRESS;
-    value.acc.zero = input.initialize;
-    executeInstruction(
-        state,
-        value,
-        output.executed_steps,
-        output.protocol_error
-    );
+        case RequestPhase::READ_L_REQUEST:
+        case RequestPhase::READ_O_REQUEST:
+            for(int bank=0; bank<fsa::ACC_SUB_BANKS; ++bank){
+                #pragma HLS UNROLL
+                if(!step_output.acc_dma_read_ready[bank]){
+                    output.protocol_error = true;
+                }
+            }
+            phase = phase==RequestPhase::READ_L_REQUEST
+                ? RequestPhase::READ_L_RESPONSE
+                : RequestPhase::READ_O_RESPONSE;
+            break;
 
-    if(input.finalize){
-        fsa::MatrixInstruction scale =
-            baseInstruction(fsa::MxFunc::ATTENTION_LSE_NORM_SCALE);
-        scale.acc.addr = L_ADDRESS;
-        executeInstruction(
-            state,
-            scale,
-            output.executed_steps,
-            output.protocol_error
-        );
+        case RequestPhase::READ_L_RESPONSE:
+        case RequestPhase::READ_O_RESPONSE:
+            for(int bank=0; bank<fsa::ACC_SUB_BANKS; ++bank){
+                #pragma HLS UNROLL
+                if(!step_output.acc_dma_response_valid[bank]){
+                    output.protocol_error = true;
+                }
+                for(unsigned element=0;
+                        element<ACC_ELEMENTS_PER_SUB_BANK; ++element){
+                    #pragma HLS UNROLL
+                    const unsigned query =
+                        bank*ACC_ELEMENTS_PER_SUB_BANK+element;
+                    if(phase==RequestPhase::READ_L_RESPONSE){
+                        output.l[query] =
+                            step_output.acc_dma_read_data[bank][element];
+                    }else{
+                        output.o[query][phase_index] =
+                            step_output.acc_dma_read_data[bank][element];
+                    }
+                }
+            }
+            if(phase==RequestPhase::READ_L_RESPONSE){
+                phase = RequestPhase::READ_O_REQUEST;
+                phase_index = 0;
+            }else{
+                ++phase_index;
+                phase = phase_index==(unsigned)fsa::SA_ROWS
+                    ? RequestPhase::DONE
+                    : RequestPhase::READ_O_REQUEST;
+            }
+            break;
 
-        fsa::MatrixInstruction norm =
-            baseInstruction(fsa::MxFunc::ATTENTION_LSE_NORM);
-        norm.acc.addr = O_BASE_ADDRESS;
-        executeInstruction(
-            state,
-            norm,
-            output.executed_steps,
-            output.protocol_error
-        );
-        online_sequence_active = false;
-        output.normalized = true;
-    }
+        case RequestPhase::DONE:
+            break;
+        }
 
-    fsa::acc_t l_row[fsa::SA_COLS]{};
-    #pragma HLS ARRAY_PARTITION variable=l_row type=complete dim=1
-    readAccRow(
-        state,
-        L_ADDRESS,
-        l_row,
-        output.executed_steps,
-        output.protocol_error
-    );
-    for(int query=0; query<fsa::SA_COLS; ++query){
-        #pragma HLS UNROLL
-        output.l[query] = l_row[query];
-    }
-
-    for(int value_feature=0;
-            value_feature<fsa::SA_ROWS; ++value_feature){
-        fsa::acc_t o_row[fsa::SA_COLS]{};
-        #pragma HLS ARRAY_PARTITION variable=o_row type=complete dim=1
-        readAccRow(
-            state,
-            O_BASE_ADDRESS+value_feature,
-            o_row,
-            output.executed_steps,
-            output.protocol_error
-        );
-        for(int query=0; query<fsa::SA_COLS; ++query){
-            #pragma HLS UNROLL
-            output.o[query][value_feature] = o_row[query];
+        if(phase==RequestPhase::DONE){
+            output.request_done = !output.protocol_error;
+            break;
         }
     }
 
-    output.request_done = !output.protocol_error;
+    if(phase!=RequestPhase::DONE){
+        output.protocol_error = true;
+        output.request_done = false;
+    }
 }
 
 void fsa_core_request_top(

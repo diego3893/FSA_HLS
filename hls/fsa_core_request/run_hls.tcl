@@ -13,8 +13,6 @@ set CFLAGS "-std=c++14 -I[file join $PROJECT_ROOT include]"
 
 add_files [file join $PROJECT_ROOT "src/hls/fsa_core_request_top.cpp"] \
     -cflags $CFLAGS
-add_files [file join $PROJECT_ROOT "src/core/matrix_engine_controller.cpp"] \
-    -cflags $CFLAGS
 add_files [file join $PROJECT_ROOT "src/core/fsa_core_datapath.cpp"] \
     -cflags $CFLAGS
 add_files [file join $PROJECT_ROOT "src/core/execution_plan.cpp"] \
