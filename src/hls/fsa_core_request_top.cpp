@@ -88,10 +88,10 @@ namespace{
         // 本函数在请求调度循环中只有一个静态调用点。所有阶段先生成本拍控制，
         // 再从该调用点推进同一套SA、Accumulator和片上状态通路。
         #pragma HLS INLINE off
-        // 当前状态回写依赖决定了最小可实现Interval为18；显式写出实际目标，
-        // 避免工具按默认II=1反复报告不可满足的依赖约束。
-        #pragma HLS PIPELINE II=19
-        #pragma HLS LATENCY min=37
+        // 最新综合中累加器状态回写依赖使本函数的实际Interval为20。
+        // 将II对齐该可实现值，并多保留一个latency周期供调度器切分组合路径。
+        #pragma HLS PIPELINE II=20
+        #pragma HLS LATENCY min=38
         fsa::fsa_core_datapath_step(state, input, output);
         executed_steps = executed_steps+1;
 
@@ -234,12 +234,13 @@ void fsa::fsa_core_request_run(
         ? REQUEST_INSTRUCTION_COUNT
         : REQUEST_BASE_INSTRUCTION_COUNT;
 
-    // 所有阶段只生成step_input；完整Core只在循环底部调用一次。共享Core及
-    // 循环状态依赖当前只能达到II=36，因此显式采用该目标，不再要求II=1。
+    // 所有阶段只生成step_input；完整Core只在循环底部调用一次。上一版共享Core
+    // 延迟37拍时外层迭代延迟和实际II均为38；本版再给Core增加一拍，
+    // 因此外层II同步调整为39，避免循环迭代延迟再次使目标差1拍。
     for(unsigned scheduler_iteration=0;
             scheduler_iteration<MAX_REQUEST_SCHEDULER_ITERATIONS;
             ++scheduler_iteration){
-        #pragma HLS PIPELINE II=37
+        #pragma HLS PIPELINE II=39
         #pragma HLS LOOP_TRIPCOUNT min=50 max=20000
 
         fsa::FsaCoreStepInput step_input{};
