@@ -48,66 +48,46 @@ namespace fsa{
         return word;
     }
 
-    void dma_load_qkv(
-        const dma_word_t q_memory[DMA_QKV_WORDS],
-        const dma_word_t k_memory[DMA_QKV_WORDS],
-        const dma_word_t vt_memory[DMA_QKV_WORDS],
-        elem_t q[SA_COLS][SA_ROWS],
-        elem_t k[SA_ROWS][SA_ROWS],
-        elem_t v[SA_ROWS][SA_ROWS]
+    void dma_load_elem_row(
+        const dma_word_t memory[DMA_MAX_QKV_WORDS],
+        const unsigned row_index,
+        elem_t row[SA_ROWS]
     ){
         #pragma HLS INLINE off
+        #pragma HLS ARRAY_PARTITION variable=row type=complete dim=1
 
-        for(int word_index=0; word_index<DMA_QKV_WORDS; ++word_index){
-            #pragma HLS LOOP_TRIPCOUNT min=4 max=4
-            const dma_word_t q_word = q_memory[word_index];
-            const dma_word_t k_word = k_memory[word_index];
-            const dma_word_t vt_word = vt_memory[word_index];
-
+        const unsigned base = row_index*DMA_QKV_WORDS_PER_ROW;
+        for(int word_index=0;
+                word_index<DMA_QKV_WORDS_PER_ROW; ++word_index){
+            #pragma HLS PIPELINE II=1
+            const dma_word_t word = memory[base+word_index];
             for(int lane=0; lane<DMA_ELEMS_PER_WORD; ++lane){
                 #pragma HLS UNROLL
-                const int linear = word_index*DMA_ELEMS_PER_WORD+lane;
-
-                const int q_query = linear/SA_ROWS;
-                const int q_feature = linear%SA_ROWS;
-                q[q_query][q_feature] = dma_unpack_elem(q_word, lane);
-
-                const int k_key = linear/SA_ROWS;
-                const int k_feature = linear%SA_ROWS;
-                k[k_key][k_feature] = dma_unpack_elem(k_word, lane);
-
-                const int value_feature = linear/SA_ROWS;
-                const int key = linear%SA_ROWS;
-                v[key][value_feature] = dma_unpack_elem(vt_word, lane);
+                row[word_index*DMA_ELEMS_PER_WORD+lane] =
+                    dma_unpack_elem(word, lane);
             }
         }
     }
 
-    void dma_store_ol(
-        dma_word_t ol_memory[DMA_OL_WORDS],
-        const acc_t l[SA_COLS],
-        const acc_t o[SA_COLS][SA_ROWS]
+    void dma_store_acc_row(
+        dma_word_t memory[DMA_MAX_O_WORDS],
+        const unsigned row_index,
+        const acc_t row[SA_ROWS]
     ){
         #pragma HLS INLINE off
+        #pragma HLS ARRAY_PARTITION variable=row type=complete dim=1
 
-        for(int word_index=0; word_index<DMA_OL_WORDS; ++word_index){
-            #pragma HLS LOOP_TRIPCOUNT min=10 max=10
+        const unsigned base = row_index*DMA_O_WORDS_PER_ROW;
+        for(int word_index=0;
+                word_index<DMA_O_WORDS_PER_ROW; ++word_index){
+            #pragma HLS PIPELINE II=1
             acc_t values[DMA_ACCS_PER_WORD]{};
             #pragma HLS ARRAY_PARTITION variable=values type=complete dim=1
-
             for(int lane=0; lane<DMA_ACCS_PER_WORD; ++lane){
                 #pragma HLS UNROLL
-                const int linear = word_index*DMA_ACCS_PER_WORD+lane;
-                if(linear<SA_COLS){
-                    values[lane] = l[linear];
-                }else{
-                    const int o_linear = linear-SA_COLS;
-                    const int query = o_linear/SA_ROWS;
-                    const int value_feature = o_linear%SA_ROWS;
-                    values[lane] = o[query][value_feature];
-                }
+                values[lane] = row[word_index*DMA_ACCS_PER_WORD+lane];
             }
-            ol_memory[word_index] = dma_pack_acc_word(values);
+            memory[base+word_index] = dma_pack_acc_word(values);
         }
     }
 

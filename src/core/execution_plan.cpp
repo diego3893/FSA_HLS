@@ -58,8 +58,10 @@ namespace fsa{
             const sram_stride_t stride,
             const unsigned index
         ){
-            const ap_int<8> address = (ap_int<8>)base+
-                (ap_int<8>)stride*(ap_int<8>)index;
+            const ap_int<SRAM_ADDRESS_WIDTH+2> address =
+                (ap_int<SRAM_ADDRESS_WIDTH+2>)base+
+                (ap_int<SRAM_ADDRESS_WIDTH+2>)stride*
+                (ap_int<SRAM_ADDRESS_WIDTH+2>)index;
             return (sram_address_t)address;
         }
 
@@ -110,13 +112,30 @@ namespace fsa{
             ExecutionPlanStep& step,
             const MatrixInstruction& instruction,
             const CmpControlCmd command,
-            const unsigned causal_counter
+            const unsigned key_index
         ){
             CmpControl control{};
             control.cmd = command;
-            control.causalCounter = instruction.acc.causal
-                ? (std::uint8_t)causal_counter
-                : (std::uint8_t)0;
+
+            unsigned mask_prefix = 0;
+            if(command==CmpControlCmd::UPDATE && instruction.acc.causal){
+                const unsigned global_key =
+                    instruction.acc.keyBase+key_index;
+                if(global_key>instruction.acc.queryBase){
+                    mask_prefix = global_key-instruction.acc.queryBase;
+                }
+            }
+
+            // 矩形阵列中只有activeRows个K/V token有效。把无效token
+            // 对所有query列屏蔽，使其softmax概率严格为0。
+            if(command==CmpControlCmd::UPDATE &&
+                    key_index>=instruction.acc.activeRows){
+                mask_prefix = SA_COLS;
+            }
+            if(mask_prefix>(unsigned)SA_COLS){
+                mask_prefix = SA_COLS;
+            }
+            control.causalCounter = (std::uint8_t)mask_prefix;
             step.cmp_ctrl = make_valid(control);
         }
 
@@ -200,7 +219,7 @@ namespace fsa{
                 }else if(timer==2*SA_ROWS+1){ // 广播1，1*S-newMax
                     setSpConstant(step, (elem_t)1.0F);
                 }else if(timer==2*SA_ROWS+2){ // 广播缩放因子
-                    setSpConstant(step, (elem_t)attentionScale());
+                    setSpConstant(step, elemAttentionScale());
                 }else if(inRange(
                     timer,
                     SCORE_EXP2_START-1,

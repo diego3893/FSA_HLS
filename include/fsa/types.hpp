@@ -25,9 +25,6 @@ namespace fsa{
     /// @brief 累加精度，竖直方向数据
     using acc_t = float;
 
-    /// @brief 片上SRAM行地址
-    using sram_address_t = ap_uint<5>;
-
     /**
      * @brief 计算索引count个对象至少需要的位数
      * 
@@ -44,6 +41,14 @@ namespace fsa{
         return width==0 ? 1 : width;
     }
 
+    /// @brief Scratchpad和Accumulator RAM所需的最大逻辑行数。
+    constexpr int SRAM_MAX_ROWS =
+        SPAD_ROWS>ACC_ROWS ? SPAD_ROWS : ACC_ROWS;
+
+    /// @brief 随阵列规模自动扩展的片上SRAM行地址宽度。
+    constexpr int SRAM_ADDRESS_WIDTH = bankedSramIndexWidth(SRAM_MAX_ROWS);
+    using sram_address_t = ap_uint<SRAM_ADDRESS_WIDTH>;
+
     /**
      * @brief BankedSRAM中sub-bank编号的定宽整数类型
      * 
@@ -54,8 +59,8 @@ namespace fsa{
 
     /// @brief 内存地址
     using memory_address_t = std::uint64_t;
-    /// @brief 地址访问步长
-    using sram_stride_t = ap_int<5>;
+    /// @brief 地址访问步长，多一位用于表示负步长。
+    using sram_stride_t = ap_int<SRAM_ADDRESS_WIDTH+1>;
     using memory_stride_t = ap_int<21>;
     /// @brief 硬件计数器
     using exp2_counter_t = ap_uint<3>;

@@ -232,7 +232,7 @@ namespace fsa{
          * @brief 恢复除法器的一个逻辑时钟步骤
          *
          * 状态由外层AccumulatorState保存，因此这里不能再使用函数内static。
-         * 四列分别调用本函数，综合展开后对应四套相互独立的除法状态。
+         * 每列分别调用本函数，综合展开后对应相互独立的除法状态。
          */
         ReciprocalTickOutput divider_tick(
             const ReciprocalDividerState& current,
@@ -292,8 +292,8 @@ namespace fsa{
         /**
          * @brief 推进一列Accumulator状态并产生该列SRAM写回数据
          *
-         * lane是每个调用点传入的编译期常量。FUNCTION_INSTANTIATE让
-         * Vitis HLS为四个lane生成不同的RTL实现；INLINE off继续保留
+         * lane是展开循环传入的编译期常量。FUNCTION_INSTANTIATE让
+         * Vitis HLS为每个lane生成不同的RTL实现；INLINE off继续保留
          * 每列独立层次，避免PWL、FP32乘加和恢复除法器跨列复用。
          */
         void accumulator_lane_step(
@@ -376,11 +376,6 @@ namespace fsa{
         #pragma HLS INLINE off
         #pragma HLS LATENCY max=18
 
-        static_assert(
-            SA_COLS==4,
-            "当前Accumulator硬件层次显式实现四个独立lane"
-        );
-
         #pragma HLS ARRAY_PARTITION variable=current.scale \
             type=complete dim=1
         #pragma HLS ARRAY_PARTITION variable=current.reciprocal \
@@ -401,34 +396,15 @@ namespace fsa{
         const bool valid = io.ctrl_in.valid;
         const AccumulatorCmd cmd = io.ctrl_in.bits.cmd;
 
-        /**
-         * 四个调用点分别传入常量lane编号，配合FUNCTION_INSTANTIATE
-         * 形成四个独立函数实现，使每列拥有自己的完整运算资源。
-         */
-        accumulator_lane_step(
-            0,
-            current.scale[0], current.reciprocal[0],
-            next.scale[0], next.reciprocal[0], valid, cmd,
-            io.sa_in[0], io.sram_in[0], io.sram_out[0]
-        );
-        accumulator_lane_step(
-            1,
-            current.scale[1], current.reciprocal[1],
-            next.scale[1], next.reciprocal[1], valid, cmd,
-            io.sa_in[1], io.sram_in[1], io.sram_out[1]
-        );
-        accumulator_lane_step(
-            2,
-            current.scale[2], current.reciprocal[2],
-            next.scale[2], next.reciprocal[2], valid, cmd,
-            io.sa_in[2], io.sram_in[2], io.sram_out[2]
-        );
-        accumulator_lane_step(
-            3,
-            current.scale[3], current.reciprocal[3],
-            next.scale[3], next.reciprocal[3], valid, cmd,
-            io.sa_in[3], io.sram_in[3], io.sram_out[3]
-        );
+        for(int col=0; col<SA_COLS; ++col){
+            #pragma HLS UNROLL
+            accumulator_lane_step(
+                col,
+                current.scale[col], current.reciprocal[col],
+                next.scale[col], next.reciprocal[col], valid, cmd,
+                io.sa_in[col], io.sram_in[col], io.sram_out[col]
+            );
+        }
     }
 
 }  // namespace fsa

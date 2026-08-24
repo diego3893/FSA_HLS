@@ -63,6 +63,13 @@ struct MatrixInstructionAcc {
     sram_stride_t stride = 0;
     bool zero = false;
     bool causal = false;
+
+    /// @brief 当前K/V tile中真实有效的token数，其余SA行作为零填充。
+    std::uint16_t activeRows = SA_ROWS;
+
+    /// @brief causal mask使用的全局query/key tile起始下标。
+    std::uint32_t queryBase = 0;
+    std::uint32_t keyBase = 0;
 };
 
 // 成员顺序与 MatrixInstruction.scala 一致：acc、spad、header。
