@@ -28,7 +28,7 @@ VIO只负责启动和读取状态，不承载Q/K/V/O。板上测试控制器通�
 本次**不验证**PCIe、XDMA、HBM Controller、外部HBM地址空间、Linux驱动、Python/C++负载、
 中断、最大长度和性能。
 
-## 2. 当前输入状态和必须补齐的IP
+## 2. 当前IP输入状态
 
 当前检查到：
 
@@ -43,25 +43,18 @@ VIO只负责启动和读取状态，不承载Q/K/V/O。板上测试控制器通�
 | 控制接口 | 32-bit AXI4-Lite，7-bit地址 |
 | 数据接口 | 64-bit地址、64-bit数据的AXI4 master |
 
-现有 `build/fsa_dma_build/solution1/impl/verilog/fsa_dma_top.v` 能确认物理端口，但当前
-工作区内没有报告所称的 `fsa_dma_top` `export.zip/component.xml`。因此创建工程前必须：
+完整导出IP现已位于：
 
-1. 从原始构建服务器取回对应版本的 `export.zip`，或者在Vitis HLS重新执行：
+```text
+fsa_dma_vivado/ip_repo/fsa_dma_top/component.xml
+```
 
-   ```tcl
-   export_design -format ip_catalog -rtl verilog
-   ```
+目录同时包含 `hdl/`、`constraints/`、`xgui/` 和驱动元数据，原始导出压缩包也保存在
+`ip_repo/xilinx_com_hls_fsa_dma_top_1_0.zip`。工程脚本会检查 `component.xml` 和VLNV。
 
-2. 解压为：
-
-   ```text
-   fsa_dma_vivado/ip_repo/fsa_dma_top/component.xml
-   ```
-
-3. 确认解压目录同时包含 `hdl/`、`constraints/`、`xgui/` 等IP文件。
-
-工程脚本会在缺少 `component.xml` 或VLNV不一致时停止，不会使用裸 `impl/verilog/`
-冒充完整HLS IP。
+需要特别区分两层接口：HLS内部 `fsa_dma_top.v` 声明了AXI USER信号，但Vivado为打包IP
+生成的 `fsa_dma_top_0` wrapper隐藏了 `AWUSER/WUSER/ARUSER/RUSER/BUSER`。板测RTL以
+Vivado wrapper为准，不连接这5组可选端口。
 
 ## 3. 目录内容
 
@@ -295,12 +288,12 @@ debug_status = 0
 ### 找不到HLS IP
 
 检查 `ip_repo/fsa_dma_top/component.xml` 是否存在，VLNV是否为
-`xilinx.com:hls:fsa_dma_top:1.0`。不要只复制HLS的裸Verilog目录。
+`xilinx.com:hls:fsa_dma_top:1.0`。
 
 ### `fsa_dma_top_0`端口不匹配
 
-说明取回的 `component.xml` 不是当前RTL对应版本。以取回IP生成的stub为准，核对
-64-bit地址/数据、7-bit控制地址、AXI user/id/lock端口；不要直接删掉不匹配端口。
+以Vivado实际生成的stub为准，核对64-bit地址/数据、7-bit控制地址和AXI ID/LOCK端口。
+当前wrapper隐藏5组AXI USER端口，因此 `fsa_dma_control_system.v` 不应连接它们。
 
 ### 一直没有 `ap_done`
 
@@ -336,8 +329,8 @@ debug_status = 0
 |---|---|---|
 | 板测包生成 | 已完成 | RTL、Tcl、XDC、testbench和本文已生成 |
 | 文本静态检查 | 已完成 | 配置、实例名、寄存器偏移和probe宽度已互相核对 |
-| 完整IP输入 | **缺失** | 当前工作区没有 `fsa_dma_top component.xml/export.zip` |
-| Vivado行为仿真 | 未执行 | 必须补齐IP后在Vivado 2024.2运行 |
+| 完整IP输入 | 已具备 | `ip_repo/fsa_dma_top/component.xml`和完整HDL目录存在 |
+| Vivado行为仿真 | **待重新执行** | 已修复wrapper中不存在的5组AXI USER端口连接 |
 | Synthesis | 未执行 | 无Vivado结果 |
 | Implementation与时序 | 未执行 | 无WNS/WHS/TNS/THS证据 |
 | Bitstream | 未生成 | 必须在时序合格后生成 |
@@ -346,4 +339,3 @@ debug_status = 0
 
 只有行为仿真、Implementation时序和VIO固定向量分别通过后，才能分别记录对应结论。
 本板测通过也不能证明XDMA/HBM/主机软件链路已经通过。
-

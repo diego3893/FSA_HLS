@@ -65,14 +65,12 @@ module fsa_dma_control_system (
     wire [2:0]   m_awprot;
     wire [3:0]   m_awqos;
     wire [3:0]   m_awregion;
-    wire [0:0]   m_awuser;
     wire         m_wvalid;
     wire         m_wready;
     wire [63:0]  m_wdata;
     wire [7:0]   m_wstrb;
     wire         m_wlast;
     wire [0:0]   m_wid;
-    wire [0:0]   m_wuser;
     wire         m_bvalid;
     wire         m_bready;
     wire [1:0]   m_bresp;
@@ -90,7 +88,6 @@ module fsa_dma_control_system (
     wire [2:0]   m_arprot;
     wire [3:0]   m_arqos;
     wire [3:0]   m_arregion;
-    wire [0:0]   m_aruser;
     wire         m_rvalid;
     wire         m_rready;
     wire [63:0]  m_rdata;
@@ -175,14 +172,12 @@ module fsa_dma_control_system (
         .m_axi_gmem_AWPROT       (m_awprot),
         .m_axi_gmem_AWQOS        (m_awqos),
         .m_axi_gmem_AWREGION     (m_awregion),
-        .m_axi_gmem_AWUSER       (m_awuser),
         .m_axi_gmem_WVALID       (m_wvalid),
         .m_axi_gmem_WREADY       (m_wready),
         .m_axi_gmem_WDATA        (m_wdata),
         .m_axi_gmem_WSTRB        (m_wstrb),
         .m_axi_gmem_WLAST        (m_wlast),
         .m_axi_gmem_WID          (m_wid),
-        .m_axi_gmem_WUSER        (m_wuser),
         .m_axi_gmem_ARVALID      (m_arvalid),
         .m_axi_gmem_ARREADY      (m_arready),
         .m_axi_gmem_ARADDR       (m_araddr),
@@ -195,19 +190,16 @@ module fsa_dma_control_system (
         .m_axi_gmem_ARPROT       (m_arprot),
         .m_axi_gmem_ARQOS        (m_arqos),
         .m_axi_gmem_ARREGION     (m_arregion),
-        .m_axi_gmem_ARUSER       (m_aruser),
         .m_axi_gmem_RVALID       (m_rvalid),
         .m_axi_gmem_RREADY       (m_rready),
         .m_axi_gmem_RDATA        (m_rdata),
         .m_axi_gmem_RLAST        (m_rlast),
         .m_axi_gmem_RID          (m_rid),
-        .m_axi_gmem_RUSER        (1'b0),
         .m_axi_gmem_RRESP        (m_rresp),
         .m_axi_gmem_BVALID       (m_bvalid),
         .m_axi_gmem_BREADY       (m_bready),
         .m_axi_gmem_BRESP        (m_bresp),
         .m_axi_gmem_BID          (m_bid),
-        .m_axi_gmem_BUSER        (1'b0),
 
         .s_axi_control_AWVALID   (ctrl_awvalid),
         .s_axi_control_AWREADY   (ctrl_awready),
@@ -268,10 +260,11 @@ module fsa_dma_control_system (
         .protocol_error (ram_protocol_error)
     );
 
+    // USER signals exist inside the HLS-generated RTL but are intentionally
+    // hidden by the packaged Vivado IP wrapper. Do not connect AWUSER,
+    // WUSER, ARUSER, RUSER or BUSER on fsa_dma_top_0.
     wire unused_hls_sideband = hls_interrupt ^ m_awlock[0] ^ m_awlock[1] ^
-        ^m_awcache ^ ^m_awprot ^ ^m_awqos ^ ^m_awregion ^ ^m_awuser ^
-        ^m_wid ^ ^m_wuser ^ ^m_arlock ^ ^m_arcache ^ ^m_arprot ^
-        ^m_arqos ^ ^m_arregion ^ ^m_aruser;
+        ^m_awcache ^ ^m_awprot ^ ^m_awqos ^ ^m_awregion ^ ^m_wid ^
+        ^m_arlock ^ ^m_arcache ^ ^m_arprot ^ ^m_arqos ^ ^m_arregion;
 
 endmodule
-

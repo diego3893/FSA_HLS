@@ -1,6 +1,6 @@
 # HLS IP放置说明
 
-此目录应包含解压后的 `fsa_dma_top` HLS IP，例如：
+此目录已经包含解压后的 `fsa_dma_top` HLS IP：
 
 ```text
 ip_repo/
@@ -13,11 +13,9 @@ ip_repo/
 
 预期 VLNV 为 `xilinx.com:hls:fsa_dma_top:1.0`。
 
-当前工作区的 `build/fsa_dma_build/solution1/impl/` 缺少报告中提到的
-`export.zip` 和 `component.xml`，所以这里没有伪造或复制不完整的 IP。请在 Vitis HLS
-重新执行 `export_design -format ip_catalog -rtl verilog`，或从原始构建服务器取回本次
-导出的 `export.zip`，解压到上述位置后再运行工程创建脚本。
+当前实际文件为 `ip_repo/fsa_dma_top/component.xml`，同时保留了原始导出压缩包
+`ip_repo/xilinx_com_hls_fsa_dma_top_1_0.zip`。工程脚本直接注册本目录。
 
-不要只复制 `solution1/impl/verilog/`：该目录是实现中间文件，不等价于带
-`component.xml`、XGUI和依赖元数据的完整 Vivado IP repository。
-
+注意：HLS内部RTL仍声明5组AXI USER信号，但Vivado打包后的 `fsa_dma_top_0` wrapper
+隐藏了这些可选端口。板测连接应以Vivado实际生成的wrapper/stub为准，不能把内部RTL的
+`AWUSER/WUSER/ARUSER/RUSER/BUSER`直接连接到IP实例。
