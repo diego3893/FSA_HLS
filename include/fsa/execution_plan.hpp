@@ -9,7 +9,8 @@
 #ifndef EXECUTION_PLAN_HPP
 #define EXECUTION_PLAN_HPP
 
-#include "fsa/hls/fsa_core_top.hpp"
+#include "fsa/control.hpp"
+#include "fsa/fsa_core_interface.hpp"
 #include "fsa/instruction.hpp"
 
 namespace fsa{

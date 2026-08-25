@@ -12,7 +12,7 @@
 #include "fsa/accumulator.hpp"
 #include "fsa/banked_sram.hpp"
 #include "fsa/delayer.hpp"
-#include "fsa/hls/fsa_core_top.hpp"
+#include "fsa/fsa_core_interface.hpp"
 #include "fsa/state.hpp"
 #include "fsa/systolic_array.hpp"
 
