@@ -13,37 +13,10 @@
 #include "fsa/banked_sram.hpp"
 #include "fsa/control.hpp"
 #include "fsa/delayer.hpp"
+#include "fsa/fsa_core_interface.hpp"
 #include "fsa/types.hpp"
 
 namespace fsa{
-
-    /**
-     * @brief Controller原本发往Scratchpad整行读端口的一拍请求
-     *
-     * 布局控制与读请求一起锁存，下一逻辑step和SRAM响应进入
-     * InputDelayer；常量请求保持相同的一拍响应时序但不访问SRAM。
-     */
-    struct SpReadRequest{
-        bool valid = false;
-        bool is_constant = false;
-        sram_address_t addr = 0;
-        bool rev_sram_out = false;
-        bool delay_sram_out = false;
-        bool rev_delayer_out = false;
-    };
-
-    /**
-     * @brief Controller原本发往Accumulator SRAM整行读端口的一拍请求
-     *
-     * rmw=true时，读请求地址会和响应一起延迟一拍，并由Accumulator
-     * 本拍产生的数据写回同一行。
-     */
-    struct AccReadRequest{
-        bool valid = false;
-        bool is_constant = false;
-        sram_address_t addr = 0;
-        bool rmw = false;
-    };
 
     /** @brief 无Controller阶段由testbench逐逻辑step提供的系统输入。 */
     struct FsaCoreTopInput{

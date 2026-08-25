@@ -1,9 +1,10 @@
 /**
  * @file matrix_engine_controller.hpp
+ * @author diego3893 (diegozcx@foxmail.com)
  * @brief 单FSM、非重叠MatrixEngineController
- *
- * 这一版只允许一条MatrixInstruction在途。它把ExecutionPlan逐logical step
- * 转换为数据通路控制，不实现Chisel双FSM的conflict-free指令重叠。
+ * @date 2026-08-25
+ * 
+ * 
  */
 #ifndef MATRIX_ENGINE_CONTROLLER_HPP
 #define MATRIX_ENGINE_CONTROLLER_HPP
