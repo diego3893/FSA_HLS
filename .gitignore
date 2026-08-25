@@ -6,5 +6,5 @@
 *.exe
 *.zip
 /hls/*/*_build/
-ip_repo/*/
+**/ip_repo/*/
 /third_party/vitis_hls/include/
