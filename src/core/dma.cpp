@@ -1,5 +1,4 @@
 #include "fsa/dma.hpp"
-
 #include <utils/x_hls_utils.h>
 
 namespace fsa{
@@ -12,9 +11,7 @@ namespace fsa{
         return view.to_ieee();
     }
 
-    dma_word_t dma_pack_elem_word(
-        const elem_t values[DMA_ELEMS_PER_WORD]
-    ){
+    dma_word_t dma_pack_elem_word(const elem_t values[DMA_ELEMS_PER_WORD]){
         #pragma HLS INLINE
         dma_word_t word = 0;
         for(int lane=0; lane<DMA_ELEMS_PER_WORD; ++lane){
@@ -34,9 +31,7 @@ namespace fsa{
         return view.to_ieee();
     }
 
-    dma_word_t dma_pack_acc_word(
-        const acc_t values[DMA_ACCS_PER_WORD]
-    ){
+    dma_word_t dma_pack_acc_word(const acc_t values[DMA_ACCS_PER_WORD]){
         #pragma HLS INLINE
         dma_word_t word = 0;
         for(int lane=0; lane<DMA_ACCS_PER_WORD; ++lane){
