@@ -77,12 +77,14 @@ void fsa_core_datapath_step(
 
     output = FsaCoreStepOutput{};
 
+    // SpRAM整行读
     SpRAMIO sp_ram_io{};
     sp_ram_io.fullRead[0].valid =
         input.sp_read.valid && !input.sp_read.is_constant;
     sp_ram_io.fullRead[0].addr = input.sp_read.addr;
     sp_ram_io.fullRead[0].setFullMask();
 
+    // SpRAM窄写请求
     for(int port=0; port<nMemPorts; ++port){
         #pragma HLS UNROLL
         sp_ram_io.narrowWrite[port].valid = input.spad_write_valid[port];
@@ -96,6 +98,7 @@ void fsa_core_datapath_step(
         }
     }
 
+    // SpRAM运行并握手
     sp_ram_step(state.sp_ram, sp_ram_io);
     output.sp_read_ready = input.sp_read.is_constant
         ? true
@@ -105,6 +108,7 @@ void fsa_core_datapath_step(
         output.spad_write_ready[port] = sp_ram_io.narrowWrite[port].ready;
     }
 
+    // InputDelayer延迟输入
     InputDelayerIO input_delayer_io{};
     input_delayer_io.in.valid = state.sp_response_valid;
     input_delayer_io.in.bits.rev_input = state.sp_rev_input;
@@ -127,6 +131,7 @@ void fsa_core_datapath_step(
     );
     output.delayer_out = input_delayer_io.out;
 
+    // SA处理数据
     SystolicArrayIO sa_io{};
     #pragma HLS ARRAY_PARTITION variable=sa_io.pe_ctrl type=complete dim=1
     #pragma HLS ARRAY_PARTITION variable=sa_io.pe_data type=complete dim=1
@@ -141,6 +146,7 @@ void fsa_core_datapath_step(
     SystolicArrayState next_sa{};
     fsa_core_datapath_sa_stage(state.sa, next_sa, sa_io);
 
+    // OutputDelayer对齐数据
     OutputDelayerIO output_delayer_io{};
     for(int col=0; col<SA_COLS; ++col){
         #pragma HLS UNROLL
@@ -156,6 +162,7 @@ void fsa_core_datapath_step(
     );
     output.aligned_sa_out = output_delayer_io.out;
 
+    // 数据送入Acc，注意区分输入来源
     AccumulatorIO accumulator_io{};
     #pragma HLS ARRAY_PARTITION variable=accumulator_io.sa_in type=complete dim=1
     #pragma HLS ARRAY_PARTITION variable=accumulator_io.sram_in type=complete dim=1
@@ -181,6 +188,7 @@ void fsa_core_datapath_step(
     );
     output.accumulator_out = accumulator_io.sram_out;
 
+    // AccRAM整行写
     AccRAMIO acc_ram_io{};
     acc_ram_io.fullRead[0].valid =
         input.acc_read.valid && !input.acc_read.is_constant;
@@ -196,6 +204,7 @@ void fsa_core_datapath_step(
             accumulator_io.sram_out[(std::size_t)col];
     }
 
+    // AccRAM窄读
     for(int port=0; port<nMemPorts; ++port){
         #pragma HLS UNROLL
         acc_ram_io.narrowRead[port].valid = input.acc_dma_read_valid[port];
@@ -225,6 +234,7 @@ void fsa_core_datapath_step(
         }
     }
 
+    // 保存本step状态
     state.input_delayer = next_input_delayer;
     state.sa = next_sa;
     state.output_delayer = next_output_delayer;
@@ -235,6 +245,7 @@ void fsa_core_datapath_step(
     const bool acc_request_accepted =
         input.acc_read.valid && output.acc_read_ready;
 
+    // 将本拍的RAM数据在下一拍返回
     state.sp_response_valid = sp_request_accepted;
     state.sp_response_is_constant = input.sp_read.is_constant;
     state.sp_rev_input = input.sp_read.rev_sram_out;
