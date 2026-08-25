@@ -1,6 +1,10 @@
 /**
  * @file fsa_core_request_top.hpp
+ * @author diego3893 (diegozcx@foxmail.com)
  * @brief 接收一个Q/K/V tile并自行完成在线FlashAttention的请求级顶层
+ * @date 2026-08-25
+ * 
+ * 
  */
 #ifndef FSA_CORE_REQUEST_TOP_HPP
 #define FSA_CORE_REQUEST_TOP_HPP
@@ -13,16 +17,12 @@ namespace fsa{
     /**
      * @brief 一个KV block请求。
      *
-     * Q布局为[query][feature]，K为[key][feature]，V为[key][value_feature]。
-     * initialize=true开始一条新的在线softmax序列；后续KV block使用false，
-     * 以复用内部CMP max以及accRAM中的非零L/O。finalize=true表示最后一个
-     * KV block，并在写回前执行O/L归一化。
      */
     struct FsaCoreRequestInput{
         bool reset = false;
         bool request_valid = false;
-        bool initialize = true;
-        bool finalize = true;
+        bool initialize = true; // 是否为第一个块，涉及reset
+        bool finalize = true; // 是否为最后一个块，涉及归一化
         bool causal = false;
 
         /// @brief k/v前active_keys行有效，范围为1..SA_COLS。
@@ -44,23 +44,19 @@ namespace fsa{
         bool normalized = false;
         ap_uint<16> executed_steps = 0;
 
-        /// @brief 在线softmax分母，lane顺序对应query。
+        /// @brief 在线softmax分母，lane顺序对应query
         acc_t l[SA_COLS]{};
 
         /**
-         * @brief attention输出，布局为[query][value_feature]。
+         * @brief attention输出，布局为[query][value_feature]
          *
-         * normalized=false时是尚未除以L的在线累计分子；finalize=true后
-         * normalized=true，此处为最终O/L。
          */
         acc_t o[SA_COLS][SA_ROWS]{};
     };
 
     /**
-     * @brief 不带外部接口pragma的请求核入口，供不同HLS系统顶层复用。
+     * @brief 不带外部接口pragma的请求核入口，供不同HLS系统顶层复用
      *
-     * 状态和fsa_core_request_top相同；一个HLS solution中只能由一个系统顶层
-     * 调用它，不能把它当作第二套并行计算核。
      */
     void fsa_core_request_run(
         const FsaCoreRequestInput& input,
