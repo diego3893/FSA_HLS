@@ -21,16 +21,16 @@ namespace fsa{
     struct FsaCoreRequestInput{
         bool reset = false;
         bool request_valid = false;
-        bool initialize = true; // 是否为第一个块，涉及reset
+        bool initialize = true; // 是否为第一个块，涉及重置m、L、O
         bool finalize = true; // 是否为最后一个块，涉及归一化
         bool causal = false;
 
-        /// @brief k/v前active_keys行有效，范围为1..SA_COLS。
+        /// @brief k/v前active_keys行有效
         std::uint16_t active_keys = SA_COLS;
 
-        /// @brief 用于跨tile causal mask的全局序列下标。
-        std::uint32_t query_base = 0;
-        std::uint32_t key_base = 0;
+        /// @brief 用于跨tile causal mask的全局序列下标
+        std::uint32_t query_base = 0; // q的起始下标
+        std::uint32_t key_base = 0; // k/v的起始下标
 
         elem_t q[SA_COLS][SA_ROWS]{};
         elem_t k[SA_ROWS][SA_ROWS]{};
@@ -38,20 +38,15 @@ namespace fsa{
     };
 
     struct FsaCoreRequestOutput{
-        bool request_ready = false;
-        bool request_done = false;
-        bool protocol_error = false;
-        bool normalized = false;
-        ap_uint<16> executed_steps = 0;
+        bool request_ready = false; // 是否可以接受请求
+        bool request_done = false; // 请求是否处理完
+        bool protocol_error = false; // 是否有错误
+        bool normalized = false; // 是否完成归一化
+        ap_uint<16> executed_steps = 0; // logical step统计，调试量
 
-        /// @brief 在线softmax分母，lane顺序对应query
-        acc_t l[SA_COLS]{};
+        acc_t l[SA_COLS]{}; // 在线softmax分母
 
-        /**
-         * @brief attention输出，布局为[query][value_feature]
-         *
-         */
-        acc_t o[SA_COLS][SA_ROWS]{};
+        acc_t o[SA_COLS][SA_ROWS]{}; // attention输出
     };
 
     /**
