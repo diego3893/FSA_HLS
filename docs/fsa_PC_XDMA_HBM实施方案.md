@@ -1,6 +1,6 @@
 # FSA 主机 PC/XDMA/HBM 实施方案
 
-> 更新日期：2026-08-25  
+> 更新日期：2026-08-26
 > 目标：在 NM37 的 XCVU37P 上形成“Linux 主机通过 XDMA 搬运数据并控制
 > `fsa_dma_top`，`fsa_dma_top` 通过 HBM 完成一次完整 Attention”的第一版闭环。
 
@@ -41,15 +41,64 @@ NM37 / XCVU37P
 | HLS C synthesis | 完成 | 100 MHz 目标，当前导出 IP 对应 4×4 配置 |
 | RTL co-simulation | 通过 | 单事务 27,566 cycles，详见 `fsa_dma综合报告.md` |
 | 可注册 HLS IP | **已具备** | `fsa_dma_vivado/ip_repo/fsa_dma_top/component.xml`、RTL、驱动和 `xgui/` 均存在 |
-| 固定向量 IP 板测 | **通过（用户确认）** | `test_pass=1`；板测使用片上 AXI RAM，不是 HBM |
-| 固定向量工程 Implementation 时序 | **通过（用户确认）** | 尚未在仓库中保存 WNS/WHS/TNS/THS 数值和报告路径 |
+| 固定向量 IP 板测 | **通过（用户确认）** | `test_busy=0`、`test_done=1`、`test_pass=1`、`test_fail=0`；板测使用片上 AXI RAM，不是 HBM。阶段 0 压缩包未包含 Hardware Manager/VIO 截图 |
+| 固定向量工程 Synthesis/Implementation/bitstream | **完成（报告已提供）** | Vivado 2024.2；`synth_design Complete!`、`write_bitstream Complete!`；目标 Part 为 `xcvu37p_CIV-fsvh2892-2-e` |
+| 固定向量工程 Implementation 时序 | **通过（报告已提供）** | 100 MHz；WNS `0.698 ns`、TNS `0`、WHS `0.009 ns`、THS `0`，Setup/Hold failing endpoints 均为 0 |
+| 固定向量工程 DRC | **无 Error/Critical Warning** | Fully Routed 设计共 1655 项检查结果，均为 Warning/Advisory；主要是 DSP 输入/输出流水级优化建议，不阻止 bitstream |
 | XDMA 链路 | 未执行/未提供 | 没有链路训练、BDF、`lspci` 或驱动日志 |
-| HBM 初始化与读写 | 未执行/未提供 | 没有 `apb_complete_*`、HBM TG 或 XDMA-HBM 回环证据 |
+| HBM 初始化与独立读写 | **通过（HBM Example Design）** | Hardware Manager 显示两个 HBM 实例 `COMPLETE`；唯一的 `AXI_00` TG 有读写计数且 mismatch 为 0，详见 2.2 节 |
 | XDMA + HBM + FSA 端到端 | 未执行/未提供 | 没有真实 HBM 上的 Q/K/V/O 金标准结果 |
 
 固定向量板测已经证明当前 `fsa_dma_top` IP 的 AXI4-Lite 控制、64-bit
 `m_axi_gmem`、固定样例和 NM37 上的实现时序可以工作。它没有包含 XDMA、HBM Controller、
 PCIe 驱动或主机软件，因此不能替代后续 XDMA-HBM-FSA 系统验证。
+
+### 2.1 阶段 0 证据归档
+
+2026-08-26 收到的 `evidence.zip/00_board_test` 包含：
+
+| 文件 | 已核对内容 |
+|---|---|
+| `run_status.txt` | Vivado 2024.2；Part 正确；Synthesis 完成；Implementation 已完成到 `write_bitstream` |
+| `timing_summary.rpt` | Routed 设计；100 MHz；WNS `0.698 ns`、TNS `0`、WHS `0.009 ns`、THS `0`、WPWS `2.000 ns`；所有用户时序约束满足 |
+| `drc.rpt` | Fully Routed；无 Error/Critical Warning；1373 个 Warning 和 282 个 Advisory，不含阻断 bitstream 的 DRC |
+| `utilization.rpt` | 顶层共 160140 LUT、93733 FF、35 RAMB36、0 RAMB18、0 URAM、300 DSP；其中 `u_fsa_dma_top` 为 60874 LUT、56215 FF、3 RAMB36、300 DSP |
+| `bit_ltx_sha256.txt` | 记录 `.bit` SHA-256 为 `a1b91bf90ad0ab3f5617075e7c01e1c924eb1863d84b7521f547d3b9b446dc16`；两个 `.ltx` 路径记录的 SHA-256 均为 `0283b339d12dd79d6e4f0daff9723caadaac523d3a68e89cc2049e470588bc9a` |
+
+时序报告还显示：内部最大延迟未约束端点为 0；唯一没有 input delay 的输入已由用户
+false path 覆盖，与板级异步 `reset_n` 的约束方式一致。哈希文件只是远端生成的清单，
+压缩包未携带 `.bit/.ltx` 本体，因此当前只能确认“哈希值已记录”，不能在本机重新计算核验。
+
+阶段 0 的证据边界必须保持如下：报告证明该固定向量 AXI RAM 板测工程可以综合、完成布局
+布线、满足 100 MHz 时序并生成 bitstream；`test_pass=1` 来自用户的实际上板确认。它不证明
+HBM 初始化、HBM 读写、PCIe/XDMA 链路或主机端到端功能。
+
+### 2.2 阶段 B HBM 独立板测证据
+
+2026-08-26 已在 NM37 上完成 HBM Example Design 的独立板测：
+
+| 项目 | 实测结果 |
+|---|---|
+| Vivado/Part | Vivado 2024.2；`xcvu37p_CIV-fsvh2892-2-e` |
+| 板级顶层 | `nm37_hbm_example_top`；`BH42/BJ42` 100 MHz 差分输入，`BF2` 低有效复位 |
+| 时钟 | HBM ref/APB/Example Design MMCM 输入为 100 MHz；Stack0 AXI generated clock 为 225 MHz |
+| TG 实例数 | `ATG_COUNT=1`，唯一实例为 `u_example_top/u_atg_axi_0` |
+| 最终 Implementation 时序 | **通过**；WNS `0.063 ns`、TNS `0`、WHS `0.012 ns`、THS `0`、WPWS `0.000 ns`，Setup/Hold/Pulse Width failing endpoints 均为 0 |
+| 最终 DRC/Methodology | **通过**；DRC Error `0`、Critical Warning `0`，`TIMING-4=0`、`TIMING-27=0` |
+| bitstream/下载 | `write_bitstream Complete!`，Hardware Manager 显示器件 `Programmed` |
+| HBM 初始化 | Hardware Manager 中 `HBM_1`、`HBM_2` 均为 `COMPLETE`；`apb_seq_complete_0_st0_r2=1` |
+| TG 控制 | `vio_tg_start_0=1`，运行后 `vio_tg_pause_0=1` 保存状态 |
+| TG 读写 | `wr_cnt_00=0x09`、`rd_cnt_00=0x08` |
+| 数据比较 | `axi_00_data_msmatch_err=0` |
+
+因此可以判定：HBM 完成初始化，启用的 `AXI_00` 可由 synthesizable TG 执行写入、读回和
+数据比较，观测期间没有数据 mismatch，阶段 B 功能测试通过。`wr_cnt_00/rd_cnt_00` 是
+5-bit VIO 快照，会循环回绕，不能把 `0x09/0x08` 当作累计事务总数或带宽数据。
+
+该结果仍不覆盖 XDMA、SmartConnect、FSA master、Linux 驱动和主机数据回环。最终
+Implementation 时序摘要已经归档；最终 Methodology 查询没有返回 `TIMING-4/TIMING-27`
+对象，确认两项均为 0；最终 DRC Error 和 Critical Warning 数量也均为 0。用户决定本阶段
+不再归档 `.bit/.ltx` SHA-256；这不影响 HBM 独立功能验收结论。
 
 旧版 `docs/fsa_dma综合报告.md` 中“IP 导出未执行”的结论描述的是更早的 Solution 状态；
 当前 `fsa_dma_vivado/ip_repo` 已经补齐导出 IP，应以本文件检查到的实际目录为准。
@@ -163,8 +212,9 @@ SmartConnect，或显式使用 AXI Protocol Converter + Data Width Converter。H
 | User BAR | 64 KiB 非预取窗口，PCIe-to-AXI-Lite translation 为 0 |
 | `FSA_CTRL_BASE` | `0x0000_0000`，相对 `/dev/xdma0_user` 起点 |
 | HBM 端口 | 先使用 `AXI_00`，启用全局寻址，功能通过后再拆分多端口 |
-| HBM 数据域 | 100 MHz 正确性基线；后续再提高频率和带宽 |
+| HBM AXI 数据域 | **225 MHz**；当前 HBM IP 向导允许范围为 225~450 MHz，第一版取最低值 225 MHz |
 | FSA 域 | 100 MHz，保持已验证时钟目标 |
+| HBM APB/ref/例程输入时钟 | 100 MHz；不要与 225 MHz 的 `AXI_00_ACLK` 混淆 |
 | 数据调度 | H2C 完成后启动 FSA；FSA 完成后再 C2H，不并发 |
 
 Gen3 x8 是本方案的正确性基线，不表示主机最终一定协商到 x8。XDMA 支持 AXI MM、
@@ -181,15 +231,16 @@ Gen3 x8 是本方案的正确性基线，不表示主机最终一定协商到 x8
 ```text
 xdma_0/M_AXI（XDMA user_clk 域）
         │
-        └─ AXI Clock Converter ─┐
-                                │
-fsa_dma_top_0/m_axi_gmem ───────┼─ SmartConnect 2SI/1MI
-        （100 MHz，64-bit AXI4） │   - 仲裁两个 master
-                                │   - AXI4 → AXI3 协议转换
-                                │   - 64/256-bit 数据宽度转换
-                                ▼
-                         hbm_0/AXI_00
-                         （100 MHz，256-bit AXI3）
+        └─ AXI Clock Converter（user_clk → 225 MHz）─┐
+                                                     │
+fsa_dma_top_0/m_axi_gmem                             ├─ SmartConnect 2SI/1MI
+        （100 MHz，64-bit AXI4）                      │   工作在 225 MHz
+        │                                            │   - 仲裁两个 master
+        └─ AXI Clock Converter（100 → 225 MHz）──────┘   - AXI4 → AXI3
+                                                     │   - 64/256-bit 转换
+                                                     ▼
+                                              hbm_0/AXI_00
+                                              （225 MHz，256-bit AXI3）
 ```
 
 必须在 Elaborated Design 或接口属性中确认 SmartConnect 确实完成了协议和宽度转换；在
@@ -219,13 +270,19 @@ XDMA DMA 描述符/设备文件偏移送到 XDMA 的 AXI MM master，与 User BA
 
 1. PCIe 参考时钟和 `PERST#`：由 `PCIE_CLK0_P/N`、`PERST_PCIE_1V8(BF5)` 驱动 XDMA；
 2. XDMA `user_clk/user_resetn` 域：服务 XDMA AXI master；
-3. 100 MHz FSA/HBM AXI 域：服务 `fsa_dma_top`、SmartConnect 和 `hbm_0/AXI_00`。
+3. 100 MHz FSA 域：服务 `fsa_dma_top`；
+4. 225 MHz HBM AXI 域：服务 HBM 侧 SmartConnect 和 `hbm_0/AXI_00`。
 
 HBM 还需要 `HBM_REF_CLK_x` 和 APB clock。候选来源是 NM37 的
 `CLK_100_DDR_P/N(BH42/BJ42)` 经 Clocking Wizard/BUFG 产生的 100 MHz，但必须让 HBM IP
 的 DRC 确认 GCIO、SLR 和抖动要求，不可仅凭固定向量板测可用就认定 HBM ref clock 合格。
 HBM 参考时钟、APB clock 和 AXI port clock 的职责见
 [PG276 Clocking](https://docs.amd.com/r/en-US/pg276-axi-hbm/Clocking)。
+
+当前 Vivado 2024.2 HBM IP 向导已经确认 `AXI Clock Frequency` 不能设为 100 MHz，允许范围
+为 225~450 MHz。第一版固定为 225 MHz；`AXI Input Clock Frequency=100 MHz` 是 Example
+Design 中 MMCM 的输入，MMCM 再生成 225 MHz AXI clock，并不表示 `AXI_00_ACLK` 可以工作
+在 100 MHz。正式集成时 FSA 保持 100 MHz，通过 AXI Clock Converter 跨到 225 MHz。
 
 HBM 任何 AXI 访问之前，必须等待所有已启用 stack 的 `apb_complete_0/1=1`。把该状态接到
 ILA，并用它保持 FSA/XDMA→HBM 数据通路处于禁止启动状态；不要在初始化完成前写 Q/K/V。
@@ -292,8 +349,9 @@ segment 最终不是从 0 开始，则统一修改 `HBM_DATA_BASE`，不要只�
 
 ### 阶段 A：保留当前固定向量板测作为回归
 
-当前 `fsa_dma_vivado` 包使用片上 AXI RAM，已由用户确认 `test_pass=1` 且 Implementation
-时序通过。每次替换 HLS IP 后先重新跑该板测，要求：
+当前 `fsa_dma_vivado` 包使用片上 AXI RAM，阶段 0 报告已证明 Synthesis、Implementation、
+100 MHz 时序和 bitstream 生成完成，并由用户确认 `test_pass=1`。每次替换 HLS IP 后先
+重新跑该板测，要求：
 
 ```text
 test_busy = 0
@@ -302,17 +360,20 @@ test_pass = 1
 test_fail = 0
 ```
 
-并保存 `report_timing_summary`、`.bit` 和同一次 Implementation 的 `.ltx`。
+并保存 `report_timing_summary`、`.bit` 和同一次 Implementation 的 `.ltx`。本轮已保存
+报告和哈希清单；若要形成完全可独立复核的上板证据，还需补一张带器件名、VIO probe
+状态和 Program Device 文件路径的 Hardware Manager 截图。
 
 ### 阶段 B：HBM 独立初始化与读写
 
-1. 创建 HBM Controller example design 或最小 Traffic Generator；
-2. 只启用第一版需要的 AXI 端口，配置全局寻址；
-3. 确认 `apb_complete_*` 拉高，Hardware Manager 的 HBM 状态为 Complete；
-4. 用 HBM TG 写读固定地址，数据比较为 0 error；
-5. 记录 HBM ref/APB/AXI clock、启用的 stack/MC/port 和实际地址范围。
+1. **已完成**：创建 HBM Controller Example Design 和 NM37 包装顶层；
+2. **已完成**：只实例化一个 synthesizable TG，`ATG_COUNT=1`，对应 `AXI_00`；
+3. **已完成**：Hardware Manager 显示两个 HBM 实例 Complete，Stack0 APB sequence complete；
+4. **已完成**：HBM TG 产生读写事务，数据 mismatch 为 0；
+5. **已完成**：最终 clean timing、DRC、Methodology、实际时钟、端口数量和 VIO 结果均已
+   归档；本阶段不要求 `.bit/.ltx` SHA-256。
 
-HBM 独立测试失败时不要加入 XDMA 和 FSA。
+阶段 B 已闭环，可以进入阶段 C；不得用阶段 B 结果替代后续 XDMA-HBM 回环。
 
 ### 阶段 C：XDMA-HBM 回环
 
@@ -473,10 +534,9 @@ lspci -s <BDF> -vv
 
 | TODO | 你需要怎么做 | 回填到本文的证据 |
 |---|---|---|
-| 保存固定向量板测时序证据 | 在已通过的工程执行 `report_timing_summary -file fsa_dma_board_timing_summary.rpt`，保存 run 状态和 bit/ltx 路径 | WNS、WHS、TNS、THS、failing endpoints、Vivado run 名称 |
+| 补齐固定向量板测现场证据 | 在 Hardware Manager 中重新打开已下载器件和 VIO，保持完成状态；截图同时包含器件名、VIO probe 和 Program Device 使用的 `.bit/.ltx` 路径 | `test_busy=0`、`test_done=1`、`test_pass=1`、`test_fail=0` 的截图 |
 | 确认 XDMA block location 和 lane mapping | 在 Vivado 2024.2 按 Gen3 x8 生成 XDMA example design，核对 location-specific XDC 与原理图第 7 页 | PCIe block、GT Bank/channel、lane reversal、CLK0、PERST pin |
 | 确认主机实际链路 | 插入目标 Linux 主机，运行 `lspci -s <BDF> -vv` | BDF、`LnkCap`、`LnkSta`、AER |
-| 确认 HBM 时钟/端口配置 | 生成 HBM example design，运行 DRC 和 HBM TG；观察 `apb_complete_*` | ref/APB/AXI clock、启用 stack/MC/AXI port、HBM TG 结果 |
 | 固化 Vivado 地址图 | 完成 Block Design 后导出 Address Editor 截图或 Tcl `assign_bd_address` 结果 | User BAR、FSA control segment、XDMA/FSA 看到的 HBM segment |
 | 确认 AXI 转换 | 打开 Elaborated Design，检查 SmartConnect 自动转换；在 HBM 端加 ILA | HBM 端 256-bit AXI3、`AxSIZE=5`、32-byte 对齐、无 DECERR/SLVERR |
 | 记录 Linux 驱动版本 | 在目标机执行 `uname -a`、`git rev-parse HEAD`、`modinfo xdma` | 内核、驱动 commit、模块版本、设备节点 |
@@ -485,8 +545,8 @@ lspci -s <BDF> -vv
 | 完成 FSA 端到端金标准 | 用当前 IP 的 4×4、L=9 样例运行，读回完整 O 与独立 CPU softmax 比较 | AP_CTRL、status、O 误差、ILA 首笔地址和响应 |
 
 以上 TODO 需要 Vivado 工程、目标 Linux 主机或真实板卡状态，无法仅从当前仓库文件完成。
-其中最先应该做的是：**保存现有板测时序报告 → 生成 HBM example design 并跑 TG →
-生成 XDMA Gen3 x8 example design 并核对第 7 页管脚 → 做 XDMA-HBM 回环**。
+阶段 0 报告和阶段 B HBM TG 功能验证已经完成。接下来优先顺序是：**生成 XDMA Gen3 x8
+example design 并核对第 7 页管脚 → 做 XDMA-HBM 回环 → 再加入 FSA**。
 
 ## 11. 结论分级
 
@@ -502,5 +562,6 @@ lspci -s <BDF> -vv
 | XDMA-HBM回环 PASS | 主机、PCIe、XDMA、互连和 HBM 数据搬运正确 |
 | FSA端到端金标准 PASS | 当前固定样例在 XDMA + HBM + FSA 完整链路上正确 |
 
-当前已到“固定向量 IP 板测和该工程时序通过”这一层；尚不能声称 XDMA、HBM 或 Linux
-端到端已经通过。所有后续结论都应附上对应日志、报告、命令和读回数据。
+当前已到“固定向量工程时序/板测通过，HBM 独立初始化和 `AXI_00` TG 读写通过”这一层；
+尚不能声称 XDMA、XDMA-HBM 回环或 Linux 端到端已经通过。所有后续结论都应附上对应日志、
+报告、命令和读回数据。
