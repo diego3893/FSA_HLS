@@ -12,11 +12,11 @@ void sp_ram_top(
 
     static fsa::SpRAMState current{};
 
-    #pragma HLS ARRAY_PARTITION variable=current.banks type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.banks type=complete dim=2
-    #pragma HLS ARRAY_RESHAPE variable=current.banks type=complete dim=4
-    #pragma HLS ARRAY_PARTITION variable=current.full_read_data type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.full_read_data type=complete dim=2
+    #pragma HLS ARRAY_PARTITION variable=current.banks complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=current.banks complete dim=2
+    #pragma HLS ARRAY_RESHAPE variable=current.banks complete dim=4
+    #pragma HLS ARRAY_PARTITION variable=current.full_read_data complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=current.full_read_data complete dim=2
 
     if(input.reset){
         fsa::reset_sp_ram_state(current);
@@ -85,13 +85,13 @@ void acc_ram_top(
 
     static fsa::AccRAMState current{};
 
-    #pragma HLS ARRAY_PARTITION variable=current.banks type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.banks type=complete dim=2
-    #pragma HLS ARRAY_RESHAPE variable=current.banks type=complete dim=4
-    #pragma HLS ARRAY_PARTITION variable=current.full_read_data type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.full_read_data type=complete dim=2
-    #pragma HLS ARRAY_PARTITION variable=current.narrow_read_data type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.narrow_read_data type=complete dim=2
+    #pragma HLS ARRAY_PARTITION variable=current.banks complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=current.banks complete dim=2
+    #pragma HLS ARRAY_RESHAPE variable=current.banks complete dim=4
+    #pragma HLS ARRAY_PARTITION variable=current.full_read_data complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=current.full_read_data complete dim=2
+    #pragma HLS ARRAY_PARTITION variable=current.narrow_read_data complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=current.narrow_read_data complete dim=2
 
     if(input.reset){
         fsa::reset_acc_ram_state(current);

@@ -13,14 +13,14 @@ void systolic_array_top(const fsa::SystolicArrayInput& input,
 
     static fsa::SystolicArrayState current{};
     
-    #pragma HLS ARRAY_PARTITION variable=current.mesh type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=current.cmp_array type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.cmp_ctrl_pipe type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.pe_ctrl_pipe type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=current.cmp_d_output_pipe type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.r_output_pipe type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=current.d_output_pipe type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=current.u_output_pipe type=complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=current.mesh complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=current.cmp_array complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=current.cmp_ctrl_pipe complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=current.pe_ctrl_pipe complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=current.cmp_d_output_pipe complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=current.r_output_pipe complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=current.d_output_pipe complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=current.u_output_pipe complete dim=0
 
     if(input.reset){
         fsa::reset_systolic_array_state(current);
@@ -32,9 +32,9 @@ void systolic_array_top(const fsa::SystolicArrayInput& input,
     io.cmp_ctrl = input.cmp_ctrl;
     io.pe_data = input.pe_data;
 
-    #pragma HLS ARRAY_PARTITION variable=io.pe_ctrl type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=io.pe_data type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=io.acc_out type=complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=io.pe_ctrl complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=io.pe_data complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=io.acc_out complete dim=1
 
     for(int row=0; row<fsa::SA_ROWS; ++row){
         #pragma HLS UNROLL
@@ -42,14 +42,14 @@ void systolic_array_top(const fsa::SystolicArrayInput& input,
     }
 
     fsa::SystolicArrayState next{};
-    #pragma HLS ARRAY_PARTITION variable=next.mesh type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=next.cmp_array type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=next.cmp_ctrl_pipe type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=next.pe_ctrl_pipe type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=next.cmp_d_output_pipe type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=next.r_output_pipe type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=next.d_output_pipe type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=next.u_output_pipe type=complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=next.mesh complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=next.cmp_array complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=next.cmp_ctrl_pipe complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=next.pe_ctrl_pipe complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=next.cmp_d_output_pipe complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=next.r_output_pipe complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=next.d_output_pipe complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=next.u_output_pipe complete dim=0
 
     fsa::systolic_array_step(current, next, io);
 

@@ -196,25 +196,25 @@ void fsa::fsa_core_request_run(
     static fsa::FsaCoreDatapathState state{};
     static bool online_sequence_active = false;
 
-    #pragma HLS ARRAY_PARTITION variable=state.input_delayer.out_delay_pipe type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=state.output_delayer.out_delay_pipe type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=state.sa.mesh type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=state.sa.cmp_array type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=state.sa.cmp_ctrl_pipe type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=state.sa.pe_ctrl_pipe type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=state.sa.cmp_d_output_pipe type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=state.sa.r_output_pipe type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=state.sa.d_output_pipe type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=state.sa.u_output_pipe type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=state.accumulator.scale type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=state.accumulator.reciprocal type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=state.sp_ram.banks type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=state.sp_ram.banks type=complete dim=2
-    #pragma HLS ARRAY_RESHAPE variable=state.sp_ram.banks type=complete dim=4
-    #pragma HLS ARRAY_PARTITION variable=state.acc_ram.banks type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=state.acc_ram.banks type=complete dim=2
-    #pragma HLS ARRAY_RESHAPE variable=state.acc_ram.banks type=complete dim=4
-    #pragma HLS ARRAY_PARTITION variable=state.acc_dma_response_valid type=complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=state.input_delayer.out_delay_pipe complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=state.output_delayer.out_delay_pipe complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=state.sa.mesh complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=state.sa.cmp_array complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=state.sa.cmp_ctrl_pipe complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=state.sa.pe_ctrl_pipe complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=state.sa.cmp_d_output_pipe complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=state.sa.r_output_pipe complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=state.sa.d_output_pipe complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=state.sa.u_output_pipe complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=state.accumulator.scale complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=state.accumulator.reciprocal complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=state.sp_ram.banks complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=state.sp_ram.banks complete dim=2
+    #pragma HLS ARRAY_RESHAPE variable=state.sp_ram.banks complete dim=4
+    #pragma HLS ARRAY_PARTITION variable=state.acc_ram.banks complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=state.acc_ram.banks complete dim=2
+    #pragma HLS ARRAY_RESHAPE variable=state.acc_ram.banks complete dim=4
+    #pragma HLS ARRAY_PARTITION variable=state.acc_dma_response_valid complete dim=1
 
     output = fsa::FsaCoreRequestOutput{};
     output.request_ready = true;

@@ -18,9 +18,9 @@ namespace{
         fsa::FsaCoreRequestInput& request
     ){
         #pragma HLS INLINE
-        #pragma HLS ARRAY_PARTITION variable=request.q type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=request.k type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=request.v type=complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=request.q complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=request.k complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=request.v complete dim=0
 
         request.reset = query_base==0 && key_base==0;
         request.request_valid = true;
@@ -103,11 +103,11 @@ void fsa_dma_top(
 
             fsa::FsaCoreRequestInput request{};
             fsa::FsaCoreRequestOutput response{};
-            #pragma HLS ARRAY_PARTITION variable=request.q type=complete dim=0
-            #pragma HLS ARRAY_PARTITION variable=request.k type=complete dim=0
-            #pragma HLS ARRAY_PARTITION variable=request.v type=complete dim=0
-            #pragma HLS ARRAY_PARTITION variable=response.l type=complete dim=1
-            #pragma HLS ARRAY_PARTITION variable=response.o type=complete dim=0
+            #pragma HLS ARRAY_PARTITION variable=request.q complete dim=0
+            #pragma HLS ARRAY_PARTITION variable=request.k complete dim=0
+            #pragma HLS ARRAY_PARTITION variable=request.v complete dim=0
+            #pragma HLS ARRAY_PARTITION variable=response.l complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=response.o complete dim=0
 
             loadRequestTile(
                 q,

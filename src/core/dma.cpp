@@ -49,7 +49,7 @@ namespace fsa{
         elem_t row[SA_ROWS]
     ){
         #pragma HLS INLINE off
-        #pragma HLS ARRAY_PARTITION variable=row type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=row complete dim=1
 
         const unsigned base = row_index*DMA_QKV_WORDS_PER_ROW;
         for(int word_index=0;
@@ -70,14 +70,14 @@ namespace fsa{
         const acc_t row[SA_ROWS]
     ){
         #pragma HLS INLINE off
-        #pragma HLS ARRAY_PARTITION variable=row type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=row complete dim=1
 
         const unsigned base = row_index*DMA_O_WORDS_PER_ROW;
         for(int word_index=0;
                 word_index<DMA_O_WORDS_PER_ROW; ++word_index){
             #pragma HLS PIPELINE II=1
             acc_t values[DMA_ACCS_PER_WORD]{};
-            #pragma HLS ARRAY_PARTITION variable=values type=complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=values complete dim=1
             for(int lane=0; lane<DMA_ACCS_PER_WORD; ++lane){
                 #pragma HLS UNROLL
                 values[lane] = row[word_index*DMA_ACCS_PER_WORD+lane];

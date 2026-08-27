@@ -12,27 +12,27 @@ namespace{
         #pragma HLS PIPELINE II=1
         #pragma HLS LATENCY max=17
 
-        #pragma HLS ARRAY_PARTITION variable=current.mesh type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=current.cmp_array type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=current.cmp_ctrl_pipe type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=current.pe_ctrl_pipe type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=current.cmp_d_output_pipe type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=current.r_output_pipe type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=current.d_output_pipe type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=current.u_output_pipe type=complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=current.mesh complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=current.cmp_array complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=current.cmp_ctrl_pipe complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=current.pe_ctrl_pipe complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=current.cmp_d_output_pipe complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=current.r_output_pipe complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=current.d_output_pipe complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=current.u_output_pipe complete dim=0
 
-        #pragma HLS ARRAY_PARTITION variable=next.mesh type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=next.cmp_array type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=next.cmp_ctrl_pipe type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=next.pe_ctrl_pipe type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=next.cmp_d_output_pipe type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=next.r_output_pipe type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=next.d_output_pipe type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=next.u_output_pipe type=complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=next.mesh complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=next.cmp_array complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=next.cmp_ctrl_pipe complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=next.pe_ctrl_pipe complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=next.cmp_d_output_pipe complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=next.r_output_pipe complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=next.d_output_pipe complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=next.u_output_pipe complete dim=0
 
-        #pragma HLS ARRAY_PARTITION variable=io.pe_ctrl type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=io.pe_data type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=io.acc_out type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=io.pe_ctrl complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=io.pe_data complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=io.acc_out complete dim=1
 
         systolic_array_step(current, next, io);
     }
@@ -123,7 +123,7 @@ void fsa_core_datapath_step(
     }
 
     ElemInputDelayerState next_input_delayer{};
-    #pragma HLS ARRAY_PARTITION variable=next_input_delayer.out_delay_pipe type=complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=next_input_delayer.out_delay_pipe complete dim=0
     input_delayer_step(
         state.input_delayer,
         next_input_delayer,
@@ -133,9 +133,9 @@ void fsa_core_datapath_step(
 
     // SA处理数据
     SystolicArrayIO sa_io{};
-    #pragma HLS ARRAY_PARTITION variable=sa_io.pe_ctrl type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=sa_io.pe_data type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=sa_io.acc_out type=complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=sa_io.pe_ctrl complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=sa_io.pe_data complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=sa_io.acc_out complete dim=1
     sa_io.pe_data = input_delayer_io.out;
     sa_io.cmp_ctrl = input.cmp_ctrl;
     for(int row=0; row<SA_ROWS; ++row){
@@ -154,7 +154,7 @@ void fsa_core_datapath_step(
     }
 
     OutputDelayerState next_output_delayer{};
-    #pragma HLS ARRAY_PARTITION variable=next_output_delayer.out_delay_pipe type=complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=next_output_delayer.out_delay_pipe complete dim=0
     output_delayer_step(
         state.output_delayer,
         next_output_delayer,
@@ -164,9 +164,9 @@ void fsa_core_datapath_step(
 
     // 数据送入Acc，注意区分输入来源
     AccumulatorIO accumulator_io{};
-    #pragma HLS ARRAY_PARTITION variable=accumulator_io.sa_in type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=accumulator_io.sram_in type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=accumulator_io.sram_out type=complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=accumulator_io.sa_in complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=accumulator_io.sram_in complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=accumulator_io.sram_out complete dim=1
     accumulator_io.ctrl_in = input.acc_ctrl;
     for(int col=0; col<SA_COLS; ++col){
         #pragma HLS UNROLL
@@ -179,8 +179,8 @@ void fsa_core_datapath_step(
     }
 
     AccumulatorState next_accumulator{};
-    #pragma HLS ARRAY_PARTITION variable=next_accumulator.scale type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=next_accumulator.reciprocal type=complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=next_accumulator.scale complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=next_accumulator.reciprocal complete dim=1
     accumulator_step(
         state.accumulator,
         next_accumulator,

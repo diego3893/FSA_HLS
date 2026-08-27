@@ -362,9 +362,9 @@ namespace fsa{
         #pragma HLS INLINE
 
         #pragma HLS ARRAY_PARTITION variable=state.scale \
-            type=complete dim=1
+            complete dim=1
         #pragma HLS ARRAY_PARTITION variable=state.reciprocal \
-            type=complete dim=1
+            complete dim=1
         for(int col=0; col<SA_COLS; ++col){
             #pragma HLS UNROLL
             state.scale[col] = accZero();
@@ -380,21 +380,21 @@ namespace fsa{
         #pragma HLS LATENCY max=18
 
         #pragma HLS ARRAY_PARTITION variable=current.scale \
-            type=complete dim=1
+            complete dim=1
         #pragma HLS ARRAY_PARTITION variable=current.reciprocal \
-            type=complete dim=1
+            complete dim=1
 
         #pragma HLS ARRAY_PARTITION variable=next.scale \
-            type=complete dim=1
+            complete dim=1
         #pragma HLS ARRAY_PARTITION variable=next.reciprocal \
-            type=complete dim=1
+            complete dim=1
 
         #pragma HLS ARRAY_PARTITION variable=io.sa_in \
-            type=complete dim=1
+            complete dim=1
         #pragma HLS ARRAY_PARTITION variable=io.sram_in \
-            type=complete dim=1
+            complete dim=1
         #pragma HLS ARRAY_PARTITION variable=io.sram_out \
-            type=complete dim=1
+            complete dim=1
 
         const bool valid = io.ctrl_in.valid;
         const AccumulatorCmd cmd = io.ctrl_in.bits.cmd;

@@ -55,11 +55,11 @@ namespace fsa{
             T out_delay[rows]{};
             T selected_output[rows]{};
 
-            #pragma HLS ARRAY_PARTITION variable=in_data type=complete dim=1
-            #pragma HLS ARRAY_PARTITION variable=out_delay type=complete dim=1
-            #pragma HLS ARRAY_PARTITION variable=selected_output type=complete dim=1
-            #pragma HLS ARRAY_PARTITION variable=current.out_delay_pipe type=complete dim=0
-            #pragma HLS ARRAY_PARTITION variable=next.out_delay_pipe type=complete dim=0
+            #pragma HLS ARRAY_PARTITION variable=in_data complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=out_delay complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=selected_output complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=current.out_delay_pipe complete dim=0
+            #pragma HLS ARRAY_PARTITION variable=next.out_delay_pipe complete dim=0
 
             for(std::size_t lane=0; lane<rows; ++lane){
                 #pragma HLS UNROLL

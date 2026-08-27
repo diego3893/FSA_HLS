@@ -25,9 +25,9 @@ void accumulator_top(
 
     // 四列需要在同一逻辑步骤内并行访问
     #pragma HLS ARRAY_PARTITION variable=current.scale \
-        type=complete dim=1
+        complete dim=1
     #pragma HLS ARRAY_PARTITION variable=current.reciprocal \
-        type=complete dim=1
+        complete dim=1
 
     if(input.reset){
         fsa::reset_accumulator_state(current);
@@ -41,11 +41,11 @@ void accumulator_top(
     fsa::AccumulatorIO io{};
 
     #pragma HLS ARRAY_PARTITION variable=io.sa_in \
-        type=complete dim=1
+        complete dim=1
     #pragma HLS ARRAY_PARTITION variable=io.sram_in \
-        type=complete dim=1
+        complete dim=1
     #pragma HLS ARRAY_PARTITION variable=io.sram_out \
-        type=complete dim=1
+        complete dim=1
 
     io.ctrl_in = input.ctrl;
 
@@ -67,9 +67,9 @@ void accumulator_top(
     fsa::AccumulatorState next{};
 
     #pragma HLS ARRAY_PARTITION variable=next.scale \
-        type=complete dim=1
+        complete dim=1
     #pragma HLS ARRAY_PARTITION variable=next.reciprocal \
-        type=complete dim=1
+        complete dim=1
 
     fsa::accumulator_step(current, next, io);
 

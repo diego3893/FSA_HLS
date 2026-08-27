@@ -95,10 +95,10 @@ namespace fsa{
             constexpr int SubBankSize = State::SubBankSize;
 
             // 保持并行性
-            #pragma HLS ARRAY_PARTITION variable=state.banks type=complete dim=1
-            #pragma HLS ARRAY_PARTITION variable=state.banks type=complete dim=2
+            #pragma HLS ARRAY_PARTITION variable=state.banks complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=state.banks complete dim=2
             // 组合一个sub-bank内部的sram字
-            #pragma HLS ARRAY_RESHAPE variable=state.banks type=complete dim=4
+            #pragma HLS ARRAY_RESHAPE variable=state.banks complete dim=4
 
             for(int port=0; port<NFullRead; ++port){
                 #pragma HLS UNROLL
