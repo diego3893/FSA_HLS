@@ -2,6 +2,9 @@
 
 #include "fsa/hls/fsa_core_request_top.hpp"
 
+#define FSA_HLS_PRAGMA_SUB(x) _Pragma(#x)
+#define FSA_HLS_PRAGMA(x) FSA_HLS_PRAGMA_SUB(x)
+
 namespace{
 
     void loadRequestTile(
@@ -64,10 +67,10 @@ void fsa_dma_top(
     #pragma HLS ALLOCATION function instances=fsa::dma_load_elem_row limit=1
     #pragma HLS ALLOCATION function instances=fsa::dma_store_acc_row limit=1
 
-    #pragma HLS INTERFACE m_axi port=q offset=slave bundle=gmem depth=FSA_DMA_AXI_QKV_DEPTH
-    #pragma HLS INTERFACE m_axi port=k offset=slave bundle=gmem depth=FSA_DMA_AXI_QKV_DEPTH
-    #pragma HLS INTERFACE m_axi port=v offset=slave bundle=gmem depth=FSA_DMA_AXI_QKV_DEPTH
-    #pragma HLS INTERFACE m_axi port=o offset=slave bundle=gmem depth=FSA_DMA_AXI_O_DEPTH
+    FSA_HLS_PRAGMA(HLS INTERFACE m_axi port=q offset=slave bundle=gmem depth=FSA_DMA_AXI_QKV_DEPTH)
+    FSA_HLS_PRAGMA(HLS INTERFACE m_axi port=k offset=slave bundle=gmem depth=FSA_DMA_AXI_QKV_DEPTH)
+    FSA_HLS_PRAGMA(HLS INTERFACE m_axi port=v offset=slave bundle=gmem depth=FSA_DMA_AXI_QKV_DEPTH)
+    FSA_HLS_PRAGMA(HLS INTERFACE m_axi port=o offset=slave bundle=gmem depth=FSA_DMA_AXI_O_DEPTH)
 
     #pragma HLS INTERFACE s_axilite port=q bundle=control
     #pragma HLS INTERFACE s_axilite port=k bundle=control
@@ -142,3 +145,6 @@ void fsa_dma_top(
 
     status = (ap_uint<8>)static_cast<std::uint8_t>(fsa::FsaDmaStatus::OK);
 }
+
+#undef FSA_HLS_PRAGMA
+#undef FSA_HLS_PRAGMA_SUB
