@@ -40,7 +40,9 @@ def find_card(requested):
     indices = []
     for path in users:
         name = pathlib.Path(path).name
-        middle = name.removeprefix("xdma").removesuffix("_user")
+        # Python bundled with older FPGA tool installations can be older than
+        # 3.9, where str.removeprefix/removesuffix were introduced.
+        middle = name[len("xdma"):-len("_user")]
         if middle.isdigit():
             indices.append(int(middle))
     if len(indices) != 1:

@@ -5,6 +5,20 @@ set EXPORT_IP 1
 set stage_dir [file normalize [file dirname [info script]]]
 set package_dir [file normalize [file join $stage_dir ..]]
 set project_root [file normalize [file join $package_dir ..]]
+source [file join $package_dir config project_config.tcl]
+
+# Vitis HLS 2020.2 normally provides the Vivado-style version command. Keep
+# the guard conditional so older 2020.2 launcher builds without it still run;
+# the shell-level `vitis_hls -version` check remains mandatory in the guide.
+if {[llength [info commands version]] != 0 && ![catch {version -short} hls_version]} {
+    puts "VITIS_HLS_VERSION=$hls_version"
+    if {![string match "${required_vitis_hls_version}*" $hls_version]} {
+        error "This package requires Vitis HLS $required_vitis_hls_version; found $hls_version"
+    }
+} else {
+    puts "WARNING: this Vitis HLS Tcl shell cannot report its version; verify vitis_hls -version is 2020.2 before continuing."
+}
+
 set hls_project_dir [file join $package_dir build hls_fsa_dma_u280]
 set export_dir [file join $package_dir ip_export]
 file mkdir $export_dir
@@ -43,7 +57,7 @@ if {![file exists $testbench]} { error "Missing HLS testbench: $testbench" }
 add_files -tb $testbench -cflags $CFLAGS
 
 open_solution -reset solution1 -flow_target vivado
-set_part {xcu280-fsvh2892-2L-e}
+set_part $target_part
 create_clock -period 10 -name default
 
 if {$RUN_CSIM} { csim_design }
@@ -54,4 +68,3 @@ if {$EXPORT_IP} {
         -output [file join $export_dir fsa_dma_top_u280.zip]
 }
 exit
-

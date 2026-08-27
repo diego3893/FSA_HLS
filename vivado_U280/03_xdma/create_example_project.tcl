@@ -1,15 +1,14 @@
 set stage_dir [file normalize [file dirname [info script]]]
 set package_dir [file normalize [file join $stage_dir ..]]
 source [file join $package_dir config project_config.tcl]
+assert_required_vivado_version
 set project_dir [file join $build_root 03_xdma_ip]
 set example_dir [file join $build_root 03_xdma_example]
 file mkdir $build_root
 file mkdir [file join $report_root 03_xdma]
 
 create_project -force fsa_u280_03_xdma_ip $project_dir -part $target_part
-if {[llength [get_board_parts -quiet $board_part]] == 1} {
-    set_property board_part $board_part [current_project]
-}
+apply_u280_board_part_if_available
 create_ip -vlnv xilinx.com:ip:xdma:4.1 -module_name xdma_0
 set_property -dict [list \
     CONFIG.functional_mode {DMA} \
@@ -44,4 +43,3 @@ redirect -file [file join $report_root 03_xdma xdma_properties.txt] {
 }
 open_example_project -force -dir $example_dir [get_ips xdma_0]
 puts "EXAMPLE_PROJECT_CREATED=$example_dir"
-

@@ -1,4 +1,4 @@
-# `fsa_dma_top` 迁移到 U280：Vivado 2024.2 操作与验收说明书
+# `fsa_dma_top` 迁移到 U280：Vivado 2020.2 操作与验收说明书
 
 ## 1. 说明书目标
 
@@ -21,7 +21,7 @@ fsa_dma_top/m_axi_gmem ──┘
 | 项目 | 固定值 |
 |---|---|
 | Part | `xcu280-fsvh2892-2L-e` |
-| Board Part | `xilinx.com:au280:part0:1.1` |
+| Board Part | 优先`xilinx.com:au280:part0:1.1`；没有时自动选择安装中的`xilinx.com:au280:part0:*` |
 | 系统时钟 | `BJ43/BJ44`，LVDS，300 MHz |
 | HBM参考时钟 | `G31/F31`，LVDS，100 MHz |
 | PCIe参考时钟 | `AR15/AR14`，100 MHz |
@@ -40,7 +40,10 @@ fsa_dma_top/m_axi_gmem ──┘
 
 ```bash
 cd FSA_HLS/vivado_U280
+mkdir -p reports
 ```
+
+必须先执行`mkdir -p reports`。Shell会在启动Vivado之前打开`tee`的目标文件；如果目录不存在，Tcl脚本内部再创建已经来不及。
 
 目录职责：
 
@@ -66,29 +69,38 @@ scripts/run_status_sim.tcl              状态寄存器仿真
 
 必须按阶段0→1→状态寄存器仿真→2→3→4→5→6→7执行。每阶段只有`通过`、`失败`、`未执行`三种结论；上一阶段失败时停止。
 
-## 3. 准备Vivado 2024.2终端
+## 3. 准备Vivado/Vitis HLS 2020.2终端
 
-Linux示例：
+先向服务器管理员确认2020.2的真实安装根目录。若某个`settings64.sh`执行时仍尝试访问
+不存在的`/tools/Xilinx_Vitis_2020.2/...`，说明该安装曾被直接搬迁且内部路径已经失效；
+不能用它继续构建，应改用原始安装或修复后的安装。下面的变量值必须替换成服务器上的
+真实路径：
 
 ```bash
-source /tools/Xilinx/Vivado/2024.2/settings64.sh
+export FSA_VIVADO_ROOT=/actual/path/Vivado/2020.2
+export FSA_VITIS_HLS_ROOT=/actual/path/Vitis_HLS/2020.2
+source "$FSA_VIVADO_ROOT/settings64.sh"
+source "$FSA_VITIS_HLS_ROOT/settings64.sh"
 vivado -version
 vitis_hls -version
 cd <FlashAttention仓库>/FSA_HLS/vivado_U280
 ```
 
-两条版本命令都必须显示2024.2。Windows应使用Vivado 2024.2 Tcl Shell进入相同目录；Linux板测命令仍在U280主机执行。
+两条版本命令都必须显示2020.2。脚本会拒绝由其他Vivado版本创建、仿真、构建或下载；
+阶段1也必须用Vitis HLS 2020.2重新导出IP。Windows应使用Vivado 2020.2 Tcl Shell进入
+相同目录；Linux板测命令仍在U280主机执行。
 
 ## 4. 阶段0：环境、器件和IP检查
 
 ### 4.1 执行
 
 ```bash
+mkdir -p reports
 vivado -mode batch -source 00_preflight/check_environment.tcl \
   2>&1 | tee reports/00_preflight_console.log
 ```
 
-脚本检查Vivado版本、U280器件/board part以及XDMA、HBM、Clocking Wizard、Processor System Reset、AXI Clock Converter、SmartConnect和ILA。
+脚本先检查Vivado版本和U280器件；只有目标Part存在时，才创建内存工程、刷新IP Catalog并检查XDMA、HBM、Clocking Wizard、Processor System Reset、AXI Clock Converter、SmartConnect和ILA。不能在IP Catalog初始化前把`IPDEF=0`解释为IP缺失。
 
 ### 4.2 得到验收结果
 
@@ -100,16 +112,27 @@ cat reports/00_preflight.txt
 必须看到：
 
 ```text
-VIVADO_VERSION=2024.2...
+VIVADO_VERSION=2020.2...
+REQUIRED_VIVADO_VERSION=2020.2
+VIVADO_EXECUTABLE=.../Vivado/2020.2/...
+XILINX_VIVADO=.../Vivado/2020.2
 TARGET_PART_COUNT=1
-BOARD_PART_COUNT=1
+U280_PART_CANDIDATES=xcu280-fsvh2892-2L-e,...
+BOARD_PART_SELECTED=xilinx.com:au280:part0:...
+IP_CATALOG_CHECK=INITIALIZED
 IPDEF_xilinx.com:ip:xdma:4.1=1
 IPDEF_xilinx.com:ip:hbm:1.0=1
 ...
 PREFLIGHT_PASS
 ```
 
-失败处理：`TARGET_PART_COUNT=0`时安装UltraScale+ HBM器件支持；`BOARD_PART_COUNT=0`时安装U280 board files；任一`IPDEF_...=0`时补齐Vivado组件。此时`U280_HLS_COMPONENT_COUNT=0`是正常的，阶段1尚未导出IP。
+失败处理：
+
+- `TARGET_PART_COUNT=0`且`U280_PART_CANDIDATES=<none>`：先确认终端source的是预期Vivado 2020.2安装目录；若无误，则通过Xilinx Unified Installer修改现有安装，加入Virtex UltraScale+ HBM/U280器件支持；
+- 有U280候选但没有精确目标Part：把候选列表和目标值逐字比较，不能直接换成另一器件；
+- `BOARD_PART_SELECTED=<none>`：安装U280 board files。工程使用显式Part和XDC，因此脚本记录warning，但仍建议补齐；若只有不同修订号，脚本会从`BOARD_PART_CANDIDATES`中自动选择；
+- 只有`IP_CATALOG_CHECK=INITIALIZED`后出现的`IPDEF_...=0`才表示对应IP确实缺失；
+- `U280_HLS_COMPONENT_COUNT=0`在阶段1之前正常。
 
 ## 5. 阶段1：针对U280重新生成HLS IP
 

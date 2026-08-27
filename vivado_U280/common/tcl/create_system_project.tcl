@@ -8,6 +8,7 @@ if {![info exists include_fsa] || ![info exists stage_name]} {
 set common_tcl_dir [file normalize [file dirname [info script]]]
 set package_dir [file normalize [file join $common_tcl_dir ../..]]
 source [file join $package_dir config project_config.tcl]
+assert_required_vivado_version
 
 proc require_one {objects description} {
     if {[llength $objects] != 1} {
@@ -34,11 +35,7 @@ file mkdir [file join $report_root $stage_name]
 create_project -force $project_name $project_dir -part $target_part
 set_property target_language Verilog [current_project]
 set_property simulator_language Mixed [current_project]
-if {[llength [get_board_parts -quiet $board_part]] == 1} {
-    set_property board_part $board_part [current_project]
-} else {
-    puts "WARNING: board part $board_part is not installed; target part remains authoritative."
-}
+apply_u280_board_part_if_available
 
 set rtl_files [list \
     [file join $common_rtl_dir u280_pcie_reset.sv] \

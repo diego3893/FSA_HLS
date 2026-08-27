@@ -1,6 +1,10 @@
 if {[llength $argv] < 1 || [llength $argv] > 2} {
     error "Usage: vivado -mode batch -source scripts/program_device.tcl -tclargs <file.bit> ?file.ltx?"
 }
+set package_dir [file normalize [file join [file dirname [info script]] ..]]
+source [file join $package_dir config project_config.tcl]
+assert_required_vivado_version
+
 set bit_file [file normalize [lindex $argv 0]]
 if {![file exists $bit_file]} { error "Bitstream does not exist: $bit_file" }
 set ltx_file ""
@@ -26,4 +30,3 @@ program_hw_devices $device
 refresh_hw_device $device
 puts "PROGRAM_PASS device=$device bit=$bit_file probes=$ltx_file"
 close_hw_manager
-

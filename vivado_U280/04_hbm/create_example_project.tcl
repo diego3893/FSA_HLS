@@ -1,15 +1,14 @@
 set stage_dir [file normalize [file dirname [info script]]]
 set package_dir [file normalize [file join $stage_dir ..]]
 source [file join $package_dir config project_config.tcl]
+assert_required_vivado_version
 set project_dir [file join $build_root 04_hbm_ip]
 set example_dir [file join $build_root 04_hbm_example]
 file mkdir $build_root
 file mkdir [file join $report_root 04_hbm]
 
 create_project -force fsa_u280_04_hbm_ip $project_dir -part $target_part
-if {[llength [get_board_parts -quiet $board_part]] == 1} {
-    set_property board_part $board_part [current_project]
-}
+apply_u280_board_part_if_available
 create_ip -vlnv xilinx.com:ip:hbm:1.0 -module_name hbm_0
 set_property -dict [list \
     CONFIG.USER_APB_EN {false} \
@@ -25,4 +24,3 @@ redirect -file [file join $report_root 04_hbm hbm_properties.txt] {
 }
 open_example_project -force -dir $example_dir [get_ips hbm_0]
 puts "EXAMPLE_PROJECT_CREATED=$example_dir"
-

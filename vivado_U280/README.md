@@ -1,6 +1,6 @@
 # `fsa_dma_top` U280 独立工程包
 
-本目录用于在 Vivado/Vitis HLS 2024.2 中按顺序建立：
+本目录用于在 Vivado/Vitis HLS 2020.2 中按顺序建立：
 
 ```text
 U280 PCIe Gen3 x8 XDMA
@@ -34,10 +34,19 @@ ip_repo/            解压后的U280 HLS IP
 
 ## 必须按顺序执行
 
-在已加载 Vivado 2024.2 环境的终端中：
+先加载管理员确认可用的 Vivado/Vitis HLS 2020.2 环境，并确认两个版本命令都显示
+`2020.2`。不要使用内部仍引用不存在的`/tools/...`旧路径的搬迁安装。
+
+```bash
+vivado -version
+vitis_hls -version
+```
+
+然后在工程包目录执行：
 
 ```bash
 cd FSA_HLS/vivado_U280
+mkdir -p reports
 
 vivado -mode batch -source 00_preflight/check_environment.tcl
 vitis_hls -f 01_hls_ip/run_hls_u280.tcl
@@ -49,6 +58,11 @@ vivado -mode batch -source 04_hbm/create_example_project.tcl
 vivado -mode batch -source 05_xdma_hbm/create_project.tcl
 vivado -mode batch -source 06_fsa_system/create_project.tcl
 ```
+
+所有创建工程、仿真、构建和下载Tcl都会拒绝非2020.2 Vivado。U280 board-part在不同
+2020.2安装中可能是不同修订号；脚本优先使用`xilinx.com:au280:part0:1.1`，没有该版本时
+自动选择当前安装中可用的`xilinx.com:au280:part0:*`，始终以
+`xcu280-fsvh2892-2L-e`和本目录XDC为最终器件及管脚依据。
 
 创建阶段 5 或阶段 6 工程后，按脚本最后打印的 XPR 路径构建，例如：
 
@@ -76,4 +90,3 @@ vivado -mode batch \
 | XDMA-HBM工程综合/实现 | 未执行 |
 | 完整工程综合/实现 | 未执行 |
 | U280板上端到端测试 | 未执行 |
-

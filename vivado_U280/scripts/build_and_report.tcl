@@ -6,6 +6,7 @@ set xpr [file normalize [lindex $argv 0]]
 if {![file exists $xpr]} { error "Project does not exist: $xpr" }
 set package_dir [file normalize [file join [file dirname [info script]] ..]]
 source [file join $package_dir config project_config.tcl]
+assert_required_vivado_version
 
 open_project $xpr
 set project_name [get_property NAME [current_project]]
