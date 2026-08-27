@@ -19,11 +19,19 @@ if {[llength [info commands version]] != 0 && ![catch {version -short} hls_versi
     puts "WARNING: this Vitis HLS Tcl shell cannot report its version; verify vitis_hls -version is 2020.2 before continuing."
 }
 
-set hls_project_dir [file join $package_dir build hls_fsa_dma_u280]
+set hls_build_root [file join $package_dir build]
+set hls_project_name "hls_fsa_dma_u280"
+set hls_project_dir [file join $hls_build_root $hls_project_name]
 set export_dir [file join $package_dir ip_export]
+file mkdir $hls_build_root
 file mkdir $export_dir
 
-open_project -reset $hls_project_dir
+# Vitis HLS 2020.2 treats the open_project argument as a project name and
+# rejects an absolute path because it contains '/'. Enter the build directory
+# first so the on-disk result is still build/hls_fsa_dma_u280.
+cd $hls_build_root
+open_project -reset $hls_project_name
+puts "HLS_PROJECT_DIR=$hls_project_dir"
 set_top fsa_dma_top
 
 set SA_ROWS 4

@@ -13,6 +13,9 @@ python3 01_hls_ip/unpack_ip.py
 第一条命令依次运行 C simulation、C synthesis、RTL co-simulation 和 IP export。
 第二条命令把导出内容放入 `ip_repo/fsa_dma_top/`。必须确认：
 
+- 日志先打印`HLS_PROJECT_DIR=.../build/hls_fsa_dma_u280`；脚本会先进入`build/`，再以
+  纯项目名调用`open_project`，以兼容2020.2不接受绝对项目路径的限制；
+
 - C simulation日志出现 `[PASS] test_fsa_dma_top`；
 - `solution1/syn/report/fsa_dma_top_csynth.rpt` 中目标时钟为 10 ns；
 - `solution1/sim/report/fsa_dma_top_cosim.rpt` 的 Verilog结果为 PASS；
