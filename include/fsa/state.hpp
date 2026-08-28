@@ -186,9 +186,9 @@ namespace fsa{
                       "RowSize必须能被NSubBanks整除");
 
         // 使用枚举常量而不是static constexpr数据成员。两者在C++数组边界和
-        // 模板参数中等价，但Vitis HLS 2020.2在对嵌套state.*.banks执行
-        // ARRAY_RESHAPE时会错误地把static constexpr成员当成待重排数组，
-        // 进而报告state.acc_ram.SubBankSize访问越界。
+        // 模板参数中等价，但Vitis HLS 2020.2在处理嵌套state.*.banks的数组
+        // 优化指令时会错误地把static constexpr成员当成数组对象，进而报告
+        // state.acc_ram.SubBankSize访问越界。
         enum : int {
             /// @brief 每个sub-bank保存的元素数量
             SubBankSize = RowSize/NSubBanks,

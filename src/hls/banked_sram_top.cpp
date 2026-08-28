@@ -12,9 +12,7 @@ void sp_ram_top(
 
     static fsa::SpRAMState current{};
 
-    #pragma HLS ARRAY_PARTITION variable=current.banks complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.banks complete dim=2
-    #pragma HLS ARRAY_RESHAPE variable=current.banks complete dim=4
+    // banks的全部维度分割由内联的bankedSRAMStep统一声明。
     #pragma HLS ARRAY_PARTITION variable=current.full_read_data complete dim=1
     #pragma HLS ARRAY_PARTITION variable=current.full_read_data complete dim=2
 
@@ -85,9 +83,7 @@ void acc_ram_top(
 
     static fsa::AccRAMState current{};
 
-    #pragma HLS ARRAY_PARTITION variable=current.banks complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.banks complete dim=2
-    #pragma HLS ARRAY_RESHAPE variable=current.banks complete dim=4
+    // banks的全部维度分割由内联的bankedSRAMStep统一声明。
     #pragma HLS ARRAY_PARTITION variable=current.full_read_data complete dim=1
     #pragma HLS ARRAY_PARTITION variable=current.full_read_data complete dim=2
     #pragma HLS ARRAY_PARTITION variable=current.narrow_read_data complete dim=1

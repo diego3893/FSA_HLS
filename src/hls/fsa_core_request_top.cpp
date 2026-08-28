@@ -208,12 +208,9 @@ void fsa::fsa_core_request_run(
     #pragma HLS ARRAY_PARTITION variable=state.sa.u_output_pipe complete dim=0
     #pragma HLS ARRAY_PARTITION variable=state.accumulator.scale complete dim=1
     #pragma HLS ARRAY_PARTITION variable=state.accumulator.reciprocal complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=state.sp_ram.banks complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=state.sp_ram.banks complete dim=2
-    #pragma HLS ARRAY_RESHAPE variable=state.sp_ram.banks complete dim=4
-    #pragma HLS ARRAY_PARTITION variable=state.acc_ram.banks complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=state.acc_ram.banks complete dim=2
-    #pragma HLS ARRAY_RESHAPE variable=state.acc_ram.banks complete dim=4
+    // SRAM banks的分割只在bankedSRAMStep中声明。该函数会内联到当前
+    // 顶层；在这里再次对嵌套state成员声明指令会触发2020.2的四维
+    // ARRAY_RESHAPE越界问题，并造成同一存储对象存在重复优化指令。
     #pragma HLS ARRAY_PARTITION variable=state.acc_dma_response_valid complete dim=1
 
     output = fsa::FsaCoreRequestOutput{};

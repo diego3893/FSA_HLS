@@ -97,8 +97,10 @@ namespace fsa{
             // 保持并行性
             #pragma HLS ARRAY_PARTITION variable=state.banks complete dim=1
             #pragma HLS ARRAY_PARTITION variable=state.banks complete dim=2
-            // 组合一个sub-bank内部的sram字
-            #pragma HLS ARRAY_RESHAPE variable=state.banks complete dim=4
+            // 2020.2对嵌套结构体中的四维数组执行ARRAY_RESHAPE dim=4
+            // 会误报array access out of bound。完整分割第四维同样为展开的
+            // element循环提供并行端口，同时避开该版本的reshape路径。
+            #pragma HLS ARRAY_PARTITION variable=state.banks complete dim=4
 
             for(int port=0; port<NFullRead; ++port){
                 #pragma HLS UNROLL
