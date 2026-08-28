@@ -1,0 +1,4 @@
+interface:
+  display_name: "REWRITE 科研思考与论文工作流"
+  short_description: "把发现转化为问题、实验与可辩护的论文故事"
+  default_prompt: "Use $rewrite-scientific-workflow to turn my current finding into prioritized scientific questions, experiments, and a defensible paper storyline."

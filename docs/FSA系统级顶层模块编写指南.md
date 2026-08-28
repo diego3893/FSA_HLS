@@ -253,7 +253,7 @@ sub_bank_index_t<ACC_SUB_BANKS>
 bool acc_dma_read_ready[nMemPorts]{};
 bool acc_dma_response_valid[nMemPorts]{};
 acc_t acc_dma_read_data
-    [nMemPorts][SA_COLS/ACC_SUB_BANKS]{};
+    [nMemPorts*ACC_DMA_READ_ELEMENTS_PER_PORT]{};
 ```
 
 现有 `BankedSRAMIO` 没有单独的 response-valid，因此系统状态可以把实际握手的 `valid && ready` 延迟一拍，专门供 testbench 判断当前输出数据是否有效。
@@ -324,7 +324,7 @@ struct FsaCoreTopOutput{
     bool acc_dma_read_ready[nMemPorts]{};
     bool acc_dma_response_valid[nMemPorts]{};
     acc_t acc_dma_read_data
-        [nMemPorts][SA_COLS/ACC_SUB_BANKS]{};
+        [nMemPorts*ACC_DMA_READ_ELEMENTS_PER_PORT]{};
 
     // 以下字段主要用于联合测试失败时定位具体逻辑拍。
     ElemVector delayer_out{};
@@ -516,16 +516,12 @@ void fsa_core_top(
     static FsaCoreState current{};
 
     // 系统顶层必须重新声明关键状态的分割约束。
-    #pragma HLS ARRAY_PARTITION variable=current.sa.mesh type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=current.sa.cmp_array type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.accumulator.scale type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.accumulator.reciprocal type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.sp_ram.banks type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.sp_ram.banks type=complete dim=2
-    #pragma HLS ARRAY_RESHAPE variable=current.sp_ram.banks type=complete dim=4
-    #pragma HLS ARRAY_PARTITION variable=current.acc_ram.banks type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=current.acc_ram.banks type=complete dim=2
-    #pragma HLS ARRAY_RESHAPE variable=current.acc_ram.banks type=complete dim=4
+    #pragma HLS ARRAY_PARTITION variable=current.sa.mesh complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=current.sa.cmp_array complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=current.accumulator.scale complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=current.accumulator.reciprocal complete dim=1
+    // banks分割由内联的bankedSRAMStep统一声明，避免在系统顶层
+    // 对嵌套结构体成员重复应用数组优化指令。
 
     if(input.reset){
         resetCoreState(current);
@@ -612,8 +608,8 @@ void fsa_core_top(
 
     fsa::SystolicArrayState next_sa{};
 
-    #pragma HLS ARRAY_PARTITION variable=next_sa.mesh type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=next_sa.cmp_array type=complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=next_sa.mesh complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=next_sa.cmp_array complete dim=1
 
     fsa::systolic_array_step(current.sa, next_sa, sa_io);
 
@@ -652,8 +648,8 @@ void fsa_core_top(
 
     fsa::AccumulatorState next_accumulator{};
 
-    #pragma HLS ARRAY_PARTITION variable=next_accumulator.scale type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=next_accumulator.reciprocal type=complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=next_accumulator.scale complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=next_accumulator.reciprocal complete dim=1
 
     fsa::accumulator_step(
         current.accumulator,
@@ -712,7 +708,8 @@ void fsa_core_top(
                 element<fsa::SA_COLS/fsa::ACC_SUB_BANKS;
                 ++element){
             #pragma HLS UNROLL
-            output.acc_dma_read_data[port][element] =
+            output.acc_dma_read_data[
+                accDmaReadDataIndex(port, element)] =
                 acc_ram_io.narrowRead[port].data[element];
         }
     }
@@ -1094,11 +1091,11 @@ void fsa_core_sa_stage(
     #pragma HLS INLINE off
     #pragma HLS PIPELINE II=16
 
-    #pragma HLS ARRAY_PARTITION variable=current.mesh type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=next.mesh type=complete dim=0
-    #pragma HLS ARRAY_PARTITION variable=io.pe_ctrl type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=io.pe_data type=complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=io.acc_out type=complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=current.mesh complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=next.mesh complete dim=0
+    #pragma HLS ARRAY_PARTITION variable=io.pe_ctrl complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=io.pe_data complete dim=1
+    #pragma HLS ARRAY_PARTITION variable=io.acc_out complete dim=1
 
     fsa::systolic_array_step(current, next, io);
 }

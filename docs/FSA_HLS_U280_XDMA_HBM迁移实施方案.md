@@ -217,11 +217,28 @@ test -f /usr/include/$(gcc -print-multiarch)/bits/wordsize.h \
 若文件本身不存在，应让管理员安装匹配当前系统架构的C开发头文件，不能混用其他Vivado
 版本或其他Ubuntu版本的glibc头文件。
 
-若通过头文件分析后出现
-`Cannot reshape array 'state.acc_ram.SubBankSize' : array access out of bound`，则检查服务器的
-`BankedSRAMState`是否已将`SubBankSize`等纯编译期常量定义为`enum : int`。这是规避2020.2
-把嵌套结构体`static constexpr`成员误判为重排目标的兼容修改；真实banks数组形状和
-`ARRAY_RESHAPE ... dim=4`保持不变。
+若通过头文件分析后出现`Cannot reshape array 'state.acc_ram.SubBankSize'`、
+`Cannot reshape array 'state.acc_ram.banks'`或
+`Cannot partition array 'state.acc_ram.banks'`，则服务器仍未同步完整的2020.2兼容修改：
+`SubBankSize`等纯编译期常量应为`enum : int`；顶层不再重复优化嵌套banks成员；实际访问
+banks的`bankedSRAMStep`只保留第一、第二维的`ARRAY_PARTITION complete`，第四维不再使用
+任何显式数组优化指令。第四维的所有读写循环均完全展开，访问下标在展开后为编译期常量。
+数组形状和功能不变，但物理实现由2020.2重新推断，因此必须在CSYNTH报告中验收
+BRAM/URAM/LUT、存储映射、目标周期和流水线II。
+
+如果下一步在LLVM `Module Verifier`阶段出现`[4 x [2 x float]]* %output.6`、
+`Broken module found, compilation aborted`和core dump，`output.6`对应内部
+`FsaCoreStepOutput::acc_dma_read_data`。2020.2无法稳定处理该二维float数组以引用参数跨越
+`advanceDatapath`非内联函数边界的IR。兼容实现将其展平成长度
+`nMemPorts*ACC_DMA_READ_ELEMENTS_PER_PORT`的一维数组，并将受影响输出结构体的整体聚合
+赋值改为逐字段、逐元素清零。同步后执行`rg 'acc_dma_read_data\[[^]]+\]\[' src include tests`
+应没有活动源码匹配；这一修改不触及顶层AXI协议、HBM地址或最终输出矩阵形状。
+
+若函数编号变化后仍在`advanceDatapath...`上发生Module Verifier core dump，则不能继续保留
+这一LLVM函数边界。兼容实现删除`advanceDatapath`和按值返回整个`FsaCoreStepInput`的
+`registerDatapathInput`，将完全相同的数据通路调用、`executed_steps`累加以及三项ready协议
+检查展开到调度循环的唯一调用点。外层`PIPELINE II=39`继续有效；由于原先的独立RTL寄存器
+层次被移除，CSYNTH通过后必须重新验收实际II、Estimated Clock和关键路径，不能沿用旧报告。
 
 ### 5.4 RTL协同仿真验收
 

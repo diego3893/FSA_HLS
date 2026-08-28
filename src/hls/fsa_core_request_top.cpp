@@ -78,48 +78,6 @@ namespace{
         }
     }
 
-    /**
-     * @brief 在调度译码和共享Core之间锁存一拍控制输入
-     *
-     * 保留独立RTL层次并流水化该拷贝，使phase/instruction译码产生的
-     * mux输出先进入寄存器，下一拍才送入advanceDatapath。这个边界用来
-     * 切断“调度mux -> advanceDatapath入口”组合路径。
-     */
-    fsa::FsaCoreStepInput registerDatapathInput(
-        const fsa::FsaCoreStepInput& input
-    ){
-        #pragma HLS INLINE off
-        #pragma HLS PIPELINE II=1
-        return input;
-    }
-
-    void advanceDatapath(
-        fsa::FsaCoreDatapathState& state,
-        const fsa::FsaCoreStepInput& input,
-        fsa::FsaCoreStepOutput& output,
-        ap_uint<16>& executed_steps,
-        bool& protocol_error
-    ){
-        // 本函数在请求调度循环中只有一个静态调用点。所有阶段先生成本拍控制，
-        // 再从该调用点推进同一套SA、Accumulator和片上状态通路。
-        #pragma HLS INLINE off
-        // 最新综合中累加器状态回写依赖使本函数的实际Interval为20。
-        // 将II对齐该可实现值；时序切分由上游显式寄存器边界完成。
-        #pragma HLS PIPELINE II=20
-        fsa::fsa_core_datapath_step(state, input, output);
-        executed_steps = executed_steps+1;
-
-        if(input.sp_read.valid && !output.sp_read_ready){
-            protocol_error = true;
-        }
-        if(input.acc_read.valid && !output.acc_read_ready){
-            protocol_error = true;
-        }
-        if(output.acc_write_valid && !output.acc_write_ready){
-            protocol_error = true;
-        }
-    }
-
     fsa::MatrixInstruction baseInstruction(const fsa::MxFunc function){
         #pragma HLS INLINE
         fsa::MatrixInstruction instruction{};
@@ -190,8 +148,6 @@ void fsa::fsa_core_request_run(
     fsa::FsaCoreRequestOutput& output
 ){
     #pragma HLS INLINE off
-    #pragma HLS ALLOCATION function instances=advanceDatapath limit=1
-    #pragma HLS ALLOCATION function instances=registerDatapathInput limit=1
 
     static fsa::FsaCoreDatapathState state{};
     static bool online_sequence_active = false;
@@ -259,9 +215,10 @@ void fsa::fsa_core_request_run(
         ? REQUEST_INSTRUCTION_COUNT
         : REQUEST_BASE_INSTRUCTION_COUNT;
 
-    // 所有阶段只生成step_input；完整Core只在循环底部调用一次。上一版外层
-    // 目标II=39、实际II=39；本版保持该已收敛目标，仅在Core之前增加
-    // 独立的II=1输入寄存器级并取消Core的latency下限。
+    // 所有阶段只生成step_input；完整Core只在循环底部调用一次。
+    // 2020.2会在验证包含多个引用参数的advanceDatapath辅助函数时生成
+    // 非法LLVM IR，因此状态推进和协议检查直接放在这个唯一调用点。
+    // 外层循环继续保持已收敛的目标II=39。
     for(unsigned scheduler_iteration=0;
             scheduler_iteration<MAX_REQUEST_SCHEDULER_ITERATIONS;
             ++scheduler_iteration){
@@ -358,19 +315,19 @@ void fsa::fsa_core_request_run(
             break;
         }
 
-        // 调度译码和共享Core之间保留一拍寄存器，避免两段
-        // 组合逻辑落在同一条时序路径上。
-        const fsa::FsaCoreStepInput registered_step_input =
-            registerDatapathInput(step_input);
-
         fsa::FsaCoreStepOutput step_output;
-        advanceDatapath(
-            state,
-            registered_step_input,
-            step_output,
-            output.executed_steps,
-            output.protocol_error
-        );
+        fsa::fsa_core_datapath_step(state, step_input, step_output);
+        output.executed_steps = output.executed_steps+1;
+
+        if(step_input.sp_read.valid && !step_output.sp_read_ready){
+            output.protocol_error = true;
+        }
+        if(step_input.acc_read.valid && !step_output.acc_read_ready){
+            output.protocol_error = true;
+        }
+        if(step_output.acc_write_valid && !step_output.acc_write_ready){
+            output.protocol_error = true;
+        }
 
         switch(phase){
         case RequestPhase::RESET_ONLINE_MAX:
