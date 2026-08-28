@@ -41,6 +41,36 @@ set QKV_DEPTH [expr {$MAX_SEQUENCE_LENGTH*$SA_ROWS/4}]
 set O_DEPTH [expr {$MAX_SEQUENCE_LENGTH*$SA_ROWS/2}]
 set CFLAGS "-std=c++14 -I[file join $project_root include] -DFSA_SA_ROWS=$SA_ROWS -DFSA_SA_COLS=$SA_COLS -DFSA_MAX_SEQUENCE_LENGTH=$MAX_SEQUENCE_LENGTH -DFSA_DMA_AXI_QKV_DEPTH=$QKV_DEPTH -DFSA_DMA_AXI_O_DEPTH=$O_DEPTH"
 
+# Ubuntu/Debian把bits/wordsize.h等glibc体系结构头文件安装在
+# /usr/include/<multiarch>/下。Vitis HLS 2020.2的综合Clang在较新的
+# Ubuntu上不会自动加入该目录，而CSIM使用宿主GCC，因此可能出现
+# “CSIM通过、CSYNTH找不到bits/wordsize.h”。只在系统使用
+# features-time64.h时探测并补入该目录，避免硬编码某一发行版。
+set host_multiarch_include ""
+set multiarch_names {}
+if {![catch {exec gcc -print-multiarch} gcc_multiarch]} {
+    set gcc_multiarch [string trim $gcc_multiarch]
+    if {$gcc_multiarch ne ""} { lappend multiarch_names $gcc_multiarch }
+}
+lappend multiarch_names "x86_64-linux-gnu"
+foreach multiarch_name [lsort -unique $multiarch_names] {
+    set candidate [file join /usr include $multiarch_name]
+    if {[file exists [file join $candidate bits wordsize.h]]} {
+        set host_multiarch_include $candidate
+        break
+    }
+}
+if {[file exists /usr/include/features-time64.h]} {
+    if {$host_multiarch_include eq ""} {
+        error "features-time64.h exists but no multiarch bits/wordsize.h directory was found"
+    }
+    append CFLAGS " -I$host_multiarch_include"
+    puts "HOST_MULTIARCH_INCLUDE=$host_multiarch_include"
+} else {
+    puts "HOST_MULTIARCH_INCLUDE=<not-required>"
+}
+puts "HLS_CFLAGS=$CFLAGS"
+
 set design_sources {
     src/hls/fsa_dma_top.cpp
     src/hls/fsa_core_request_top.cpp

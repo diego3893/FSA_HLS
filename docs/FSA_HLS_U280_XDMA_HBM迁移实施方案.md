@@ -141,11 +141,19 @@ PREFLIGHT_PASS
 ### 5.1 执行完整HLS流程
 
 ```bash
+set -o pipefail
 vitis_hls -f 01_hls_ip/run_hls_u280.tcl \
   2>&1 | tee reports/01_hls_u280_console.log
 ```
 
+`set -o pipefail`使这条流水线返回`vitis_hls`的失败状态；否则`tee`成功写完日志可能掩盖HLS
+退出码。命令返回非0时保留日志并停止，不执行IP解压。
+
 脚本固定top=`fsa_dma_top`、part=`xcu280-fsvh2892-2L-e`、周期10 ns、4×4阵列、`L_MAX=4096`，依次运行C simulation、C synthesis、Verilog RTL co-simulation和IP export。
+Vitis HLS 2020.2的`open_project`参数只能是项目名，不能直接传含`/`的绝对路径；脚本会先
+进入`vivado_U280/build/`，再创建`hls_fsa_dma_u280`，日志必须打印最终
+`HLS_PROJECT_DIR=.../build/hls_fsa_dma_u280`。若仍出现`contains illegal character '/'`，
+说明服务器运行的还是修改前脚本。
 
 ### 5.2 C simulation验收
 
@@ -156,6 +164,17 @@ grep -n "\[PASS\] test_fsa_dma_top" \
 
 必须返回包含`one start produced complete 9x4 O`的一行。无该行或退出码非0时停止。
 
+先用总日志确认流程走到了哪一步，不能仅根据`solution1/`当前有哪些子目录下结论：
+
+```bash
+grep -nE 'Running: (csim_design|csynth_design|cosim_design|export_design)|Finished Command (csim_design|csynth_design|cosim_design|export_design)|ERROR:' \
+  reports/01_hls_u280_console.log | tail -n 80
+```
+
+如果已经看到`Running: csynth_design`，但还没有`Finished Command csynth_design`，且日志中没有
+`ERROR:`，表示C综合仍在运行。此时`solution1/`中只有`csim/`是允许的中间状态，不是失败证据。
+等待前台`vitis_hls`命令结束；不要另开第二个进程对同一个HLS工程重复运行。
+
 ### 5.3 C synthesis验收
 
 ```bash
@@ -165,6 +184,44 @@ less build/hls_fsa_dma_u280/solution1/syn/report/fsa_dma_top_csynth.rpt
 ```
 
 目标周期必须为10 ns，Estimated Clock必须小于10 ns。接口仍应是32-bit数据/7-bit地址AXI-Lite和64-bit AXI master。HLS估算不能替代板级Implementation时序。
+
+在读取报告前，逐项执行以下检查：
+
+```bash
+grep -n 'Finished Command csynth_design' reports/01_hls_u280_console.log
+grep -n 'ERROR:' reports/01_hls_u280_console.log
+test -f build/hls_fsa_dma_u280/solution1/syn/report/fsa_dma_top_csynth.rpt \
+  && echo CSYNTH_REPORT_PRESENT \
+  || echo CSYNTH_REPORT_MISSING
+grep -n "unexpected pragma parameter 'type'" reports/01_hls_u280_console.log
+```
+
+只有第一条找到完成行、第二条和第四条没有输出、第三条打印`CSYNTH_REPORT_PRESENT`，才能进入
+报告验收。`unexpected pragma parameter 'type'`表示源码仍用了2020.2不接受的
+`type=complete`形式，相关`ARRAY_PARTITION`/`ARRAY_RESHAPE`可能未生效；即使综合最终完成，
+也不能把该结果作为资源与性能基线。当前源码已改为等价的2020.2语法
+`variable=... complete dim=...`。Xilinx自带`hls_hotbm_apfixed.h`中的
+`resource pragma is deprecated`警告不属于这个问题，可记录但无需因此停止。
+
+若CSIM通过而CSYNTH立即在`features-time64.h`报告`bits/wordsize.h`不存在，先执行：
+
+```bash
+gcc -print-multiarch
+test -f /usr/include/$(gcc -print-multiarch)/bits/wordsize.h \
+  && echo MULTIARCH_HEADER_PRESENT \
+  || echo MULTIARCH_HEADER_MISSING
+```
+
+新版Ubuntu把该头文件放在multiarch目录，而2020.2综合Clang可能不会自动搜索这个目录。
+`run_hls_u280.tcl`会探测该路径、加入HLS编译参数，并打印`HOST_MULTIARCH_INCLUDE=...`。
+若文件本身不存在，应让管理员安装匹配当前系统架构的C开发头文件，不能混用其他Vivado
+版本或其他Ubuntu版本的glibc头文件。
+
+若通过头文件分析后出现
+`Cannot reshape array 'state.acc_ram.SubBankSize' : array access out of bound`，则检查服务器的
+`BankedSRAMState`是否已将`SubBankSize`等纯编译期常量定义为`enum : int`。这是规避2020.2
+把嵌套结构体`static constexpr`成员误判为重排目标的兼容修改；真实banks数组形状和
+`ARRAY_RESHAPE ... dim=4`保持不变。
 
 ### 5.4 RTL协同仿真验收
 
@@ -183,6 +240,15 @@ find ip_repo -name ReleaseNotes.txt -print -exec cat {} \;
 ```
 
 Python命令必须打印`IP_UNPACK_PASS=...component.xml`；ReleaseNotes必须显示U280，不得仍是`xcvu37p_CIV`。若目标目录已存在，脚本会拒绝覆盖，人工确认旧目录后先移到备份位置。
+
+### 5.6 2020.2报告AXI depth宏未声明
+
+若日志在`fsa_dma_top.cpp`的四条`m_axi`接口处报告
+`FSA_DMA_AXI_QKV_DEPTH`或`FSA_DMA_AXI_O_DEPTH`未声明，先检查源码是否使用
+`FSA_HLS_PRAGMA(...)`，而不是直接把宏名写在`#pragma HLS INTERFACE`中。2020.2需要通过
+两层`_Pragma`宏让预处理器先展开depth。当前4×4、`L_MAX=4096`配置的最终值必须是
+Q/K/V各4096个64-bit word，O为8192个64-bit word；修复只改变pragma展开方式，不改变
+数组边界、地址空间或AXI数据位宽。
 
 ## 6. 验证新增状态寄存器
 

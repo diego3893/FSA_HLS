@@ -108,7 +108,9 @@ namespace fsa{
     };
 
     /**
-     * @brief 单列FP32 reciprocal恢复除法器的跨拍状态
+     * @brief 
+     * 
+     *
      *
      * 除法器固定计算1.0/denominator。普通有限数先拆成符号、
      * 无偏指数和24位规格化有效数，再使用恢复除法每拍生成两个商位。
@@ -183,20 +185,24 @@ namespace fsa{
         static_assert(RowSize%NSubBanks==0,
                       "RowSize必须能被NSubBanks整除");
 
-        /// @brief 每个sub-bank保存的元素数量
-        static constexpr int SubBankSize = RowSize/NSubBanks;
+        // 使用枚举常量而不是static constexpr数据成员。两者在C++数组边界和
+        // 模板参数中等价，但Vitis HLS 2020.2在对嵌套state.*.banks执行
+        // ARRAY_RESHAPE时会错误地把static constexpr成员当成待重排数组，
+        // 进而报告state.acc_ram.SubBankSize访问越界。
+        enum : int {
+            /// @brief 每个sub-bank保存的元素数量
+            SubBankSize = RowSize/NSubBanks,
 
-        /// @brief full read返回的元素数量
-        static constexpr int FullDataSize = RowSize;
+            /// @brief full read返回的元素数量
+            FullDataSize = RowSize,
 
-        /// @brief narrow read返回的元素数量
-        static constexpr int NarrowDataSize = SubBankSize;
+            /// @brief narrow read返回的元素数量
+            NarrowDataSize = SubBankSize,
 
-        // 消除array<T, 0>造成的越界问题
-        static constexpr int FullReadStorage =
-            NFullRead>0 ? NFullRead : 1;
-        static constexpr int NarrowReadStorage =
-            NNarrowRead>0 ? NNarrowRead : 1;
+            // 消除array<T, 0>造成的越界问题
+            FullReadStorage = NFullRead>0 ? NFullRead : 1,
+            NarrowReadStorage = NNarrowRead>0 ? NNarrowRead : 1
+        };
 
         using FullData = std::array<T, (std::size_t)RowSize>;
         using NarrowData = std::array<T, (std::size_t)SubBankSize>;
