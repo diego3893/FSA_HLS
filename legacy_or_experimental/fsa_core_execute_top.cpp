@@ -50,7 +50,8 @@ namespace{
                     element<fsa::SA_COLS/fsa::ACC_SUB_BANKS; ++element){
                 #pragma HLS UNROLL
                 output.acc_dma_read_data[port][element] =
-                    step_output.acc_dma_read_data[port][element];
+                    step_output.acc_dma_read_data[
+                        fsa::accDmaReadDataIndex(port, element)];
             }
         }
         output.acc_write_valid = step_output.acc_write_valid;

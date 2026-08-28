@@ -17,6 +17,15 @@
 #include "fsa/systolic_array.hpp"
 
 namespace fsa{
+    /// @brief 每个accRAM窄读端口返回的元素数
+    constexpr int ACC_DMA_READ_ELEMENTS_PER_PORT =
+        SA_COLS/ACC_SUB_BANKS;
+
+    /// @brief 将二维(port, element)映射到2020.2可稳定处理的一维下标
+    constexpr int accDmaReadDataIndex(const int port, const int element){
+        return port*ACC_DMA_READ_ELEMENTS_PER_PORT+element;
+    }
+
     /// @brief 一个logical step的数据通路输入
     struct FsaCoreStepInput{
         // Core内部信号
@@ -50,8 +59,11 @@ namespace fsa{
         bool spad_write_ready[nMemPorts]{};
         bool acc_dma_read_ready[nMemPorts]{};
         bool acc_dma_response_valid[nMemPorts]{};
+        // 物理含义仍是[nMemPorts][ACC_DMA_READ_ELEMENTS_PER_PORT]。
+        // 展平可规避Vitis HLS 2020.2在非内联函数引用参数中为二维float
+        // 数组生成非法LLVM IR的问题。
         acc_t acc_dma_read_data
-            [nMemPorts][SA_COLS/ACC_SUB_BANKS]{};
+            [nMemPorts*ACC_DMA_READ_ELEMENTS_PER_PORT]{};
 
         ElemVector delayer_out{};
         AccVector aligned_sa_out{};

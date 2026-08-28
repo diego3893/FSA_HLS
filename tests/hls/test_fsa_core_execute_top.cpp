@@ -211,7 +211,8 @@ namespace{
             );
             for(int element=0; element<ELEMENTS_PER_SUB_BANK; ++element){
                 row[(std::size_t)(sub_bank*ELEMENTS_PER_SUB_BANK+element)] =
-                    response.acc_dma_read_data[sub_bank][element];
+                    response.acc_dma_read_data[
+                        fsa::accDmaReadDataIndex(sub_bank, element)];
             }
         }
         return row;

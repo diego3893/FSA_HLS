@@ -213,7 +213,20 @@ void fsa::fsa_core_request_run(
     // ARRAY_RESHAPE越界问题，并造成同一存储对象存在重复优化指令。
     #pragma HLS ARRAY_PARTITION variable=state.acc_dma_response_valid complete dim=1
 
-    output = fsa::FsaCoreRequestOutput{};
+    // 显式清零，避免2020.2对含二维数组的输出结构体生成聚合store。
+    output.request_ready = false;
+    output.request_done = false;
+    output.protocol_error = false;
+    output.normalized = false;
+    output.executed_steps = 0;
+    for(int query=0; query<fsa::SA_COLS; ++query){
+        #pragma HLS UNROLL
+        output.l[query] = fsa::acc_t{};
+        for(int row=0; row<fsa::SA_ROWS; ++row){
+            #pragma HLS UNROLL
+            output.o[query][row] = fsa::acc_t{};
+        }
+    }
     output.request_ready = true;
 
     if(input.reset){
@@ -350,7 +363,7 @@ void fsa::fsa_core_request_run(
         const fsa::FsaCoreStepInput registered_step_input =
             registerDatapathInput(step_input);
 
-        fsa::FsaCoreStepOutput step_output{};
+        fsa::FsaCoreStepOutput step_output;
         advanceDatapath(
             state,
             registered_step_input,
@@ -444,11 +457,12 @@ void fsa::fsa_core_request_run(
                     const unsigned query =
                         bank*ACC_ELEMENTS_PER_SUB_BANK+element;
                     if(phase==RequestPhase::READ_L_RESPONSE){
-                        output.l[query] =
-                            step_output.acc_dma_read_data[bank][element];
+                        output.l[query] = step_output.acc_dma_read_data[
+                            fsa::accDmaReadDataIndex(bank, element)];
                     }else{
                         output.o[query][phase_index] =
-                            step_output.acc_dma_read_data[bank][element];
+                            step_output.acc_dma_read_data[
+                                fsa::accDmaReadDataIndex(bank, element)];
                     }
                 }
             }

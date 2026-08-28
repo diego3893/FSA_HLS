@@ -75,7 +75,34 @@ void fsa_core_datapath_step(
 ){
     #pragma HLS INLINE
 
-    output = FsaCoreStepOutput{};
+    // 不使用整个结构体的聚合赋值。Vitis HLS 2020.2在该结构体作为
+    // advanceDatapath引用参数时，曾为其中的二维float数组生成非法IR。
+    output.sp_read_ready = false;
+    output.acc_read_ready = false;
+    output.acc_write_ready = false;
+    output.acc_write_valid = false;
+    output.acc_write_addr = 0;
+    for(int port=0; port<nMemPorts; ++port){
+        #pragma HLS UNROLL
+        output.spad_write_ready[port] = false;
+        output.acc_dma_read_ready[port] = false;
+        output.acc_dma_response_valid[port] = false;
+        for(int element=0;
+                element<ACC_DMA_READ_ELEMENTS_PER_PORT; ++element){
+            #pragma HLS UNROLL
+            output.acc_dma_read_data[
+                accDmaReadDataIndex(port, element)] = acc_t{};
+        }
+    }
+    for(int row=0; row<SA_ROWS; ++row){
+        #pragma HLS UNROLL
+        output.delayer_out[(std::size_t)row] = elem_t{};
+    }
+    for(int col=0; col<SA_COLS; ++col){
+        #pragma HLS UNROLL
+        output.aligned_sa_out[(std::size_t)col] = acc_t{};
+        output.accumulator_out[(std::size_t)col] = acc_t{};
+    }
 
     // SpRAM整行读
     SpRAMIO sp_ram_io{};
@@ -227,9 +254,11 @@ void fsa_core_datapath_step(
             acc_ram_io.narrowRead[port].ready;
         output.acc_dma_response_valid[port] =
             state.acc_dma_response_valid[port];
-        for(int element=0; element<SA_COLS/ACC_SUB_BANKS; ++element){
+        for(int element=0;
+                element<ACC_DMA_READ_ELEMENTS_PER_PORT; ++element){
             #pragma HLS UNROLL
-            output.acc_dma_read_data[port][element] =
+            output.acc_dma_read_data[
+                accDmaReadDataIndex(port, element)] =
                 acc_ram_io.narrowRead[port].data[(std::size_t)element];
         }
     }

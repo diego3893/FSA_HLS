@@ -307,7 +307,8 @@ namespace{
                 const int row_element =
                     sub_bank*ELEMENTS_PER_SUB_BANK+element;
                 row[(std::size_t)row_element] =
-                    response.acc_dma_read_data[sub_bank][element];
+                    response.acc_dma_read_data[
+                        fsa::accDmaReadDataIndex(sub_bank, element)];
             }
         }
         return row;
