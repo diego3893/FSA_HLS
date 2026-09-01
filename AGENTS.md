@@ -1,88 +1,88 @@
 # FSA-HLS 项目协作说明
 
-## 适用范围
+## 适用范围和当前架构
 
-- 本文件适用于 `FSA-HLS` 仓库中的全部文件。
-- 用户在当前对话中的明确要求优先于本文件。
-- `FSA-main` 中的 Chisel 源码是功能和时序语义的主要参考；除非用户明确要求，否则不要修改 `FSA-main`。
-- 本项目分为两个阶段：先迁移 PE、CMP、SA、Delayer、Accumulator、片上存储等核心计算模块，再迁移 DMA 等外围模块。
+- 本文件适用于 `FSA-HLS` 仓库中的全部文件；用户在当前对话中的明确要求优先。
+- `FSA-main` 的 Chisel 源码和 FSA 论文用于核对功能、数据移动和架构意图；除非用户明确要求，否则不要修改参考项目。
+- 当前综合主路径是 `fsa_dma_top -> fsa_stream_request_run -> stream_array/stream_pe`：DMA 使用 load/compute/store `DATAFLOW`，阵列使用定长 token 和 PE 局部状态。
+- 原 `fsa_core_request_run`、`fsa_core_datapath_step` 及其 `current/next` 模型继续作为功能参考，不应为了优化路径而删除或无意改变其语义。
+- 当前版本保持在线 softmax、causal mask、`active_keys`、非整 tile、最终归一化和现有 DMA 外部接口。Split-D、controller 指令重叠、AXI bundle 拆分不属于默认修改范围，除非用户明确要求。
+- `accumulator_pipeline` 是独立实验实现，当前综合主路径不使用；未经单独验证不要接入主路径。
 
 ## 与用户沟通
 
-- 默认使用中文，表达应简明、通俗，按只学过本科基础课程的读者水平解释。
-- 用户未明确要求修改文件时，只检查并在对话中给出结论，不改文件。
-- 用户要求检查时，只指出确实需要修改的问题；注释风格等非硬伤不必强行调整。
-- 用户要求实现或修复时，可以直接修改并进行与改动规模相称的验证。
-- 不要擅自改变阵列规模、开发板型号、顶层协议或数据位宽。
-- 如果只能完成语法检查、C 仿真或综合中的一部分，必须准确说明验证范围，不能笼统地说“已经通过”。
+- 默认使用中文，表达简明、通俗，按只学过本科基础课程的读者水平解释。
+- 用户未要求修改文件时，只检查并给出结论；用户要求实现或修复时，可直接修改并进行与风险相称的验证。
+- 不擅自改变阵列规模、开发板型号、时钟目标、顶层协议或数据位宽。
+- 必须区分 C++ 测试、C 仿真、C 综合、RTL 协同仿真、IP 导出、Vivado 实现和上板测试；只完成其中一部分时准确说明范围。
 
 ## 目录职责
 
-- `include/fsa/`：公共配置、类型、控制信号和模块接口。
-- `include/fsa/hls/`：可综合顶层函数的接口。
-- `src/core/`：PE、CMP、Delayer、SA、算术函数等核心行为实现。
-- `src/hls/`：面向 Vitis HLS 的顶层包装函数和接口 Pragma。
-- `tests/`：普通 C++ 测试。
-- `tests/hls/`：各 HLS 顶层的 testbench。
-- `hls/<module>/run_hls.tcl`：模块的 C 仿真、综合、协同仿真和 IP 导出流程。
-- `docs/`：迁移说明和综合报告。
-- `build/`、`hls/*/build/`：工具生成物，通常不提交 Git。
+- `include/fsa/`：公共配置、类型、控制信号和核心接口。
+- `include/fsa/hls/`：可综合顶层函数接口。
+- `src/core/`：算术、旧逐拍参考模型和新 stream 核心实现。
+- `src/hls/`：Vitis HLS 顶层包装、外部接口和顶层 `DATAFLOW`。
+- `tests/`：核心 C++ 测试；`tests/hls/`：必须调用对应 HLS 顶层的 testbench。
+- `hls/<module>/run_hls.tcl`：单模块 C 仿真、综合、协同仿真和导出流程。
+- `run_test.ps1`：本地 GCC 测试入口；`run_hls.sh`：服务器/Vitis HLS 模块入口。
+- `docs/`：架构方案、执行说明和基于实际构建产物的综合报告。
+- `build/`、`hls/*/build/`、`hls/*/*_build/`：工具生成物，通常不提交 Git。
 
-## C++ 和注释约定
+## C++、数值和注释约定
 
-- 公共名称尽量与 Chisel 中的模块、变量和控制信号一致，方便逐项对照。
+- 公共名称尽量与 Chisel/FSA 概念对应；核心类型和函数放在 `namespace fsa` 中。
 - 头文件保护宏只使用文件名，例如 `PE_TOP_HPP`；不使用 `#pragma once`。
-- 核心类型和函数放在 `namespace fsa` 中。
-- 保持项目现有排版，不对无关代码进行大范围格式化。
-- 新增公共结构体、字段和函数时写清楚：它是什么、从哪里来、送到哪里、对应哪段 Chisel 逻辑。
-- 注释应解释硬件意义，不要只把代码逐字翻译成中文。
-- 沿用项目现有的简单类型转换写法。涉及位模式重解释时必须使用专门的 `view...` 函数，不能用普通强制类型转换代替。
-- `cvtAtoE` 表示数值格式转换；`viewEasA`、`viewAasE` 表示按位打包或解包，两者不能混用。
-- 默认使用 C++ testbench，不额外引入 Python 依赖，除非 Python 明显更合适或用户明确要求。
+- 保持现有排版，不对无关代码做大范围格式化。新增公共结构体、字段和函数要说明硬件含义、数据来源和去向。
+- `cvtAtoE` 是 FP32 到 FP16 的数值转换；`viewEasA`、`viewAasE` 是位模式装入/取出，不能互换。
+- FP16 位模式装在 `acc_t` 载体中时，测试必须先用 `viewAasE` 解包，不能把载体本身直接与 FP32 数值比较。
+- 默认使用 C++ testbench，不额外引入 Python，除非 Python 明显更合适或用户明确要求。
 
-## 时序模型
+## 旧逐拍模型与新 stream 模型
 
-- 一个 `step` 表示模块的一次状态推进：只读 `current`，只写 `next`，最后统一执行 `current = next`。
-- 不要在一个 step 的中途把 `next` 写回 `current`，否则会破坏“所有寄存器同时更新”的硬件语义。
-- 顶层函数的一次调用是否等于一个时钟周期，必须结合控制协议和综合结果说明；使用 `ap_ctrl_hs` 时，一次调用首先表示一次事务。
-- 新增寄存器、pipe 或 busy/counter 状态时，应说明它对应的硬件延迟以及 Chisel 中的寄存器或模块连接。
+- 旧 `step` 模型必须只读 `current`、只写 `next`，并在 step 结束后统一提交；不要在 step 中途写回 `current`。
+- 上述 `current/next` 约束只适用于旧逐拍参考模型。新高吞吐路径应让每个 PE/CMP/Accumulator 进程拥有自己的局部持久状态，不能重新引入整阵列状态复制。
+- stream token 必须携带所需的 `valid/op/tag/last/masked` 信息。所有 DATAFLOW 生产者和消费者必须具有可证明的固定 token 数或明确终止 token；bubble 也要传递，不能因分支少写 FIFO。
+- QK 产生的 S、减 max 后的 N、PWL 后的 P、rowsum 和 PV 应沿 FSA 阵列路径移动；不要把完整 S/P tile 写入通用 SRAM 后交给独立 softmax/PV 核。
+- 每个 PE 的普通 MAC、减 max、缩放和 PWL 以复用一条 FMA 流水线为目标。空间展开仍应保留每个 PE 的独立实例，不能把整个阵列错误限制成一条共享 FMA。
+- CMP 的逐 score 最大值更新应使用 compare/mux；`oldMax-newMax` 只在 tile 边界计算。
+- 在线状态必须保持 `m/l/O` 语义：跨 KV tile rescale，只有 `finalize` 后才计算最终 `O/l`。
 
-## HLS 编写约定
+## HLS 编写和顶层维护约定
 
-- 顶层包装函数负责：接口定义、复位、输入映射、调用核心函数、输出映射和跨调用状态保存。
-- 新建或修改 `hls/<module>/run_hls.tcl` 时，默认只运行验证 C/C++ 功能所需的 C 仿真和检查硬件实例数、资源、延迟及时序所需的 C 综合。
-- `run_hls.tcl` 中协同仿真和 IP 导出开关默认关闭，即 `RUN_COSIM` 和 `EXPORT_IP`（或同等含义的开关）默认设为 `0`。
-- 只有用户在当前任务中明确要求运行协同仿真或导出 IP 时，才可启用对应步骤；不能从“验证正确性”“运行 HLS”“检查综合结果”或“编写综合报告”等一般要求中推断需要执行。
-- 如果没有运行协同仿真或导出 IP，应准确说明验证范围为 C 仿真和/或 C 综合，不能声称 RTL 协同仿真通过或 IP 已成功导出。
-- 未经用户明确允许，不得通过放宽 `create_clock` 的时钟周期、减小 `set_clock_uncertainty` 或更换器件来消除时序违例。默认保持现有 100 MHz 时钟目标和时序设置不变，优先通过代码、数据通路、流水线或资源结构优化解决问题。
-- 顶层控制协议默认沿用现有模块的 `ap_ctrl_hs`，需要更换时先说明原因和接口影响。
-- 普通标量或结构体端口沿用现有接口方式；不要仅为了 HLS 而无理由拆散已经清晰的结构体。
-- PE/CMP 阵列中的行列循环优先评估 `UNROLL`，以生成空间并行的硬件实例。
-- 被并行访问的数组应根据访问维度添加 `ARRAY_PARTITION`；Pragma 可以放在顶层，也可以放在会被内联的核心函数中，但必须确认综合报告显示其生效。
-- 小型 `step` 辅助函数可使用 `INLINE`；是否使用 `PIPELINE`、`DATAFLOW` 必须依据数据依赖和报告决定，不能机械添加。
-- 当前整体设计不使用 `accumulator_pipeline`；除非用户明确要求切换架构，否则不要把它接入当前计算通路。
-- 不要仅根据顶层的 II 判断 PE 是否并行。还要检查 RTL 实例数量、循环综合信息以及 DSP、LUT、FF 等资源。
-- 修改 Pragma 后，应在报告中核对并行度、延迟、II、资源和接口，而不是只看综合是否成功。
+- 顶层包装函数负责接口、复位、输入映射、核心调用、输出映射和必要的跨事务状态。
+- **新增 HLS 顶层时，必须同时新增或修改以下内容：**
+
+  1. `include/fsa/hls/<top>.hpp`；
+  2. `src/hls/<top>.cpp`；
+  3. `tests/hls/test_<top>.cpp`；
+  4. `hls/<module>/run_hls.tcl`；
+  5. 根目录 `run_hls.sh` 的模块白名单、交互提示和用法提示，使 `./run_hls.sh <module>` 能运行新顶层。
+- 新建或修改 `run_hls.tcl` 时，默认运行 C 仿真和 C 综合；`RUN_COSIM=0`、`EXPORT_IP=0`。只有用户明确要求时才启用协同仿真或 IP 导出。
+- 保持目标器件 `xcvu37p_CIV-fsvh2892-2-e` 和 100 MHz 时钟；未经允许不能靠放宽时钟、更换器件或减小时钟不确定度掩盖时序问题。
+- 顶层控制协议默认保持 `ap_ctrl_hs`；需要改为 free-running/chain 等协议时，先说明接口影响。
+- PE/CMP 空间阵列优先用 `UNROLL`，独立生产者/消费者用 `DATAFLOW` 和 `hls::stream`；不要用空的包装函数冒充寄存器边界。
+- 并行访问数组必须按实际访问维度 `ARRAY_PARTITION/RESHAPE`。避免把未使用的 `SA_ROWS x SA_ROWS` K/V 数据完全展开；优化路径只缓冲实际 tile 行。
+- FIFO 深度必须结合 token 生产/消费距离和综合/cosim stall 决定；C++ 仿真的最大队列长度不等于 RTL FIFO 的最终合理深度。
+- 修改 pragma 或算术结构后，必须在综合报告中核对 FMA/DSP 实例数、循环 II、延迟、FIFO stall、LUT/FF/BRAM/URAM 和估算时钟。源码中只有一个调用点不等于综合后一定只有一个硬件实例。
 
 ## 测试约定
 
-- HLS testbench 应调用对应的顶层函数，不能绕过顶层直接测试内部实现。
-- 金标准应尽量独立计算，避免复制被测函数的实现方式。
-- 除数值结果外，还要按需要检查 `valid`、复位、状态保持、空闲拍和流水延迟。
-- 浮点或定点比较应使用与格式相符的误差范围；位级转换功能应直接比较位模式。
-- SA 正式测试默认使用 `config.hpp` 中的阵列规模
-- 修改模块后，优先运行其直接 testbench；改动公共类型、算术函数或控制结构时，还要运行受影响的上层模块测试。
-- 服务器上的常用入口是 `./run_hls.sh <module>`
-- 本地没有Vitis HLS环境，只做C++检查即可
+- HLS testbench 必须调用对应顶层，不能绕过顶层只测内部函数。
+- 金标准尽量独立计算；浮点比较使用与 FP16/PWL 误差相符的容差，位模式功能直接比较位模式。
+- 修改 stream 路径时至少覆盖：单/多 KV tile、initialize/finalize、causal、跨 tile causal、`active_keys` 边界、非整 tile、reset、连续 query block 和新旧核 tile 边界对照。
+- 修改公共算术、token 或 PE/CMP 后，先跑直接测试，再跑 `test_fsa_stream_request_top`、`test_fsa_stream_vs_legacy` 和 `test_fsa_dma_top` 等上层回归。
+- 默认 4x4 配置用于快速回归；影响参数化代码时还要至少编译或运行一次目标 128x4 配置。
+- 本地 GCC 使用 `.vscode/c_cpp_properties.json` 指向的 `third_party/vitis_hls/include`。若机器没有 `vitis-run`/`vitis_hls`，只能报告 C++ 测试结果，不能声称完成 HLS 综合。
+- 服务器/Vitis 环境统一使用 `./run_hls.sh <module>`；新增模块必须按上一节同步更新该脚本。
 
 ## 综合报告约定
 
-- 报告必须基于当前源码对应的最新构建结果；如果无法确认版本一致，应标注“构建结果可能过期”。
-- 至少核对：C 仿真、C 综合、协同仿真、时钟目标、估算时钟、延迟、II、接口、资源和关键循环。
-- 判断阵列并行性时，必须同时查看 RTL 层次或实例数和资源使用，不能只依据一项数字。
-- 报告结论分清：功能仿真通过、综合通过、协同仿真通过、成功导出 IP、成功上板，这些不是同一件事。
-- `docs/` 中的报告保持简洁，记录结论、关键数据、问题和下一步
+- 报告必须来自当前源码对应的最新构建；无法确认版本一致时注明“构建结果可能过期”。
+- 至少记录 C 仿真、C 综合、协同仿真、IP 导出是否执行，以及目标/估算时钟、延迟/II、接口、层次和资源。
+- 判断 PE 并行度和 FMA 复用时必须同时检查 RTL 层次、operator/instance 报告和资源，不能只看顶层 II 或 C++ 写法。
+- `docs/` 中的报告保持简洁，记录结论、证据、未验证项和下一步。
 
 ## 修改和 Git 安全
 
-- 不进行git操作，可以提示有关键文件未跟踪等
+- 默认不创建/切换分支、不提交、不推送，也不覆盖用户已有修改；只有用户明确要求时才执行相应 Git 操作。
+- 可以使用 `git status`、`git diff` 等只读命令检查工作区，并提醒用户存在未跟踪或未提交文件。
