@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cmath>
 
+#include "fsa/arithmetic.hpp"
 #include "fsa/cmp.hpp"
 
 namespace{
@@ -34,7 +35,11 @@ int main(){
     fsa::cmp_step(current, next, io);
 
     assert(io.d_output.valid);
-    assert(almostEqual(io.d_output.bits, (fsa::acc_t)3.0F));
+    // UPDATE沿竖直acc_t载体传输的是FP16位模式，不是FP32数值转换。
+    assert(almostEqual(
+        (fsa::acc_t)fsa::viewAasE(io.d_output.bits),
+        (fsa::acc_t)3.0F
+    ));
     assert(almostEqual(next.newMax, (fsa::acc_t)3.0F));
 
     current = next;

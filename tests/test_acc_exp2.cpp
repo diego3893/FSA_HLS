@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstddef>
 #include <iostream>
+#include <limits>
 
 #include "fsa/arithmetic.hpp"
 
@@ -30,11 +31,20 @@ void checkExp2(const fsa::acc_t x){
               << std::endl;
 
     assert(relative_error <= MAX_RELATIVE_ERROR);
+
+    const fsa::elem_t pe_actual =
+        fsa::peExp2Approx((fsa::elem_t)x);
+    const fsa::acc_t pe_relative_error =
+        std::fabs((fsa::acc_t)pe_actual-expected)/std::fabs(expected);
+    assert(pe_relative_error <= (fsa::acc_t)5.0e-3F);
 }
 
 }  // namespace
 
 int main(){
+    assert((fsa::acc_t)fsa::peExp2Approx(
+        (fsa::elem_t)-std::numeric_limits<float>::infinity()
+    ) == (fsa::acc_t)0.0F);
     // 整数输入：验证整数部分拆分和ldexp指数恢复。
     const fsa::acc_t integer_inputs[] = {
         (fsa::acc_t)0.0F,

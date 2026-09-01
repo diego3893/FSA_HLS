@@ -91,11 +91,14 @@ namespace{
         return (float)fsa::dma_unpack_acc(memory[word], lane);
     }
 
-    void golden(float expected[L][D]){
+    void golden(float expected[L][D], const bool causal){
         for(int query=0; query<L; ++query){
             float scores[L]{};
             float row_max = -1.0e30F;
             for(int key=0; key<L; ++key){
+                if(causal && key>query){
+                    continue;
+                }
                 for(int feature=0; feature<D; ++feature){
                     scores[key] += Q[query][feature]*K[key][feature];
                 }
@@ -106,6 +109,9 @@ namespace{
 
             float row_sum = 0.0F;
             for(int key=0; key<L; ++key){
+                if(causal && key>query){
+                    continue;
+                }
                 const float probability = std::exp(
                     (scores[key]-row_max)/std::sqrt((float)D)
                 );
@@ -141,6 +147,23 @@ int main(){
         k_memory,
         v_memory,
         o_memory,
+        (ap_uint<32>)0,
+        false,
+        status
+    );
+    expect(
+        status==(ap_uint<8>)static_cast<std::uint8_t>(
+            fsa::FsaDmaStatus::INVALID_SEQUENCE_LENGTH
+        ),
+        "zero sequence length was not rejected"
+    );
+
+    status = 0xff;
+    fsa_dma_top(
+        q_memory,
+        k_memory,
+        v_memory,
+        o_memory,
         (ap_uint<32>)L,
         false,
         status
@@ -158,7 +181,7 @@ int main(){
     );
 
     float expected[L][D]{};
-    golden(expected);
+    golden(expected, false);
     for(int query=0; query<L; ++query){
         for(int feature=0; feature<D; ++feature){
             const float actual = readOutput(o_memory, query, feature);
@@ -171,12 +194,45 @@ int main(){
         }
     }
 
+    for(int word=0; word<fsa::DMA_MAX_O_WORDS+2; ++word){
+        o_memory[word] = canary;
+    }
+    status = 0xff;
+    fsa_dma_top(
+        q_memory,
+        k_memory,
+        v_memory,
+        o_memory,
+        (ap_uint<32>)L,
+        true,
+        status
+    );
+    expect(
+        status==(ap_uint<8>)static_cast<std::uint8_t>(
+            fsa::FsaDmaStatus::OK
+        ),
+        "causal DMA top returned an error status"
+    );
+    float causal_expected[L][D]{};
+    golden(causal_expected, true);
+    for(int query=0; query<L; ++query){
+        for(int feature=0; feature<D; ++feature){
+            const float actual = readOutput(o_memory, query, feature);
+            expect(
+                std::isfinite(actual) &&
+                    std::fabs(actual-causal_expected[query][feature])<=0.18F,
+                "causal O mismatch at query "+std::to_string(query)+
+                    ", feature "+std::to_string(feature)
+            );
+        }
+    }
+
     if(failures!=0){
         std::cerr << "[FAIL] test_fsa_dma_top: "
                   << failures << " check(s) failed" << std::endl;
         return 1;
     }
-    std::cout << "[PASS] test_fsa_dma_top: one start produced complete "
+    std::cout << "[PASS] test_fsa_dma_top: non-causal and causal "
               << L << "x" << D << " O with " << TILE
               << "-token tiles" << std::endl;
     return 0;
