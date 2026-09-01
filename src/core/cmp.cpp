@@ -24,26 +24,23 @@ namespace fsa{
         const bool do_reset = cmd == CmpControlCmd::RESET;
         const bool prop_exp2_intercepts = cmd == CmpControlCmd::PROP_EXP2_INTERCEPTS;
 
-        const acc_t zero = accZero();
-
         const acc_t d_input = (io.in_ctrl.bits.causalCounter==0) ? io.d_input.bits 
                                                                 : accMinimum();
-
-        const acc_t cmp_in_a = update_new_max ? d_input
-                            : (prop_new_max ? zero : current.oldMax);
-        const acc_t cmp_in_b = current.newMax;
-        const CmpUnitOutput cmpUnit = accCmp(cmp_in_a, cmp_in_b);
 
         const acc_t downCastDIn = viewEasA(cvtAtoE(d_input));
 
         if(prop_zero){
-            io.d_output.bits = zero;
+            io.d_output.bits = accZero();
         }else if(prop_exp2_intercepts){
             io.d_output.bits = exp2PWLIntercept(current.exp2_counter);
         }else if(update_new_max){
             io.d_output.bits = downCastDIn;
+        }else if(prop_new_max){
+            io.d_output.bits = -current.newMax;
+        }else if(prop_diff){
+            io.d_output.bits = accDiff(current.oldMax, current.newMax);
         }else{
-            io.d_output.bits = cmpUnit.out_diff;
+            io.d_output.bits = accZero();
         }
 
         io.d_output.valid = fire && !do_reset;
@@ -69,11 +66,10 @@ namespace fsa{
             next.oldMax = accMinimum();
         }else if(prop_zero || prop_exp2_intercepts){
             // none
-        }else{
-            next.newMax = cmpUnit.out_max;
-            if(prop_diff){
-                next.oldMax = cmpUnit.out_max;
-            }
+        }else if(update_new_max){
+            next.newMax = accMax(d_input, current.newMax);
+        }else if(prop_diff){
+            next.oldMax = current.newMax;
         }
     }
 

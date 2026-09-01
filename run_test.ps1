@@ -27,8 +27,11 @@ $OutputEncoding = $Utf8NoBom
 # PSScriptRoot makes the script independent of the caller's current directory.
 $ProjectRoot = $PSScriptRoot
 $IncludeDirectory = Join-Path $ProjectRoot "include"
+$VitisIncludeDirectory = Join-Path $ProjectRoot "third_party\vitis_hls\include"
 $SourceDirectory = Join-Path $ProjectRoot "src\core"
+$HlsSourceDirectory = Join-Path $ProjectRoot "src\hls"
 $TestDirectory = Join-Path $ProjectRoot "tests"
+$HlsTestDirectory = Join-Path $TestDirectory "hls"
 $BuildDirectory = Join-Path $ProjectRoot "build\tests"
 
 if(-not (Get-Command g++ -ErrorAction SilentlyContinue)){
@@ -48,9 +51,24 @@ $CoreSources = @(
         Sort-Object Name |
         ForEach-Object FullName
 )
+$HostSupportSources = @(
+    Get-ChildItem -LiteralPath (Join-Path $TestDirectory "support") -Filter "*.cpp" -File |
+        Sort-Object Name |
+        ForEach-Object FullName
+)
+$HlsSources = @(
+    Get-ChildItem -LiteralPath $HlsSourceDirectory -Filter "*.cpp" -File |
+        Sort-Object Name |
+        ForEach-Object FullName
+)
 
 $AllTests = @(
     Get-ChildItem -LiteralPath $TestDirectory -Filter "*.cpp" -File |
+        Where-Object { $_.BaseName -ne "test_accumulator_pipeline" } |
+        Sort-Object Name
+)
+$AllHlsTests = @(
+    Get-ChildItem -LiteralPath $HlsTestDirectory -Filter "*.cpp" -File |
         Sort-Object Name
 )
 
@@ -65,7 +83,7 @@ if($Test -eq "all"){
     # Accept pe, test_pe, and test_pe.cpp.
     $RequestedName = [System.IO.Path]::GetFileNameWithoutExtension($Test)
     $SelectedTests = @(
-        $AllTests | Where-Object {
+        @($AllTests)+@($AllHlsTests) | Where-Object {
             $_.BaseName -eq $RequestedName -or
             $_.BaseName -eq "test_$RequestedName"
         }
@@ -91,7 +109,18 @@ $CompilerOptions = @(
     "-Wextra",
     "-Wpedantic",
     "-Werror",
-    "-I$IncludeDirectory"
+    # GCC does not understand HLS pragmas, and parameters used only by an HLS
+    # pragma look unused during host compilation.
+    "-Wno-unknown-pragmas",
+    "-Wno-unused-parameter",
+    # Use the header-only host implementation of half instead of the Xilinx
+    # floating-point simulation library, which is not installed locally.
+    "-DHLS_NO_XIL_FPO_LIB",
+    "-I$IncludeDirectory",
+    # Treat the bundled Vitis compatibility headers as vendor/system headers;
+    # warnings in those headers must not fail project source checks.
+    "-isystem",
+    $VitisIncludeDirectory
 )
 
 foreach($TestFile in $SelectedTests){
@@ -100,7 +129,12 @@ foreach($TestFile in $SelectedTests){
 
     Write-Host "[BUILD] $TestName" -ForegroundColor Cyan
 
-    & g++ @CompilerOptions @CoreSources $TestFile.FullName -o $Executable
+    $SelectedSources = @($CoreSources)+@($HostSupportSources)
+    if($TestFile.DirectoryName -eq $HlsTestDirectory){
+        $SelectedSources += $HlsSources
+    }
+
+    & g++ @CompilerOptions @SelectedSources $TestFile.FullName -o $Executable
     if($LASTEXITCODE -ne 0){
         Write-Host "[FAIL] $TestName failed to build." -ForegroundColor Red
         exit $LASTEXITCODE

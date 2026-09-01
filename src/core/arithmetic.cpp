@@ -21,6 +21,17 @@ namespace fsa{
             0x075cae0f
         };
 
+        const elem_t PE_EXP2_PWL_SLOPES[exp2PWLPieces] = {
+            (elem_t)0.664062500F,
+            (elem_t)0.608886719F,
+            (elem_t)0.558105469F,
+            (elem_t)0.512207031F,
+            (elem_t)0.469482422F,
+            (elem_t)0.430419922F,
+            (elem_t)0.394775391F,
+            (elem_t)0.362060547F
+        };
+
         /**
          * @brief Accumulator内置PWL斜率的FP32位模式
          *
@@ -264,6 +275,59 @@ namespace fsa{
             return index;
         }
 
+        /**
+         * @brief PE PWL在进入共享FMA前需要的拆分结果
+         */
+        struct PeExp2Preparation{
+            acc_t fractional_x = 0.0F;
+            acc_t slope = 0.0F;
+            acc_t intercept = 0.0F;
+            int integer_part = 0;
+            bool negative_infinity = false;
+            bool segment_match = false;
+        };
+
+        PeExp2Preparation preparePeExp2(
+            const elem_t x,
+            const elem_t slope,
+            const acc_t encoded_intercept
+        ){
+            #pragma HLS INLINE
+
+            PeExp2Preparation preparation{};
+            const fp_struct<elem_t> x_view(x);
+            preparation.negative_infinity =
+                x_view.data()==(ap_uint<16>)0xfc00;
+
+            const acc_t x_acc = (acc_t)x;
+            preparation.integer_part = truncToIntBits(x_acc);
+            preparation.fractional_x =
+                x_acc-(acc_t)preparation.integer_part;
+            preparation.slope = (acc_t)slope;
+            preparation.intercept =
+                restoreExp2PWLIntercept(encoded_intercept);
+
+            const exp2_counter_t intercept_index =
+                decodeExp2PWLIndex(encoded_intercept);
+            preparation.segment_match =
+                intercept_index==exp2PWLPieceForX(x);
+            return preparation;
+        }
+
+        acc_t finishPeExp2(
+            const PeExp2Preparation& preparation,
+            const acc_t fractional_result
+        ){
+            #pragma HLS INLINE
+            if(preparation.negative_infinity){
+                return accZero();
+            }
+            return ldexpByBits(
+                fractional_result,
+                preparation.integer_part
+            );
+        }
+
     }  // namespace
 
     acc_t peMac(const elem_t in_a, const elem_t in_b, const acc_t in_c){
@@ -274,19 +338,30 @@ namespace fsa{
                             const acc_t in_c, const bool in_exp2){
         #pragma HLS PIPELINE II=1
         PeMacUnitOutput output{};
-        if(!in_exp2){
-            output.out_accType = peMac(in_a, in_b, in_c);
-            output.out_elemType = cvtAtoE(output.out_accType);
-            output.out_exp2 = false;
-            return output;
+        PeExp2Preparation preparation{};
+        if(in_exp2){
+            // 普通MAC不经过PWL的Split/分段选择组合逻辑。
+            preparation = preparePeExp2(in_a, in_b, in_c);
         }
 
-        output.out_accType = peExp2PWL(in_a, in_b, in_c);
+        // 普通MAC与PWL在进入算术单元前选择操作数，函数内只保留一个
+        // hls::fma调用点。综合后每个PE应只有一条FMA流水线。
+        const acc_t fma_a = in_exp2
+            ? preparation.fractional_x
+            : (acc_t)in_a;
+        const acc_t fma_b = in_exp2
+            ? preparation.slope
+            : (acc_t)in_b;
+        const acc_t fma_c = in_exp2
+            ? preparation.intercept
+            : in_c;
+        const acc_t fma_result = hls::fma(fma_a, fma_b, fma_c);
+
+        output.out_accType = in_exp2
+            ? finishPeExp2(preparation, fma_result)
+            : fma_result;
         output.out_elemType = cvtAtoE(output.out_accType);
-
-        const exp2_counter_t intercept_index = decodeExp2PWLIndex(in_c);
-
-        output.out_exp2 = intercept_index==exp2PWLPieceForX(in_a);
+        output.out_exp2 = in_exp2 && preparation.segment_match;
 
         return output;
     }
@@ -301,6 +376,16 @@ namespace fsa{
         const fp_struct<acc_t> diff_view(output.out_diff);
         output.out_max = diff_view.sign[0] ? in_b : in_a;
         return output;
+    }
+
+    acc_t accMax(const acc_t in_a, const acc_t in_b){
+        #pragma HLS INLINE
+        return in_a>in_b ? in_a : in_b;
+    }
+
+    acc_t accDiff(const acc_t in_a, const acc_t in_b){
+        #pragma HLS INLINE
+        return in_a-in_b;
     }
 
     elem_t cvtAtoE(const acc_t a){
@@ -331,22 +416,43 @@ namespace fsa{
         #pragma HLS PIPELINE II=1
         #pragma HLS LATENCY min=13 max=13
 
-        // 矩形阵列用FP16 -INF标记填充K行；其softmax概率必须为0。
+        const PeExp2Preparation preparation =
+            preparePeExp2(x, slope, encoded_intercept);
+        const acc_t fractional_result = hls::fma(
+            preparation.fractional_x,
+            preparation.slope,
+            preparation.intercept
+        );
+        return finishPeExp2(preparation, fractional_result);
+    }
+
+    elem_t peExp2Approx(const elem_t x){
+        #pragma HLS INLINE off
+
         const fp_struct<elem_t> x_view(x);
         if(x_view.data()==(ap_uint<16>)0xfc00){
-            return accZero();
+            return elemZero();
         }
 
-        const acc_t x_acc = (acc_t)x;
-        const int integer_part = truncToIntBits(x_acc);
-        const acc_t fractional_part = x_acc-(acc_t)integer_part;
+        elem_t result = elemZero();
+        for(int piece=0; piece<exp2PWLPieces; ++piece){
+            #pragma HLS PIPELINE II=1
+            const PeMacUnitOutput output = peMacUnit(
+                x,
+                PE_EXP2_PWL_SLOPES[piece],
+                exp2PWLIntercept((exp2_counter_t)piece),
+                true
+            );
+            if(output.out_exp2){
+                result = output.out_elemType;
+            }
+        }
+        return result;
+    }
 
-        const acc_t intercept = restoreExp2PWLIntercept(encoded_intercept);
-
-        const acc_t fractional_result = 
-                        hls::fma(fractional_part, (acc_t)slope, intercept);
-
-        return ldexpByBits(fractional_result, integer_part);
+    elem_t peExp2Slope(const exp2_counter_t index){
+        #pragma HLS INLINE
+        return PE_EXP2_PWL_SLOPES[index.to_uint()];
     }
 
     acc_t exp2PWLIntercept(const exp2_counter_t index){

@@ -7,29 +7,21 @@ set PROJECT_ROOT [file normalize [file join $SCRIPT_DIR "../.."]]
 set HLS_PROJECT_DIR [file join $SCRIPT_DIR "build"]
 
 open_project -reset $HLS_PROJECT_DIR
-set_top fsa_dma_top
+set_top fsa_stream_request_top
 
 set SA_ROWS 4
 set SA_COLS 4
-set MAX_SEQUENCE_LENGTH 4096
 if {[info exists ::env(FSA_SA_ROWS)]} {
     set SA_ROWS $::env(FSA_SA_ROWS)
 }
 if {[info exists ::env(FSA_SA_COLS)]} {
     set SA_COLS $::env(FSA_SA_COLS)
 }
-if {[info exists ::env(FSA_MAX_SEQUENCE_LENGTH)]} {
-    set MAX_SEQUENCE_LENGTH $::env(FSA_MAX_SEQUENCE_LENGTH)
-}
 
-puts "FSA configuration: SA_ROWS=$SA_ROWS SA_COLS=$SA_COLS L_MAX=$MAX_SEQUENCE_LENGTH"
-set QKV_DEPTH [expr {$MAX_SEQUENCE_LENGTH*$SA_ROWS/4}]
-set O_DEPTH [expr {$MAX_SEQUENCE_LENGTH*$SA_ROWS/2}]
-set CFLAGS "-std=c++14 -I[file join $PROJECT_ROOT include] -DFSA_SA_ROWS=$SA_ROWS -DFSA_SA_COLS=$SA_COLS -DFSA_MAX_SEQUENCE_LENGTH=$MAX_SEQUENCE_LENGTH -DFSA_DMA_AXI_QKV_DEPTH=$QKV_DEPTH -DFSA_DMA_AXI_O_DEPTH=$O_DEPTH"
+puts "FSA stream configuration: SA_ROWS=$SA_ROWS SA_COLS=$SA_COLS"
+set CFLAGS "-std=c++14 -I[file join $PROJECT_ROOT include] -DFSA_SA_ROWS=$SA_ROWS -DFSA_SA_COLS=$SA_COLS"
 
-add_files [file join $PROJECT_ROOT "src/hls/fsa_dma_top.cpp"] \
-    -cflags $CFLAGS
-add_files [file join $PROJECT_ROOT "src/core/dma.cpp"] \
+add_files [file join $PROJECT_ROOT "src/hls/fsa_stream_request_top.cpp"] \
     -cflags $CFLAGS
 add_files [file join $PROJECT_ROOT "src/core/stream_array.cpp"] \
     -cflags $CFLAGS
@@ -40,7 +32,7 @@ add_files [file join $PROJECT_ROOT "src/core/arithmetic.cpp"] \
 
 if {$RUN_CSIM || $RUN_COSIM} {
     add_files -tb \
-        [file join $PROJECT_ROOT "tests/hls/test_fsa_dma_top.cpp"] \
+        [file join $PROJECT_ROOT "tests/hls/test_fsa_stream_request_top.cpp"] \
         -cflags $CFLAGS
 }
 

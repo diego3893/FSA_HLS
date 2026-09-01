@@ -72,6 +72,18 @@ namespace fsa{
     CmpUnitOutput accCmp(acc_t in_a, acc_t in_b);
 
     /**
+     * @brief CMP UPDATE热路径使用的FP32最大值选择
+     *
+     * 该函数不同时计算差值，避免每个score都经过浮点FMA/减法器。
+     */
+    acc_t accMax(acc_t in_a, acc_t in_b);
+
+    /**
+     * @brief 每个KV tile只执行一次的FP32差值
+     */
+    acc_t accDiff(acc_t in_a, acc_t in_b);
+
+    /**
      * @brief acc_t转换为elem_t
      * 
      * @param a acc_t数据
@@ -104,6 +116,17 @@ namespace fsa{
      * @return acc_t PWL结果
      */
     acc_t peExp2PWL(elem_t x, elem_t slope, acc_t intercept);
+
+    /**
+     * @brief 依次发送全部8组PWL系数并返回匹配分段的FP16 exp2结果
+     *
+     * 循环中的peMacUnit是单一调用点，供流式核心按论文的8拍系数波
+     * 复用同一条PE FMA流水线。
+     */
+    elem_t peExp2Approx(elem_t x);
+
+    /// @brief 返回PE第index段PWL的FP16斜率。
+    elem_t peExp2Slope(exp2_counter_t index);
 
     /**
      * @brief 取得CMP当前需要发送的PWL截距
