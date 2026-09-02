@@ -94,6 +94,23 @@ namespace fsa{
                 vertical.valid && (reduction || lane_enabled);
             const bool exp2 = op==StreamPeOp::EXP2_PWL;
 
+            // 左右数据移动不依赖本PE的FMA结果，应当在算术流水线返回前
+            // 立即转发。非归约phase的上下数据同样只是广播操作数；提前
+            // 转发可避免SUB/SCALE/PWL每跨一个PE都额外串联一次FMA延迟。
+            // 归约phase的down.vertical是真正的部分和，仍必须等待FMA。
+            right.write(horizontal);
+            if(!reduction){
+                down.write(vertical);
+            }
+
+            StreamPeLaneResult lane_result{};
+            if(reduction){
+                // 归约phase不使用lane结果，但collector要求每个PE每个wave
+                // 都产生一个定长token。先发送bubble，避免无用lane通道
+                // 跟随FMA关键路径。
+                lane.write(lane_result);
+            }
+
             // 所有phase共用该物理PE中的唯一FMA调用点。
             const PeMacUnitOutput arithmetic = peMacUnit(
                 resident,
@@ -102,18 +119,20 @@ namespace fsa{
                 exp2
             );
 
-            right.write(horizontal);
-            StreamPeToken down_token = vertical;
-            if(reduction && operation_valid){
-                down_token.vertical = arithmetic.out_accType;
+            if(reduction){
+                StreamPeToken down_token = vertical;
+                if(operation_valid){
+                    down_token.vertical = arithmetic.out_accType;
+                }
+                down.write(down_token);
             }
-            down.write(down_token);
 
-            StreamPeLaneResult lane_result{};
-            lane_result.valid = !reduction && operation_valid;
-            lane_result.segment_match = arithmetic.out_exp2;
-            lane_result.element = arithmetic.out_elemType;
-            lane.write(lane_result);
+            if(!reduction){
+                lane_result.valid = operation_valid;
+                lane_result.segment_match = arithmetic.out_exp2;
+                lane_result.element = arithmetic.out_elemType;
+                lane.write(lane_result);
+            }
         }
     }
 
