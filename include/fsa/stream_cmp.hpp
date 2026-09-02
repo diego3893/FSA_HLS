@@ -9,14 +9,6 @@
 
 namespace fsa{
 
-    void stream_cmp_finalize_lane(
-        int query,
-        acc_t previous_max,
-        acc_t current_max,
-        acc_t& new_max,
-        acc_t& max_difference
-    );
-
     void stream_cmp_update(
         const acc_t scores[SA_COLS][SA_ROWS],
         std::uint16_t active_keys,

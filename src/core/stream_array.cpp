@@ -50,17 +50,13 @@ namespace fsa{
             const elem_t data[SA_COLS][SA_ROWS],
             const acc_t column_operand[SA_COLS],
             const bool lane_enabled[SA_ROWS][SA_COLS],
-            const bool initialize,
-            const acc_t old_max[SA_COLS],
             const std::uint16_t active_keys,
             const StreamPeOp op,
             const int wave_count,
             const bool reduction,
             acc_t reduction_result[SA_COLS][SA_ROWS],
             elem_t lane_result[SA_ROWS][SA_COLS],
-            acc_t scalar_reduction[SA_COLS],
-            acc_t new_max[SA_COLS],
-            acc_t max_difference[SA_COLS]
+            acc_t scalar_reduction[SA_COLS]
         ){
             #pragma HLS INLINE off
             #pragma HLS DATAFLOW
@@ -68,13 +64,9 @@ namespace fsa{
             #pragma HLS ARRAY_PARTITION variable=data type=complete dim=0
             #pragma HLS ARRAY_PARTITION variable=column_operand type=complete dim=1
             #pragma HLS ARRAY_PARTITION variable=lane_enabled type=complete dim=0
-            #pragma HLS ARRAY_PARTITION variable=old_max type=complete dim=1
             #pragma HLS ARRAY_PARTITION variable=reduction_result type=complete dim=1
             #pragma HLS ARRAY_PARTITION variable=lane_result type=complete dim=0
             #pragma HLS ARRAY_PARTITION variable=scalar_reduction type=complete dim=1
-            #pragma HLS ARRAY_PARTITION variable=new_max type=complete dim=1
-            #pragma HLS ARRAY_PARTITION \
-                variable=max_difference type=complete dim=1
 
             PeStream horizontal[SA_ROWS][SA_COLS+1];
             PeStream vertical[SA_ROWS+1][SA_COLS];
@@ -130,9 +122,7 @@ namespace fsa{
 
             stream_output_delayer(
                 op, wave_count, horizontal, vertical, lane,
-                lane_enabled, initialize, old_max,
-                reduction_result, lane_result, scalar_reduction,
-                new_max, max_difference
+                reduction_result, lane_result, scalar_reduction
             );
         }
 
@@ -188,9 +178,6 @@ namespace fsa{
         acc_t mesh_scalar_reduction[SA_COLS]{};
         acc_t column_operand[SA_COLS]{};
         bool lane_enabled[SA_ROWS][SA_COLS]{};
-        acc_t new_max[SA_COLS]{};
-        acc_t max_difference[SA_COLS]{};
-        acc_t rowsum[SA_COLS]{};
         #pragma HLS ARRAY_PARTITION variable=resident_a type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=resident_b type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=k_tile type=complete dim=0
@@ -200,9 +187,6 @@ namespace fsa{
             variable=mesh_scalar_reduction type=complete dim=1
         #pragma HLS ARRAY_PARTITION variable=column_operand type=complete dim=1
         #pragma HLS ARRAY_PARTITION variable=lane_enabled type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=new_max type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=max_difference type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=rowsum type=complete dim=1
 
         // LOAD_Q/LOAD_SCORE只写寄存器，不占用FMA。所有需要乘加的phase
         // 都通过下面同一个runFmaMesh层级执行。
@@ -238,14 +222,25 @@ namespace fsa{
 
         stream_detail::runFmaMesh(
             resident_a, k_tile, column_operand,
-            lane_enabled, input.initialize, online.m, input.active_keys,
+            lane_enabled, input.active_keys,
             StreamPeOp::QK_MAC, SA_COLS, true,
-            mesh_reduction, resident_b, mesh_scalar_reduction,
-            new_max, max_difference
+            mesh_reduction, resident_b, mesh_scalar_reduction
         );
 
-        // QK归约结果在OutputDelayer流出时直接由4路CMP更新最大值，
-        // 并写入resident_b。避免先物化完整score矩阵、再额外扫描4拍。
+        acc_t new_max[SA_COLS]{};
+        acc_t max_difference[SA_COLS]{};
+        acc_t rowsum[SA_COLS]{};
+        #pragma HLS ARRAY_PARTITION variable=new_max type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=max_difference type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=rowsum type=complete dim=1
+
+        // OutputDelayer对齐后的score进入真正的CMP层级。CMP负责mask、
+        // 跨tile最大值、max difference以及score反馈bank。
+        stream_cmp_update(
+            mesh_reduction, input.active_keys, input.causal,
+            input.query_base, input.key_base, input.initialize,
+            online.m, resident_a, new_max, max_difference
+        );
         for(int query=0; query<SA_COLS; ++query){
             #pragma HLS UNROLL
             column_operand[query] = -new_max[query];
@@ -254,11 +249,10 @@ namespace fsa{
         // 两个phase保留旧实现的FP16舍入边界：先(score-max)写回FP16，
         // 再乘attention scale写回FP16。
         stream_detail::runFmaMesh(
-            resident_b, k_tile, column_operand,
-            lane_enabled, input.initialize, online.m, input.active_keys,
+            resident_a, k_tile, column_operand,
+            lane_enabled, input.active_keys,
             StreamPeOp::SUB_MAX, 1, false,
-            mesh_reduction, resident_a, mesh_scalar_reduction,
-            new_max, max_difference
+            mesh_reduction, resident_b, mesh_scalar_reduction
         );
 
         for(int query=0; query<SA_COLS; ++query){
@@ -266,11 +260,10 @@ namespace fsa{
             column_operand[query] = accZero();
         }
         stream_detail::runFmaMesh(
-            resident_a, k_tile, column_operand,
-            lane_enabled, input.initialize, online.m, input.active_keys,
+            resident_b, k_tile, column_operand,
+            lane_enabled, input.active_keys,
             StreamPeOp::SCALE_SCORE, 1, false,
-            mesh_reduction, resident_b, mesh_scalar_reduction,
-            new_max, max_difference
+            mesh_reduction, resident_a, mesh_scalar_reduction
         );
 
         // PWL collector只提交匹配分段；先清零保证masked lane严格为0。
@@ -278,26 +271,24 @@ namespace fsa{
             #pragma HLS PIPELINE II=1
             for(int query=0; query<SA_COLS; ++query){
                 #pragma HLS UNROLL
-                resident_a[row][query] = elemZero();
+                resident_b[row][query] = elemZero();
             }
         }
         stream_detail::runFmaMesh(
-            resident_b, k_tile, column_operand,
-            lane_enabled, input.initialize, online.m, input.active_keys,
+            resident_a, k_tile, column_operand,
+            lane_enabled, input.active_keys,
             StreamPeOp::EXP2_PWL, exp2PWLPieces, false,
-            mesh_reduction, resident_a, mesh_scalar_reduction,
-            new_max, max_difference
+            mesh_reduction, resident_b, mesh_scalar_reduction
         );
 
         // P已经就绪，rowsum和PV都只读同一个resident bank。把1个
         // rowsum wave与SA_ROWS个PV wave连续送入同一次mesh调用，避免
         // 两个无数据依赖的归约phase之间再次启动和排空DATAFLOW网络。
         stream_detail::runFmaMesh(
-            resident_a, v_tile, column_operand,
-            lane_enabled, input.initialize, online.m, input.active_keys,
+            resident_b, v_tile, column_operand,
+            lane_enabled, input.active_keys,
             StreamPeOp::ROWSUM_PV, SA_ROWS+1, true,
-            mesh_reduction, resident_b, mesh_scalar_reduction,
-            new_max, max_difference
+            mesh_reduction, resident_a, mesh_scalar_reduction
         );
         for(int query=0; query<SA_COLS; ++query){
             #pragma HLS UNROLL
