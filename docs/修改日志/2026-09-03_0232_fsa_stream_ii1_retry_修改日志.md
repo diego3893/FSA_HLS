@@ -3,7 +3,7 @@
 ## 1. 本次调用信息
 
 - 开始时间：2026-09-03 02:32 +08:00
-- 当前状态：进行中
+- 当前状态：阻塞
 - 本地仓库：`C:\Users\30130\Desktop\workstation\FlashAttention\FSA_HLS`
 - 远端仓库：`FSA-FPGA-NM37-tailBox:/home/zhangchenxuan/FSA_HLS`
 - 分支：`perf/fsa-streaming-core-v1`
@@ -30,7 +30,7 @@
 ## 3. 初始状态
 
 - 本地工作树：分支与 origin 同步，无暂存或已跟踪未提交改动。保留两组无关未跟踪内容：`docs/fsa_stream_request综合报告.md` 和 `skills/fsa-hls-remote-iteration/`。
-- 远端预检：上一调用确认路径、分支和 origin 正确；远端 HEAD 为 `dfb6940`，`run_hls.sh` 仅有 `100644 -> 100755` 的 mode-only 修改。用户已授权本次删除该文件并重试 pull。
+- 远端预检：本次重新确认路径、分支和 origin 正确；远端 HEAD 为 `dfb694052b632f90492d9a1464efc29fe44cb25a`，唯一 tracked 改动为 `run_hls.sh` 的 `100644 -> 100755` mode-only 修改。按用户授权删除该文件后，两次 `git pull --ff-only` 都因远端服务器无法连接 GitHub:443 超时失败；第三次 SSH 重试未获执行授权。远端脚本当前可能保持删除状态。
 - 相关源码和既有测试：起始代码父提交 `dfb6940` 包含 16 路显式 PE task、4 路显式 Accumulator、动态 wave tripcount 和 scalar FIFO 配置；本地上一调用四项回归均通过。
 - 初始问题证据：旧构建仅证明 16 PE、4 CMP 和 Delayer，Accumulator 当时只形成一条复用 lane，DATAFLOW 顶层 latency/II 为 `?` 且没有 CoSim；必须用当前提交重新综合。
 
@@ -38,7 +38,7 @@
 
 | 轮次 | 被测commit | 修改摘要 | 本地测试 | 远端测试 | 验收状态 |
 |---:|---|---|---|---|---|
-| 1 | 待定 | 恢复远端 `run_hls.sh` 并验证当前结构 | 待执行 | 待执行 | 进行中 |
+| 1 | 未形成 | 恢复远端 `run_hls.sh` 并验证当前结构 | 4项 PASS | pull 网络阻塞，HLS 未执行 | 未完成（阻塞） |
 
 ## 5. 逐轮记录
 
@@ -68,32 +68,32 @@
 
 #### 修改后远端测试
 
-- 被测commit：待定
-- 环境与参数：待补充
-- 命令：待补充
-- 开始/结束时间：待补充
-- 结果与退出码：待补充
-- 关键指标：待补充
-- 证据路径：待补充
+- 被测commit：未形成远端被测提交；本地已推送 `276422fa55f4007a478309c664f6bcd894200932`，远端仍为 `dfb694052b632f90492d9a1464efc29fe44cb25a`。
+- 环境与参数：远端工具链未初始化；HLS 参数未进入执行阶段。
+- 命令：先删除获授权处理的 `/home/zhangchenxuan/FSA_HLS/run_hls.sh`，再两次执行 `git pull --ff-only origin perf/fsa-streaming-core-v1`；预定成功后执行 `git restore --source=HEAD -- run_hls.sh` 和精确 HEAD 检查，但 pull 未成功。
+- 开始/结束时间：2026-09-03 02:37 至 02:51 +08:00。
+- 结果与退出码：两次 pull 均失败，退出码 1；共同错误为 `Failed to connect to github.com port 443`，单次约 135 秒超时。第三次 SSH 重试因执行授权被拒绝而未运行。
+- 关键指标：没有新的 CSim、CSynth 或 CoSim 数据；无法确认 II、实例数、时序和资源。
+- 证据路径：远端仓库 `/home/zhangchenxuan/FSA_HLS` 的 Git 输出；无 HLS 构建产物。
 
 #### 本轮结论与下一步
 
-- 已解决的问题：待远端数据分析。
-- 仍存在的问题：待远端数据分析。
-- 验收标准状态：进行中。
-- 失败分析：待远端数据分析。
-- 下一轮修改：待第1轮证据决定。
-- 本轮闭环状态：进行中。
+- 已解决的问题：本地四项功能回归再次通过；确认并按授权删除了原先 mode-only 阻塞的 `run_hls.sh`。
+- 仍存在的问题：NM37 无法访问 GitHub:443，远端无法快进到 `276422f`；`run_hls.sh` 因 pull 未成功可能仍被删除；远端 HLS 全部未执行。
+- 验收标准状态：本地功能通过；远端 CSim/CSynth/CoSim、II=1、结构实例数、时序和资源全部无法确认。
+- 失败分析：当前阻塞是服务器到 GitHub 的网络连接失败，不是 FSA 源码或 Vitis HLS 失败；第三次重试又缺少 SSH 执行授权，无法继续恢复或测试。
+- 下一轮修改：不应修改设计代码。先恢复 SSH 执行授权；在远端执行 `cd ~/FSA_HLS && git restore --source=HEAD -- run_hls.sh` 消除删除状态，待 GitHub 连通后重新执行 `git pull --ff-only`，核对远端 HEAD 等于 `276422fa55f4007a478309c664f6bcd894200932` 后继续原第1轮 HLS。
+- 本轮闭环状态：未完成（阻塞）；未获得远端测试数据，不计入已完成迭代次数。
 
 ## 6. 调用结束总结
 
-- 结束时间：待补充
-- 结束原因：进行中
+- 结束时间：2026-09-03 02:52:22 +08:00
+- 结束原因：阻塞
 - 已完成闭环迭代：0/2
-- 未完成迭代：第1轮进行中
-- 最终被测代码commit：待定
-- 最终日志commit：未提交（进行中）
-- 验收结果：待补充
-- 仍未解决：待补充
-- 建议下一步：待补充
+- 未完成迭代：第1轮；远端 GitHub:443 连续两次超时，第三次 SSH 未获授权。
+- 最终被测代码commit：未产生远端被测提交；计划测试 `276422fa55f4007a478309c664f6bcd894200932`，其中设计源码仍对应 `dfb694052b632f90492d9a1464efc29fe44cb25a`。
+- 最终日志commit：待提交；提交后以分支 HEAD 为准。
+- 验收结果：仅本地四项功能回归通过；全部远端验收项未执行。
+- 仍未解决：恢复远端 `run_hls.sh`、建立 NM37 到 GitHub 的连接、同步精确提交并运行 CSim/CSynth/CoSim。
+- 建议下一步：先授权一次 SSH 恢复命令，随后在网络恢复时继续本轮；无需占用第2轮或修改设计。
 - 独立最终报告：未要求
