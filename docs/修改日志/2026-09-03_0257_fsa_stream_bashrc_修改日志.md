@@ -3,7 +3,7 @@
 ## 1. 本次调用信息
 
 - 开始时间：2026-09-03 02:57 +08:00
-- 当前状态：进行中
+- 当前状态：达到要求
 - 本地仓库：`C:\Users\30130\Desktop\workstation\FlashAttention\FSA_HLS`
 - 远端仓库：`FSA-FPGA-NM37-tailBox:/home/zhangchenxuan/FSA_HLS`
 - 分支：`perf/fsa-streaming-core-v1`
@@ -20,17 +20,17 @@
 
 ### 可验证标准
 
-- [ ] 本地测试和远端 CSim 的完整 9x4 Q/K/V 结果正确。
-- [ ] 4x4、VU37P、100 MHz 配置下 C synthesis 成功。
-- [ ] PE 核心 token 处理循环 II=1；顶层事务吞吐若无法由静态报告直接给出，记录 DATAFLOW 子模块 II 与 CoSim 间隔证据。
-- [ ] 综合层次包含 16 个 PE、4 个 CMP、Input/Output Delayer 和 4 路独立 Accumulator。
-- [ ] RTL CoSim 通过，无死锁，并记录 latency/interval。
-- [ ] 记录估算时钟、资源和警告；不改变器件、时钟、位宽或接口以换取通过。
+- [x] 本地测试和远端 CSim 的完整 9x4 Q/K/V 结果正确。
+- [x] 4x4、VU37P、100 MHz 配置下 C synthesis 成功。
+- [x] PE 核心 token 处理循环 II=1；顶层事务吞吐若无法由静态报告直接给出，记录 DATAFLOW 子模块 II 与 CoSim 间隔证据。
+- [x] 综合层次包含 16 个 PE、4 个 CMP、Input/Output Delayer 和 4 路独立 Accumulator。
+- [x] RTL CoSim 通过，无死锁，并记录 latency/interval。
+- [x] 记录估算时钟、资源和警告；未改变器件、时钟、位宽或接口。
 
 ## 3. 初始状态
 
 - 本地工作树：分支与 origin 同步；无暂存或已跟踪未提交修改。保留无关未跟踪文件 `docs/fsa_stream_request综合报告.md` 和目录 `skills/fsa-hls-remote-iteration/`。
-- 远端预检：待使用加载 `~/.bashrc` 的交互式 Bash 重新检查。用户手动执行 GitHub curl 与 pull 已成功并快进至 `276422f`；上一调用删除的 `run_hls.sh` 是否已恢复需复查。
+- 远端预检：用 `bash -ic` 加载 `~/.bashrc` 后确认 Vitis 路径为 `/opt/Xilinx_2024.2/Vitis/2024.2/bin/vitis-run`。远端初始 HEAD 为 `276422f`，唯一 tracked 状态是 `D run_hls.sh`；按用户授权删除该阻塞文件、执行 `git pull --ff-only`，再从新 HEAD 恢复脚本，最终精确同步到 `27ba02aa44ac1db71419c0f05f4fb983c52c0a8b` 且 tracked 工作树干净。
 - 相关源码和既有测试：设计源码仍对应 `dfb6940`；上一调用对相同源码执行的四项本地回归均通过，本次将至少重跑直接流式顶层测试。
 - 初始问题证据：旧综合只形成一条 Accumulator lane，且没有当前代码的 CoSim；当前显式 4-lane 修改尚无新综合证据。上一远端自动执行未加载 `.bashrc`，导致代理环境缺失和 GitHub:443 超时。
 
@@ -38,7 +38,7 @@
 
 | 轮次 | 被测commit | 修改摘要 | 本地测试 | 远端测试 | 验收状态 |
 |---:|---|---|---|---|---|
-| 1 | 待定 | 加载 `.bashrc`，同步并验证现有流式结构 | 待执行 | 待执行 | 进行中 |
+| 1 | `27ba02aa44ac1db71419c0f05f4fb983c52c0a8b` | 加载 `.bashrc`，同步并验证现有流式结构 | PASS | CSim/CSynth/CoSim PASS | 通过 |
 
 ## 5. 逐轮记录
 
@@ -55,7 +55,8 @@
 
 - `docs/修改日志/2026-09-03_0257_fsa_stream_bashrc_修改日志.md`：新建本次调用日志。
 - 设计源码：远端测试前无新增修改。
-- 与计划的偏差：无。
+- 远端环境处理：所有命令使用 `bash -ic`；删除阻塞的 `run_hls.sh`，pull 后使用 `git restore --source=HEAD -- run_hls.sh` 恢复版本库内容。
+- 与计划的偏差：没有设计源码修改；第1轮直接验证起始设计并达到范围内验收标准。
 
 #### 修改后本地测试
 
@@ -66,32 +67,42 @@
 
 #### 修改后远端测试
 
-- 被测commit：待定
-- 环境与参数：待补充
-- 命令：待补充
-- 开始/结束时间：待补充
-- 结果与退出码：待补充
-- 关键指标：待补充
-- 证据路径：待补充
+- 被测commit：`27ba02aa44ac1db71419c0f05f4fb983c52c0a8b`；其中设计源码对应 `dfb694052b632f90492d9a1464efc29fe44cb25a`，后续提交仅更新远端迭代日志。
+- 环境与参数：Vitis HLS 2024.2 build 5238294；`FSA_SA_ROWS=4`、`FSA_SA_COLS=4`、`xcvu37p_CIV-fsvh2892-2-e`、目标周期 10 ns、不确定度 2.7 ns；`RUN_CSIM=1 RUN_COSIM=1 EXPORT_IP=0`。
+- 命令：`bash -ic '... RUN_CSIM=1 RUN_COSIM=1 EXPORT_IP=0 FSA_SA_ROWS=4 FSA_SA_COLS=4 bash ./run_hls.sh fsa_stream_request ...'`。
+- 开始/结束时间：2026-09-03 03:09:29 至 03:16:07 +08:00；Vitis 报告总 elapsed 6 分 27 秒，远端命令退出码 0。
+- 结果与退出码：CSim PASS；CSynth PASS；Verilog/XSim CoSim PASS，10/10 transactions，无 deadlock；IP export 未执行。
+- 关键指标：
+  - CSim/CoSim 数值：max L error=0.00701189，max O error=0.00193387。
+  - DATAFLOW：`runFmaMesh` 成功抽取 19 个进程，即 entry + Input Delayer + 16 PE + Output Delayer；没有 DATAFLOW warning。
+  - II：16 个 `stream_pe_process` 的 `VITIS_LOOP_87_1` 均为 Final II=1、depth=15；Accumulator 的 `VITIS_LOOP_34_1` 为 II=1、depth=8。
+  - 结构：16 PE，每个 12 DSP、合计 192 DSP；4 CMP，每个 2 DSP、合计 8 DSP；4 个独立 Accumulator lane，每个 8 DSP、合计 32 DSP；总计 232 DSP。
+  - Accumulator：4 个 `grp_stream_accumulator_lane_*` 实例，单 lane latency/interval 22–57 cycles；update 总 latency/interval 25–60 cycles。
+  - `runFmaMesh`：latency 87–94 cycles，function interval 20–27 cycles；该数字是一次 phase 调用间隔，不等同于 PE 内部 token II。
+  - 顶层：CSynth latency 2–682 cycles、interval 3–683 cycles；CoSim latency min/avg/max=3/559/638，interval=4/551/639，总执行 5601 cycles。当前范围不实现 controller/request overlap，因此不宣称顶层请求 II=1。
+  - 时序：target 10.000 ns，estimated 7.281 ns，估算 Fmax 137.34 MHz；考虑 2.7 ns uncertainty 后计算余量仅 0.019 ns。
+  - 总资源：BRAM_18K=0、DSP=232、FF=71748、LUT=124903、URAM=0；单 SLR 占用约 DSP 7%、FF 8%、LUT 28%。
+  - warning：`solution1.log` 共 47 条，即 36 条函数名 legalize、9 条 power-on initialization、2 条 design-size；另有一条 XSim `LIBRARY_PATH` 环境提示，均未阻断综合或 CoSim。error 数为 0。
+- 证据路径：`/tmp/fsa_stream_round1_27ba02a.log`；`/home/zhangchenxuan/FSA_HLS/hls/fsa_stream_request/fsa_stream_request_build/solution1/{csim,syn,sim}/report/`；构建 ZIP 为 `/home/zhangchenxuan/FSA_HLS/hls/fsa_stream_request/fsa_stream_request_build.zip`。
 
 #### 本轮结论与下一步
 
-- 已解决的问题：待远端数据分析。
-- 仍存在的问题：待远端数据分析。
-- 验收标准状态：进行中。
-- 失败分析：待远端数据分析。
-- 下一轮修改：待第1轮证据决定。
-- 本轮闭环状态：进行中。
+- 已解决的问题：`.bashrc` 环境已正确加载，GitHub/Vitis 环境一致；当前代码的 CSim、CSynth、CoSim 闭环完成；16 PE、4 CMP、Delayer 和 4 路 Accumulator 均由综合报告证实；内部 PE/Accumulator 循环 II=1。
+- 仍存在的问题：顶层 request 仍按完整 tile/在线状态顺序执行，CSynth interval 3–683、CoSim平均 551 cycles；这是未实现 controller/request overlap 的已知边界。有效时序余量仅约 0.019 ns，后续布局布线仍有风险。
+- 验收标准状态：在“不考虑 controller 指令重叠”的既定范围内全部达到；明确不把 PE token II=1 等同于顶层每周期接受一个新请求。
+- 失败分析：本轮没有功能、综合或 CoSim 失败。此前网络失败由未加载 `.bashrc` 导致代理环境缺失，本轮已修正。
+- 下一轮修改：无需第2轮；若未来要求顶层 request II=1，必须将请求/phase 调度与在线状态依赖纳入新的多事务重叠架构，不属于本次范围。
+- 本轮闭环状态：已完成。
 
 ## 6. 调用结束总结
 
-- 结束时间：待补充
-- 结束原因：进行中
-- 已完成闭环迭代：0/2
-- 未完成迭代：第1轮进行中
-- 最终被测代码commit：待定
-- 最终日志commit：未提交（进行中）
-- 验收结果：待补充
-- 仍未解决：待补充
-- 建议下一步：待补充
+- 结束时间：2026-09-03 03:22:48 +08:00
+- 结束原因：全部达到（限定为不包含 controller/request overlap 的内部流式计算核）
+- 已完成闭环迭代：1/2
+- 未完成迭代：无
+- 最终被测代码commit：`27ba02aa44ac1db71419c0f05f4fb983c52c0a8b`
+- 最终日志commit：待提交；提交后以分支 HEAD 为准，该文档提交不声称经过 HLS 测试。
+- 验收结果：本地 9x4 测试 PASS；远端 CSim/CSynth/Verilog CoSim PASS；16 PE、4 CMP、Input/Output Delayer、4 Accumulator 均实例化；PE 和 Accumulator 内部循环 II=1。
+- 仍未解决：顶层 request interval 非 1；有效综合时序余量只有约 0.019 ns。二者均已明确记录，前者超出本次排除 controller overlap 的范围，后者需要后续 Vivado implementation 验证。
+- 建议下一步：若继续性能优化，优先做 Vivado implementation 时序验证；若目标升级为顶层 request II=1，则另开任务设计跨请求/跨 phase 重叠和多 bank 在线状态。
 - 独立最终报告：未要求
