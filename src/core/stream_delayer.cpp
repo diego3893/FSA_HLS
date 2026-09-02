@@ -1,6 +1,7 @@
 #include "fsa/stream_delayer.hpp"
 
 #include "fsa/arithmetic.hpp"
+#include "fsa/stream_cmp.hpp"
 
 namespace fsa{
 
@@ -93,17 +94,33 @@ namespace fsa{
         StreamPeTokenStream horizontal[SA_ROWS][SA_COLS+1],
         StreamPeTokenStream vertical[SA_ROWS+1][SA_COLS],
         StreamPeLaneStream lane[SA_ROWS][SA_COLS],
+        const bool lane_enabled[SA_ROWS][SA_COLS],
+        const bool initialize,
+        const acc_t old_max[SA_COLS],
         acc_t reduction_result[SA_COLS][SA_ROWS],
         elem_t lane_result[SA_ROWS][SA_COLS],
-        acc_t scalar_reduction[SA_COLS]
+        acc_t scalar_reduction[SA_COLS],
+        acc_t new_max[SA_COLS],
+        acc_t max_difference[SA_COLS]
     ){
         #pragma HLS INLINE off
+        #pragma HLS ARRAY_PARTITION variable=lane_enabled type=complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=old_max type=complete dim=1
         #pragma HLS ARRAY_PARTITION \
             variable=scalar_reduction type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=new_max type=complete dim=1
+        #pragma HLS ARRAY_PARTITION \
+            variable=max_difference type=complete dim=1
 
         const bool reduction = op==StreamPeOp::QK_MAC ||
             op==StreamPeOp::ROWSUM_MAC || op==StreamPeOp::PV_MAC ||
             op==StreamPeOp::ROWSUM_PV;
+        acc_t running_max[SA_COLS];
+        #pragma HLS ARRAY_PARTITION variable=running_max type=complete dim=1
+        for(int col=0; col<SA_COLS; ++col){
+            #pragma HLS UNROLL
+            running_max[col] = initialize ? accMinimum() : old_max[col];
+        }
         for(int wave=0; wave<wave_count; ++wave){
             #pragma HLS PIPELINE II=1
             #pragma HLS LOOP_TRIPCOUNT \
@@ -112,7 +129,16 @@ namespace fsa{
                 #pragma HLS UNROLL
                 const StreamPeToken token =
                     vertical[SA_ROWS][col].read();
-                if(op==StreamPeOp::ROWSUM_PV && wave==0){
+                if(op==StreamPeOp::QK_MAC && wave<SA_ROWS){
+                    const bool enabled = lane_enabled[wave][col];
+                    if(enabled){
+                        const acc_t score = token.vertical;
+                        running_max[col] = accMax(running_max[col], score);
+                        lane_result[wave][col] = cvtAtoE(score);
+                    }else{
+                        lane_result[wave][col] = elemZero();
+                    }
+                }else if(op==StreamPeOp::ROWSUM_PV && wave==0){
                     scalar_reduction[col] = token.vertical;
                 }else if(op==StreamPeOp::ROWSUM_PV &&
                     wave<=SA_ROWS){
@@ -134,6 +160,18 @@ namespace fsa{
                     }
                 }
                 (void)horizontal[row][SA_COLS].read();
+            }
+        }
+
+        if(op==StreamPeOp::QK_MAC){
+            for(int query=0; query<SA_COLS; ++query){
+                #pragma HLS UNROLL
+                const acc_t previous = initialize
+                    ? accMinimum() : old_max[query];
+                stream_cmp_finalize_lane(
+                    query, previous, running_max[query],
+                    new_max[query], max_difference[query]
+                );
             }
         }
     }

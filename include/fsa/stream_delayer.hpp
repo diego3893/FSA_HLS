@@ -25,9 +25,14 @@ namespace fsa{
         StreamPeTokenStream horizontal[SA_ROWS][SA_COLS+1],
         StreamPeTokenStream vertical[SA_ROWS+1][SA_COLS],
         StreamPeLaneStream lane[SA_ROWS][SA_COLS],
+        const bool lane_enabled[SA_ROWS][SA_COLS],
+        bool initialize,
+        const acc_t old_max[SA_COLS],
         acc_t reduction_result[SA_COLS][SA_ROWS],
         elem_t lane_result[SA_ROWS][SA_COLS],
-        acc_t scalar_reduction[SA_COLS]
+        acc_t scalar_reduction[SA_COLS],
+        acc_t new_max[SA_COLS],
+        acc_t max_difference[SA_COLS]
     );
 
 }  // namespace fsa

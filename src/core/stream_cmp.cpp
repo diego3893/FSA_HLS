@@ -3,6 +3,21 @@
 #include "fsa/arithmetic.hpp"
 
 namespace fsa{
+
+    void stream_cmp_finalize_lane(
+        const int query,
+        const acc_t previous_max,
+        const acc_t current_max,
+        acc_t& new_max,
+        acc_t& max_difference
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS FUNCTION_INSTANTIATE variable=query
+
+        new_max = current_max;
+        max_difference = accDiff(previous_max, current_max);
+    }
+
     namespace stream_cmp_detail{
 
         bool cmp_lane_enabled(
