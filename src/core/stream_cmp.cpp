@@ -88,4 +88,15 @@ namespace fsa{
         }
     }
 
+    void stream_cmp_cycle(
+        const int instance,
+        const CMPState& current,
+        CMPState& next,
+        CMPIO& io
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS FUNCTION_INSTANTIATE variable=instance
+        cmp_step(current, next, io);
+    }
+
 }  // namespace fsa

@@ -43,6 +43,16 @@ add_files [file join $PROJECT_ROOT "src/core/stream_cmp.cpp"] \
     -cflags $CFLAGS
 add_files [file join $PROJECT_ROOT "src/core/stream_accumulator.cpp"] \
     -cflags $CFLAGS
+add_files [file join $PROJECT_ROOT "src/core/execution_plan.cpp"] \
+    -cflags $CFLAGS
+add_files [file join $PROJECT_ROOT "src/core/delayer.cpp"] \
+    -cflags $CFLAGS
+add_files [file join $PROJECT_ROOT "src/core/systolic_array.cpp"] \
+    -cflags $CFLAGS
+add_files [file join $PROJECT_ROOT "src/core/pe.cpp"] \
+    -cflags $CFLAGS
+add_files [file join $PROJECT_ROOT "src/core/cmp.cpp"] \
+    -cflags $CFLAGS
 add_files [file join $PROJECT_ROOT "src/core/accumulator.cpp"] \
     -cflags $CFLAGS
 add_files [file join $PROJECT_ROOT "src/core/arithmetic.cpp"] \

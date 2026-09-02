@@ -105,4 +105,94 @@ namespace fsa{
         output.normalized = finalize;
     }
 
+    void stream_fsa_accumulator_process(
+        StreamArrayOutputStream& input,
+        FsaCoreRequestOutput& output
+    ){
+        #pragma HLS INLINE off
+        static AccumulatorState state{};
+        static acc_t local_memory[ACC_ROWS][SA_COLS]{};
+        static AccReadRequest pending_read{};
+        static acc_t pending_constant = accZero();
+        #pragma HLS RESET variable=state
+        #pragma HLS RESET variable=local_memory
+        #pragma HLS RESET variable=pending_read
+        #pragma HLS RESET variable=pending_constant
+        #pragma HLS ARRAY_PARTITION variable=state.scale type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=state.reciprocal type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=local_memory type=complete dim=2
+
+        bool done = false;
+        while(!done){
+            #pragma HLS PIPELINE II=1
+            #pragma HLS LOOP_TRIPCOUNT \
+                min=1 max=STREAM_MAX_REQUEST_CYCLES
+            const StreamArrayOutputToken token = input.read();
+            if(token.reset){
+                reset_accumulator_state(state);
+                pending_read = AccReadRequest{};
+                pending_constant = accZero();
+                for(int row=0; row<ACC_ROWS; ++row){
+                    for(int col=0; col<SA_COLS; ++col){
+                        #pragma HLS UNROLL
+                        local_memory[row][col] = accZero();
+                    }
+                }
+            }
+
+            AccumulatorIO accumulator_io{};
+            #pragma HLS ARRAY_PARTITION variable=accumulator_io.sa_in type=complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=accumulator_io.sram_in type=complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=accumulator_io.sram_out type=complete dim=1
+            accumulator_io.ctrl_in = token.acc_ctrl;
+
+            unsigned read_address = pending_read.addr.to_uint();
+            if(read_address>=(unsigned)ACC_ROWS){
+                read_address = 0;
+            }
+            for(int col=0; col<SA_COLS; ++col){
+                #pragma HLS UNROLL
+                accumulator_io.sa_in[(std::size_t)col] =
+                    token.array_output[col];
+                accumulator_io.sram_in[(std::size_t)col] =
+                    pending_read.is_constant
+                        ? pending_constant
+                        : local_memory[read_address][col];
+            }
+
+            AccumulatorState next{};
+            accumulator_step(state, next, accumulator_io);
+            state = next;
+
+            if(pending_read.valid && pending_read.rmw &&
+                    pending_read.addr.to_uint()<(unsigned)ACC_ROWS){
+                const unsigned write_address =
+                    pending_read.addr.to_uint();
+                for(int col=0; col<SA_COLS; ++col){
+                    #pragma HLS UNROLL
+                    local_memory[write_address][col] =
+                        accumulator_io.sram_out[(std::size_t)col];
+                }
+            }
+
+            pending_read = token.acc_read;
+            pending_constant = token.acc_constant_value;
+
+            if(token.last && token.request_valid){
+                for(int query=0; query<SA_COLS; ++query){
+                    #pragma HLS UNROLL
+                    output.l[query] = local_memory[0][query];
+                    for(int feature=0; feature<SA_ROWS; ++feature){
+                        #pragma HLS UNROLL
+                        output.o[query][feature] =
+                            local_memory[1+feature][query];
+                    }
+                }
+                output.normalized = token.finalize;
+                output.request_done = true;
+            }
+            done = token.last;
+        }
+    }
+
 }  // namespace fsa

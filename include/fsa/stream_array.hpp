@@ -1,6 +1,6 @@
 /**
  * @file stream_array.hpp
- * @brief 一组共享FMA PE阵列完成QK、S-N-P、rowsum和PV的tile接口。
+ * @brief 与Scala FSA数据通路等价的持久化流式阵列接口。
  */
 #ifndef STREAM_ARRAY_HPP
 #define STREAM_ARRAY_HPP
@@ -10,25 +10,13 @@
 namespace fsa{
 
     /**
-     * @brief 跨KV tile保留的在线softmax状态。
-     */
-    struct StreamOnlineState{
-        bool active = false;
-        acc_t m[SA_COLS]{};
-        acc_t l[SA_COLS]{};
-        acc_t o[SA_COLS][SA_ROWS]{};
-    };
-
-    void reset_stream_online_state(StreamOnlineState& state);
-
-    /**
-     * @brief 用一套PE阵列处理一个KV tile。
+     * @brief 用一套持久化PE/CMP网络处理一个KV tile。
      *
-     * QK后score经CMP求max并写入完全分割的PE resident bank；各phase
-     * 顺序复用同一组FMA mesh，P随后直接被rowsum/PV消费，不进入外部SRAM。
+     * PE本地reg依次保存Q、S、N和P。score沿下到上路径进入CMP，CMP
+     * 更新最大值后沿上到下路径把score/max/截距送回同一组PE；P直接
+     * 留在PE中供rowsum和PV复用，不存在阵列外的S/P phase bank。
      */
     void stream_fsa_tile(
-        StreamOnlineState& online,
         const FsaCoreRequestInput& input,
         FsaCoreRequestOutput& output
     );

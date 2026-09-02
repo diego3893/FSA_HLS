@@ -5,6 +5,7 @@
 #ifndef STREAM_CMP_HPP
 #define STREAM_CMP_HPP
 
+#include "fsa/cmp.hpp"
 #include "fsa/types.hpp"
 
 namespace fsa{
@@ -20,6 +21,16 @@ namespace fsa{
         elem_t score_resident[SA_ROWS][SA_COLS],
         acc_t new_max[SA_COLS],
         acc_t max_difference[SA_COLS]
+    );
+
+    /**
+     * @brief 持久化FSA阵列顶部一个物理CMP的一拍。
+     */
+    void stream_cmp_cycle(
+        int instance,
+        const CMPState& current,
+        CMPState& next,
+        CMPIO& io
     );
 
 }  // namespace fsa

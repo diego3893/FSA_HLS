@@ -136,4 +136,15 @@ namespace fsa{
         }
     }
 
+    void stream_pe_cycle(
+        const int instance,
+        const PEState& current,
+        PEState& next,
+        PEIO& io
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS FUNCTION_INSTANTIATE variable=instance
+        pe_step(current, next, io);
+    }
+
 }  // namespace fsa

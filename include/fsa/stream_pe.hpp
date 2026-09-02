@@ -1,10 +1,11 @@
 /**
  * @file stream_pe.hpp
- * @brief 不使用外部current/next拷贝的持久流式PE。
+ * @brief 在FSA三向数据通路中保存局部reg状态的持久流式PE。
  */
 #ifndef STREAM_PE_HPP
 #define STREAM_PE_HPP
 
+#include "fsa/pe.hpp"
 #include "fsa/stream_types.hpp"
 
 namespace fsa{
@@ -46,6 +47,19 @@ namespace fsa{
         StreamPeTokenStream& right,
         StreamPeTokenStream& down,
         StreamPeLaneStream& lane
+    );
+
+    /**
+     * @brief 持久化FSA阵列中一个物理PE的一拍。
+     *
+     * instance是编译期实例编号，用于强制HLS保留SA_ROWS*SA_COLS个
+     * PE层次；每个实例只含一条由opcode复用的peMacUnit FMA路径。
+     */
+    void stream_pe_cycle(
+        int instance,
+        const PEState& current,
+        PEState& next,
+        PEIO& io
     );
 
 }  // namespace fsa
