@@ -70,4 +70,49 @@ namespace fsa{
         return output;
     }
 
+    void stream_pe_process(
+        const elem_t resident,
+        const bool lane_enabled,
+        const bool reduction,
+        const StreamPeOp op,
+        const int wave_count,
+        StreamPeTokenStream& left,
+        StreamPeTokenStream& up,
+        StreamPeTokenStream& right,
+        StreamPeTokenStream& down,
+        StreamPeLaneStream& lane
+    ){
+        #pragma HLS INLINE off
+
+        for(int wave=0; wave<wave_count; ++wave){
+            #pragma HLS PIPELINE II=1
+            const StreamPeToken horizontal = left.read();
+            const StreamPeToken vertical = up.read();
+            const bool operation_valid = horizontal.valid &&
+                vertical.valid && (reduction || lane_enabled);
+            const bool exp2 = op==StreamPeOp::EXP2_PWL;
+
+            // 所有phase共用该物理PE中的唯一FMA调用点。
+            const PeMacUnitOutput arithmetic = peMacUnit(
+                resident,
+                horizontal.horizontal,
+                vertical.vertical,
+                exp2
+            );
+
+            right.write(horizontal);
+            StreamPeToken down_token = vertical;
+            if(reduction && operation_valid){
+                down_token.vertical = arithmetic.out_accType;
+            }
+            down.write(down_token);
+
+            StreamPeLaneResult lane_result{};
+            lane_result.valid = !reduction && operation_valid;
+            lane_result.segment_match = arithmetic.out_exp2;
+            lane_result.element = arithmetic.out_elemType;
+            lane.write(lane_result);
+        }
+    }
+
 }  // namespace fsa

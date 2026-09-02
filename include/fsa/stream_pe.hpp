@@ -29,6 +29,25 @@ namespace fsa{
         const StreamPeToken& token
     );
 
+    /**
+     * @brief 一个物理PE处理一个完整phase的定长token波。
+     *
+     * resident在phase内只读，phase结果经lane或down stream提交，因此
+     * FMA流水线没有resident写回造成的loop-carried dependence。
+     */
+    void stream_pe_process(
+        elem_t resident,
+        bool lane_enabled,
+        bool reduction,
+        StreamPeOp op,
+        int wave_count,
+        StreamPeTokenStream& left,
+        StreamPeTokenStream& up,
+        StreamPeTokenStream& right,
+        StreamPeTokenStream& down,
+        StreamPeLaneStream& lane
+    );
+
 }  // namespace fsa
 
 #endif  // STREAM_PE_HPP

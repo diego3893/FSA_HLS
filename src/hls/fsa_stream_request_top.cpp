@@ -10,7 +10,7 @@ void fsa_stream_request_top(
     #pragma HLS AGGREGATE variable=input compact=bit
     #pragma HLS AGGREGATE variable=output compact=bit
     #pragma HLS INTERFACE ap_none port=input
-    #pragma HLS INTERFACE ap_none port=output
+    #pragma HLS INTERFACE ap_vld port=output
 
     fsa::fsa_stream_request_run(input, output);
 }

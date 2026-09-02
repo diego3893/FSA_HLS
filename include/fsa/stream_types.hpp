@@ -7,6 +7,8 @@
 
 #include <cstdint>
 
+#include <hls_stream.h>
+
 #include "fsa/types.hpp"
 
 namespace fsa{
@@ -50,6 +52,18 @@ namespace fsa{
         bool register_written = false;
         elem_t resident{};
     };
+
+    /**
+     * @brief 非归约phase中由单个PE提交给输出对齐网络的数据。
+     */
+    struct StreamPeLaneResult{
+        bool valid = false;
+        bool segment_match = false;
+        elem_t element{};
+    };
+
+    using StreamPeTokenStream = hls::stream<StreamPeToken>;
+    using StreamPeLaneStream = hls::stream<StreamPeLaneResult>;
 
     struct StreamScoreToken{
         bool valid = false;

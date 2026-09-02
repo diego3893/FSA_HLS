@@ -2,6 +2,16 @@ set RUN_CSIM  1
 set RUN_COSIM 0
 set EXPORT_IP 0
 
+if {[info exists ::env(RUN_CSIM)]} {
+    set RUN_CSIM $::env(RUN_CSIM)
+}
+if {[info exists ::env(RUN_COSIM)]} {
+    set RUN_COSIM $::env(RUN_COSIM)
+}
+if {[info exists ::env(EXPORT_IP)]} {
+    set EXPORT_IP $::env(EXPORT_IP)
+}
+
 set SCRIPT_DIR [file dirname [file normalize [info script]]]
 set PROJECT_ROOT [file normalize [file join $SCRIPT_DIR "../.."]]
 set HLS_PROJECT_DIR [file join $SCRIPT_DIR "build"]
@@ -25,6 +35,16 @@ add_files [file join $PROJECT_ROOT "src/hls/fsa_stream_request_top.cpp"] \
     -cflags $CFLAGS
 add_files [file join $PROJECT_ROOT "src/core/stream_array.cpp"] \
     -cflags $CFLAGS
+add_files [file join $PROJECT_ROOT "src/core/stream_pe.cpp"] \
+    -cflags $CFLAGS
+add_files [file join $PROJECT_ROOT "src/core/stream_delayer.cpp"] \
+    -cflags $CFLAGS
+add_files [file join $PROJECT_ROOT "src/core/stream_cmp.cpp"] \
+    -cflags $CFLAGS
+add_files [file join $PROJECT_ROOT "src/core/stream_accumulator.cpp"] \
+    -cflags $CFLAGS
+add_files [file join $PROJECT_ROOT "src/core/accumulator.cpp"] \
+    -cflags $CFLAGS
 add_files [file join $PROJECT_ROOT "src/core/arithmetic.cpp"] \
     -cflags $CFLAGS
 
@@ -37,6 +57,7 @@ if {$RUN_CSIM || $RUN_COSIM} {
 open_solution -reset "solution1" -flow_target vivado
 set_part {xcvu37p_CIV-fsvh2892-2-e}
 create_clock -period 10 -name default
+config_dataflow -start_fifo_depth 16
 
 if {$RUN_CSIM} {
     csim_design

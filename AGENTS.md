@@ -4,11 +4,11 @@
 
 - 本文件适用于 `FSA-HLS` 仓库中的全部文件；用户在当前对话中的明确要求优先。
 - `FSA-main` 的 Chisel 源码和 FSA 论文用于核对功能、数据移动和架构意图；除非用户明确要求，否则不要修改参考项目。
-- 当前综合主路径是 `fsa_dma_top -> fsa_stream_request_run -> stream_array/runFmaMesh`：DMA 使用 load/compute/store `DATAFLOW`；计算核用一组定长-token FMA mesh 顺序执行 QK、减 max、缩放、PWL、rowsum 和 PV。
+- 当前综合主路径是 `fsa_dma_top -> fsa_stream_request_run -> stream_array/runFmaMesh`：DMA 使用 load/compute/store `DATAFLOW`；计算核由 stream-native InputDelayer、单组 PE mesh、OutputDelayer、CMP 和 Accumulator 组成，并顺序复用同一组 PE FMA 执行 QK、减 max、缩放、PWL、rowsum 和 PV。
 - `stream_pe_step` 保留为独立功能参考和单元测试对象，但不在 `fsa_stream_request`/`fsa_dma` 的当前综合主路径中。
 - 原 `fsa_core_request_run`、`fsa_core_datapath_step` 及其 `current/next` 模型继续作为功能参考，不应为了优化路径而删除或无意改变其语义。
 - 当前版本保持在线 softmax、causal mask、`active_keys`、非整 tile、最终归一化和现有 DMA 外部接口。Split-D、controller 指令重叠、AXI bundle 拆分不属于默认修改范围，除非用户明确要求。
-- `accumulator_pipeline` 是独立实验实现，当前综合主路径不使用；未经单独验证不要接入主路径。
+- `accumulator_pipeline` 是独立实验实现，当前综合主路径不使用；stream主路径只复用 `accumulator.cpp` 中经过单元测试的定长恢复除法器，最终归一化不得重新写成直接 FP32 `/`。
 
 ## 与用户沟通
 

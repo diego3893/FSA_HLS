@@ -48,6 +48,14 @@ namespace fsa{
     void accumulator_step(const AccumulatorState& current, 
                         AccumulatorState& next, AccumulatorIO& io);
 
+    /**
+     * @brief 使用Accumulator中的定长恢复除法器计算1/denominator。
+     *
+     * 整个多周期操作在一次函数调用内完成，供请求级stream核finalize阶段
+     * 复用，避免综合出时序很差的FP32直接除法器。
+     */
+    acc_t accumulator_reciprocal(acc_t denominator);
+
 }  // namespace fsa
 
 #endif // !ACCUMULATOR_HPP

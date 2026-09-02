@@ -5,7 +5,7 @@
 
 namespace fsa{
 
-    namespace{
+    namespace accumulator_detail{
 
         /// @brief 单拍恢复除法器的输出；valid只在DONE阶段置位
         struct ReciprocalTickOutput{
@@ -243,6 +243,7 @@ namespace fsa{
             const bool start,
             const acc_t denominator
         ){
+            #pragma HLS INLINE
             ReciprocalTickOutput output{};
             next = current;
 
@@ -356,7 +357,31 @@ namespace fsa{
             }
         }
 
-    }  // namespace
+    }  // namespace accumulator_detail
+
+    acc_t accumulator_reciprocal(const acc_t denominator){
+        #pragma HLS INLINE off
+
+        ReciprocalDividerState state{};
+        accumulator_detail::begin_reciprocal(state, denominator);
+
+        for(int iteration=0;
+                iteration<reciprocalIterationCycles; ++iteration){
+            #pragma HLS PIPELINE II=1
+            ReciprocalDividerState next{};
+            (void)accumulator_detail::divider_tick(
+                state, next, false, denominator
+            );
+            state = next;
+        }
+
+        ReciprocalDividerState next{};
+        const accumulator_detail::ReciprocalTickOutput result =
+            accumulator_detail::divider_tick(
+                state, next, false, denominator
+            );
+        return result.value;
+    }
 
     void reset_accumulator_state(AccumulatorState& state){
         #pragma HLS INLINE
@@ -401,7 +426,7 @@ namespace fsa{
 
         for(int col=0; col<SA_COLS; ++col){
             #pragma HLS UNROLL
-            accumulator_lane_step(
+            accumulator_detail::accumulator_lane_step(
                 col,
                 current.scale[col], current.reciprocal[col],
                 next.scale[col], next.reciprocal[col], valid, cmd,
