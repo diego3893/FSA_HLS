@@ -29,12 +29,15 @@ namespace fsa{
         EXP2_PWL = 6,
         ROWSUM_MAC = 7,
         PV_MAC = 8,
-        PASS = 9
+        PASS = 9,
+
+        /// @brief wave0计算rowsum，后续SA_ROWS个wave连续计算PV。
+        ROWSUM_PV = 10
     };
 
     /// @brief 任一mesh phase允许的最大token波数，仅用于综合边界和报告。
     constexpr int STREAM_MAX_PHASE_WAVES =
-        SA_ROWS>exp2PWLPieces ? SA_ROWS : exp2PWLPieces;
+        SA_ROWS+1>exp2PWLPieces ? SA_ROWS+1 : exp2PWLPieces;
 
     struct StreamPeToken{
         bool valid = false;

@@ -26,7 +26,8 @@ namespace fsa{
         StreamPeTokenStream vertical[SA_ROWS+1][SA_COLS],
         StreamPeLaneStream lane[SA_ROWS][SA_COLS],
         acc_t reduction_result[SA_COLS][SA_ROWS],
-        elem_t lane_result[SA_ROWS][SA_COLS]
+        elem_t lane_result[SA_ROWS][SA_COLS],
+        acc_t scalar_reduction[SA_COLS]
     );
 
 }  // namespace fsa

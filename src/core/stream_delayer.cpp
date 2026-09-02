@@ -24,7 +24,11 @@ namespace fsa{
                 StreamPeToken token{};
                 token.valid = true;
                 token.last = wave+1==wave_count;
-                token.op = op;
+                token.op = op==StreamPeOp::ROWSUM_PV
+                    ? (wave==0
+                        ? StreamPeOp::ROWSUM_MAC
+                        : StreamPeOp::PV_MAC)
+                    : op;
                 token.tag = wave;
 
                 if(op==StreamPeOp::QK_MAC){
@@ -36,6 +40,16 @@ namespace fsa{
                     const int key_row = row<SA_COLS ? row : 0;
                     token.horizontal = token.valid
                         ? data[key_row][wave] : elemZero();
+                }else if(op==StreamPeOp::ROWSUM_PV){
+                    if(wave==0){
+                        token.horizontal = elemOne();
+                    }else{
+                        token.valid = row<SA_COLS &&
+                            row<(int)active_keys;
+                        const int key_row = row<SA_COLS ? row : 0;
+                        token.horizontal = token.valid
+                            ? data[key_row][wave-1] : elemZero();
+                    }
                 }else if(op==StreamPeOp::EXP2_PWL){
                     token.horizontal = peExp2Slope(
                         (exp2_counter_t)wave
@@ -53,7 +67,11 @@ namespace fsa{
                 StreamPeToken token{};
                 token.valid = true;
                 token.last = wave+1==wave_count;
-                token.op = op;
+                token.op = op==StreamPeOp::ROWSUM_PV
+                    ? (wave==0
+                        ? StreamPeOp::ROWSUM_MAC
+                        : StreamPeOp::PV_MAC)
+                    : op;
                 token.tag = wave;
                 if(op==StreamPeOp::SUB_MAX){
                     token.vertical = column_operand[col];
@@ -76,12 +94,16 @@ namespace fsa{
         StreamPeTokenStream vertical[SA_ROWS+1][SA_COLS],
         StreamPeLaneStream lane[SA_ROWS][SA_COLS],
         acc_t reduction_result[SA_COLS][SA_ROWS],
-        elem_t lane_result[SA_ROWS][SA_COLS]
+        elem_t lane_result[SA_ROWS][SA_COLS],
+        acc_t scalar_reduction[SA_COLS]
     ){
         #pragma HLS INLINE off
+        #pragma HLS ARRAY_PARTITION \
+            variable=scalar_reduction type=complete dim=1
 
         const bool reduction = op==StreamPeOp::QK_MAC ||
-            op==StreamPeOp::ROWSUM_MAC || op==StreamPeOp::PV_MAC;
+            op==StreamPeOp::ROWSUM_MAC || op==StreamPeOp::PV_MAC ||
+            op==StreamPeOp::ROWSUM_PV;
         for(int wave=0; wave<wave_count; ++wave){
             #pragma HLS PIPELINE II=1
             #pragma HLS LOOP_TRIPCOUNT \
@@ -90,7 +112,12 @@ namespace fsa{
                 #pragma HLS UNROLL
                 const StreamPeToken token =
                     vertical[SA_ROWS][col].read();
-                if(reduction && wave<SA_ROWS){
+                if(op==StreamPeOp::ROWSUM_PV && wave==0){
+                    scalar_reduction[col] = token.vertical;
+                }else if(op==StreamPeOp::ROWSUM_PV &&
+                    wave<=SA_ROWS){
+                    reduction_result[col][wave-1] = token.vertical;
+                }else if(reduction && wave<SA_ROWS){
                     reduction_result[col][wave] = token.vertical;
                 }
             }

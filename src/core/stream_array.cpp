@@ -55,7 +55,8 @@ namespace fsa{
             const int wave_count,
             const bool reduction,
             acc_t reduction_result[SA_COLS][SA_ROWS],
-            elem_t lane_result[SA_ROWS][SA_COLS]
+            elem_t lane_result[SA_ROWS][SA_COLS],
+            acc_t scalar_reduction[SA_COLS]
         ){
             #pragma HLS INLINE off
             #pragma HLS DATAFLOW
@@ -65,6 +66,7 @@ namespace fsa{
             #pragma HLS ARRAY_PARTITION variable=lane_enabled type=complete dim=0
             #pragma HLS ARRAY_PARTITION variable=reduction_result type=complete dim=1
             #pragma HLS ARRAY_PARTITION variable=lane_result type=complete dim=0
+            #pragma HLS ARRAY_PARTITION variable=scalar_reduction type=complete dim=1
 
             PeStream horizontal[SA_ROWS][SA_COLS+1];
             PeStream vertical[SA_ROWS+1][SA_COLS];
@@ -120,7 +122,7 @@ namespace fsa{
 
             stream_output_delayer(
                 op, wave_count, horizontal, vertical, lane,
-                reduction_result, lane_result
+                reduction_result, lane_result, scalar_reduction
             );
         }
 
@@ -173,6 +175,7 @@ namespace fsa{
         elem_t k_tile[SA_COLS][SA_ROWS]{};
         elem_t v_tile[SA_COLS][SA_ROWS]{};
         acc_t mesh_reduction[SA_COLS][SA_ROWS]{};
+        acc_t mesh_scalar_reduction[SA_COLS]{};
         acc_t column_operand[SA_COLS]{};
         bool lane_enabled[SA_ROWS][SA_COLS]{};
         #pragma HLS ARRAY_PARTITION variable=resident_a type=complete dim=0
@@ -180,6 +183,8 @@ namespace fsa{
         #pragma HLS ARRAY_PARTITION variable=k_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=v_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=mesh_reduction type=complete dim=1
+        #pragma HLS ARRAY_PARTITION \
+            variable=mesh_scalar_reduction type=complete dim=1
         #pragma HLS ARRAY_PARTITION variable=column_operand type=complete dim=1
         #pragma HLS ARRAY_PARTITION variable=lane_enabled type=complete dim=0
 
@@ -219,7 +224,7 @@ namespace fsa{
             resident_a, k_tile, column_operand,
             lane_enabled, input.active_keys,
             StreamPeOp::QK_MAC, SA_COLS, true,
-            mesh_reduction, resident_b
+            mesh_reduction, resident_b, mesh_scalar_reduction
         );
 
         acc_t new_max[SA_COLS]{};
@@ -247,7 +252,7 @@ namespace fsa{
             resident_a, k_tile, column_operand,
             lane_enabled, input.active_keys,
             StreamPeOp::SUB_MAX, 1, false,
-            mesh_reduction, resident_b
+            mesh_reduction, resident_b, mesh_scalar_reduction
         );
 
         for(int query=0; query<SA_COLS; ++query){
@@ -258,7 +263,7 @@ namespace fsa{
             resident_b, k_tile, column_operand,
             lane_enabled, input.active_keys,
             StreamPeOp::SCALE_SCORE, 1, false,
-            mesh_reduction, resident_a
+            mesh_reduction, resident_a, mesh_scalar_reduction
         );
 
         // PWL collector只提交匹配分段；先清零保证masked lane严格为0。
@@ -273,26 +278,22 @@ namespace fsa{
             resident_a, k_tile, column_operand,
             lane_enabled, input.active_keys,
             StreamPeOp::EXP2_PWL, exp2PWLPieces, false,
-            mesh_reduction, resident_b
+            mesh_reduction, resident_b, mesh_scalar_reduction
         );
 
-        stream_detail::runFmaMesh(
-            resident_b, k_tile, column_operand,
-            lane_enabled, input.active_keys,
-            StreamPeOp::ROWSUM_MAC, 1, true,
-            mesh_reduction, resident_a
-        );
-        for(int query=0; query<SA_COLS; ++query){
-            #pragma HLS UNROLL
-            rowsum[query] = mesh_reduction[query][0];
-        }
-
+        // P已经就绪，rowsum和PV都只读同一个resident bank。把1个
+        // rowsum wave与SA_ROWS个PV wave连续送入同一次mesh调用，避免
+        // 两个无数据依赖的归约phase之间再次启动和排空DATAFLOW网络。
         stream_detail::runFmaMesh(
             resident_b, v_tile, column_operand,
             lane_enabled, input.active_keys,
-            StreamPeOp::PV_MAC, SA_ROWS, true,
-            mesh_reduction, resident_a
+            StreamPeOp::ROWSUM_PV, SA_ROWS+1, true,
+            mesh_reduction, resident_a, mesh_scalar_reduction
         );
+        for(int query=0; query<SA_COLS; ++query){
+            #pragma HLS UNROLL
+            rowsum[query] = mesh_scalar_reduction[query];
+        }
 
         // 独立Accumulator层级保存L/O，并在finalize时使用恢复除法器
         // 每个query只求一次1/L，再用乘法归一化全部feature。
