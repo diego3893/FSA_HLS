@@ -65,14 +65,42 @@ namespace fsa{
         #pragma HLS ARRAY_PARTITION variable=online_l type=complete dim=1
         #pragma HLS ARRAY_PARTITION variable=online_o type=complete dim=1
 
+        acc_t lane_output_l[SA_COLS]{};
+        acc_t lane_output_o[SA_COLS][SA_ROWS]{};
+        #pragma HLS ARRAY_PARTITION variable=lane_output_l type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=lane_output_o type=complete dim=0
+
+        #define FSA_STREAM_ACCUMULATOR_LANE(QUERY) \
+            stream_accumulator_detail::stream_accumulator_lane( \
+                QUERY, initialize, finalize, \
+                max_difference[QUERY], rowsum[QUERY], pv[QUERY], \
+                online_l[QUERY], online_o[QUERY], \
+                lane_output_l[QUERY], lane_output_o[QUERY] \
+            )
+
+        // 4x4配置显式产生4个独立Accumulator lane。使用本地完全分割
+        // 输出避免聚合output结构体让HLS把四次调用重新串行化。
+        #if FSA_SA_COLS==4
+        FSA_STREAM_ACCUMULATOR_LANE(0);
+        FSA_STREAM_ACCUMULATOR_LANE(1);
+        FSA_STREAM_ACCUMULATOR_LANE(2);
+        FSA_STREAM_ACCUMULATOR_LANE(3);
+        #else
         for(int query=0; query<SA_COLS; ++query){
             #pragma HLS UNROLL
-            stream_accumulator_detail::stream_accumulator_lane(
-                query, initialize, finalize,
-                max_difference[query], rowsum[query], pv[query],
-                online_l[query], online_o[query],
-                output.l[query], output.o[query]
-            );
+            FSA_STREAM_ACCUMULATOR_LANE(query);
+        }
+        #endif
+        #undef FSA_STREAM_ACCUMULATOR_LANE
+
+        for(int query=0; query<SA_COLS; ++query){
+            #pragma HLS UNROLL
+            output.l[query] = lane_output_l[query];
+            for(int feature=0; feature<SA_ROWS; ++feature){
+                #pragma HLS UNROLL
+                output.o[query][feature] =
+                    lane_output_o[query][feature];
+            }
         }
         output.normalized = finalize;
     }

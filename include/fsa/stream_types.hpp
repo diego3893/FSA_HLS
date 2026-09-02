@@ -32,6 +32,10 @@ namespace fsa{
         PASS = 9
     };
 
+    /// @brief 任一mesh phase允许的最大token波数，仅用于综合边界和报告。
+    constexpr int STREAM_MAX_PHASE_WAVES =
+        SA_ROWS>exp2PWLPieces ? SA_ROWS : exp2PWLPieces;
+
     struct StreamPeToken{
         bool valid = false;
         bool last = false;

@@ -86,6 +86,8 @@ namespace fsa{
 
         for(int wave=0; wave<wave_count; ++wave){
             #pragma HLS PIPELINE II=1
+            #pragma HLS LOOP_TRIPCOUNT \
+                min=1 max=STREAM_MAX_PHASE_WAVES
             const StreamPeToken horizontal = left.read();
             const StreamPeToken vertical = up.read();
             const bool operation_valid = horizontal.valid &&

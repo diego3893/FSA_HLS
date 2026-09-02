@@ -17,6 +17,8 @@ namespace fsa{
 
         for(int wave=0; wave<wave_count; ++wave){
             #pragma HLS PIPELINE II=1
+            #pragma HLS LOOP_TRIPCOUNT \
+                min=1 max=STREAM_MAX_PHASE_WAVES
             for(int row=0; row<SA_ROWS; ++row){
                 #pragma HLS UNROLL
                 StreamPeToken token{};
@@ -82,6 +84,8 @@ namespace fsa{
             op==StreamPeOp::ROWSUM_MAC || op==StreamPeOp::PV_MAC;
         for(int wave=0; wave<wave_count; ++wave){
             #pragma HLS PIPELINE II=1
+            #pragma HLS LOOP_TRIPCOUNT \
+                min=1 max=STREAM_MAX_PHASE_WAVES
             for(int col=0; col<SA_COLS; ++col){
                 #pragma HLS UNROLL
                 const StreamPeToken token =

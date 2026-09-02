@@ -1,5 +1,5 @@
 set RUN_CSIM  1
-set RUN_COSIM 0
+set RUN_COSIM 1
 set EXPORT_IP 0
 
 if {[info exists ::env(RUN_CSIM)]} {
@@ -57,7 +57,7 @@ if {$RUN_CSIM || $RUN_COSIM} {
 open_solution -reset "solution1" -flow_target vivado
 set_part {xcvu37p_CIV-fsvh2892-2-e}
 create_clock -period 10 -name default
-config_dataflow -start_fifo_depth 16
+config_dataflow -start_fifo_depth 16 -scalar_fifo_depth 8
 
 if {$RUN_CSIM} {
     csim_design

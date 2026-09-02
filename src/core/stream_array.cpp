@@ -22,27 +22,6 @@ namespace fsa{
             "当前FSA mesh要求head dimension不小于token tile宽度"
         );
 
-        bool isReductionPhase(const StreamPeOp op){
-            #pragma HLS INLINE
-            return op==StreamPeOp::QK_MAC ||
-                op==StreamPeOp::ROWSUM_MAC ||
-                op==StreamPeOp::PV_MAC;
-        }
-
-        int phaseWaveCount(const StreamPeOp op){
-            #pragma HLS INLINE
-            if(op==StreamPeOp::QK_MAC){
-                return SA_COLS;
-            }
-            if(op==StreamPeOp::PV_MAC){
-                return SA_ROWS;
-            }
-            if(op==StreamPeOp::EXP2_PWL){
-                return exp2PWLPieces;
-            }
-            return 1;
-        }
-
         bool softmaxLaneEnabled(
             const int row,
             const int col,
@@ -70,11 +49,11 @@ namespace fsa{
             const elem_t resident[SA_ROWS][SA_COLS],
             const elem_t data[SA_COLS][SA_ROWS],
             const acc_t column_operand[SA_COLS],
+            const bool lane_enabled[SA_ROWS][SA_COLS],
             const std::uint16_t active_keys,
-            const bool causal,
-            const std::uint32_t query_base,
-            const std::uint32_t key_base,
             const StreamPeOp op,
+            const int wave_count,
+            const bool reduction,
             acc_t reduction_result[SA_COLS][SA_ROWS],
             elem_t lane_result[SA_ROWS][SA_COLS]
         ){
@@ -83,6 +62,7 @@ namespace fsa{
             #pragma HLS ARRAY_PARTITION variable=resident type=complete dim=0
             #pragma HLS ARRAY_PARTITION variable=data type=complete dim=0
             #pragma HLS ARRAY_PARTITION variable=column_operand type=complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=lane_enabled type=complete dim=0
             #pragma HLS ARRAY_PARTITION variable=reduction_result type=complete dim=1
             #pragma HLS ARRAY_PARTITION variable=lane_result type=complete dim=0
 
@@ -93,8 +73,6 @@ namespace fsa{
             #pragma HLS STREAM variable=vertical depth=MESH_FIFO_DEPTH
             #pragma HLS STREAM variable=lane depth=MESH_FIFO_DEPTH
 
-            const int wave_count = phaseWaveCount(op);
-            const bool reduction = isReductionPhase(op);
             stream_input_delayer(
                 data, column_operand, active_keys, op, wave_count,
                 horizontal, vertical
@@ -103,10 +81,7 @@ namespace fsa{
             #define FSA_STREAM_PE_INSTANCE(ROW, COL) \
                 stream_pe_process( \
                     resident[ROW][COL], \
-                    softmaxLaneEnabled( \
-                        ROW, COL, active_keys, causal, \
-                        query_base, key_base \
-                    ), \
+                    lane_enabled[ROW][COL], \
                     reduction, op, wave_count, \
                     horizontal[ROW][COL], vertical[ROW][COL], \
                     horizontal[ROW][COL+1], vertical[ROW+1][COL], \
@@ -199,12 +174,14 @@ namespace fsa{
         elem_t v_tile[SA_COLS][SA_ROWS]{};
         acc_t mesh_reduction[SA_COLS][SA_ROWS]{};
         acc_t column_operand[SA_COLS]{};
+        bool lane_enabled[SA_ROWS][SA_COLS]{};
         #pragma HLS ARRAY_PARTITION variable=resident_a type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=resident_b type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=k_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=v_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=mesh_reduction type=complete dim=1
         #pragma HLS ARRAY_PARTITION variable=column_operand type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=lane_enabled type=complete dim=0
 
         // LOAD_Q/LOAD_SCORE只写寄存器，不占用FMA。所有需要乘加的phase
         // 都通过下面同一个runFmaMesh层级执行。
@@ -224,11 +201,25 @@ namespace fsa{
             }
         }
 
+        // DATAFLOW task只接收runFmaMesh的正式参数。mask判断在进入
+        // DATAFLOW前完成，避免工具把16个判断表达式变成标量FIFO task。
+        for(int row=0; row<SA_ROWS; ++row){
+            #pragma HLS UNROLL
+            for(int query=0; query<SA_COLS; ++query){
+                #pragma HLS UNROLL
+                lane_enabled[row][query] =
+                    stream_detail::softmaxLaneEnabled(
+                        row, query, input.active_keys, input.causal,
+                        input.query_base, input.key_base
+                    );
+            }
+        }
+
         stream_detail::runFmaMesh(
             resident_a, k_tile, column_operand,
-            input.active_keys, input.causal,
-            input.query_base, input.key_base,
-            StreamPeOp::QK_MAC, mesh_reduction, resident_b
+            lane_enabled, input.active_keys,
+            StreamPeOp::QK_MAC, SA_COLS, true,
+            mesh_reduction, resident_b
         );
 
         acc_t new_max[SA_COLS]{};
@@ -254,9 +245,9 @@ namespace fsa{
         // 再乘attention scale写回FP16。
         stream_detail::runFmaMesh(
             resident_a, k_tile, column_operand,
-            input.active_keys, input.causal,
-            input.query_base, input.key_base,
-            StreamPeOp::SUB_MAX, mesh_reduction, resident_b
+            lane_enabled, input.active_keys,
+            StreamPeOp::SUB_MAX, 1, false,
+            mesh_reduction, resident_b
         );
 
         for(int query=0; query<SA_COLS; ++query){
@@ -265,9 +256,9 @@ namespace fsa{
         }
         stream_detail::runFmaMesh(
             resident_b, k_tile, column_operand,
-            input.active_keys, input.causal,
-            input.query_base, input.key_base,
-            StreamPeOp::SCALE_SCORE, mesh_reduction, resident_a
+            lane_enabled, input.active_keys,
+            StreamPeOp::SCALE_SCORE, 1, false,
+            mesh_reduction, resident_a
         );
 
         // PWL collector只提交匹配分段；先清零保证masked lane严格为0。
@@ -280,16 +271,16 @@ namespace fsa{
         }
         stream_detail::runFmaMesh(
             resident_a, k_tile, column_operand,
-            input.active_keys, input.causal,
-            input.query_base, input.key_base,
-            StreamPeOp::EXP2_PWL, mesh_reduction, resident_b
+            lane_enabled, input.active_keys,
+            StreamPeOp::EXP2_PWL, exp2PWLPieces, false,
+            mesh_reduction, resident_b
         );
 
         stream_detail::runFmaMesh(
             resident_b, k_tile, column_operand,
-            input.active_keys, input.causal,
-            input.query_base, input.key_base,
-            StreamPeOp::ROWSUM_MAC, mesh_reduction, resident_a
+            lane_enabled, input.active_keys,
+            StreamPeOp::ROWSUM_MAC, 1, true,
+            mesh_reduction, resident_a
         );
         for(int query=0; query<SA_COLS; ++query){
             #pragma HLS UNROLL
@@ -298,9 +289,9 @@ namespace fsa{
 
         stream_detail::runFmaMesh(
             resident_b, v_tile, column_operand,
-            input.active_keys, input.causal,
-            input.query_base, input.key_base,
-            StreamPeOp::PV_MAC, mesh_reduction, resident_a
+            lane_enabled, input.active_keys,
+            StreamPeOp::PV_MAC, SA_ROWS, true,
+            mesh_reduction, resident_a
         );
 
         // 独立Accumulator层级保存L/O，并在finalize时使用恢复除法器
