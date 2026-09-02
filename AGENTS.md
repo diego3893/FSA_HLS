@@ -4,7 +4,8 @@
 
 - 本文件适用于 `FSA-HLS` 仓库中的全部文件；用户在当前对话中的明确要求优先。
 - `FSA-main` 的 Chisel 源码和 FSA 论文用于核对功能、数据移动和架构意图；除非用户明确要求，否则不要修改参考项目。
-- 当前综合主路径是 `fsa_dma_top -> fsa_stream_request_run -> stream_array/stream_pe`：DMA 使用 load/compute/store `DATAFLOW`，阵列使用定长 token 和 PE 局部状态。
+- 当前综合主路径是 `fsa_dma_top -> fsa_stream_request_run -> stream_array/runFmaMesh`：DMA 使用 load/compute/store `DATAFLOW`；计算核用一组定长-token FMA mesh 顺序执行 QK、减 max、缩放、PWL、rowsum 和 PV。
+- `stream_pe_step` 保留为独立功能参考和单元测试对象，但不在 `fsa_stream_request`/`fsa_dma` 的当前综合主路径中。
 - 原 `fsa_core_request_run`、`fsa_core_datapath_step` 及其 `current/next` 模型继续作为功能参考，不应为了优化路径而删除或无意改变其语义。
 - 当前版本保持在线 softmax、causal mask、`active_keys`、非整 tile、最终归一化和现有 DMA 外部接口。Split-D、controller 指令重叠、AXI bundle 拆分不属于默认修改范围，除非用户明确要求。
 - `accumulator_pipeline` 是独立实验实现，当前综合主路径不使用；未经单独验证不要接入主路径。
@@ -40,7 +41,7 @@
 ## 旧逐拍模型与新 stream 模型
 
 - 旧 `step` 模型必须只读 `current`、只写 `next`，并在 step 结束后统一提交；不要在 step 中途写回 `current`。
-- 上述 `current/next` 约束只适用于旧逐拍参考模型。新高吞吐路径应让每个 PE/CMP/Accumulator 进程拥有自己的局部持久状态，不能重新引入整阵列状态复制。
+- 上述 `current/next` 约束只适用于旧逐拍参考模型。新高吞吐路径使用完全分割的 phase-resident bank；单个 phase 内 PE 只读 resident、结果经 stream 提交到下一 bank，不能重新引入逐拍整阵列状态复制。
 - stream token 必须携带所需的 `valid/op/tag/last/masked` 信息。所有 DATAFLOW 生产者和消费者必须具有可证明的固定 token 数或明确终止 token；bubble 也要传递，不能因分支少写 FIFO。
 - QK 产生的 S、减 max 后的 N、PWL 后的 P、rowsum 和 PV 应沿 FSA 阵列路径移动；不要把完整 S/P tile 写入通用 SRAM 后交给独立 softmax/PV 核。
 - 每个 PE 的普通 MAC、减 max、缩放和 PWL 以复用一条 FMA 流水线为目标。空间展开仍应保留每个 PE 的独立实例，不能把整个阵列错误限制成一条共享 FMA。
