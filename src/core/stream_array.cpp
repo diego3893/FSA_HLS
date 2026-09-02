@@ -190,7 +190,8 @@ namespace fsa{
         FsaCoreRequestOutput& output
     ){
         #pragma HLS INLINE off
-        #pragma HLS ALLOCATION function instances=runFmaMesh limit=1
+        #pragma HLS ALLOCATION \
+            function instances=stream_detail::runFmaMesh limit=1
 
         elem_t resident_a[SA_ROWS][SA_COLS]{};
         elem_t resident_b[SA_ROWS][SA_COLS]{};
