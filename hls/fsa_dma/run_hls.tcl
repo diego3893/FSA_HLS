@@ -33,8 +33,6 @@ add_files [file join $PROJECT_ROOT "src/core/dma.cpp"] \
     -cflags $CFLAGS
 add_files [file join $PROJECT_ROOT "src/core/stream_array.cpp"] \
     -cflags $CFLAGS
-add_files [file join $PROJECT_ROOT "src/core/stream_pe.cpp"] \
-    -cflags $CFLAGS
 add_files [file join $PROJECT_ROOT "src/core/arithmetic.cpp"] \
     -cflags $CFLAGS
 

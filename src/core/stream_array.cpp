@@ -3,58 +3,167 @@
 #include <hls_stream.h>
 
 #include "fsa/arithmetic.hpp"
+#include "fsa/stream_types.hpp"
 
 namespace fsa{
     namespace{
 
         using PeStream = hls::stream<StreamPeToken>;
 
+        struct PeLaneResult{
+            bool valid = false;
+            bool segment_match = false;
+            elem_t element{};
+        };
+
+        using PeLaneStream = hls::stream<PeLaneResult>;
+
+        constexpr int MESH_FIFO_DEPTH = 5;
+        static_assert(
+            SA_ROWS>=SA_COLS,
+            "当前FSA mesh要求head dimension不小于token tile宽度"
+        );
+
+        bool isReductionPhase(const StreamPeOp op){
+            #pragma HLS INLINE
+            return op==StreamPeOp::QK_MAC ||
+                op==StreamPeOp::ROWSUM_MAC ||
+                op==StreamPeOp::PV_MAC;
+        }
+
+        int phaseWaveCount(const StreamPeOp op){
+            #pragma HLS INLINE
+            if(op==StreamPeOp::QK_MAC){
+                return SA_COLS;
+            }
+            if(op==StreamPeOp::PV_MAC){
+                return SA_ROWS;
+            }
+            if(op==StreamPeOp::EXP2_PWL){
+                return exp2PWLPieces;
+            }
+            return 1;
+        }
+
+        bool softmaxLaneEnabled(
+            const int row,
+            const int col,
+            const std::uint16_t active_keys,
+            const bool causal,
+            const std::uint32_t query_base,
+            const std::uint32_t key_base
+        ){
+            #pragma HLS INLINE
+            if(row>=SA_COLS || row>=(int)active_keys){
+                return false;
+            }
+            return !causal ||
+                key_base+(unsigned)row<=query_base+(unsigned)col;
+        }
+
+        /**
+         * @brief 一个物理PE在一个完整phase中处理定长token波。
+         *
+         * resident在本phase内只读，计算结果经stream送给收集进程，因此
+         * FMA流水线不再与StreamPeState写回形成loop-carried dependence。
+         */
         void macPeProcess(
-            StreamPeState& state,
-            const unsigned item_count,
+            const elem_t resident,
+            const int row,
+            const int col,
+            const std::uint16_t active_keys,
+            const bool causal,
+            const std::uint32_t query_base,
+            const std::uint32_t key_base,
+            const StreamPeOp op,
             PeStream& left,
             PeStream& up,
             PeStream& right,
-            PeStream& down
+            PeStream& down,
+            PeLaneStream& lane
         ){
             #pragma HLS INLINE off
-            for(unsigned item=0; item<item_count; ++item){
+
+            const int wave_count = phaseWaveCount(op);
+            const bool reduction = isReductionPhase(op);
+            const bool lane_enabled = softmaxLaneEnabled(
+                row, col, active_keys, causal, query_base, key_base
+            );
+
+            for(int wave=0; wave<wave_count; ++wave){
                 #pragma HLS PIPELINE II=1
                 const StreamPeToken horizontal = left.read();
                 const StreamPeToken vertical = up.read();
 
-                StreamPeToken operation = horizontal;
-                operation.valid = horizontal.valid && vertical.valid;
-                operation.vertical = vertical.vertical;
+                const bool operation_valid = horizontal.valid &&
+                    vertical.valid && (reduction || lane_enabled);
+                const bool exp2 = op==StreamPeOp::EXP2_PWL;
 
-                const StreamPeOutput result =
-                    stream_pe_step(state, operation);
-                right.write(result.right);
-                down.write(result.down);
+                // 该函数是每个PE唯一的FMA调用点。QK、softmax、rowsum和
+                // PV的phase按顺序调用同一个mesh模块，不再产生第二组PE。
+                const PeMacUnitOutput arithmetic = peMacUnit(
+                    resident,
+                    horizontal.horizontal,
+                    vertical.vertical,
+                    exp2
+                );
+
+                right.write(horizontal);
+
+                StreamPeToken down_token = vertical;
+                if(reduction && operation_valid){
+                    down_token.vertical = arithmetic.out_accType;
+                }
+                down.write(down_token);
+
+                PeLaneResult lane_result{};
+                lane_result.valid = !reduction && operation_valid;
+                lane_result.segment_match = arithmetic.out_exp2;
+                lane_result.element = arithmetic.out_elemType;
+                lane.write(lane_result);
             }
         }
 
         void feedMeshLeft(
             const elem_t data[SA_COLS][SA_ROWS],
-            const unsigned item_count,
+            const std::uint16_t active_keys,
             const StreamPeOp op,
             PeStream horizontal[SA_ROWS][SA_COLS+1]
         ){
             #pragma HLS INLINE off
-            for(unsigned item=0; item<item_count; ++item){
+
+            const int wave_count = phaseWaveCount(op);
+            for(int wave=0; wave<wave_count; ++wave){
                 #pragma HLS PIPELINE II=1
                 for(int row=0; row<SA_ROWS; ++row){
                     #pragma HLS UNROLL
                     StreamPeToken token{};
                     token.valid = true;
-                    token.last = item+1==item_count;
+                    token.last = wave+1==wave_count;
                     token.op = op;
-                    token.tag = item;
-                    if(op==StreamPeOp::PV_MAC){
-                        token.horizontal = row<SA_COLS
-                            ? data[row][item] : elemZero();
+                    token.tag = wave;
+
+                    if(op==StreamPeOp::QK_MAC){
+                        // 始终发送SA_COLS个key token；tail key变为bubble。
+                        token.valid = wave<(int)active_keys;
+                        token.horizontal = token.valid
+                            ? data[wave][row] : elemZero();
+                    }else if(op==StreamPeOp::PV_MAC){
+                        // 始终发送SA_ROWS个feature token；无效key行在PE中
+                        // 旁路竖直部分和，避免少写任何FIFO。
+                        token.valid = row<SA_COLS &&
+                            row<(int)active_keys;
+                        const int key_row = row<SA_COLS ? row : 0;
+                        token.horizontal = token.valid
+                            ? data[key_row][wave] : elemZero();
+                    }else if(op==StreamPeOp::EXP2_PWL){
+                        token.horizontal = peExp2Slope(
+                            (exp2_counter_t)wave
+                        );
+                    }else if(op==StreamPeOp::SCALE_SCORE){
+                        token.horizontal = elemAttentionScale();
                     }else{
-                        token.horizontal = data[item][row];
+                        token.horizontal = elemOne();
                     }
                     horizontal[row][0].write(token);
                 }
@@ -62,49 +171,91 @@ namespace fsa{
         }
 
         void feedMeshTop(
-            const unsigned item_count,
+            const acc_t column_operand[SA_COLS],
             const StreamPeOp op,
             PeStream vertical[SA_ROWS+1][SA_COLS]
         ){
             #pragma HLS INLINE off
-            for(unsigned item=0; item<item_count; ++item){
+
+            const int wave_count = phaseWaveCount(op);
+            for(int wave=0; wave<wave_count; ++wave){
                 #pragma HLS PIPELINE II=1
                 for(int col=0; col<SA_COLS; ++col){
                     #pragma HLS UNROLL
                     StreamPeToken token{};
                     token.valid = true;
-                    token.last = item+1==item_count;
+                    token.last = wave+1==wave_count;
                     token.op = op;
-                    token.tag = item;
-                    token.vertical = accZero();
+                    token.tag = wave;
+                    if(op==StreamPeOp::SUB_MAX){
+                        token.vertical = column_operand[col];
+                    }else if(op==StreamPeOp::EXP2_PWL){
+                        token.vertical = exp2PWLIntercept(
+                            (exp2_counter_t)wave
+                        );
+                    }else{
+                        token.vertical = accZero();
+                    }
                     vertical[0][col].write(token);
                 }
             }
         }
 
         void collectMeshBottom(
-            const unsigned item_count,
+            const StreamPeOp op,
             PeStream vertical[SA_ROWS+1][SA_COLS],
             acc_t result[SA_COLS][SA_ROWS]
         ){
             #pragma HLS INLINE off
-            for(unsigned item=0; item<item_count; ++item){
+
+            const int wave_count = phaseWaveCount(op);
+            const bool reduction = isReductionPhase(op);
+            for(int wave=0; wave<wave_count; ++wave){
                 #pragma HLS PIPELINE II=1
                 for(int col=0; col<SA_COLS; ++col){
                     #pragma HLS UNROLL
                     const StreamPeToken token =
                         vertical[SA_ROWS][col].read();
-                    result[col][item] = token.vertical;
+                    if(reduction && wave<SA_ROWS){
+                        result[col][wave] = token.vertical;
+                    }
+                }
+            }
+        }
+
+        void collectMeshLanes(
+            const StreamPeOp op,
+            PeLaneStream lane[SA_ROWS][SA_COLS],
+            elem_t result[SA_ROWS][SA_COLS]
+        ){
+            #pragma HLS INLINE off
+
+            const int wave_count = phaseWaveCount(op);
+            for(int wave=0; wave<wave_count; ++wave){
+                #pragma HLS PIPELINE II=1
+                for(int row=0; row<SA_ROWS; ++row){
+                    #pragma HLS UNROLL
+                    for(int col=0; col<SA_COLS; ++col){
+                        #pragma HLS UNROLL
+                        const PeLaneResult item = lane[row][col].read();
+                        const bool selected = op==StreamPeOp::EXP2_PWL
+                            ? item.segment_match : true;
+                        if(item.valid && selected){
+                            result[row][col] = item.element;
+                        }
+                    }
                 }
             }
         }
 
         void drainMeshRight(
-            const unsigned item_count,
+            const StreamPeOp op,
             PeStream horizontal[SA_ROWS][SA_COLS+1]
         ){
             #pragma HLS INLINE off
-            for(unsigned item=0; item<item_count; ++item){
+
+            const int wave_count = phaseWaveCount(op);
+            for(int wave=0; wave<wave_count; ++wave){
                 #pragma HLS PIPELINE II=1
                 for(int row=0; row<SA_ROWS; ++row){
                     #pragma HLS UNROLL
@@ -113,41 +264,60 @@ namespace fsa{
             }
         }
 
-        void runMacMesh(
-            StreamPeState pe[SA_ROWS][SA_COLS],
+        /**
+         * @brief 全部计算phase复用的唯一FMA mesh。
+         *
+         * 每个调用的token数只由编译期阵列参数和opcode决定：QK固定
+         * SA_COLS，PV固定SA_ROWS，PWL固定8，其余固定1。active_keys只
+         * 生成bubble，不再控制循环上界。
+         */
+        void runFmaMesh(
+            const elem_t resident[SA_ROWS][SA_COLS],
             const elem_t data[SA_COLS][SA_ROWS],
-            const unsigned item_count,
+            const acc_t column_operand[SA_COLS],
+            const std::uint16_t active_keys,
+            const bool causal,
+            const std::uint32_t query_base,
+            const std::uint32_t key_base,
             const StreamPeOp op,
-            acc_t result[SA_COLS][SA_ROWS]
+            acc_t reduction_result[SA_COLS][SA_ROWS],
+            elem_t lane_result[SA_ROWS][SA_COLS]
         ){
             #pragma HLS INLINE off
             #pragma HLS DATAFLOW
-            #pragma HLS ARRAY_PARTITION variable=pe type=complete dim=0
+            #pragma HLS ARRAY_PARTITION variable=resident type=complete dim=0
             #pragma HLS ARRAY_PARTITION variable=data type=complete dim=0
-            #pragma HLS ARRAY_PARTITION variable=result type=complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=column_operand type=complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=reduction_result type=complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=lane_result type=complete dim=0
 
             PeStream horizontal[SA_ROWS][SA_COLS+1];
             PeStream vertical[SA_ROWS+1][SA_COLS];
-            #pragma HLS STREAM variable=horizontal depth=4
-            #pragma HLS STREAM variable=vertical depth=4
+            PeLaneStream lane[SA_ROWS][SA_COLS];
+            #pragma HLS STREAM variable=horizontal depth=MESH_FIFO_DEPTH
+            #pragma HLS STREAM variable=vertical depth=MESH_FIFO_DEPTH
+            #pragma HLS STREAM variable=lane depth=MESH_FIFO_DEPTH
 
-            feedMeshLeft(data, item_count, op, horizontal);
-            feedMeshTop(item_count, op, vertical);
+            feedMeshLeft(data, active_keys, op, horizontal);
+            feedMeshTop(column_operand, op, vertical);
 
             for(int row=0; row<SA_ROWS; ++row){
                 #pragma HLS UNROLL
                 for(int col=0; col<SA_COLS; ++col){
                     #pragma HLS UNROLL
                     macPeProcess(
-                        pe[row][col], item_count,
+                        resident[row][col], row, col,
+                        active_keys, causal, query_base, key_base, op,
                         horizontal[row][col], vertical[row][col],
-                        horizontal[row][col+1], vertical[row+1][col]
+                        horizontal[row][col+1], vertical[row+1][col],
+                        lane[row][col]
                     );
                 }
             }
 
-            collectMeshBottom(item_count, vertical, result);
-            drainMeshRight(item_count, horizontal);
+            collectMeshBottom(op, vertical, reduction_result);
+            collectMeshLanes(op, lane, lane_result);
+            drainMeshRight(op, horizontal);
         }
 
         unsigned legacyLogicalStepCount(
@@ -191,28 +361,28 @@ namespace fsa{
         FsaCoreRequestOutput& output
     ){
         #pragma HLS INLINE off
-        #pragma HLS ALLOCATION function instances=stream_pe_step limit=FSA_SA_ROWS*FSA_SA_COLS
+        #pragma HLS ALLOCATION function instances=runFmaMesh limit=1
 
-        StreamPeState pe[SA_ROWS][SA_COLS]{};
-        acc_t score[SA_COLS][SA_ROWS]{};
-        acc_t pv[SA_COLS][SA_ROWS]{};
+        elem_t resident_a[SA_ROWS][SA_COLS]{};
+        elem_t resident_b[SA_ROWS][SA_COLS]{};
         elem_t k_tile[SA_COLS][SA_ROWS]{};
         elem_t v_tile[SA_COLS][SA_ROWS]{};
-        #pragma HLS ARRAY_PARTITION variable=pe type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=score type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=pv type=complete dim=1
+        acc_t mesh_reduction[SA_COLS][SA_ROWS]{};
+        acc_t column_operand[SA_COLS]{};
+        #pragma HLS ARRAY_PARTITION variable=resident_a type=complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=resident_b type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=k_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=v_tile type=complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=mesh_reduction type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=column_operand type=complete dim=1
 
+        // LOAD_Q/LOAD_SCORE只写寄存器，不占用FMA。所有需要乘加的phase
+        // 都通过下面同一个runFmaMesh层级执行。
         for(int col=0; col<SA_COLS; ++col){
             #pragma HLS PIPELINE II=1
             for(int row=0; row<SA_ROWS; ++row){
                 #pragma HLS UNROLL
-                StreamPeToken load{};
-                load.valid = true;
-                load.op = StreamPeOp::LOAD_Q;
-                load.horizontal = input.q[col][row];
-                stream_pe_step(pe[row][col], load);
+                resident_a[row][col] = input.q[col][row];
             }
         }
         for(int key=0; key<SA_COLS; ++key){
@@ -224,10 +394,11 @@ namespace fsa{
             }
         }
 
-        // Q驻留在PE中，K按key token流过二维阵列；底部直接得到score。
-        runMacMesh(
-            pe, k_tile, (unsigned)input.active_keys,
-            StreamPeOp::QK_MAC, score
+        runFmaMesh(
+            resident_a, k_tile, column_operand,
+            input.active_keys, input.causal,
+            input.query_base, input.key_base,
+            StreamPeOp::QK_MAC, mesh_reduction, resident_b
         );
 
         acc_t tile_max[SA_COLS]{};
@@ -244,21 +415,24 @@ namespace fsa{
             tile_max[query] = accMinimum();
         }
 
-        // CMP热路径只做compare/mux；score保留在本地restream缓冲，随后
-        // 回灌原PE位置，不进入Scratchpad/Accumulator RAM。
-        for(int key=0; key<SA_COLS; ++key){
+        // 只保留SA_COLS×SA_COLS个有效score。resident_a的其余行清零，
+        // 随后同一物理行在PV阶段表示padding key。
+        for(int row=0; row<SA_ROWS; ++row){
             #pragma HLS PIPELINE II=1
             for(int query=0; query<SA_COLS; ++query){
                 #pragma HLS UNROLL
-                const bool padding = key>=(int)input.active_keys;
-                const bool causal_mask = input.causal &&
-                    input.key_base+(unsigned)key>
-                    input.query_base+(unsigned)query;
-                if(!padding && !causal_mask){
-                    tile_max[query] = accMax(
-                        tile_max[query], score[query][key]
-                    );
+                const bool enabled = softmaxLaneEnabled(
+                    row, query, input.active_keys, input.causal,
+                    input.query_base, input.key_base
+                );
+                if(row<SA_COLS && enabled){
+                    const acc_t score = mesh_reduction[query][row];
+                    tile_max[query] = accMax(tile_max[query], score);
+                    resident_a[row][query] = cvtAtoE(score);
+                }else{
+                    resident_a[row][query] = elemZero();
                 }
+                resident_b[row][query] = elemZero();
             }
         }
 
@@ -274,108 +448,60 @@ namespace fsa{
                 : accExp2PWL(
                     accDiff(old_m, new_max[query])*attentionScale()
                 );
+            column_operand[query] = -new_max[query];
         }
 
-        // score从CMP restream缓冲回灌原PE。减max、缩放和随后8拍
-        // PWL全部复用该PE的同一条FMA，N/P不移出阵列。
-        for(int row=0; row<SA_ROWS; ++row){
+        // 两个phase保留旧实现的FP16舍入边界：先(score-max)写回FP16，
+        // 再乘attention scale写回FP16。
+        runFmaMesh(
+            resident_a, k_tile, column_operand,
+            input.active_keys, input.causal,
+            input.query_base, input.key_base,
+            StreamPeOp::SUB_MAX, mesh_reduction, resident_b
+        );
+
+        for(int query=0; query<SA_COLS; ++query){
             #pragma HLS UNROLL
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                const bool padding = row>=(int)input.active_keys;
-                const bool causal_mask = input.causal &&
-                    input.key_base+(unsigned)row>
-                    input.query_base+(unsigned)query;
-                StreamPeToken load_score{};
-                load_score.valid = true;
-                load_score.op = StreamPeOp::LOAD_SCORE;
-                load_score.masked = padding || causal_mask;
-                load_score.horizontal = load_score.masked
-                    ? elemZero()
-                    : cvtAtoE(score[query][row]);
-                stream_pe_step(pe[row][query], load_score);
-            }
+            column_operand[query] = accZero();
         }
+        runFmaMesh(
+            resident_b, k_tile, column_operand,
+            input.active_keys, input.causal,
+            input.query_base, input.key_base,
+            StreamPeOp::SCALE_SCORE, mesh_reduction, resident_a
+        );
 
-        for(int row=0; row<SA_ROWS; ++row){
-            #pragma HLS UNROLL
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                const bool padding = row>=(int)input.active_keys;
-                const bool causal_mask = input.causal &&
-                    input.key_base+(unsigned)row>
-                    input.query_base+(unsigned)query;
-                StreamPeToken subtract{};
-                subtract.valid = !padding && !causal_mask;
-                subtract.op = StreamPeOp::SUB_MAX;
-                subtract.horizontal = elemOne();
-                subtract.vertical = -new_max[query];
-                stream_pe_step(pe[row][query], subtract);
-            }
-        }
-
-        for(int row=0; row<SA_ROWS; ++row){
-            #pragma HLS UNROLL
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                const bool padding = row>=(int)input.active_keys;
-                const bool causal_mask = input.causal &&
-                    input.key_base+(unsigned)row>
-                    input.query_base+(unsigned)query;
-                StreamPeToken scale{};
-                scale.valid = !padding && !causal_mask;
-                scale.op = StreamPeOp::SCALE_SCORE;
-                scale.horizontal = elemAttentionScale();
-                scale.vertical = accZero();
-                stream_pe_step(pe[row][query], scale);
-            }
-        }
-
-        for(int piece=0; piece<exp2PWLPieces; ++piece){
-            #pragma HLS PIPELINE II=1
-            for(int row=0; row<SA_ROWS; ++row){
-                #pragma HLS UNROLL
-                for(int query=0; query<SA_COLS; ++query){
-                    #pragma HLS UNROLL
-                    const bool padding = row>=(int)input.active_keys;
-                    const bool causal_mask = input.causal &&
-                        input.key_base+(unsigned)row>
-                        input.query_base+(unsigned)query;
-                    StreamPeToken coefficient{};
-                    coefficient.valid = !padding && !causal_mask;
-                    coefficient.last = piece==exp2PWLPieces-1;
-                    coefficient.op = StreamPeOp::EXP2_PWL;
-                    coefficient.horizontal = peExp2Slope(
-                        (exp2_counter_t)piece
-                    );
-                    coefficient.vertical = exp2PWLIntercept(
-                        (exp2_counter_t)piece
-                    );
-                    stream_pe_step(pe[row][query], coefficient);
-                }
-            }
-        }
-
-        // rowsum直接读取PE resident P。每列自顶向下形成一条FMA链，
-        // 不把P写出阵列。
+        // PWL collector只提交匹配分段；先清零保证masked lane严格为0。
         for(int row=0; row<SA_ROWS; ++row){
             #pragma HLS PIPELINE II=1
             for(int query=0; query<SA_COLS; ++query){
                 #pragma HLS UNROLL
-                StreamPeToken sum{};
-                sum.valid = true;
-                sum.op = StreamPeOp::ROWSUM_MAC;
-                sum.horizontal = elemOne();
-                sum.vertical = rowsum[query];
-                rowsum[query] =
-                    stream_pe_step(pe[row][query], sum).down.vertical;
+                resident_b[row][query] = elemZero();
             }
         }
+        runFmaMesh(
+            resident_a, k_tile, column_operand,
+            input.active_keys, input.causal,
+            input.query_base, input.key_base,
+            StreamPeOp::EXP2_PWL, mesh_reduction, resident_b
+        );
 
-        // V按value feature流过仍保存P的阵列，底部产生PV。
-        runMacMesh(
-            pe, v_tile, (unsigned)SA_ROWS,
-            StreamPeOp::PV_MAC, pv
+        runFmaMesh(
+            resident_b, k_tile, column_operand,
+            input.active_keys, input.causal,
+            input.query_base, input.key_base,
+            StreamPeOp::ROWSUM_MAC, mesh_reduction, resident_a
+        );
+        for(int query=0; query<SA_COLS; ++query){
+            #pragma HLS UNROLL
+            rowsum[query] = mesh_reduction[query][0];
+        }
+
+        runFmaMesh(
+            resident_b, v_tile, column_operand,
+            input.active_keys, input.causal,
+            input.query_base, input.key_base,
+            StreamPeOp::PV_MAC, mesh_reduction, resident_a
         );
 
         for(int query=0; query<SA_COLS; ++query){
@@ -393,7 +519,8 @@ namespace fsa{
                 const acc_t old_o = input.initialize
                     ? accZero() : online.o[query][feature];
                 online.o[query][feature] = accUnit(
-                    alpha[query], old_o, pv[query][feature]
+                    alpha[query], old_o,
+                    mesh_reduction[query][feature]
                 );
                 output.o[query][feature] = input.finalize
                     ? (online.l[query]==accZero()

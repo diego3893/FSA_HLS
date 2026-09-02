@@ -1,12 +1,11 @@
 /**
  * @file stream_array.hpp
- * @brief 持久PE阵列完成QK、原地S-N-P、rowsum和PV的tile接口。
+ * @brief 一组共享FMA PE阵列完成QK、S-N-P、rowsum和PV的tile接口。
  */
 #ifndef STREAM_ARRAY_HPP
 #define STREAM_ARRAY_HPP
 
 #include "fsa/hls/fsa_core_request_top.hpp"
-#include "fsa/stream_pe.hpp"
 
 namespace fsa{
 
@@ -25,8 +24,8 @@ namespace fsa{
     /**
      * @brief 用一套PE阵列处理一个KV tile。
      *
-     * QK后score经CMP求max并回灌；N和P只写回同一PE的reg，随后直接
-     * 被rowsum/PV消费，不将完整P tile写入外部SRAM。
+     * QK后score经CMP求max并写入完全分割的PE resident bank；各phase
+     * 顺序复用同一组FMA mesh，P随后直接被rowsum/PV消费，不进入外部SRAM。
      */
     void stream_fsa_tile(
         StreamOnlineState& online,

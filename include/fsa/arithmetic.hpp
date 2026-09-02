@@ -74,7 +74,8 @@ namespace fsa{
     /**
      * @brief CMP UPDATE热路径使用的FP32最大值选择
      *
-     * 该函数不同时计算差值，避免每个score都经过浮点FMA/减法器。
+     * 使用IEEE-754位序比较，避免在逐score递推路径上实例化FP32比较器。
+     * NaN采用maxNum语义（优先非NaN），+0大于-0；差值仍只在tile边界算。
      */
     acc_t accMax(acc_t in_a, acc_t in_b);
 

@@ -380,7 +380,45 @@ namespace fsa{
 
     acc_t accMax(const acc_t in_a, const acc_t in_b){
         #pragma HLS INLINE
-        return in_a>in_b ? in_a : in_b;
+        const fp_struct<acc_t> a_view(in_a);
+        const fp_struct<acc_t> b_view(in_b);
+        const ap_uint<32> a_bits = a_view.data();
+        const ap_uint<32> b_bits = b_view.data();
+
+        const bool a_nan = a_bits.range(30, 23)==(ap_uint<8>)0xff &&
+            a_bits.range(22, 0)!=(ap_uint<23>)0;
+        const bool b_nan = b_bits.range(30, 23)==(ap_uint<8>)0xff &&
+            b_bits.range(22, 0)!=(ap_uint<23>)0;
+        if(a_nan){
+            return in_b;
+        }
+        if(b_nan){
+            return in_a;
+        }
+
+        const bool a_zero = a_bits.range(30, 0)==(ap_uint<31>)0;
+        const bool b_zero = b_bits.range(30, 0)==(ap_uint<31>)0;
+        if(a_zero && b_zero){
+            // +0是max(-0,+0)，同号时保留第二个输入的位模式。
+            return a_bits[31] ? in_b : in_a;
+        }
+
+        const bool a_sign = a_bits[31];
+        const bool b_sign = b_bits[31];
+        if(a_sign!=b_sign){
+            return a_sign ? in_b : in_a;
+        }
+
+        const ap_uint<31> a_magnitude = a_bits.range(30, 0);
+        const ap_uint<31> b_magnitude = b_bits.range(30, 0);
+        if(a_magnitude==b_magnitude){
+            return in_b;
+        }
+
+        const bool a_is_larger = a_sign
+            ? a_magnitude<b_magnitude
+            : a_magnitude>b_magnitude;
+        return a_is_larger ? in_a : in_b;
     }
 
     acc_t accDiff(const acc_t in_a, const acc_t in_b){
