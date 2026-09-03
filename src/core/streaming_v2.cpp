@@ -41,8 +41,29 @@ namespace streaming_v2_detail{
         acc_t pv[SA_COLS][SA_ROWS]{};
     };
 
+    /**
+     * QK阵列完成一个tile后送出的寄存器包。V使用独立stream从
+     * Scratchpad直达AttentionValue级，不占用score通道位宽。
+     */
+    struct ScoreTilePacket{
+        TileMeta meta{};
+        acc_t scores[SA_COLS][SA_COLS]{};
+    };
+
+    /**
+     * CMP/PWL级送往AttentionValue阵列的包。probability对应FSA中
+     * 回写PE寄存器的P，alpha用于后续Accumulator的跨tile重标定。
+     */
+    struct ProbabilityTilePacket{
+        TileMeta meta{};
+        acc_t alpha[SA_COLS]{};
+        elem_t probability[SA_ROWS][SA_COLS]{};
+    };
+
     using ElemRowStream = hls::stream<ElemRowPacket>;
     using MetaStream = hls::stream<TileMeta>;
+    using ScoreTileStream = hls::stream<ScoreTilePacket>;
+    using ProbabilityTileStream = hls::stream<ProbabilityTilePacket>;
     using SaResultStream = hls::stream<SaTileResult>;
     using AccRowStream = hls::stream<AccRowPacket>;
 
@@ -303,165 +324,89 @@ namespace streaming_v2_detail{
     }
 
     /**
-     * 一套SA_ROWS x SA_COLS PE寄存器依次驻留Q、S/N、P。
-     * QK沿feature维归约，CMP逐key更新max，P随后复用同一阵列完成
-     * rowsum/PV，结构与FSA-main的PE/CMP数据通路对应。
+     * 第一套SA完成QK。它与AttentionValue阵列是两个DATAFLOW级，因此
+     * 下一tile的QK可以和上一tile的CMP/PWL、PV并行运行。
      */
-    void systolicArrayTile(
-        const TileMeta& meta,
-        const elem_t q_tile[SA_COLS][SA_ROWS],
-        const elem_t k_tile[SA_COLS][SA_ROWS],
-        const elem_t v_tile[SA_COLS][SA_ROWS],
-        acc_t cmp_max[SA_COLS],
-        SaTileResult& result
-    ){
-        #pragma HLS INLINE off
-        #pragma HLS ALLOCATION function instances=peArrayReduce limit=1
-        #pragma HLS ARRAY_PARTITION variable=q_tile type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=k_tile type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=v_tile type=complete dim=2
-        #pragma HLS ARRAY_PARTITION variable=cmp_max type=complete dim=1
-
-        elem_t pe_register[SA_ROWS][SA_COLS]{};
-        acc_t scores[SA_COLS][SA_COLS]{};
-        #pragma HLS ARRAY_PARTITION variable=pe_register type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=scores type=complete dim=0
-
-        // LOAD_Q：Q token转置为每个PE的stationary寄存器。
-        for(int feature=0; feature<SA_ROWS; ++feature){
-            #pragma HLS UNROLL
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                pe_register[feature][query] = q_tile[query][feature];
-            }
-        }
-
-        // AttentionScore：完整二维PE网格为空间展开，key wave按II=1进入。
-        for(int key=0; key<SA_COLS; ++key){
-            #pragma HLS PIPELINE II=1
-            elem_t horizontal[SA_ROWS]{};
-            acc_t reduced[SA_COLS]{};
-            #pragma HLS ARRAY_PARTITION variable=horizontal type=complete dim=1
-            #pragma HLS ARRAY_PARTITION variable=reduced type=complete dim=1
-            for(int feature=0; feature<SA_ROWS; ++feature){
-                #pragma HLS UNROLL
-                horizontal[feature] = k_tile[key][feature];
-            }
-            peArrayReduce(pe_register, horizontal, reduced);
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                scores[query][key] = reduced[query];
-            }
-        }
-
-        acc_t previous_max[SA_COLS]{};
-        #pragma HLS ARRAY_PARTITION variable=previous_max type=complete dim=1
-        for(int query=0; query<SA_COLS; ++query){
-            #pragma HLS UNROLL
-            previous_max[query] = cmp_max[query];
-            if(meta.initialize){
-                cmp_max[query] = accMinimum();
-            }
-        }
-
-        // CMP array：每列一个比较器，score以key wave顺序流过。
-        for(int key=0; key<SA_COLS; ++key){
-            #pragma HLS PIPELINE II=1
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                if(laneEnabled(meta, query, key)){
-                    cmp_max[query] =
-                        accCmp(scores[query][key], cmp_max[query]).out_max;
-                }
-            }
-        }
-
-        for(int query=0; query<SA_COLS; ++query){
-            #pragma HLS UNROLL
-            result.alpha[query] = meta.initialize
-                ? accZero()
-                : accExp2PWL(
-                    (previous_max[query]-cmp_max[query])*attentionScale()
-                );
-        }
-
-        // LOAD_S/SUB/SCALE/PWL：P回写同一组PE reg。
-        for(int row=0; row<SA_ROWS; ++row){
-            #pragma HLS UNROLL
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                pe_register[row][query] = elemZero();
-            }
-        }
-        for(int key=0; key<SA_COLS; ++key){
-            #pragma HLS PIPELINE II=1
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                if(laneEnabled(meta, query, key)){
-                    const elem_t score = cvtAtoE(scores[query][key]);
-                    const elem_t normalized = cvtAtoE(peMac(
-                        score, elemOne(), -cmp_max[query]
-                    ));
-                    const elem_t scaled = cvtAtoE(peMac(
-                        normalized, elemAttentionScale(), accZero()
-                    ));
-                    pe_register[key][query] =
-                        cvtAtoE(accExp2PWL((acc_t)scaled));
-                }
-            }
-        }
-
-        // AttentionValue：P留在PE中，wave0求L，后续wave连续求PV。
-        elem_t horizontal[SA_ROWS]{};
-        acc_t reduced[SA_COLS]{};
-        #pragma HLS ARRAY_PARTITION variable=horizontal type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=reduced type=complete dim=1
-        for(int key=0; key<SA_ROWS; ++key){
-            #pragma HLS UNROLL
-            horizontal[key] = elemOne();
-        }
-        peArrayReduce(pe_register, horizontal, reduced);
-        for(int query=0; query<SA_COLS; ++query){
-            #pragma HLS UNROLL
-            result.rowsum[query] = reduced[query];
-        }
-
-        for(int feature=0; feature<SA_ROWS; ++feature){
-            #pragma HLS PIPELINE II=1
-            for(int key=0; key<SA_ROWS; ++key){
-                #pragma HLS UNROLL
-                horizontal[key] = key<SA_COLS
-                    ? v_tile[key][feature] : elemZero();
-            }
-            peArrayReduce(pe_register, horizontal, reduced);
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                result.pv[query][feature] = reduced[query];
-            }
-        }
-
-        result.initialize = meta.initialize;
-        result.finalize = meta.finalize;
-        result.active_queries = meta.active_queries;
-    }
-
-    void systolicArrayProcess(
+    void systolicArrayScoreProcess(
         const unsigned length,
         MetaStream& meta_stream,
         ElemRowStream& q_sa_stream,
         ElemRowStream& k_sa_stream,
-        ElemRowStream& v_sa_stream,
-        SaResultStream& sa_result_stream
+        ScoreTileStream& score_tile_stream
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS ALLOCATION function instances=peArrayReduce limit=1
+
+        const unsigned tiles = tileCount(length);
+        for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+            for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
+                #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+                ScoreTilePacket packet{};
+                elem_t pe_register[SA_ROWS][SA_COLS]{};
+                elem_t k_tile[SA_COLS][SA_ROWS]{};
+                #pragma HLS ARRAY_PARTITION variable=packet.scores \
+                    type=complete dim=0
+                #pragma HLS ARRAY_PARTITION variable=pe_register \
+                    type=complete dim=0
+                #pragma HLS ARRAY_PARTITION variable=k_tile \
+                    type=complete dim=0
+
+                packet.meta = meta_stream.read();
+                for(int query=0; query<SA_COLS; ++query){
+                    #pragma HLS PIPELINE II=1
+                    const ElemRowPacket q_packet = q_sa_stream.read();
+                    for(int feature=0; feature<SA_ROWS; ++feature){
+                        #pragma HLS UNROLL
+                        pe_register[feature][query] =
+                            q_packet.data[feature];
+                    }
+                }
+                for(int key=0; key<SA_COLS; ++key){
+                    #pragma HLS PIPELINE II=1
+                    const ElemRowPacket k_packet = k_sa_stream.read();
+                    for(int feature=0; feature<SA_ROWS; ++feature){
+                        #pragma HLS UNROLL
+                        k_tile[key][feature] = k_packet.data[feature];
+                    }
+                }
+
+                // key wave连续进入QK阵列，阵列内部保持II=1。
+                for(int key=0; key<SA_COLS; ++key){
+                    #pragma HLS PIPELINE II=1
+                    elem_t horizontal[SA_ROWS]{};
+                    acc_t reduced[SA_COLS]{};
+                    #pragma HLS ARRAY_PARTITION variable=horizontal \
+                        type=complete dim=1
+                    #pragma HLS ARRAY_PARTITION variable=reduced \
+                        type=complete dim=1
+                    for(int feature=0; feature<SA_ROWS; ++feature){
+                        #pragma HLS UNROLL
+                        horizontal[feature] = k_tile[key][feature];
+                    }
+                    peArrayReduce(pe_register, horizontal, reduced);
+                    for(int query=0; query<SA_COLS; ++query){
+                        #pragma HLS UNROLL
+                        packet.scores[query][key] = reduced[query];
+                    }
+                }
+                score_tile_stream.write(packet);
+            }
+        }
+    }
+
+    /**
+     * FSA的CMP、SUB、SCALE和PWL级。cmp_max只在本进程内部反馈，QK
+     * 阵列不再被这条跨tile依赖阻塞。
+     */
+    void softmaxProcess(
+        const unsigned length,
+        ScoreTileStream& score_tile_stream,
+        ProbabilityTileStream& probability_tile_stream
     ){
         #pragma HLS INLINE off
 
-        elem_t q_tile[SA_COLS][SA_ROWS]{};
-        elem_t k_tile[SA_COLS][SA_ROWS]{};
-        elem_t v_tile[SA_COLS][SA_ROWS]{};
         acc_t cmp_max[SA_COLS]{};
-        #pragma HLS ARRAY_PARTITION variable=q_tile type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=k_tile type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=v_tile type=complete dim=2
         #pragma HLS ARRAY_PARTITION variable=cmp_max type=complete dim=1
 
         const unsigned tiles = tileCount(length);
@@ -469,34 +414,159 @@ namespace streaming_v2_detail{
             #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
             for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
-                const TileMeta meta = meta_stream.read();
+                const ScoreTilePacket score_packet = score_tile_stream.read();
+                ProbabilityTilePacket probability_packet{};
+                acc_t previous_max[SA_COLS]{};
+                #pragma HLS ARRAY_PARTITION variable=score_packet.scores \
+                    type=complete dim=0
+                #pragma HLS ARRAY_PARTITION variable=probability_packet.alpha \
+                    type=complete dim=1
+                #pragma HLS ARRAY_PARTITION \
+                    variable=probability_packet.probability \
+                    type=complete dim=0
+                #pragma HLS ARRAY_PARTITION variable=previous_max \
+                    type=complete dim=1
 
+                probability_packet.meta = score_packet.meta;
                 for(int query=0; query<SA_COLS; ++query){
-                    #pragma HLS PIPELINE II=1
-                    const ElemRowPacket packet = q_sa_stream.read();
-                    for(int feature=0; feature<SA_ROWS; ++feature){
-                        #pragma HLS UNROLL
-                        q_tile[query][feature] = packet.data[feature];
+                    #pragma HLS UNROLL
+                    previous_max[query] = cmp_max[query];
+                    if(score_packet.meta.initialize){
+                        cmp_max[query] = accMinimum();
                     }
                 }
+
+                // CMP array：每列一个比较器，score按key wave顺序流过。
                 for(int key=0; key<SA_COLS; ++key){
                     #pragma HLS PIPELINE II=1
-                    const ElemRowPacket k_packet = k_sa_stream.read();
+                    for(int query=0; query<SA_COLS; ++query){
+                        #pragma HLS UNROLL
+                        if(laneEnabled(score_packet.meta, query, key)){
+                            cmp_max[query] = accCmp(
+                                score_packet.scores[query][key],
+                                cmp_max[query]
+                            ).out_max;
+                        }
+                    }
+                }
+
+                for(int query=0; query<SA_COLS; ++query){
+                    #pragma HLS UNROLL
+                    probability_packet.alpha[query] =
+                        score_packet.meta.initialize
+                            ? accZero()
+                            : accExp2PWL(
+                                (previous_max[query]-cmp_max[query])*
+                                attentionScale()
+                            );
+                }
+
+                // LOAD_S/SUB/SCALE/PWL：生成回写SA的P。
+                for(int key=0; key<SA_COLS; ++key){
+                    #pragma HLS PIPELINE II=1
+                    for(int query=0; query<SA_COLS; ++query){
+                        #pragma HLS UNROLL
+                        if(laneEnabled(score_packet.meta, query, key)){
+                            const elem_t score = cvtAtoE(
+                                score_packet.scores[query][key]
+                            );
+                            const elem_t normalized = cvtAtoE(peMac(
+                                score, elemOne(), -cmp_max[query]
+                            ));
+                            const elem_t scaled = cvtAtoE(peMac(
+                                normalized,
+                                elemAttentionScale(),
+                                accZero()
+                            ));
+                            probability_packet.probability[key][query] =
+                                cvtAtoE(accExp2PWL((acc_t)scaled));
+                        }
+                    }
+                }
+
+                probability_tile_stream.write(probability_packet);
+            }
+        }
+    }
+
+    /**
+     * 第二套SA完成rowsum和PV。QK与PV分成两个并行硬件级，是用约一套
+     * PE网格的面积换取tile级流水吞吐；完整计算核仍保持FSA的SA/CMP/
+     * Accumulator分层和相同的数值时序。
+     */
+    void systolicArrayValueProcess(
+        const unsigned length,
+        ProbabilityTileStream& probability_tile_stream,
+        ElemRowStream& v_sa_stream,
+        SaResultStream& sa_result_stream
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS ALLOCATION function instances=peArrayReduce limit=1
+
+        const unsigned tiles = tileCount(length);
+        for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+            for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
+                #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+                const ProbabilityTilePacket packet =
+                    probability_tile_stream.read();
+                SaTileResult result{};
+                elem_t v_tile[SA_COLS][SA_ROWS]{};
+                elem_t horizontal[SA_ROWS]{};
+                acc_t reduced[SA_COLS]{};
+                #pragma HLS ARRAY_PARTITION variable=packet.probability \
+                    type=complete dim=0
+                #pragma HLS ARRAY_PARTITION variable=v_tile \
+                    type=complete dim=0
+                #pragma HLS ARRAY_PARTITION variable=result.alpha \
+                    type=complete dim=1
+                #pragma HLS ARRAY_PARTITION variable=result.rowsum \
+                    type=complete dim=1
+                #pragma HLS ARRAY_PARTITION variable=result.pv \
+                    type=complete dim=0
+                #pragma HLS ARRAY_PARTITION variable=horizontal \
+                    type=complete dim=1
+                #pragma HLS ARRAY_PARTITION variable=reduced \
+                    type=complete dim=1
+
+                // V绕过QK/CMP级，在PV阵列入口形成两tile深的弹性旁路。
+                for(int key=0; key<SA_COLS; ++key){
+                    #pragma HLS PIPELINE II=1
                     const ElemRowPacket v_packet = v_sa_stream.read();
                     for(int feature=0; feature<SA_ROWS; ++feature){
                         #pragma HLS UNROLL
-                        k_tile[key][feature] = k_packet.data[feature];
                         v_tile[key][feature] = v_packet.data[feature];
                     }
                 }
 
-                SaTileResult result{};
-                #pragma HLS ARRAY_PARTITION variable=result.alpha type=complete dim=1
-                #pragma HLS ARRAY_PARTITION variable=result.rowsum type=complete dim=1
-                #pragma HLS ARRAY_PARTITION variable=result.pv type=complete dim=0
-                systolicArrayTile(
-                    meta, q_tile, k_tile, v_tile, cmp_max, result
-                );
+                for(int key=0; key<SA_ROWS; ++key){
+                    #pragma HLS UNROLL
+                    horizontal[key] = elemOne();
+                }
+                peArrayReduce(packet.probability, horizontal, reduced);
+                for(int query=0; query<SA_COLS; ++query){
+                    #pragma HLS UNROLL
+                    result.alpha[query] = packet.alpha[query];
+                    result.rowsum[query] = reduced[query];
+                }
+
+                for(int feature=0; feature<SA_ROWS; ++feature){
+                    #pragma HLS PIPELINE II=1
+                    for(int key=0; key<SA_ROWS; ++key){
+                        #pragma HLS UNROLL
+                        horizontal[key] = key<SA_COLS
+                            ? v_tile[key][feature] : elemZero();
+                    }
+                    peArrayReduce(packet.probability, horizontal, reduced);
+                    for(int query=0; query<SA_COLS; ++query){
+                        #pragma HLS UNROLL
+                        result.pv[query][feature] = reduced[query];
+                    }
+                }
+
+                result.initialize = packet.meta.initialize;
+                result.finalize = packet.meta.finalize;
+                result.active_queries = packet.meta.active_queries;
                 sa_result_stream.write(result);
             }
         }
@@ -603,6 +673,69 @@ namespace streaming_v2_detail{
         );
     }
 
+    /**
+     * 规范DATAFLOW区域只包含局部stream声明和进程调用。外层参数检查不
+     * 再妨碍Vitis把DMA、Scratchpad、两级SA、CMP/PWL和Accumulator
+     * 全部抽取成并行进程。
+     */
+    void fsaStreamingDataflow(
+        const dma_word_t q_address[DMA_MAX_QKV_WORDS],
+        const dma_word_t k_address[DMA_MAX_QKV_WORDS],
+        const dma_word_t v_address[DMA_MAX_QKV_WORDS],
+        dma_word_t o_address[DMA_MAX_O_WORDS],
+        const unsigned length,
+        const bool causal,
+        ap_uint<8>& status
+    ){
+        #pragma HLS INLINE off
+
+        ElemRowStream q_dma_stream("v2_q_dma");
+        ElemRowStream k_dma_stream("v2_k_dma");
+        ElemRowStream v_dma_stream("v2_v_dma");
+        MetaStream meta_stream("v2_meta");
+        ElemRowStream q_sa_stream("v2_q_sa");
+        ElemRowStream k_sa_stream("v2_k_sa");
+        ElemRowStream v_sa_stream("v2_v_sa");
+        ScoreTileStream score_tile_stream("v2_score_tile");
+        ProbabilityTileStream probability_tile_stream("v2_probability_tile");
+        SaResultStream sa_result_stream("v2_sa_result");
+        AccRowStream output_stream("v2_output");
+        #pragma HLS STREAM variable=q_dma_stream depth=2*SA_COLS
+        #pragma HLS STREAM variable=k_dma_stream depth=2*SA_COLS
+        #pragma HLS STREAM variable=v_dma_stream depth=2*SA_COLS
+        #pragma HLS STREAM variable=meta_stream depth=2
+        #pragma HLS STREAM variable=q_sa_stream depth=2*SA_COLS
+        #pragma HLS STREAM variable=k_sa_stream depth=2*SA_COLS
+        #pragma HLS STREAM variable=v_sa_stream depth=2*SA_COLS
+        #pragma HLS STREAM variable=score_tile_stream depth=2
+        #pragma HLS STREAM variable=probability_tile_stream depth=2
+        #pragma HLS STREAM variable=sa_result_stream depth=2
+        #pragma HLS STREAM variable=output_stream depth=2
+        #pragma HLS DATAFLOW
+
+        dmaReadQ(q_address, length, q_dma_stream);
+        dmaReadK(k_address, length, k_dma_stream);
+        dmaReadV(v_address, length, v_dma_stream);
+        scratchpadProcess(
+            length, causal,
+            q_dma_stream, k_dma_stream, v_dma_stream,
+            meta_stream, q_sa_stream, k_sa_stream, v_sa_stream
+        );
+        systolicArrayScoreProcess(
+            length,
+            meta_stream, q_sa_stream, k_sa_stream,
+            score_tile_stream
+        );
+        softmaxProcess(
+            length, score_tile_stream, probability_tile_stream
+        );
+        systolicArrayValueProcess(
+            length, probability_tile_stream, v_sa_stream, sa_result_stream
+        );
+        accumulatorProcess(length, sa_result_stream, output_stream);
+        dmaWriteO(o_address, length, output_stream, status);
+    }
+
 }  // namespace streaming_v2_detail
 
 void fsa_streaming_v2_run(
@@ -622,44 +755,9 @@ void fsa_streaming_v2_run(
         return;
     }
 
-    streaming_v2_detail::ElemRowStream q_dma_stream("v2_q_dma");
-    streaming_v2_detail::ElemRowStream k_dma_stream("v2_k_dma");
-    streaming_v2_detail::ElemRowStream v_dma_stream("v2_v_dma");
-    streaming_v2_detail::MetaStream meta_stream("v2_meta");
-    streaming_v2_detail::ElemRowStream q_sa_stream("v2_q_sa");
-    streaming_v2_detail::ElemRowStream k_sa_stream("v2_k_sa");
-    streaming_v2_detail::ElemRowStream v_sa_stream("v2_v_sa");
-    streaming_v2_detail::SaResultStream sa_result_stream("v2_sa_result");
-    streaming_v2_detail::AccRowStream output_stream("v2_output");
-    #pragma HLS STREAM variable=q_dma_stream depth=2*SA_COLS
-    #pragma HLS STREAM variable=k_dma_stream depth=2*SA_COLS
-    #pragma HLS STREAM variable=v_dma_stream depth=2*SA_COLS
-    #pragma HLS STREAM variable=meta_stream depth=2
-    #pragma HLS STREAM variable=q_sa_stream depth=2*SA_COLS
-    #pragma HLS STREAM variable=k_sa_stream depth=2*SA_COLS
-    #pragma HLS STREAM variable=v_sa_stream depth=2*SA_COLS
-    #pragma HLS STREAM variable=sa_result_stream depth=2
-    #pragma HLS STREAM variable=output_stream depth=2
-    #pragma HLS DATAFLOW
-
-    streaming_v2_detail::dmaReadQ(q_address, length, q_dma_stream);
-    streaming_v2_detail::dmaReadK(k_address, length, k_dma_stream);
-    streaming_v2_detail::dmaReadV(v_address, length, v_dma_stream);
-    streaming_v2_detail::scratchpadProcess(
-        length, causal,
-        q_dma_stream, k_dma_stream, v_dma_stream,
-        meta_stream, q_sa_stream, k_sa_stream, v_sa_stream
-    );
-    streaming_v2_detail::systolicArrayProcess(
-        length,
-        meta_stream, q_sa_stream, k_sa_stream, v_sa_stream,
-        sa_result_stream
-    );
-    streaming_v2_detail::accumulatorProcess(
-        length, sa_result_stream, output_stream
-    );
-    streaming_v2_detail::dmaWriteO(
-        o_address, length, output_stream, status
+    streaming_v2_detail::fsaStreamingDataflow(
+        q_address, k_address, v_address, o_address,
+        length, causal, status
     );
 }
 
