@@ -1,5 +1,5 @@
 set RUN_CSIM  1
-set RUN_COSIM 0
+set RUN_COSIM 1
 set EXPORT_IP 0
 
 set SCRIPT_DIR [file dirname [file normalize [info script]]]
