@@ -27,6 +27,7 @@ $OutputEncoding = $Utf8NoBom
 # PSScriptRoot makes the script independent of the caller's current directory.
 $ProjectRoot = $PSScriptRoot
 $IncludeDirectory = Join-Path $ProjectRoot "include"
+$VitisHeaderDirectory = Join-Path $ProjectRoot "third_party\vitis_hls\include"
 $SourceDirectory = Join-Path $ProjectRoot "src\core"
 $TestDirectory = Join-Path $ProjectRoot "tests"
 $BuildDirectory = Join-Path $ProjectRoot "build\tests"
@@ -91,7 +92,13 @@ $CompilerOptions = @(
     "-Wextra",
     "-Wpedantic",
     "-Werror",
-    "-I$IncludeDirectory"
+    "-Wno-unknown-pragmas",
+    "-Wno-unused-parameter",
+    "-DHLS_NO_XIL_FPO_LIB",
+    "-DFSA_LOCAL_MATH_STUBS",
+    "-I$IncludeDirectory",
+    "-isystem",
+    "$VitisHeaderDirectory"
 )
 
 foreach($TestFile in $SelectedTests){

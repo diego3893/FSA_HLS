@@ -358,6 +358,26 @@ namespace fsa{
 
     }  // namespace
 
+    acc_t accumulator_reciprocal(const acc_t denominator){
+        #pragma HLS INLINE off
+
+        ReciprocalDividerState state{};
+        begin_reciprocal(state, denominator);
+
+        for(int iteration=0;
+                iteration<reciprocalIterationCycles; ++iteration){
+            #pragma HLS PIPELINE II=1
+            ReciprocalDividerState next{};
+            (void)divider_tick(state, next, false, denominator);
+            state = next;
+        }
+
+        ReciprocalDividerState next{};
+        const ReciprocalTickOutput result =
+            divider_tick(state, next, false, denominator);
+        return result.value;
+    }
+
     void reset_accumulator_state(AccumulatorState& state){
         #pragma HLS INLINE
 

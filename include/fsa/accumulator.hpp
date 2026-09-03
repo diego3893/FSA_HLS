@@ -48,6 +48,14 @@ namespace fsa{
     void accumulator_step(const AccumulatorState& current, 
                         AccumulatorState& next, AccumulatorIO& io);
 
+    /**
+     * @brief 使用Accumulator的定长恢复除法器计算1/denominator。
+     *
+     * v2完整事务顶层在最终写回前调用该接口。实现复用旧Accumulator
+     * 已有的恢复除法状态机，不在新路径中引入组合FP32除法器。
+     */
+    acc_t accumulator_reciprocal(acc_t denominator);
+
 }  // namespace fsa
 
 #endif // !ACCUMULATOR_HPP

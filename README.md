@@ -104,6 +104,34 @@ HLS入口为：
 ./run_hls.sh fsa_dma
 ```
 
+### 完整序列streaming v2顶层
+
+`fsa_streaming_v2_top`保留旧顶层不动，新增一次`ap_start`完成整个序列的
+高吞吐路径。AXI-Lite参数是`sequence_length`、`causal`以及row-major
+Q/K/V/O四个DDR基地址；tile边界和在线softmax状态不再暴露给调用者。
+
+内部采用如下DATAFLOW任务图：
+
+```text
+Q/K/V独立AXI DMA
+        ↓ stream
+双缓冲Scratchpad SRAM（Q复用、K/V ping-pong）
+        ↓ stream
+SA_ROWS × SA_COLS PE + 每列CMP
+        ↓ tile stream
+Accumulator SRAM（L/O）+ 最终reciprocal
+        ↓ stream
+O AXI DMA
+```
+
+默认4×4配置下，长度9会由硬件内部完成3个query tile和3个KV tile，软件
+只调用一次顶层。四个存储器端口使用独立AXI bundle，并允许512-bit自动
+widen和多笔outstanding burst。
+
+```bash
+./run_hls.sh fsa_streaming_v2
+```
+
 ### 阶段二：DMA 与外围部分
 
 阶段二负责迁移：
