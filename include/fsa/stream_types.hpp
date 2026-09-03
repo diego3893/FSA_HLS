@@ -9,8 +9,6 @@
 
 #include <hls_stream.h>
 
-#include "fsa/control.hpp"
-#include "fsa/fsa_core_interface.hpp"
 #include "fsa/types.hpp"
 
 namespace fsa{
@@ -40,13 +38,6 @@ namespace fsa{
     /// @brief 任一mesh phase允许的最大token波数，仅用于综合边界和报告。
     constexpr int STREAM_MAX_PHASE_WAVES =
         SA_ROWS+1>exp2PWLPieces ? SA_ROWS+1 : exp2PWLPieces;
-
-    /// @brief reset、初始化和finalize均开启时单请求的最大逻辑拍数。
-    constexpr int STREAM_MAX_REQUEST_CYCLES =
-        1+SA_COLS+(SA_COLS+1)+
-        (3*SA_ROWS+SA_COLS+exp2PWLPieces+4)+
-        (2*SA_ROWS+SA_COLS)+
-        (2+reciprocalLatency)+(SA_ROWS+1);
 
     struct StreamPeToken{
         bool valid = false;
@@ -80,45 +71,6 @@ namespace fsa{
 
     using StreamPeTokenStream = hls::stream<StreamPeToken>;
     using StreamPeLaneStream = hls::stream<StreamPeLaneResult>;
-
-    /**
-     * @brief InputDelayer每个逻辑拍送入持久化FSA阵列的完整边界token。
-     *
-     * token只携带边界数据和FSA原生控制；S、N、P以及竖直部分和均不
-     * 离开PE/CMP网络。last是请求末拍，不是矩阵行末拍。
-     */
-    struct StreamArrayCycleToken{
-        bool reset = false;
-        bool last = false;
-        bool request_valid = false;
-        bool finalize = false;
-
-        elem_t pe_data[SA_ROWS]{};
-        ValidData<PECtrl> pe_ctrl[SA_ROWS]{};
-        ValidData<CmpControl> cmp_ctrl{};
-
-        AccReadRequest acc_read{};
-        acc_t acc_constant_value{};
-        ValidData<AccumulatorControl> acc_ctrl{};
-    };
-
-    /**
-     * @brief FSA阵列底部输出及同拍Accumulator控制。
-     */
-    struct StreamArrayOutputToken{
-        bool reset = false;
-        bool last = false;
-        bool request_valid = false;
-        bool finalize = false;
-
-        acc_t array_output[SA_COLS]{};
-        AccReadRequest acc_read{};
-        acc_t acc_constant_value{};
-        ValidData<AccumulatorControl> acc_ctrl{};
-    };
-
-    using StreamArrayCycleStream = hls::stream<StreamArrayCycleToken>;
-    using StreamArrayOutputStream = hls::stream<StreamArrayOutputToken>;
 
     struct StreamScoreToken{
         bool valid = false;

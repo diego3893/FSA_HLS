@@ -6,7 +6,6 @@
 #define STREAM_ACCUMULATOR_HPP
 
 #include "fsa/hls/fsa_core_request_top.hpp"
-#include "fsa/stream_types.hpp"
 
 namespace fsa{
 
@@ -22,12 +21,15 @@ namespace fsa{
     );
 
     /**
-     * @brief 4路持久化Accumulator消费逐拍阵列输出。
+     * @brief 4路持久化Accumulator消费rowsum/PV流的对齐结果。
      *
      * L/O存储属于Accumulator局部状态，不在core中实例化BankedSRAM。
      */
-    void stream_fsa_accumulator_process(
-        StreamArrayOutputStream& input,
+    void stream_fsa_accumulator_request(
+        const FsaCoreRequestInput& input,
+        const acc_t max_difference[SA_COLS],
+        const acc_t rowsum[SA_COLS],
+        const acc_t pv[SA_COLS][SA_ROWS],
         FsaCoreRequestOutput& output
     );
 

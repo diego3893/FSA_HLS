@@ -5,7 +5,7 @@
 #ifndef STREAM_CMP_HPP
 #define STREAM_CMP_HPP
 
-#include "fsa/cmp.hpp"
+#include "fsa/hls/fsa_core_request_top.hpp"
 #include "fsa/types.hpp"
 
 namespace fsa{
@@ -24,13 +24,17 @@ namespace fsa{
     );
 
     /**
-     * @brief 持久化FSA阵列顶部一个物理CMP的一拍。
+     * @brief 4个持久化CMP处理一个QK结果波，并生成向下反馈的score。
+     *
+     * oldMax/newMax属于CMP模块本地状态；initialize开始新在线softmax
+     * 序列。反馈矩阵随后沿PE的上到下通路装入同一组PE寄存器。
      */
-    void stream_cmp_cycle(
-        int instance,
-        const CMPState& current,
-        CMPState& next,
-        CMPIO& io
+    void stream_cmp_request(
+        const FsaCoreRequestInput& input,
+        const acc_t scores[SA_COLS][SA_ROWS],
+        elem_t score_feedback[SA_COLS][SA_ROWS],
+        acc_t new_max[SA_COLS],
+        acc_t max_difference[SA_COLS]
     );
 
 }  // namespace fsa

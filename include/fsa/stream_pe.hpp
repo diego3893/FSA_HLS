@@ -5,7 +5,6 @@
 #ifndef STREAM_PE_HPP
 #define STREAM_PE_HPP
 
-#include "fsa/pe.hpp"
 #include "fsa/stream_types.hpp"
 
 namespace fsa{
@@ -37,29 +36,19 @@ namespace fsa{
      * FMA流水线没有resident写回造成的loop-carried dependence。
      */
     void stream_pe_process(
+        int instance,
         elem_t resident,
         bool lane_enabled,
         bool reduction,
         StreamPeOp op,
         int wave_count,
         StreamPeTokenStream& left,
-        StreamPeTokenStream& up,
+        StreamPeTokenStream& upward_in,
+        StreamPeTokenStream& upward_out,
+        StreamPeTokenStream& downward_in,
+        StreamPeTokenStream& downward_out,
         StreamPeTokenStream& right,
-        StreamPeTokenStream& down,
         StreamPeLaneStream& lane
-    );
-
-    /**
-     * @brief 持久化FSA阵列中一个物理PE的一拍。
-     *
-     * instance是编译期实例编号，用于强制HLS保留SA_ROWS*SA_COLS个
-     * PE层次；每个实例只含一条由opcode复用的peMacUnit FMA路径。
-     */
-    void stream_pe_cycle(
-        int instance,
-        const PEState& current,
-        PEState& next,
-        PEIO& io
     );
 
 }  // namespace fsa

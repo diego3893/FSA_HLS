@@ -88,15 +88,41 @@ namespace fsa{
         }
     }
 
-    void stream_cmp_cycle(
-        const int instance,
-        const CMPState& current,
-        CMPState& next,
-        CMPIO& io
+    void stream_cmp_request(
+        const FsaCoreRequestInput& input,
+        const acc_t scores[SA_COLS][SA_ROWS],
+        elem_t score_feedback[SA_COLS][SA_ROWS],
+        acc_t new_max[SA_COLS],
+        acc_t max_difference[SA_COLS]
     ){
         #pragma HLS INLINE off
-        #pragma HLS FUNCTION_INSTANTIATE variable=instance
-        cmp_step(current, next, io);
+        #pragma HLS ARRAY_PARTITION variable=scores type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=score_feedback type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=new_max type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=max_difference type=complete dim=1
+
+        static acc_t old_max[SA_COLS]{};
+        #pragma HLS RESET variable=old_max
+        #pragma HLS ARRAY_PARTITION variable=old_max type=complete dim=1
+
+        elem_t feedback_by_row[SA_ROWS][SA_COLS]{};
+        #pragma HLS ARRAY_PARTITION variable=feedback_by_row type=complete dim=0
+
+        stream_cmp_update(
+            scores, input.active_keys, input.causal,
+            input.query_base, input.key_base, input.initialize,
+            old_max, feedback_by_row, new_max, max_difference
+        );
+
+        for(int query=0; query<SA_COLS; ++query){
+            #pragma HLS UNROLL
+            old_max[query] = new_max[query];
+            for(int key=0; key<SA_ROWS; ++key){
+                #pragma HLS UNROLL
+                score_feedback[query][key] =
+                    feedback_by_row[key][query];
+            }
+        }
     }
 
 }  // namespace fsa

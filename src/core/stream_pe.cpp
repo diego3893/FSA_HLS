@@ -71,25 +71,34 @@ namespace fsa{
     }
 
     void stream_pe_process(
+        const int instance,
         const elem_t resident,
         const bool lane_enabled,
         const bool reduction,
         const StreamPeOp op,
         const int wave_count,
         StreamPeTokenStream& left,
-        StreamPeTokenStream& up,
+        StreamPeTokenStream& upward_in,
+        StreamPeTokenStream& upward_out,
+        StreamPeTokenStream& downward_in,
+        StreamPeTokenStream& downward_out,
         StreamPeTokenStream& right,
-        StreamPeTokenStream& down,
         StreamPeLaneStream& lane
     ){
         #pragma HLS INLINE off
+        #pragma HLS FUNCTION_INSTANTIATE variable=instance
+
+        const int row = instance/SA_COLS;
+        const int col = instance%SA_COLS;
+        const bool upward = op==StreamPeOp::QK_MAC;
 
         for(int wave=0; wave<wave_count; ++wave){
             #pragma HLS PIPELINE II=1
             #pragma HLS LOOP_TRIPCOUNT \
                 min=1 max=STREAM_MAX_PHASE_WAVES
             const StreamPeToken horizontal = left.read();
-            const StreamPeToken vertical = up.read();
+            const StreamPeToken vertical = upward
+                ? upward_in.read() : downward_in.read();
             const bool operation_valid = horizontal.valid &&
                 vertical.valid && (reduction || lane_enabled);
             const bool exp2 = op==StreamPeOp::EXP2_PWL;
@@ -100,7 +109,11 @@ namespace fsa{
             // 归约phase的down.vertical是真正的部分和，仍必须等待FMA。
             right.write(horizontal);
             if(!reduction){
-                down.write(vertical);
+                if(upward){
+                    upward_out.write(vertical);
+                }else{
+                    downward_out.write(vertical);
+                }
             }
 
             StreamPeLaneResult lane_result{};
@@ -109,6 +122,24 @@ namespace fsa{
                 // 都产生一个定长token。先发送bubble，避免无用lane通道
                 // 跟随FMA关键路径。
                 lane.write(lane_result);
+            }
+
+            // LOAD_Q沿左到右路径移动，列号匹配时装入本PE；LOAD_SCORE
+            // 来自CMP并沿上到下路径移动，行号匹配时装入同一个reg。
+            // 两类搬运不经过FMA，但仍为每个wave产生定长lane token。
+            if(op==StreamPeOp::LOAD_Q){
+                lane_result.valid = horizontal.valid &&
+                    horizontal.tag==(ap_uint<16>)col;
+                lane_result.element = horizontal.horizontal;
+                lane.write(lane_result);
+                continue;
+            }
+            if(op==StreamPeOp::LOAD_SCORE){
+                lane_result.valid = vertical.valid &&
+                    vertical.tag==(ap_uint<16>)row;
+                lane_result.element = viewAasE(vertical.vertical);
+                lane.write(lane_result);
+                continue;
             }
 
             // 所有phase共用该物理PE中的唯一FMA调用点。
@@ -124,7 +155,11 @@ namespace fsa{
                 if(operation_valid){
                     down_token.vertical = arithmetic.out_accType;
                 }
-                down.write(down_token);
+                if(upward){
+                    upward_out.write(down_token);
+                }else{
+                    downward_out.write(down_token);
+                }
             }
 
             if(!reduction){
@@ -134,17 +169,6 @@ namespace fsa{
                 lane.write(lane_result);
             }
         }
-    }
-
-    void stream_pe_cycle(
-        const int instance,
-        const PEState& current,
-        PEState& next,
-        PEIO& io
-    ){
-        #pragma HLS INLINE off
-        #pragma HLS FUNCTION_INSTANTIATE variable=instance
-        pe_step(current, next, io);
     }
 
 }  // namespace fsa
