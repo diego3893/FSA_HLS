@@ -13,6 +13,18 @@ namespace streaming_v2_detail{
         "streaming v2要求SA高度不小于token tile宽度"
     );
 
+    // 与FSA execution plan一致：8拍依次从SA左侧广播FP16 PWL斜率。
+    const elem_t EXP2_SLOPES[exp2PWLPieces] = {
+        (elem_t)0.664062500F,
+        (elem_t)0.608886719F,
+        (elem_t)0.558105469F,
+        (elem_t)0.512207031F,
+        (elem_t)0.469482422F,
+        (elem_t)0.430419922F,
+        (elem_t)0.394775391F,
+        (elem_t)0.362060547F
+    };
+
     struct ElemRowPacket{
         bool valid = false;
         elem_t data[SA_ROWS]{};
@@ -272,17 +284,19 @@ namespace streaming_v2_detail{
     };
 
     /**
-     * 一次wave通过完整PE网格。QK、SUB、SCALE、PWL、rowsum和PV都调用
-     * 这一个禁止内联的硬件实例，使每个PE中的FMA在不同阶段分时复用。
+     * 一次wave通过完整PE网格。resident只读，计算结果经独立端口返回；
+     * 调用方在wave完成后决定是否写回。这样QK/PV等只读阶段不会再被HLS
+     * 误判为对resident的循环携带依赖，同时所有阶段仍复用同一个PE网格。
      */
     void peArrayWave(
-        elem_t resident[SA_ROWS][SA_COLS],
+        const elem_t resident[SA_ROWS][SA_COLS],
         const elem_t horizontal[SA_ROWS],
         const acc_t vertical[SA_ROWS][SA_COLS],
         const bool active[SA_ROWS][SA_COLS],
         const PeArrayMode mode,
-        const PePwlParam& pwl,
-        const exp2_counter_t target_index[SA_ROWS][SA_COLS],
+        const acc_t encoded_intercept,
+        elem_t updated[SA_ROWS][SA_COLS],
+        bool update_enable[SA_ROWS][SA_COLS],
         acc_t output[SA_COLS]
     ){
         #pragma HLS INLINE off
@@ -291,7 +305,8 @@ namespace streaming_v2_detail{
         #pragma HLS ARRAY_PARTITION variable=horizontal type=complete dim=1
         #pragma HLS ARRAY_PARTITION variable=vertical type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=active type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=target_index type=complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=updated type=complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=update_enable type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=output type=complete dim=1
 
         acc_t partial[SA_ROWS+1][SA_COLS]{};
@@ -305,30 +320,25 @@ namespace streaming_v2_detail{
             for(int query=0; query<SA_COLS; ++query){
                 #pragma HLS UNROLL
                 const bool reduce = mode==PeArrayMode::REDUCE;
-                const bool pwl_match =
-                    mode!=PeArrayMode::UPDATE_PWL ||
-                    pwl.index==target_index[row][query];
-                const bool execute = reduce ||
-                    (active[row][query] && pwl_match);
+                const bool update_pwl = mode==PeArrayMode::UPDATE_PWL;
+                const bool execute = reduce || active[row][query];
                 PeMacUnitOutput unit{};
                 if(execute){
-                    unit = peMacUnitWithPwlParam(
+                    unit = peMacUnit(
                         resident[row][query],
                         horizontal[row],
                         reduce ? partial[row][query]
-                               : vertical[row][query],
-                        mode==PeArrayMode::UPDATE_PWL,
-                        pwl,
-                        target_index[row][query]
+                               : (update_pwl ? encoded_intercept
+                                             : vertical[row][query]),
+                        update_pwl
                     );
                 }
 
                 partial[row+1][query] = reduce
                     ? unit.out_accType : partial[row][query];
-                if(!reduce && execute &&
-                        (mode==PeArrayMode::UPDATE_MAC || unit.out_exp2)){
-                    resident[row][query] = unit.out_elemType;
-                }
+                updated[row][query] = unit.out_elemType;
+                update_enable[row][query] = !reduce && execute &&
+                    (mode==PeArrayMode::UPDATE_MAC || unit.out_exp2);
             }
         }
         for(int query=0; query<SA_COLS; ++query){
@@ -362,17 +372,23 @@ namespace streaming_v2_detail{
         elem_t horizontal[SA_ROWS]{};
         acc_t vertical[SA_ROWS][SA_COLS]{};
         bool active[SA_ROWS][SA_COLS]{};
-        exp2_counter_t target_index[SA_ROWS][SA_COLS]{};
+        elem_t wave_register[SA_ROWS][SA_COLS]{};
+        bool wave_enable[SA_ROWS][SA_COLS]{};
+        elem_t pwl_candidate[exp2PWLPieces][SA_ROWS][SA_COLS]{};
+        bool pwl_valid[exp2PWLPieces][SA_ROWS][SA_COLS]{};
         acc_t reduced[SA_COLS]{};
         #pragma HLS ARRAY_PARTITION variable=pe_register type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=scores type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=horizontal type=complete dim=1
         #pragma HLS ARRAY_PARTITION variable=vertical type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=active type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=target_index type=complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=wave_register type=complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=wave_enable type=complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=pwl_candidate type=complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=pwl_valid type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=reduced type=complete dim=1
 
-        const PePwlParam idle_pwl{};
+        const acc_t idle_intercept = accZero();
 
         // LOAD_Q：Q token转置为每个PE的stationary寄存器。
         for(int feature=0; feature<SA_ROWS; ++feature){
@@ -392,7 +408,8 @@ namespace streaming_v2_detail{
             }
             peArrayWave(
                 pe_register, horizontal, vertical, active,
-                PeArrayMode::REDUCE, idle_pwl, target_index, reduced
+                PeArrayMode::REDUCE, idle_intercept,
+                wave_register, wave_enable, reduced
             );
             for(int query=0; query<SA_COLS; ++query){
                 #pragma HLS UNROLL
@@ -451,8 +468,18 @@ namespace streaming_v2_detail{
         }
         peArrayWave(
             pe_register, horizontal, vertical, active,
-            PeArrayMode::UPDATE_MAC, idle_pwl, target_index, reduced
+            PeArrayMode::UPDATE_MAC, idle_intercept,
+            wave_register, wave_enable, reduced
         );
+        for(int row=0; row<SA_ROWS; ++row){
+            #pragma HLS UNROLL
+            for(int query=0; query<SA_COLS; ++query){
+                #pragma HLS UNROLL
+                if(wave_enable[row][query]){
+                    pe_register[row][query] = wave_register[row][query];
+                }
+            }
+        }
 
         // SCALE：attentionScale从左侧广播，仍复用同一个PE网格。
         for(int row=0; row<SA_ROWS; ++row){
@@ -465,31 +492,49 @@ namespace streaming_v2_detail{
         }
         peArrayWave(
             pe_register, horizontal, vertical, active,
-            PeArrayMode::UPDATE_MAC, idle_pwl, target_index, reduced
+            PeArrayMode::UPDATE_MAC, idle_intercept,
+            wave_register, wave_enable, reduced
         );
-
-        // 分段编号只计算一次；8拍PWL显式传输正常intercept和独立index。
         for(int row=0; row<SA_ROWS; ++row){
             #pragma HLS UNROLL
             for(int query=0; query<SA_COLS; ++query){
                 #pragma HLS UNROLL
-                target_index[row][query] = active[row][query]
-                    ? pePwlTargetIndex(pe_register[row][query])
-                    : (exp2_counter_t)0;
+                if(wave_enable[row][query]){
+                    pe_register[row][query] = wave_register[row][query];
+                }
             }
         }
+
+        // 恢复FSA原始协议：CMP逐拍广播编码intercept，编号保存在其[26:24]。
+        // 8拍均读取同一份scaled score快照，只在全部wave返回后选择命中结果，
+        // 因而不再在piece循环中形成PE寄存器反馈依赖。
         for(int piece=0; piece<exp2PWLPieces; ++piece){
             #pragma HLS PIPELINE II=1
-            const PePwlParam pwl = pePwlParam((exp2_counter_t)piece);
-            const elem_t slope = pePwlSlope((exp2_counter_t)piece);
             for(int row=0; row<SA_ROWS; ++row){
                 #pragma HLS UNROLL
-                horizontal[row] = slope;
+                horizontal[row] = EXP2_SLOPES[piece];
             }
             peArrayWave(
                 pe_register, horizontal, vertical, active,
-                PeArrayMode::UPDATE_PWL, pwl, target_index, reduced
+                PeArrayMode::UPDATE_PWL,
+                exp2PWLIntercept((exp2_counter_t)piece),
+                pwl_candidate[piece], pwl_valid[piece], reduced
             );
+        }
+        for(int row=0; row<SA_ROWS; ++row){
+            #pragma HLS UNROLL
+            for(int query=0; query<SA_COLS; ++query){
+                #pragma HLS UNROLL
+                elem_t probability = elemZero();
+                for(int piece=0; piece<exp2PWLPieces; ++piece){
+                    #pragma HLS UNROLL
+                    if(pwl_valid[piece][row][query]){
+                        probability = pwl_candidate[piece][row][query];
+                    }
+                }
+                pe_register[row][query] = active[row][query]
+                    ? probability : elemZero();
+            }
         }
 
         // AttentionValue：P留在PE中，wave0求L，后续wave连续求PV。
@@ -499,7 +544,8 @@ namespace streaming_v2_detail{
         }
         peArrayWave(
             pe_register, horizontal, vertical, active,
-            PeArrayMode::REDUCE, idle_pwl, target_index, reduced
+            PeArrayMode::REDUCE, idle_intercept,
+            wave_register, wave_enable, reduced
         );
         for(int query=0; query<SA_COLS; ++query){
             #pragma HLS UNROLL
@@ -515,7 +561,8 @@ namespace streaming_v2_detail{
             }
             peArrayWave(
                 pe_register, horizontal, vertical, active,
-                PeArrayMode::REDUCE, idle_pwl, target_index, reduced
+                PeArrayMode::REDUCE, idle_intercept,
+                wave_register, wave_enable, reduced
             );
             for(int query=0; query<SA_COLS; ++query){
                 #pragma HLS UNROLL

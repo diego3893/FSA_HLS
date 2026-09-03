@@ -1,6 +1,6 @@
 /**
  * @file test_pe_pwl_param.cpp
- * @brief 验证完整PE路径使用正常intercept和独立PWL编号。
+ * @brief 验证PE恢复使用原始编码intercept，并与普通MAC共享计算入口。
  */
 
 #include <cassert>
@@ -11,27 +11,31 @@
 
 namespace{
 
+const fsa::elem_t EXP2_SLOPES[fsa::exp2PWLPieces] = {
+    (fsa::elem_t)0.664062500F,
+    (fsa::elem_t)0.608886719F,
+    (fsa::elem_t)0.558105469F,
+    (fsa::elem_t)0.512207031F,
+    (fsa::elem_t)0.469482422F,
+    (fsa::elem_t)0.430419922F,
+    (fsa::elem_t)0.394775391F,
+    (fsa::elem_t)0.362060547F
+};
+
 void checkPwlSegment(const float input){
     const fsa::elem_t x = (fsa::elem_t)input;
-    const fsa::exp2_counter_t target = fsa::pePwlTargetIndex(x);
     bool matched = false;
 
     for(int piece=0; piece<fsa::exp2PWLPieces; ++piece){
-        const fsa::exp2_counter_t index =
-            (fsa::exp2_counter_t)piece;
-        const fsa::PePwlParam parameter = fsa::pePwlParam(index);
-        const fsa::PeMacUnitOutput output =
-            fsa::peMacUnitWithPwlParam(
-                x,
-                fsa::pePwlSlope(index),
-                (fsa::acc_t)123.0F,
-                true,
-                parameter,
-                target
-            );
+        const fsa::PeMacUnitOutput output = fsa::peMacUnit(
+            x,
+            EXP2_SLOPES[piece],
+            fsa::exp2PWLIntercept((fsa::exp2_counter_t)piece),
+            true
+        );
 
-        assert(output.out_exp2==(index==target));
         if(output.out_exp2){
+            assert(!matched);
             matched = true;
             const float expected = std::exp2((float)x);
             const float actual = (float)output.out_elemType;
@@ -46,14 +50,11 @@ void checkPwlSegment(const float input){
 }  // namespace
 
 int main(){
-    const fsa::PePwlParam idle{};
-    const fsa::PeMacUnitOutput mac = fsa::peMacUnitWithPwlParam(
+    const fsa::PeMacUnitOutput mac = fsa::peMacUnit(
         (fsa::elem_t)2.0F,
         (fsa::elem_t)3.0F,
         (fsa::acc_t)4.0F,
-        false,
-        idle,
-        (fsa::exp2_counter_t)0
+        false
     );
     assert(std::fabs(mac.out_accType-(fsa::acc_t)10.0F)<1.0e-6F);
     assert(!mac.out_exp2);
@@ -72,7 +73,7 @@ int main(){
         checkPwlSegment(input);
     }
 
-    std::cout << "[PASS] test_pe_pwl_param: explicit intercept/index and "
-                 "shared MAC/PWL interface" << std::endl;
+    std::cout << "[PASS] test_pe_pwl_param: encoded intercept and shared "
+                 "MAC/PWL interface" << std::endl;
     return 0;
 }
