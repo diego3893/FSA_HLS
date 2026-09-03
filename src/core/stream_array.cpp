@@ -147,7 +147,6 @@ namespace fsa{
             #pragma HLS INLINE off
             #pragma HLS DATAFLOW
             #pragma HLS ARRAY_PARTITION variable=resident type=complete dim=0
-            #pragma HLS ARRAY_PARTITION variable=data type=complete dim=1
             #pragma HLS ARRAY_PARTITION variable=column_operand type=complete dim=1
             #pragma HLS ARRAY_PARTITION variable=lane_enabled type=complete dim=0
             #pragma HLS ARRAY_PARTITION variable=reduction_result type=complete dim=1

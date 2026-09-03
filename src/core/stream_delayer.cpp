@@ -15,7 +15,6 @@ namespace fsa{
         StreamPeTokenStream downward[SA_ROWS+1][SA_COLS]
     ){
         #pragma HLS INLINE off
-        #pragma HLS ARRAY_PARTITION variable=data type=complete dim=1
         #pragma HLS ARRAY_PARTITION variable=column_operand type=complete dim=1
 
         const bool upward_phase = op==StreamPeOp::QK_MAC;
