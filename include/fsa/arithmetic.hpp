@@ -36,6 +36,17 @@ namespace fsa{
     };
 
     /**
+     * @brief PE执行一拍PWL时随截距一起传播的显式控制参数
+     *
+     * intercept始终保存正常FP32数值，index单独表示当前广播的PWL分段。
+     * streaming v2使用该接口，不再把控制位编码进浮点exponent。
+     */
+    struct PePwlParam{
+        acc_t intercept{};
+        exp2_counter_t index = 0;
+    };
+
+    /**
      * @brief 执行 PE 内部 MacUnit 的普通 MAC 或 exp2 模式
      *
      * @param in_a PE.reg
@@ -45,6 +56,21 @@ namespace fsa{
      * @return PeMacUnitOutput 两种精度的计算结果与exp2标志
      */
     PeMacUnitOutput peMacUnit(elem_t in_a, elem_t in_b, acc_t in_c, bool in_exp2);
+
+    /**
+     * @brief 完整PE数据通路使用的MAC/PWL复用入口
+     *
+     * 普通模式执行in_a*in_b+in_c；PWL模式使用正常浮点截距，并通过
+     * 独立index与预先求出的target_index判断本拍结果是否应写回PE.reg。
+     */
+    PeMacUnitOutput peMacUnitWithPwlParam(
+        elem_t in_a,
+        elem_t in_b,
+        acc_t in_c,
+        bool in_exp2,
+        const PePwlParam& pwl,
+        exp2_counter_t target_index
+    );
 
     /**
      * @brief Acc的mac计算
@@ -111,6 +137,15 @@ namespace fsa{
      * @return acc_t 返回编码后的截距
      */
     acc_t exp2PWLIntercept(exp2_counter_t index);
+
+    /** @brief 返回正常FP32截距和独立分段编号。 */
+    PePwlParam pePwlParam(exp2_counter_t index);
+
+    /** @brief 返回PE元素精度的当前PWL斜率。 */
+    elem_t pePwlSlope(exp2_counter_t index);
+
+    /** @brief 计算元素精度输入的小数部分所属PWL分段。 */
+    exp2_counter_t pePwlTargetIndex(elem_t x);
 
     /**
      * @brief Acc的exp2计算

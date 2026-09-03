@@ -50,6 +50,23 @@ namespace fsa{
             0x3f5cae0f
         };
 
+        /**
+         * @brief PE左侧常量通路使用的FP16 PWL斜率位模式
+         *
+         * 数值与Accumulator的FP32斜率表对应，但按FSA的PE输入精度
+         * 预先完成RNE舍入，避免运行时生成FP32到FP16转换硬件。
+         */
+        const ap_uint<16> PE_EXP2_PWL_SLOPE_BITS[exp2PWLPieces] = {
+            0x3950,
+            0x38df,
+            0x3877,
+            0x3819,
+            0x3783,
+            0x36e3,
+            0x3651,
+            0x35cb
+        };
+
         static_assert(
             exp2PWLPieces == 8,
             "EXP2_PWL_INTERCEPT_BITS只适用于8段PWL"
@@ -247,6 +264,11 @@ namespace fsa{
             return view.to_ieee();
         }
 
+        elem_t elemFloatFromBits(const ap_uint<16> bits){
+            const fp_struct<elem_t> view(bits);
+            return view.to_ieee();
+        }
+
         /**
          * @brief 根据[-1, 0]内的小数部分选择Accumulator PWL分段
          *
@@ -288,6 +310,38 @@ namespace fsa{
 
         output.out_exp2 = intercept_index==exp2PWLPieceForX(in_a);
 
+        return output;
+    }
+
+    PeMacUnitOutput peMacUnitWithPwlParam(
+        const elem_t in_a,
+        const elem_t in_b,
+        const acc_t in_c,
+        const bool in_exp2,
+        const PePwlParam& pwl,
+        const exp2_counter_t target_index
+    ){
+        #pragma HLS INLINE
+
+        const acc_t input_a = (acc_t)in_a;
+        int integer_part = 0;
+        acc_t fma_a = input_a;
+        if(in_exp2){
+            integer_part = truncToIntBits(input_a);
+            fma_a = input_a-(acc_t)integer_part;
+        }
+
+        // 普通MAC与PWL共用这个唯一FMA表达式，便于PE网格分时复用。
+        const acc_t fma_c = in_exp2 ? pwl.intercept : in_c;
+        const acc_t fma_result = hls::fma(fma_a, (acc_t)in_b, fma_c);
+        const acc_t result = in_exp2
+            ? ldexpByBits(fma_result, integer_part)
+            : fma_result;
+
+        PeMacUnitOutput output{};
+        output.out_accType = result;
+        output.out_elemType = cvtAtoE(result);
+        output.out_exp2 = in_exp2 && pwl.index==target_index;
         return output;
     }
 
@@ -353,6 +407,27 @@ namespace fsa{
         const ap_uint<32> bits = EXP2_PWL_INTERCEPT_BITS[index.to_uint()];
         const fp_struct<acc_t> view(bits);
         return view.to_ieee();
+    }
+
+    PePwlParam pePwlParam(const exp2_counter_t index){
+        #pragma HLS INLINE
+        PePwlParam parameter{};
+        parameter.intercept =
+            accFloatFromBits(ACC_EXP2_PWL_INTERCEPT_BITS[index.to_uint()]);
+        parameter.index = index;
+        return parameter;
+    }
+
+    elem_t pePwlSlope(const exp2_counter_t index){
+        #pragma HLS INLINE
+        return elemFloatFromBits(
+            PE_EXP2_PWL_SLOPE_BITS[index.to_uint()]
+        );
+    }
+
+    exp2_counter_t pePwlTargetIndex(const elem_t x){
+        #pragma HLS INLINE
+        return exp2PWLPieceForX(x);
     }
 
     acc_t accExp2PWL(const acc_t x){
