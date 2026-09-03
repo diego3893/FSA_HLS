@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <utils/x_hls_utils.h>
 
 #include "fsa/arithmetic.hpp"
 
@@ -47,6 +48,51 @@ void checkPwlSegment(const float input){
     assert(matched);
 }
 
+void checkAllFiniteSoftmaxInputs(){
+    for(unsigned bits=0x8000U; bits<0xfc00U; ++bits){
+        const fp_struct<fsa::elem_t> view((ap_uint<16>)bits);
+        const fsa::elem_t x = view.to_ieee();
+        if((float)x < -16.0F){
+            continue;
+        }
+
+        int matches = 0;
+        int matched_piece = -1;
+        for(int piece=0; piece<fsa::exp2PWLPieces; ++piece){
+            const fsa::PeMacUnitOutput output = fsa::peMacUnit(
+                x,
+                EXP2_SLOPES[piece],
+                fsa::exp2PWLIntercept((fsa::exp2_counter_t)piece),
+                true
+            );
+            if(output.out_exp2){
+                ++matches;
+                matched_piece = piece;
+            }
+        }
+        assert(matches==1);
+        int expected_piece = (int)(
+            std::fabs((float)x-std::trunc((float)x))*
+            (float)fsa::exp2PWLPieces
+        );
+        if(expected_piece>=fsa::exp2PWLPieces){
+            expected_piece = fsa::exp2PWLPieces-1;
+        }
+        assert(matched_piece==expected_piece);
+    }
+
+    const fp_struct<fsa::elem_t> negative_infinity((ap_uint<16>)0xfc00);
+    for(int piece=0; piece<fsa::exp2PWLPieces; ++piece){
+        const fsa::PeMacUnitOutput output = fsa::peMacUnit(
+            negative_infinity.to_ieee(),
+            EXP2_SLOPES[piece],
+            fsa::exp2PWLIntercept((fsa::exp2_counter_t)piece),
+            true
+        );
+        assert((float)output.out_elemType==0.0F);
+    }
+}
+
 }  // namespace
 
 int main(){
@@ -72,6 +118,7 @@ int main(){
     for(const float input : segment_midpoints){
         checkPwlSegment(input);
     }
+    checkAllFiniteSoftmaxInputs();
 
     std::cout << "[PASS] test_pe_pwl_param: encoded intercept and shared "
                  "MAC/PWL interface" << std::endl;

@@ -277,80 +277,35 @@ namespace streaming_v2_detail{
             meta.query_base.to_uint()+(unsigned)query;
     }
 
-    enum class PeArrayMode : std::uint8_t{
-        REDUCE = 0,
-        UPDATE_MAC = 1,
-        UPDATE_PWL = 2
+    enum class PeWaveOp : std::uint8_t{
+        IDLE = 0,
+        QK = 1,
+        SUB_MAX = 2,
+        SCALE = 3,
+        PWL = 4,
+        ROW_SUM = 5,
+        PV = 6
     };
 
     /**
-     * 一次wave通过完整PE网格。resident只读，计算结果经独立端口返回；
-     * 调用方在wave完成后决定是否写回。这样QK/PV等只读阶段不会再被HLS
-     * 误判为对resident的循环携带依赖，同时所有阶段仍复用同一个PE网格。
+     * 流过SA的一个控制波。partial对应Scala PE的上/下方数据，
+     * index在QK时是key、PWL时是piece、PV时是feature。
      */
-    void peArrayWave(
-        const elem_t resident[SA_ROWS][SA_COLS],
-        const elem_t horizontal[SA_ROWS],
-        const acc_t vertical[SA_ROWS][SA_COLS],
-        const bool active[SA_ROWS][SA_COLS],
-        const PeArrayMode mode,
-        const acc_t encoded_intercept,
-        elem_t updated[SA_ROWS][SA_COLS],
-        bool update_enable[SA_ROWS][SA_COLS],
-        acc_t output[SA_COLS]
-    ){
-        #pragma HLS INLINE off
-        #pragma HLS PIPELINE II=1
-        #pragma HLS ARRAY_PARTITION variable=resident type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=horizontal type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=vertical type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=active type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=updated type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=update_enable type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=output type=complete dim=1
-
-        acc_t partial[SA_ROWS+1][SA_COLS]{};
-        #pragma HLS ARRAY_PARTITION variable=partial type=complete dim=0
-        for(int query=0; query<SA_COLS; ++query){
-            #pragma HLS UNROLL
-            partial[0][query] = accZero();
-        }
-        for(int row=0; row<SA_ROWS; ++row){
-            #pragma HLS UNROLL
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                const bool reduce = mode==PeArrayMode::REDUCE;
-                const bool update_pwl = mode==PeArrayMode::UPDATE_PWL;
-                const bool execute = reduce || active[row][query];
-                PeMacUnitOutput unit{};
-                if(execute){
-                    unit = peMacUnit(
-                        resident[row][query],
-                        horizontal[row],
-                        reduce ? partial[row][query]
-                               : (update_pwl ? encoded_intercept
-                                             : vertical[row][query]),
-                        update_pwl
-                    );
-                }
-
-                partial[row+1][query] = reduce
-                    ? unit.out_accType : partial[row][query];
-                updated[row][query] = unit.out_elemType;
-                update_enable[row][query] = !reduce && execute &&
-                    (mode==PeArrayMode::UPDATE_MAC || unit.out_exp2);
-            }
-        }
-        for(int query=0; query<SA_COLS; ++query){
-            #pragma HLS UNROLL
-            output[query] = partial[SA_ROWS][query];
-        }
-    }
+    struct PeWave{
+        bool valid = false;
+        PeWaveOp op = PeWaveOp::IDLE;
+        ap_uint<4> index = 0;
+        acc_t partial[SA_COLS]{};
+    };
 
     /**
-     * 一套SA_ROWS x SA_COLS PE寄存器依次驻留Q、S/N、P。
-     * QK沿feature维归约，CMP逐key更新max，P随后复用同一阵列完成
-     * rowsum/PV。QK和PV在tile内部顺序执行，不复制第二套PE网格。
+     * 一套SA_ROWS x SA_COLS物理PE依次驻留Q、S/N、P。
+     *
+     * 抽象层级与Scala实现一致：阵列在整个tile期间常驻。每拍只向
+     * 第0行注入一个
+     * 控制wave，旧wave通过行间寄存器逐拍向下传递。QK、softmax和PV
+     * 在每个物理PE中只有一个peMacUnit调用点，因此不会形成按阶段复制
+     * 的多套算术阵列。
      */
     void systolicArrayTile(
         const TileMeta& meta,
@@ -361,7 +316,8 @@ namespace streaming_v2_detail{
         SaTileResult& result
     ){
         #pragma HLS INLINE off
-        #pragma HLS ALLOCATION function instances=peArrayWave limit=1
+        // 4x4 FSA只允许16个物理MacUnit，各计算阶段按时分复用。
+        #pragma HLS ALLOCATION function instances=peMacUnit limit=16
         #pragma HLS ARRAY_PARTITION variable=q_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=k_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=v_tile type=complete dim=2
@@ -369,51 +325,20 @@ namespace streaming_v2_detail{
 
         elem_t pe_register[SA_ROWS][SA_COLS]{};
         acc_t scores[SA_COLS][SA_COLS]{};
-        elem_t horizontal[SA_ROWS]{};
-        acc_t vertical[SA_ROWS][SA_COLS]{};
         bool active[SA_ROWS][SA_COLS]{};
-        elem_t wave_register[SA_ROWS][SA_COLS]{};
-        bool wave_enable[SA_ROWS][SA_COLS]{};
-        elem_t pwl_candidate[exp2PWLPieces][SA_ROWS][SA_COLS]{};
-        bool pwl_valid[exp2PWLPieces][SA_ROWS][SA_COLS]{};
-        acc_t reduced[SA_COLS]{};
+        bool pwl_done[SA_ROWS][SA_COLS]{};
+        PeWave wave_pipe[SA_ROWS]{};
         #pragma HLS ARRAY_PARTITION variable=pe_register type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=scores type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=horizontal type=complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=vertical type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=active type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=wave_register type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=wave_enable type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=pwl_candidate type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=pwl_valid type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=reduced type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=pwl_done type=complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=wave_pipe type=complete dim=1
 
-        const acc_t idle_intercept = accZero();
-
-        // LOAD_Q：Q token转置为每个PE的stationary寄存器。
         for(int feature=0; feature<SA_ROWS; ++feature){
             #pragma HLS UNROLL
             for(int query=0; query<SA_COLS; ++query){
                 #pragma HLS UNROLL
                 pe_register[feature][query] = q_tile[query][feature];
-            }
-        }
-
-        // AttentionScore：key wave按II=1进入唯一PE网格。
-        for(int key=0; key<SA_COLS; ++key){
-            #pragma HLS PIPELINE II=1
-            for(int feature=0; feature<SA_ROWS; ++feature){
-                #pragma HLS UNROLL
-                horizontal[feature] = k_tile[key][feature];
-            }
-            peArrayWave(
-                pe_register, horizontal, vertical, active,
-                PeArrayMode::REDUCE, idle_intercept,
-                wave_register, wave_enable, reduced
-            );
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                scores[query][key] = reduced[query];
             }
         }
 
@@ -427,14 +352,180 @@ namespace streaming_v2_detail{
             }
         }
 
-        // CMP array：每列一个比较器，score以key wave顺序流过。
-        for(int key=0; key<SA_COLS; ++key){
+        // 周期坐标与AttentionScoreExecPlan对齐：2*rows+1时S从
+        // CMP回填PE，之后SUB/SCALE/PWL/ROWSUM连续流过阵列。
+        static const int LOAD_S_CYCLE = 2*SA_ROWS+1;
+        static const int POST_START_CYCLE = LOAD_S_CYCLE+1;
+        static const int PWL_START_CYCLE = POST_START_CYCLE+2;
+        static const int ROW_SUM_CYCLE = PWL_START_CYCLE+exp2PWLPieces;
+        static const int PV_START_CYCLE = ROW_SUM_CYCLE+1;
+        // 包含列间传播和OutputDelayer的排空窗口；4x4配置为30拍。
+        static const int SA_TILE_CYCLES =
+            5*SA_ROWS+exp2PWLPieces+2;
+
+        for(int cycle=0; cycle<SA_TILE_CYCLES; ++cycle){
             #pragma HLS PIPELINE II=1
-            for(int query=0; query<SA_COLS; ++query){
+            #pragma HLS LOOP_TRIPCOUNT min=SA_TILE_CYCLES max=SA_TILE_CYCLES
+
+            if(cycle==LOAD_S_CYCLE){
+                for(int row=0; row<SA_ROWS; ++row){
+                    #pragma HLS UNROLL
+                    for(int query=0; query<SA_COLS; ++query){
+                        #pragma HLS UNROLL
+                        active[row][query] = row<SA_COLS &&
+                            laneEnabled(meta, query, row);
+                        pwl_done[row][query] = false;
+                        pe_register[row][query] = active[row][query]
+                            ? cvtAtoE(scores[query][row]) : elemZero();
+                    }
+                }
+            }
+
+            PeWave injected{};
+            #pragma HLS ARRAY_PARTITION variable=injected.partial complete dim=1
+            if(cycle<SA_COLS){
+                injected.valid = true;
+                injected.op = PeWaveOp::QK;
+                injected.index = (ap_uint<4>)cycle;
+            }else if(cycle==POST_START_CYCLE){
+                injected.valid = true;
+                injected.op = PeWaveOp::SUB_MAX;
+            }else if(cycle==POST_START_CYCLE+1){
+                injected.valid = true;
+                injected.op = PeWaveOp::SCALE;
+            }else if(cycle>=PWL_START_CYCLE &&
+                    cycle<PWL_START_CYCLE+exp2PWLPieces){
+                injected.valid = true;
+                injected.op = PeWaveOp::PWL;
+                injected.index =
+                    (ap_uint<4>)(cycle-PWL_START_CYCLE);
+            }else if(cycle==ROW_SUM_CYCLE){
+                injected.valid = true;
+                injected.op = PeWaveOp::ROW_SUM;
+            }else if(cycle>=PV_START_CYCLE &&
+                    cycle<PV_START_CYCLE+SA_ROWS){
+                injected.valid = true;
+                injected.op = PeWaveOp::PV;
+                injected.index =
+                    (ap_uint<4>)(cycle-PV_START_CYCLE);
+            }
+
+            PeWave next_pipe[SA_ROWS]{};
+            PeWave completed{};
+            #pragma HLS ARRAY_PARTITION variable=next_pipe complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=completed.partial complete dim=1
+            for(int row=0; row<SA_ROWS; ++row){
                 #pragma HLS UNROLL
-                if(laneEnabled(meta, query, key)){
-                    cmp_max[query] =
-                        accCmp(scores[query][key], cmp_max[query]).out_max;
+                PeWave wave = row==0 ? injected : wave_pipe[row-1];
+                #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
+
+                for(int query=0; query<SA_COLS; ++query){
+                    #pragma HLS UNROLL
+                    elem_t operand_a = elemZero();
+                    elem_t operand_b = elemZero();
+                    acc_t operand_c = accZero();
+                    bool exp2_mode = false;
+
+                    if(wave.valid){
+                        switch(wave.op){
+                        case PeWaveOp::QK:
+                            operand_a = pe_register[row][query];
+                            operand_b =
+                                k_tile[wave.index.to_uint()][row];
+                            operand_c = wave.partial[query];
+                            break;
+                        case PeWaveOp::SUB_MAX:
+                            operand_a = pe_register[row][query];
+                            operand_b = elemOne();
+                            operand_c = -cmp_max[query];
+                            break;
+                        case PeWaveOp::SCALE:
+                            operand_a = pe_register[row][query];
+                            operand_b = elemAttentionScale();
+                            break;
+                        case PeWaveOp::PWL:
+                            operand_a = pe_register[row][query];
+                            operand_b =
+                                EXP2_SLOPES[wave.index.to_uint()];
+                            operand_c = exp2PWLIntercept(
+                                (exp2_counter_t)wave.index
+                            );
+                            exp2_mode = true;
+                            break;
+                        case PeWaveOp::ROW_SUM:
+                            operand_a = active[row][query]
+                                ? pe_register[row][query] : elemZero();
+                            operand_b = elemOne();
+                            operand_c = wave.partial[query];
+                            break;
+                        case PeWaveOp::PV:
+                            operand_a = active[row][query]
+                                ? pe_register[row][query] : elemZero();
+                            if(row<SA_COLS){
+                                operand_b =
+                                    v_tile[row][wave.index.to_uint()];
+                            }
+                            operand_c = wave.partial[query];
+                            break;
+                        default:
+                            break;
+                        }
+                    }
+
+                    // 每个物理PE在整个调度器中只有这一个算术调用点。
+                    const PeMacUnitOutput unit = peMacUnit(
+                        operand_a, operand_b, operand_c, exp2_mode
+                    );
+
+                    if(wave.valid && (wave.op==PeWaveOp::QK ||
+                            wave.op==PeWaveOp::ROW_SUM ||
+                            wave.op==PeWaveOp::PV)){
+                        wave.partial[query] = unit.out_accType;
+                    }else if(wave.valid && active[row][query] &&
+                            (wave.op==PeWaveOp::SUB_MAX ||
+                             wave.op==PeWaveOp::SCALE)){
+                        pe_register[row][query] = unit.out_elemType;
+                    }else if(wave.valid && active[row][query] &&
+                            wave.op==PeWaveOp::PWL &&
+                            !pwl_done[row][query] && unit.out_exp2){
+                        pe_register[row][query] = unit.out_elemType;
+                        pwl_done[row][query] = true;
+                    }
+                }
+
+                next_pipe[row] = wave;
+                if(row==SA_ROWS-1){
+                    completed = wave;
+                }
+            }
+
+            for(int row=0; row<SA_ROWS; ++row){
+                #pragma HLS UNROLL
+                wave_pipe[row] = next_pipe[row];
+            }
+
+            if(completed.valid && completed.op==PeWaveOp::QK){
+                const int key = completed.index.to_int();
+                for(int query=0; query<SA_COLS; ++query){
+                    #pragma HLS UNROLL
+                    scores[query][key] = completed.partial[query];
+                    if(laneEnabled(meta, query, key)){
+                        cmp_max[query] = accCmp(
+                            completed.partial[query], cmp_max[query]
+                        ).out_max;
+                    }
+                }
+            }else if(completed.valid &&
+                    completed.op==PeWaveOp::ROW_SUM){
+                for(int query=0; query<SA_COLS; ++query){
+                    #pragma HLS UNROLL
+                    result.rowsum[query] = completed.partial[query];
+                }
+            }else if(completed.valid && completed.op==PeWaveOp::PV){
+                const int feature = completed.index.to_int();
+                for(int query=0; query<SA_COLS; ++query){
+                    #pragma HLS UNROLL
+                    result.pv[query][feature] = completed.partial[query];
                 }
             }
         }
@@ -444,132 +535,6 @@ namespace streaming_v2_detail{
             result.max_diff[query] =
                 previous_max[query]-cmp_max[query];
         }
-
-        // LOAD_S：把score转为元素精度并写入同一组PE.reg。
-        for(int row=0; row<SA_ROWS; ++row){
-            #pragma HLS UNROLL
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                active[row][query] = row<SA_COLS &&
-                    laneEnabled(meta, query, row);
-                pe_register[row][query] = active[row][query]
-                    ? cvtAtoE(scores[query][row]) : elemZero();
-            }
-        }
-
-        // SUB_MAX：每列广播-newMax，使用唯一PE FMA更新reg。
-        for(int row=0; row<SA_ROWS; ++row){
-            #pragma HLS UNROLL
-            horizontal[row] = elemOne();
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                vertical[row][query] = -cmp_max[query];
-            }
-        }
-        peArrayWave(
-            pe_register, horizontal, vertical, active,
-            PeArrayMode::UPDATE_MAC, idle_intercept,
-            wave_register, wave_enable, reduced
-        );
-        for(int row=0; row<SA_ROWS; ++row){
-            #pragma HLS UNROLL
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                if(wave_enable[row][query]){
-                    pe_register[row][query] = wave_register[row][query];
-                }
-            }
-        }
-
-        // SCALE：attentionScale从左侧广播，仍复用同一个PE网格。
-        for(int row=0; row<SA_ROWS; ++row){
-            #pragma HLS UNROLL
-            horizontal[row] = elemAttentionScale();
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                vertical[row][query] = accZero();
-            }
-        }
-        peArrayWave(
-            pe_register, horizontal, vertical, active,
-            PeArrayMode::UPDATE_MAC, idle_intercept,
-            wave_register, wave_enable, reduced
-        );
-        for(int row=0; row<SA_ROWS; ++row){
-            #pragma HLS UNROLL
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                if(wave_enable[row][query]){
-                    pe_register[row][query] = wave_register[row][query];
-                }
-            }
-        }
-
-        // 恢复FSA原始协议：CMP逐拍广播编码intercept，编号保存在其[26:24]。
-        // 8拍均读取同一份scaled score快照，只在全部wave返回后选择命中结果，
-        // 因而不再在piece循环中形成PE寄存器反馈依赖。
-        for(int piece=0; piece<exp2PWLPieces; ++piece){
-            #pragma HLS PIPELINE II=1
-            for(int row=0; row<SA_ROWS; ++row){
-                #pragma HLS UNROLL
-                horizontal[row] = EXP2_SLOPES[piece];
-            }
-            peArrayWave(
-                pe_register, horizontal, vertical, active,
-                PeArrayMode::UPDATE_PWL,
-                exp2PWLIntercept((exp2_counter_t)piece),
-                pwl_candidate[piece], pwl_valid[piece], reduced
-            );
-        }
-        for(int row=0; row<SA_ROWS; ++row){
-            #pragma HLS UNROLL
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                elem_t probability = elemZero();
-                for(int piece=0; piece<exp2PWLPieces; ++piece){
-                    #pragma HLS UNROLL
-                    if(pwl_valid[piece][row][query]){
-                        probability = pwl_candidate[piece][row][query];
-                    }
-                }
-                pe_register[row][query] = active[row][query]
-                    ? probability : elemZero();
-            }
-        }
-
-        // AttentionValue：P留在PE中，wave0求L，后续wave连续求PV。
-        for(int key=0; key<SA_ROWS; ++key){
-            #pragma HLS UNROLL
-            horizontal[key] = elemOne();
-        }
-        peArrayWave(
-            pe_register, horizontal, vertical, active,
-            PeArrayMode::REDUCE, idle_intercept,
-            wave_register, wave_enable, reduced
-        );
-        for(int query=0; query<SA_COLS; ++query){
-            #pragma HLS UNROLL
-            result.rowsum[query] = reduced[query];
-        }
-
-        for(int feature=0; feature<SA_ROWS; ++feature){
-            #pragma HLS PIPELINE II=1
-            for(int key=0; key<SA_ROWS; ++key){
-                #pragma HLS UNROLL
-                horizontal[key] = key<SA_COLS
-                    ? v_tile[key][feature] : elemZero();
-            }
-            peArrayWave(
-                pe_register, horizontal, vertical, active,
-                PeArrayMode::REDUCE, idle_intercept,
-                wave_register, wave_enable, reduced
-            );
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                result.pv[query][feature] = reduced[query];
-            }
-        }
-
         result.initialize = meta.initialize;
         result.finalize = meta.finalize;
         result.active_queries = meta.active_queries;
