@@ -385,19 +385,22 @@ namespace streaming_v2_detail{
     };
 
     /**
-     * @brief 每列顶部唯一的CMP实例
+     * @brief 每列CMP的多周期输出通路
      *
-     * UPDATE的最大值选择使用有限FP32位序比较，使连续score能够II=1更新
-     * newMax；差值仍由accCmp中的单条FMA通路完成。这样既保留FSA的
-     * “每列一个CMP”结构，也避免多拍浮点比较形成列内反馈环。
+     * oldMax/newMax/exp2_counter均按值传入，函数内部不修改CMP状态。
+     * 这样FP32差值和FP32到FP16转换可以保持II=1流水，而不会把函数
+     * latency错误地放到newMax的逐拍反馈环上。状态寄存器仍然只有
+     * SA_COLS组，并在SpatialCmpColumns中与该输出通路一一对应。
      */
     template<int COL>
-    acc_t spatialCmpCell(
+    acc_t spatialCmpOutputCell(
         const bool valid,
         const CmpWaveOp op,
         const bool input_enabled,
         const acc_t d_input,
-        CMPState& state
+        const acc_t old_max,
+        const acc_t new_max,
+        const exp2_counter_t exp2_counter
     ){
         static_assert(COL>=0 && COL<SA_COLS, "CMP col out of range");
         #pragma HLS INLINE off
@@ -408,23 +411,18 @@ namespace streaming_v2_detail{
         }
 
         if(op==CmpWaveOp::RESET){
-            state.oldMax = accMinimum();
-            state.newMax = accMinimum();
             return accZero();
         }
 
         if(op==CmpWaveOp::UPDATE){
             const acc_t masked_input = input_enabled
                 ? d_input : accMinimum();
-            state.newMax = finiteAccMax(masked_input, state.newMax);
             // 与Scala CMP一致：score从CMP向下返回前先缩为elem_t。
             return viewEasA(cvtAtoE(masked_input));
         }
 
         if(op==CmpWaveOp::PROP_EXP2_INTERCEPTS){
-            const acc_t output = exp2PWLIntercept(state.exp2_counter);
-            state.exp2_counter = state.exp2_counter+1;
-            return output;
+            return exp2PWLIntercept(exp2_counter);
         }
 
         if(op==CmpWaveOp::PROP_ZERO){
@@ -432,11 +430,8 @@ namespace streaming_v2_detail{
         }
 
         const acc_t lhs = op==CmpWaveOp::PROP_MAX
-            ? accZero() : state.oldMax;
-        const CmpUnitOutput cmp_output = accCmp(lhs, state.newMax);
-        if(op==CmpWaveOp::PROP_MAX_DIFF){
-            state.oldMax = state.newMax;
-        }
+            ? accZero() : old_max;
+        const CmpUnitOutput cmp_output = accCmp(lhs, new_max);
         return cmp_output.out_diff;
     }
 
@@ -454,8 +449,30 @@ namespace streaming_v2_detail{
             #pragma HLS INLINE
             const bool enabled = op!=CmpWaveOp::UPDATE ||
                 laneEnabled(meta, COL, key);
-            d_output[COL] = spatialCmpCell<COL>(
-                valid, op, enabled, d_input[COL], state[COL]
+            const acc_t old_max = state[COL].oldMax;
+            const acc_t new_max = state[COL].newMax;
+            const exp2_counter_t exp2_counter = state[COL].exp2_counter;
+
+            // 只有这个组合max位于连续score之间的真实反馈环。它不经过
+            // cvtAtoE或accCmp，因而下一拍可以立即读取更新后的newMax。
+            if(valid && op==CmpWaveOp::UPDATE){
+                const acc_t masked_input = enabled
+                    ? d_input[COL] : accMinimum();
+                state[COL].newMax = finiteAccMax(
+                    masked_input, new_max
+                );
+            }else if(valid && op==CmpWaveOp::RESET){
+                state[COL].oldMax = accMinimum();
+                state[COL].newMax = accMinimum();
+            }else if(valid && op==CmpWaveOp::PROP_MAX_DIFF){
+                state[COL].oldMax = new_max;
+            }else if(valid && op==CmpWaveOp::PROP_EXP2_INTERCEPTS){
+                state[COL].exp2_counter = exp2_counter+1;
+            }
+
+            d_output[COL] = spatialCmpOutputCell<COL>(
+                valid, op, enabled, d_input[COL],
+                old_max, new_max, exp2_counter
             );
             SpatialCmpColumns<COL+1>::run(
                 valid, op, key, meta, d_input, state, d_output
@@ -629,26 +646,29 @@ namespace streaming_v2_detail{
         constexpr int KEY_TILE = SA_COLS;
         // 与当前peMacUnit综合延迟一致；data/valid/op/tag共用此延迟。
         constexpr int PE_TOKEN_LATENCY = 9;
+        // 结果在第9拍末提交。环形槽隔10拍复用，避免上一token的
+        // 写回与下一次读取落在同一时钟沿而形成distance=9约束。
+        constexpr int PE_HOP_CYCLES = PE_TOKEN_LATENCY+1;
         constexpr int QK_START = SA_COLS;
         constexpr int FIRST_SCORE =
-            QK_START+SA_ROWS*PE_TOKEN_LATENCY;
+            QK_START+SA_ROWS*PE_HOP_CYCLES;
         constexpr int SCORES_READY = FIRST_SCORE+2*KEY_TILE-2;
         constexpr int MAX_DIFF_CYCLE = SCORES_READY+1;
         constexpr int SUB_MAX_CYCLE = MAX_DIFF_CYCLE+1;
         constexpr int SCALE_CYCLE =
-            SUB_MAX_CYCLE+PE_TOKEN_LATENCY+1;
-        constexpr int PWL_START = SCALE_CYCLE+PE_TOKEN_LATENCY+1;
+            SUB_MAX_CYCLE+PE_HOP_CYCLES+1;
+        constexpr int PWL_START = SCALE_CYCLE+PE_HOP_CYCLES+1;
         constexpr int PWL_END = PWL_START+exp2PWLPieces-1;
         constexpr int ROW_SUM_CYCLE =
-            PWL_END+PE_TOKEN_LATENCY+1;
+            PWL_END+PE_HOP_CYCLES+1;
         constexpr int PV_START = ROW_SUM_CYCLE+1;
         constexpr int LAST_RESULT_CYCLE =
-            PV_START+SA_ROWS-1+SA_ROWS*PE_TOKEN_LATENCY;
+            PV_START+SA_ROWS-1+SA_ROWS*PE_HOP_CYCLES;
         constexpr int TOTAL_CYCLES = LAST_RESULT_CYCLE+1;
 
         elem_t pe_register[SA_ROWS][SA_COLS]{};
         bool active[SA_ROWS][SA_COLS]{};
-        PeWave pe_pipeline[SA_ROWS][PE_TOKEN_LATENCY]{};
+        PeWave pe_pipeline[SA_ROWS][PE_HOP_CYCLES]{};
         ScoreWave score_pipeline[SA_ROWS]{};
         #pragma HLS ARRAY_PARTITION variable=pe_register complete dim=0
         #pragma HLS ARRAY_PARTITION variable=active complete dim=0
@@ -670,7 +690,7 @@ namespace streaming_v2_detail{
             // 调度器保证下一次读取发生在对应commit后；同拍RAW仍保留。
             #pragma HLS DEPENDENCE variable=pe_register inter false
 
-            const int pipeline_slot = cycle%PE_TOKEN_LATENCY;
+            const int pipeline_slot = cycle%PE_HOP_CYCLES;
             PeWave row_input[SA_ROWS]{};
             PeWave row_result[SA_ROWS]{};
             #pragma HLS ARRAY_PARTITION variable=row_input complete dim=0
@@ -679,7 +699,7 @@ namespace streaming_v2_detail{
             PeWave qk_at_cmp{};
             PeWave bottom_result{};
 
-            // 每个PE行取出九拍前启动的token，提交本行结果后送往邻行。
+            // 每个PE行取出上一跳启动的token，提交本行结果后送往邻行。
             for(int row=0; row<SA_ROWS; ++row){
                 #pragma HLS UNROLL
                 const PeWave completed = pe_pipeline[row][pipeline_slot];
@@ -964,6 +984,57 @@ namespace streaming_v2_detail{
     }
 
     /**
+     * @brief 一列Accumulator的物理FP32 MAC流水线
+     *
+     * 模板列号保证综合后得到SA_COLS条并行lane。每条lane在不同L/O行
+     * 之间时分复用，QK和PV仍只使用上方同一套SA。固定九拍只增加
+     * fill/drain，不降低连续L/O token的发射率。
+     */
+    template<int COL>
+    acc_t accumulatorMacLane(
+        const acc_t scale,
+        const acc_t old_value,
+        const acc_t contribution
+    ){
+        static_assert(COL>=0 && COL<SA_COLS,
+                      "Accumulator col out of range");
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LATENCY min=9 max=9
+        return accUnit(scale, old_value, contribution);
+    }
+
+    template<int COL>
+    struct AccumulatorMacColumns{
+        static void run(
+            const acc_t scale[SA_COLS],
+            const acc_t old_value[SA_COLS],
+            const acc_t contribution[SA_COLS],
+            acc_t result[SA_COLS]
+        ){
+            #pragma HLS INLINE
+            result[COL] = accumulatorMacLane<COL>(
+                scale[COL], old_value[COL], contribution[COL]
+            );
+            AccumulatorMacColumns<COL+1>::run(
+                scale, old_value, contribution, result
+            );
+        }
+    };
+
+    template<>
+    struct AccumulatorMacColumns<SA_COLS>{
+        static void run(
+            const acc_t[SA_COLS],
+            const acc_t[SA_COLS],
+            const acc_t[SA_COLS],
+            acc_t[SA_COLS]
+        ){
+            #pragma HLS INLINE
+        }
+    };
+
+    /**
      * FSA Accumulator：row0保存L，row1..SA_ROWS保存O；列bank完全分割。
      */
     void accumulatorProcess(
@@ -998,25 +1069,40 @@ namespace streaming_v2_detail{
                         );
                 }
 
-                // rowsum后紧跟SA_ROWS个PV token。每拍只更新一行L/O，
-                // 同一组SA_COLS个Accumulator lane在所有行之间时分复用。
+                // rowsum后紧跟SA_ROWS个PV token。协议固定映射为
+                // event=0更新L，event=1..SA_ROWS更新对应O行。
                 for(int event=0; event<SA_ROWS+1; ++event){
                     #pragma HLS PIPELINE II=1
+                    // 本循环每次访问不同的固定行；跨key tile的同一行
+                    // 反馈发生在循环排空之后，因此这里不是L/O真依赖。
+                    #pragma HLS DEPENDENCE \
+                        variable=accumulator_sram inter false
                     const SaResultToken value_token =
                         sa_result_stream.read();
-                    const int accumulator_row =
-                        value_token.kind==SaResultKind::ROW_SUM
-                            ? 0 : value_token.index.to_int()+1;
+                    const int accumulator_row = event;
+                    acc_t old_value[SA_COLS]{};
+                    acc_t contribution[SA_COLS]{};
+                    acc_t updated_value[SA_COLS]{};
+                    #pragma HLS ARRAY_PARTITION \
+                        variable=old_value complete dim=1
+                    #pragma HLS ARRAY_PARTITION \
+                        variable=contribution complete dim=1
+                    #pragma HLS ARRAY_PARTITION \
+                        variable=updated_value complete dim=1
                     for(int query=0; query<SA_COLS; ++query){
                         #pragma HLS UNROLL
-                        const acc_t old_value = max_token.initialize
+                        old_value[query] = max_token.initialize
                             ? accZero()
                             : accumulator_sram[accumulator_row][query];
-                        accumulator_sram[accumulator_row][query] = accUnit(
-                            alpha[query],
-                            old_value,
-                            value_token.data[query]
-                        );
+                        contribution[query] = value_token.data[query];
+                    }
+                    AccumulatorMacColumns<0>::run(
+                        alpha, old_value, contribution, updated_value
+                    );
+                    for(int query=0; query<SA_COLS; ++query){
+                        #pragma HLS UNROLL
+                        accumulator_sram[accumulator_row][query] =
+                            updated_value[query];
                     }
                 }
 
