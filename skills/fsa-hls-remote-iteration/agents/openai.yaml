@@ -1,0 +1,4 @@
+interface:
+  display_name: "FSA HLS 远端迭代"
+  short_description: "通过SSH持续测试迭代并完整保存逐轮修改日志与测试证据"
+  default_prompt: "使用 $fsa-hls-remote-iteration，根据我的验收要求修改 FSA_HLS，在远端测试迭代，并持续维护本次调用的修改日志。"
