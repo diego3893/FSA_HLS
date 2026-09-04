@@ -350,22 +350,25 @@ namespace streaming_v2_detail{
     /**
      * 流过SA的一个控制波。partial对应Scala PE的上/下方数据，
      * index在QK时是key、PWL时是piece、PV时是feature。
+     *
+     * 成员刻意不设默认值：临时wave用`{}`显式生成bubble，环形存储则
+     * 依靠写前不读协议，避免HLS在每个tile入口综合出整表清零循环。
      */
     struct PeWave{
-        bool valid = false;
-        PeWaveOp op = PeWaveOp::IDLE;
-        PeWaveDirection direction = PeWaveDirection::DOWN;
-        PeWaveIndex index = 0;
-        acc_t partial[SA_COLS]{};
-        elem_t element[SA_COLS]{};
-        bool exp2_match[SA_COLS]{};
+        bool valid;
+        PeWaveOp op;
+        PeWaveDirection direction;
+        PeWaveIndex index;
+        acc_t partial[SA_COLS];
+        elem_t element[SA_COLS];
+        bool exp2_match[SA_COLS];
     };
 
     /** score从顶部CMP逐拍向下回流；key标签决定在哪一行写入PE.reg。 */
     struct ScoreWave{
-        bool valid = false;
-        PeWaveIndex key = 0;
-        elem_t score[SA_COLS]{};
+        bool valid;
+        PeWaveIndex key;
+        elem_t score[SA_COLS];
     };
 
     /**
@@ -532,7 +535,12 @@ namespace streaming_v2_detail{
                 wave.op==PeWaveOp::PV;
             const bool use_probability = wave.op==PeWaveOp::ROW_SUM ||
                 wave.op==PeWaveOp::PV;
-            const elem_t operand_a = use_probability && !active[ROW][COL]
+            // A tile no longer clears every PE register before the cycle loop.
+            // Invalid bubbles must therefore not observe a register before the
+            // feeder has written it.  Every valid operation is launched only
+            // after the corresponding Q/score/probability value is resident.
+            const elem_t operand_a = !wave.valid ||
+                    (use_probability && !active[ROW][COL])
                 ? elemZero() : pe_register[ROW][COL];
             const bool exp2_mode = wave.op==PeWaveOp::PWL;
 
@@ -674,10 +682,13 @@ namespace streaming_v2_detail{
             PV_START+SA_ROWS-1+SA_ROWS*PE_HOP_CYCLES;
         constexpr int TOTAL_CYCLES = LAST_RESULT_CYCLE+1;
 
-        elem_t pe_register[SA_ROWS][SA_COLS]{};
-        bool active[SA_ROWS][SA_COLS]{};
-        PeWave pe_pipeline[SA_ROWS][PE_HOP_CYCLES]{};
-        ScoreWave score_pipeline[SA_ROWS]{};
+        // These arrays are completely written before their first meaningful
+        // read.  Avoid aggregate initialization here: in HLS it becomes a
+        // serialized per-tile clear loop and hides the II=1 wavefront gain.
+        elem_t pe_register[SA_ROWS][SA_COLS];
+        bool active[SA_ROWS][SA_COLS];
+        PeWave pe_pipeline[SA_ROWS][PE_HOP_CYCLES];
+        ScoreWave score_pipeline[SA_ROWS];
         #pragma HLS ARRAY_PARTITION variable=pe_register complete dim=0
         #pragma HLS ARRAY_PARTITION variable=active complete dim=0
         #pragma HLS ARRAY_PARTITION variable=pe_pipeline complete dim=0
@@ -707,36 +718,40 @@ namespace streaming_v2_detail{
             PeWave qk_at_cmp{};
             PeWave bottom_result{};
 
-            // 每个PE行取出上一跳启动的token，提交本行结果后送往邻行。
+            // 环形槽在前PE_HOP_CYCLES拍被逐槽写满；之后每次读取的槽都已
+            // 由同一tile写过，因此不需要在tile入口清空整个环形缓冲。
             for(int row=0; row<SA_ROWS; ++row){
                 #pragma HLS UNROLL
-                const PeWave completed = pe_pipeline[row][pipeline_slot];
-                if(completed.valid){
-                    for(int query=0; query<SA_COLS; ++query){
-                        #pragma HLS UNROLL
-                        if(active[row][query] &&
-                                (completed.op==PeWaveOp::SUB_MAX ||
-                                 completed.op==PeWaveOp::SCALE)){
-                            pe_register[row][query] =
-                                completed.element[query];
-                        }else if(active[row][query] &&
-                                completed.op==PeWaveOp::PWL &&
-                                completed.exp2_match[query]){
-                            pe_register[row][query] =
-                                completed.element[query];
+                if(cycle>=PE_HOP_CYCLES){
+                    const PeWave completed =
+                        pe_pipeline[row][pipeline_slot];
+                    if(completed.valid){
+                        for(int query=0; query<SA_COLS; ++query){
+                            #pragma HLS UNROLL
+                            if(active[row][query] &&
+                                    (completed.op==PeWaveOp::SUB_MAX ||
+                                     completed.op==PeWaveOp::SCALE)){
+                                pe_register[row][query] =
+                                    completed.element[query];
+                            }else if(active[row][query] &&
+                                    completed.op==PeWaveOp::PWL &&
+                                    completed.exp2_match[query]){
+                                pe_register[row][query] =
+                                    completed.element[query];
+                            }
                         }
-                    }
 
-                    if(completed.direction==PeWaveDirection::UP){
-                        if(row==0){
-                            qk_at_cmp = completed;
+                        if(completed.direction==PeWaveDirection::UP){
+                            if(row==0){
+                                qk_at_cmp = completed;
+                            }else{
+                                row_input[row-1] = completed;
+                            }
+                        }else if(row+1==SA_ROWS){
+                            bottom_result = completed;
                         }else{
-                            row_input[row-1] = completed;
+                            row_input[row+1] = completed;
                         }
-                    }else if(row+1==SA_ROWS){
-                        bottom_result = completed;
-                    }else{
-                        row_input[row+1] = completed;
                     }
                 }
             }
@@ -816,8 +831,13 @@ namespace streaming_v2_detail{
             #pragma HLS ARRAY_PARTITION variable=next_score_pipeline complete dim=1
             for(int row=0; row<SA_ROWS; ++row){
                 #pragma HLS UNROLL
-                const ScoreWave score_wave = row==0 && injected_score.valid
-                    ? injected_score : score_pipeline[row];
+                ScoreWave score_wave{};
+                if(row==0 && injected_score.valid){
+                    score_wave = injected_score;
+                }else if(cycle>0){
+                    // cycle 0 writes every score slot before any later read.
+                    score_wave = score_pipeline[row];
+                }
                 if(score_wave.valid){
                     if(score_wave.key.to_int()==row){
                         for(int query=0; query<SA_COLS; ++query){
