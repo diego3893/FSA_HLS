@@ -646,9 +646,17 @@ namespace streaming_v2_detail{
         constexpr int KEY_TILE = SA_COLS;
         // 与当前peMacUnit综合延迟一致；data/valid/op/tag共用此延迟。
         constexpr int PE_TOKEN_LATENCY = 9;
-        // 结果在第9拍末提交。环形槽隔10拍复用，避免上一token的
-        // 写回与下一次读取落在同一时钟沿而形成distance=9约束。
-        constexpr int PE_HOP_CYCLES = PE_TOKEN_LATENCY+1;
+        // v3综合中，外层逐拍调度器从读取pe_pipeline槽到16个PE结果
+        // 真正写回共跨15级：前端完成commit/路由/CMP/operand选择，随后
+        // 进入9拍PE。原先10槽会在旧partial写回前再次读取同一槽，形成
+        // distance=10的真实跨迭代依赖并把外层II抬到2。
+        //
+        // 使用16个槽后，上一token在第15级写回，下一次读取发生在下一
+        // 拍；这是当前单套PE阵列在II=1下的最小安全反馈距离。16还是
+        // 2的幂，动态槽选择可直接使用计数器低位，避免10路取模选择器。
+        constexpr int PE_SCHEDULER_GUARD_CYCLES = 7;
+        constexpr int PE_HOP_CYCLES =
+            PE_TOKEN_LATENCY+PE_SCHEDULER_GUARD_CYCLES;
         constexpr int QK_START = SA_COLS;
         constexpr int FIRST_SCORE =
             QK_START+SA_ROWS*PE_HOP_CYCLES;
