@@ -368,7 +368,6 @@ namespace streaming_v2_detail{
         static void run(
             PeWave& wave,
             const elem_t horizontal[SA_ROWS],
-            const acc_t vertical[SA_COLS],
             elem_t pe_register[SA_ROWS][SA_COLS],
             const bool active[SA_ROWS][SA_COLS],
             elem_t probability[SA_ROWS][SA_COLS]
@@ -381,14 +380,12 @@ namespace streaming_v2_detail{
                 wave.op==PeWaveOp::PV;
             const elem_t operand_a = use_probability
                 ? probability[ROW][COL] : pe_register[ROW][COL];
-            const acc_t operand_c = reduce
-                ? wave.partial[COL] : vertical[COL];
             const bool exp2_mode = wave.op==PeWaveOp::PWL;
 
             const PeMacUnitOutput unit = spatialPeCell<ROW, COL>(
                 operand_a,
                 horizontal[ROW],
-                operand_c,
+                wave.partial[COL],
                 exp2_mode
             );
 
@@ -406,7 +403,6 @@ namespace streaming_v2_detail{
             SpatialPeColumns<ROW, COL+1>::run(
                 wave,
                 horizontal,
-                vertical,
                 pe_register,
                 active,
                 probability
@@ -419,7 +415,6 @@ namespace streaming_v2_detail{
         static void run(
             PeWave&,
             const elem_t[SA_ROWS],
-            const acc_t[SA_COLS],
             elem_t[SA_ROWS][SA_COLS],
             const bool[SA_ROWS][SA_COLS],
             elem_t[SA_ROWS][SA_COLS]
@@ -433,7 +428,6 @@ namespace streaming_v2_detail{
         static void run(
             PeWave& wave,
             const elem_t horizontal[SA_ROWS],
-            const acc_t vertical[SA_COLS],
             elem_t pe_register[SA_ROWS][SA_COLS],
             const bool active[SA_ROWS][SA_COLS],
             elem_t probability[SA_ROWS][SA_COLS]
@@ -442,7 +436,6 @@ namespace streaming_v2_detail{
             SpatialPeColumns<ROW, 0>::run(
                 wave,
                 horizontal,
-                vertical,
                 pe_register,
                 active,
                 probability
@@ -450,7 +443,6 @@ namespace streaming_v2_detail{
             SpatialPeRows<ROW+1>::run(
                 wave,
                 horizontal,
-                vertical,
                 pe_register,
                 active,
                 probability
@@ -463,7 +455,6 @@ namespace streaming_v2_detail{
         static void run(
             PeWave&,
             const elem_t[SA_ROWS],
-            const acc_t[SA_COLS],
             elem_t[SA_ROWS][SA_COLS],
             const bool[SA_ROWS][SA_COLS],
             elem_t[SA_ROWS][SA_COLS]
@@ -472,10 +463,66 @@ namespace streaming_v2_detail{
         }
     };
 
-    // peMacUnit本体为9拍，再保留一拍PE层次的边界裕量。
-    // 这只扩展wave latency，每个空间PE仍可每拍接收新wave。
-    constexpr int PE_WAVE_LATENCY = 10;
-    constexpr int SA_REDUCTION_LATENCY = SA_ROWS*PE_WAVE_LATENCY;
+    /**
+     * @brief 共享物理阵列处理一个wave
+     *
+     * 这是systolicArrayTile中唯一允许实例化的空间阵列模块。
+     * QK、softmax和PV从不同阶段调用它，但ALLOCATION约束保证
+     * 这些顺序阶段复用同一套SA_ROWS x SA_COLS物理PE。
+     * partial在归约操作中携带竖直累加值，在SUB_MAX和PWL中
+     * 分别携带-max和PWL intercept，从而不需要阵列外的第二套
+     * 浮点计算通路。
+     */
+    PeWave spatialPeArray(
+        PeWave wave,
+        const elem_t k_tile[SA_COLS][SA_ROWS],
+        const elem_t v_tile[SA_COLS][SA_ROWS],
+        elem_t pe_register[SA_ROWS][SA_COLS],
+        const bool active[SA_ROWS][SA_COLS],
+        elem_t probability[SA_ROWS][SA_COLS]
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=k_tile complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=v_tile complete dim=2
+        #pragma HLS ARRAY_PARTITION variable=pe_register complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=active complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=probability complete dim=0
+        // 同一阶段的相邻wave不会读写同一个状态：QK/PV只读，
+        // PWL各piece只做有序的条件写。阶段边界由函数调用排空。
+        #pragma HLS DEPENDENCE variable=pe_register inter false
+        #pragma HLS DEPENDENCE variable=probability inter false
+
+        elem_t horizontal[SA_ROWS]{};
+        #pragma HLS ARRAY_PARTITION variable=horizontal complete dim=1
+        for(int row=0; row<SA_ROWS; ++row){
+            #pragma HLS UNROLL
+            if(wave.op==PeWaveOp::QK){
+                horizontal[row] =
+                    k_tile[wave.index.to_uint()][row];
+            }else if(wave.op==PeWaveOp::SCALE){
+                horizontal[row] = elemAttentionScale();
+            }else if(wave.op==PeWaveOp::PWL){
+                horizontal[row] =
+                    EXP2_SLOPES[wave.index.to_uint()];
+            }else if(wave.op==PeWaveOp::PV){
+                horizontal[row] = row<SA_COLS
+                    ? v_tile[row][wave.index.to_uint()] : elemZero();
+            }else{
+                horizontal[row] = elemOne();
+            }
+        }
+
+        SpatialPeRows<0>::run(
+            wave,
+            horizontal,
+            pe_register,
+            active,
+            probability
+        );
+        return wave;
+    }
 
     /**
      * 一套SA_ROWS x SA_COLS物理PE依次驻留Q、S/N、P。
@@ -495,7 +542,8 @@ namespace streaming_v2_detail{
         SaTileResult& result
     ){
         #pragma HLS INLINE off
-        // 4x4 FSA只允许16个物理MacUnit，各计算阶段按时分复用。
+        // 只允许一套参数化空间阵列，各计算阶段按时分复用。
+        #pragma HLS ALLOCATION function instances=spatialPeArray limit=1
         #pragma HLS ARRAY_PARTITION variable=q_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=k_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=v_tile type=complete dim=2
@@ -509,8 +557,7 @@ namespace streaming_v2_detail{
         #pragma HLS ARRAY_PARTITION variable=scores type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=active type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=probability type=complete dim=0
-        // QK写入和LOAD_S读取由cycle调度隔开了整个SA排空窗口。
-        // 对流水迭代而言不存在同一scores bank的冲突。
+        // QK的每个key写独立bank；阶段结束后才读取scores。
         #pragma HLS DEPENDENCE variable=scores inter false
 
         for(int feature=0; feature<SA_ROWS; ++feature){
@@ -531,141 +578,153 @@ namespace streaming_v2_detail{
             }
         }
 
-        // Scala计划中相邻PE只隔一个逻辑拍；HLS版的FP FMA是多拍
-        // pipeline。下面保留相同wave顺序，同时把数据依赖的间隔
-        // 扩展为实际算术latency，避免用增大II来隐式等待。
-        static const int LOAD_S_CYCLE =
-            SA_COLS+SA_REDUCTION_LATENCY+1;
-        static const int POST_START_CYCLE = LOAD_S_CYCLE+3;
-        static const int SCALE_CYCLE =
-            POST_START_CYCLE+PE_WAVE_LATENCY+1;
-        static const int PWL_START_CYCLE =
-            SCALE_CYCLE+PE_WAVE_LATENCY+1;
-        static const int ROW_SUM_CYCLE = PWL_START_CYCLE+
-            exp2PWLPieces+PE_WAVE_LATENCY;
-        static const int PV_START_CYCLE = ROW_SUM_CYCLE+1;
-        static const int SA_TILE_CYCLES = PV_START_CYCLE+SA_ROWS;
-
-        for(int cycle=0; cycle<SA_TILE_CYCLES; ++cycle){
+        // QK只负责连续发射key wave。最大值在流水排空后归约，
+        // 不再形成“本次max写回 -> 下一cycle阶段读取”的假反馈。
+        for(int key=0; key<SA_COLS; ++key){
             #pragma HLS PIPELINE II=1
-            #pragma HLS LOOP_TRIPCOUNT min=SA_TILE_CYCLES max=SA_TILE_CYCLES
-
-            if(cycle==LOAD_S_CYCLE){
-                for(int row=0; row<SA_ROWS; ++row){
-                    #pragma HLS UNROLL
-                    for(int query=0; query<SA_COLS; ++query){
-                        #pragma HLS UNROLL
-                        active[row][query] = row<SA_COLS &&
-                            laneEnabled(meta, query, row);
-                        probability[row][query] = elemZero();
-                        pe_register[row][query] = active[row][query]
-                            ? cvtAtoE(scores[query][row]) : elemZero();
-                    }
-                }
-            }
-
-            PeWave injected{};
-            #pragma HLS ARRAY_PARTITION variable=injected.partial complete dim=1
-            if(cycle<SA_COLS){
-                injected.valid = true;
-                injected.op = PeWaveOp::QK;
-                injected.index = (PeWaveIndex)cycle;
-            }else if(cycle==POST_START_CYCLE){
-                injected.valid = true;
-                injected.op = PeWaveOp::SUB_MAX;
-            }else if(cycle==SCALE_CYCLE){
-                injected.valid = true;
-                injected.op = PeWaveOp::SCALE;
-            }else if(cycle>=PWL_START_CYCLE &&
-                    cycle<PWL_START_CYCLE+exp2PWLPieces){
-                injected.valid = true;
-                injected.op = PeWaveOp::PWL;
-                injected.index =
-                    (PeWaveIndex)(cycle-PWL_START_CYCLE);
-            }else if(cycle==ROW_SUM_CYCLE){
-                injected.valid = true;
-                injected.op = PeWaveOp::ROW_SUM;
-            }else if(cycle>=PV_START_CYCLE &&
-                    cycle<PV_START_CYCLE+SA_ROWS){
-                injected.valid = true;
-                injected.op = PeWaveOp::PV;
-                injected.index =
-                    (PeWaveIndex)(cycle-PV_START_CYCLE);
-            }
-
-            PeWave wave = injected;
+            PeWave wave{};
             #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
-            elem_t horizontal[SA_ROWS]{};
-            acc_t vertical[SA_COLS]{};
-            #pragma HLS ARRAY_PARTITION variable=horizontal complete dim=1
-            #pragma HLS ARRAY_PARTITION variable=vertical complete dim=1
-
-            for(int row=0; row<SA_ROWS; ++row){
-                #pragma HLS UNROLL
-                if(wave.valid && wave.op==PeWaveOp::QK){
-                    horizontal[row] =
-                        k_tile[wave.index.to_uint()][row];
-                }else if(wave.valid && wave.op==PeWaveOp::SCALE){
-                    horizontal[row] = elemAttentionScale();
-                }else if(wave.valid && wave.op==PeWaveOp::PWL){
-                    horizontal[row] =
-                        EXP2_SLOPES[wave.index.to_uint()];
-                }else if(wave.valid && wave.op==PeWaveOp::PV){
-                    horizontal[row] = row<SA_COLS
-                        ? v_tile[row][wave.index.to_uint()] : elemZero();
-                }else if(wave.valid){
-                    horizontal[row] = elemOne();
-                }
-            }
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                if(wave.valid && wave.op==PeWaveOp::SUB_MAX){
-                    vertical[query] = -cmp_max[query];
-                }else if(wave.valid && wave.op==PeWaveOp::PWL){
-                    vertical[query] = exp2PWLIntercept(
-                        (exp2_counter_t)wave.index
-                    );
-                }
-            }
-
-            SpatialPeRows<0>::run(
+            wave.valid = true;
+            wave.op = PeWaveOp::QK;
+            wave.index = (PeWaveIndex)key;
+            const PeWave completed = spatialPeArray(
                 wave,
-                horizontal,
-                vertical,
+                k_tile,
+                v_tile,
                 pe_register,
                 active,
                 probability
             );
+            for(int query=0; query<SA_COLS; ++query){
+                #pragma HLS UNROLL
+                scores[query][key] = completed.partial[query];
+            }
+        }
 
-            const PeWave completed = wave;
-            #pragma HLS ARRAY_PARTITION variable=completed.partial complete dim=1
+        for(int query=0; query<SA_COLS; ++query){
+            #pragma HLS UNROLL
+            acc_t next_max = cmp_max[query];
+            for(int key=0; key<SA_COLS; ++key){
+                #pragma HLS UNROLL
+                if(laneEnabled(meta, query, key)){
+                    next_max = finiteAccMax(
+                        scores[query][key], next_max
+                    );
+                }
+            }
+            cmp_max[query] = next_max;
+        }
 
-            if(completed.valid && completed.op==PeWaveOp::QK){
-                const int key = completed.index.to_int();
-                for(int query=0; query<SA_COLS; ++query){
-                    #pragma HLS UNROLL
-                    scores[query][key] = completed.partial[query];
-                    if(laneEnabled(meta, query, key)){
-                        // Scala CMP的max选择是组合路径；差值FMA只在
-                        // PROP_MAX_DIFF时使用。将两者拆开可避免把
-                        // 9拍FP FMA延迟误形成key间II=9的max反馈。
-                        cmp_max[query] = finiteAccMax(
-                            completed.partial[query], cmp_max[query]
-                        );
-                    }
-                }
-            }else if(completed.valid &&
-                    completed.op==PeWaveOp::ROW_SUM){
-                for(int query=0; query<SA_COLS; ++query){
-                    #pragma HLS UNROLL
-                    result.rowsum[query] = completed.partial[query];
-                }
-            }else if(completed.valid && completed.op==PeWaveOp::PV){
-                const int feature = completed.index.to_int();
-                for(int query=0; query<SA_COLS; ++query){
-                    #pragma HLS UNROLL
-                    result.pv[query][feature] = completed.partial[query];
-                }
+        for(int row=0; row<SA_ROWS; ++row){
+            #pragma HLS UNROLL
+            for(int query=0; query<SA_COLS; ++query){
+                #pragma HLS UNROLL
+                active[row][query] = row<SA_COLS &&
+                    laneEnabled(meta, query, row);
+                probability[row][query] = elemZero();
+                pe_register[row][query] = active[row][query]
+                    ? cvtAtoE(scores[query][row]) : elemZero();
+            }
+        }
+
+        // S-max与attention scale之间存在真实的PE寄存器依赖，
+        // 因而作为两个顺序wave执行，而不是伪装成同一流水循环。
+        {
+            PeWave wave{};
+            #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
+            wave.valid = true;
+            wave.op = PeWaveOp::SUB_MAX;
+            for(int query=0; query<SA_COLS; ++query){
+                #pragma HLS UNROLL
+                wave.partial[query] = -cmp_max[query];
+            }
+            (void)spatialPeArray(
+                wave,
+                k_tile,
+                v_tile,
+                pe_register,
+                active,
+                probability
+            );
+        }
+
+        {
+            PeWave wave{};
+            #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
+            wave.valid = true;
+            wave.op = PeWaveOp::SCALE;
+            (void)spatialPeArray(
+                wave,
+                k_tile,
+                v_tile,
+                pe_register,
+                active,
+                probability
+            );
+        }
+
+        for(int piece=0; piece<exp2PWLPieces; ++piece){
+            #pragma HLS PIPELINE II=1
+            #pragma HLS DEPENDENCE variable=probability inter false
+            PeWave wave{};
+            #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
+            wave.valid = true;
+            wave.op = PeWaveOp::PWL;
+            wave.index = (PeWaveIndex)piece;
+            const acc_t intercept = exp2PWLIntercept(
+                (exp2_counter_t)piece
+            );
+            for(int query=0; query<SA_COLS; ++query){
+                #pragma HLS UNROLL
+                wave.partial[query] = intercept;
+            }
+            (void)spatialPeArray(
+                wave,
+                k_tile,
+                v_tile,
+                pe_register,
+                active,
+                probability
+            );
+        }
+
+        {
+            PeWave wave{};
+            #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
+            wave.valid = true;
+            wave.op = PeWaveOp::ROW_SUM;
+            const PeWave completed = spatialPeArray(
+                wave,
+                k_tile,
+                v_tile,
+                pe_register,
+                active,
+                probability
+            );
+            for(int query=0; query<SA_COLS; ++query){
+                #pragma HLS UNROLL
+                result.rowsum[query] = completed.partial[query];
+            }
+        }
+
+        for(int feature=0; feature<SA_ROWS; ++feature){
+            #pragma HLS PIPELINE II=1
+            PeWave wave{};
+            #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
+            wave.valid = true;
+            wave.op = PeWaveOp::PV;
+            wave.index = (PeWaveIndex)feature;
+            const PeWave completed = spatialPeArray(
+                wave,
+                k_tile,
+                v_tile,
+                pe_register,
+                active,
+                probability
+            );
+            for(int query=0; query<SA_COLS; ++query){
+                #pragma HLS UNROLL
+                result.pv[query][feature] = completed.partial[query];
             }
         }
 
