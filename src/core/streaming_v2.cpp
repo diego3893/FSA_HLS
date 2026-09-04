@@ -5,6 +5,7 @@
 
 #include "fsa/accumulator.hpp"
 #include "fsa/arithmetic.hpp"
+#include "fsa/state.hpp"
 
 namespace fsa{
 namespace streaming_v2_detail{
@@ -45,18 +46,29 @@ namespace streaming_v2_detail{
         ap_uint<32> key_base = 0;
     };
 
-    struct SaTileResult{
+    enum class SaResultKind : std::uint8_t{
+        MAX_DIFF = 0,
+        ROW_SUM = 1,
+        PV = 2
+    };
+
+    /**
+     * SA与Accumulator之间的逐拍结果token。
+     * MAX_DIFF先到达，随后是ROW_SUM和连续SA_ROWS拍PV；不再等待并
+     * 物化完整SaTileResult后才启动Accumulator。
+     */
+    struct SaResultToken{
+        SaResultKind kind = SaResultKind::MAX_DIFF;
         bool initialize = false;
         bool finalize = false;
         ap_uint<16> active_queries = 0;
-        acc_t max_diff[SA_COLS]{};
-        acc_t rowsum[SA_COLS]{};
-        acc_t pv[SA_COLS][SA_ROWS]{};
+        ap_uint<16> index = 0;
+        acc_t data[SA_COLS]{};
     };
 
     using ElemRowStream = hls::stream<ElemRowPacket>;
     using MetaStream = hls::stream<TileMeta>;
-    using SaResultStream = hls::stream<SaTileResult>;
+    using SaResultStream = hls::stream<SaResultToken>;
     using AccRowStream = hls::stream<AccRowPacket>;
     using DmaWordStream = hls::stream<dma_word_t>;
 
@@ -314,6 +326,11 @@ namespace streaming_v2_detail{
         PV = 6
     };
 
+    enum class PeWaveDirection : std::uint8_t{
+        UP = 0,
+        DOWN = 1
+    };
+
     constexpr int maxConstexpr(const int a, const int b){
         return a>b ? a : b;
     }
@@ -337,8 +354,128 @@ namespace streaming_v2_detail{
     struct PeWave{
         bool valid = false;
         PeWaveOp op = PeWaveOp::IDLE;
+        PeWaveDirection direction = PeWaveDirection::DOWN;
         PeWaveIndex index = 0;
         acc_t partial[SA_COLS]{};
+        elem_t element[SA_COLS]{};
+        bool exp2_match[SA_COLS]{};
+    };
+
+    /** score从顶部CMP逐拍向下回流；key标签决定在哪一行写入PE.reg。 */
+    struct ScoreWave{
+        bool valid = false;
+        PeWaveIndex key = 0;
+        elem_t score[SA_COLS]{};
+    };
+
+    /**
+     * @brief streaming v2中CMP在一个wave上的动作
+     *
+     * HOLD表示本拍CMP不推进状态。其余命令与Scala CMP.scala中的
+     * UPDATE/PROP_*一一对应；RESET只在一个query tile的首个KV tile执行。
+     */
+    enum class CmpWaveOp : std::uint8_t{
+        HOLD = 0,
+        UPDATE = 1,
+        PROP_MAX = 2,
+        PROP_MAX_DIFF = 3,
+        PROP_ZERO = 4,
+        RESET = 5,
+        PROP_EXP2_INTERCEPTS = 6
+    };
+
+    /**
+     * @brief 每列顶部唯一的CMP实例
+     *
+     * UPDATE的最大值选择使用有限FP32位序比较，使连续score能够II=1更新
+     * newMax；差值仍由accCmp中的单条FMA通路完成。这样既保留FSA的
+     * “每列一个CMP”结构，也避免多拍浮点比较形成列内反馈环。
+     */
+    template<int COL>
+    acc_t spatialCmpCell(
+        const bool valid,
+        const CmpWaveOp op,
+        const bool input_enabled,
+        const acc_t d_input,
+        CMPState& state
+    ){
+        static_assert(COL>=0 && COL<SA_COLS, "CMP col out of range");
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+
+        if(!valid || op==CmpWaveOp::HOLD){
+            return accZero();
+        }
+
+        if(op==CmpWaveOp::RESET){
+            state.oldMax = accMinimum();
+            state.newMax = accMinimum();
+            return accZero();
+        }
+
+        if(op==CmpWaveOp::UPDATE){
+            const acc_t masked_input = input_enabled
+                ? d_input : accMinimum();
+            state.newMax = finiteAccMax(masked_input, state.newMax);
+            // 与Scala CMP一致：score从CMP向下返回前先缩为elem_t。
+            return viewEasA(cvtAtoE(masked_input));
+        }
+
+        if(op==CmpWaveOp::PROP_EXP2_INTERCEPTS){
+            const acc_t output = exp2PWLIntercept(state.exp2_counter);
+            state.exp2_counter = state.exp2_counter+1;
+            return output;
+        }
+
+        if(op==CmpWaveOp::PROP_ZERO){
+            return accZero();
+        }
+
+        const acc_t lhs = op==CmpWaveOp::PROP_MAX
+            ? accZero() : state.oldMax;
+        const CmpUnitOutput cmp_output = accCmp(lhs, state.newMax);
+        if(op==CmpWaveOp::PROP_MAX_DIFF){
+            state.oldMax = state.newMax;
+        }
+        return cmp_output.out_diff;
+    }
+
+    template<int COL>
+    struct SpatialCmpColumns{
+        static void run(
+            const bool valid,
+            const CmpWaveOp op,
+            const int key,
+            const TileMeta& meta,
+            const acc_t d_input[SA_COLS],
+            CMPState state[SA_COLS],
+            acc_t d_output[SA_COLS]
+        ){
+            #pragma HLS INLINE
+            const bool enabled = op!=CmpWaveOp::UPDATE ||
+                laneEnabled(meta, COL, key);
+            d_output[COL] = spatialCmpCell<COL>(
+                valid, op, enabled, d_input[COL], state[COL]
+            );
+            SpatialCmpColumns<COL+1>::run(
+                valid, op, key, meta, d_input, state, d_output
+            );
+        }
+    };
+
+    template<>
+    struct SpatialCmpColumns<SA_COLS>{
+        static void run(
+            const bool,
+            const CmpWaveOp,
+            const int,
+            const TileMeta&,
+            const acc_t[SA_COLS],
+            CMPState[SA_COLS],
+            acc_t[SA_COLS]
+        ){
+            #pragma HLS INLINE
+        }
     };
 
     /**
@@ -358,6 +495,7 @@ namespace streaming_v2_detail{
         static_assert(COL>=0 && COL<SA_COLS, "PE col out of range");
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=1
+        #pragma HLS LATENCY min=9 max=9
         return peMacUnit(
             operand_a, operand_b, operand_c, exp2_mode
         );
@@ -369,8 +507,7 @@ namespace streaming_v2_detail{
             PeWave& wave,
             const elem_t horizontal[SA_ROWS],
             elem_t pe_register[SA_ROWS][SA_COLS],
-            const bool active[SA_ROWS][SA_COLS],
-            elem_t probability[SA_ROWS][SA_COLS]
+            const bool active[SA_ROWS][SA_COLS]
         ){
             #pragma HLS INLINE
             const bool reduce = wave.op==PeWaveOp::QK ||
@@ -378,8 +515,8 @@ namespace streaming_v2_detail{
                 wave.op==PeWaveOp::PV;
             const bool use_probability = wave.op==PeWaveOp::ROW_SUM ||
                 wave.op==PeWaveOp::PV;
-            const elem_t operand_a = use_probability
-                ? probability[ROW][COL] : pe_register[ROW][COL];
+            const elem_t operand_a = use_probability && !active[ROW][COL]
+                ? elemZero() : pe_register[ROW][COL];
             const bool exp2_mode = wave.op==PeWaveOp::PWL;
 
             const PeMacUnitOutput unit = spatialPeCell<ROW, COL>(
@@ -394,18 +531,18 @@ namespace streaming_v2_detail{
             }else if(wave.valid && active[ROW][COL] &&
                     (wave.op==PeWaveOp::SUB_MAX ||
                      wave.op==PeWaveOp::SCALE)){
-                pe_register[ROW][COL] = unit.out_elemType;
+                wave.element[COL] = unit.out_elemType;
             }else if(wave.valid && active[ROW][COL] &&
-                    wave.op==PeWaveOp::PWL && unit.out_exp2){
-                probability[ROW][COL] = unit.out_elemType;
+                    wave.op==PeWaveOp::PWL){
+                wave.element[COL] = unit.out_elemType;
+                wave.exp2_match[COL] = unit.out_exp2;
             }
 
             SpatialPeColumns<ROW, COL+1>::run(
                 wave,
                 horizontal,
                 pe_register,
-                active,
-                probability
+                active
             );
         }
     };
@@ -416,326 +553,361 @@ namespace streaming_v2_detail{
             PeWave&,
             const elem_t[SA_ROWS],
             elem_t[SA_ROWS][SA_COLS],
-            const bool[SA_ROWS][SA_COLS],
-            elem_t[SA_ROWS][SA_COLS]
+            const bool[SA_ROWS][SA_COLS]
         ){
             #pragma HLS INLINE
         }
     };
 
     template<int ROW>
-    struct SpatialPeRows{
+    struct SpatialPeRowsTick{
         static void run(
-            PeWave& wave,
+            PeWave wave[SA_ROWS],
             const elem_t horizontal[SA_ROWS],
             elem_t pe_register[SA_ROWS][SA_COLS],
-            const bool active[SA_ROWS][SA_COLS],
-            elem_t probability[SA_ROWS][SA_COLS]
+            const bool active[SA_ROWS][SA_COLS]
         ){
             #pragma HLS INLINE
             SpatialPeColumns<ROW, 0>::run(
-                wave,
+                wave[ROW],
                 horizontal,
                 pe_register,
-                active,
-                probability
+                active
             );
-            SpatialPeRows<ROW+1>::run(
+            SpatialPeRowsTick<ROW+1>::run(
                 wave,
                 horizontal,
                 pe_register,
-                active,
-                probability
+                active
             );
         }
     };
 
     template<>
-    struct SpatialPeRows<SA_ROWS>{
+    struct SpatialPeRowsTick<SA_ROWS>{
         static void run(
-            PeWave&,
+            PeWave[SA_ROWS],
             const elem_t[SA_ROWS],
             elem_t[SA_ROWS][SA_COLS],
-            const bool[SA_ROWS][SA_COLS],
-            elem_t[SA_ROWS][SA_COLS]
+            const bool[SA_ROWS][SA_COLS]
         ){
             #pragma HLS INLINE
         }
     };
 
     /**
-     * @brief 共享物理阵列处理一个wave
+     * @brief 一套常驻的CMP + PE阵列完成一个KV tile
      *
-     * 这是systolicArrayTile中唯一允许实例化的空间阵列模块。
-     * QK、softmax和PV从不同阶段调用它，但ALLOCATION约束保证
-     * 这些顺序阶段复用同一套SA_ROWS x SA_COLS物理PE。
-     * partial在归约操作中携带竖直累加值，在SUB_MAX和PWL中
-     * 分别携带-max和PWL intercept，从而不需要阵列外的第二套
-     * 浮点计算通路。
+     * 本函数内部只有一个CMP调用点和一个PE调用点。所有QK、softmax、
+     * row-sum和PV命令进入同一个II=1调度循环，因而不会再把每个wave
+     * 解释成一次ap_ctrl_hs子模块事务。结构固定为SA_COLS个列头CMP以及
+     * SA_ROWS x SA_COLS个PE，规模随配置参数变化。
      */
-    PeWave spatialPeArray(
-        PeWave wave,
-        const elem_t k_tile[SA_COLS][SA_ROWS],
-        const elem_t v_tile[SA_COLS][SA_ROWS],
-        elem_t pe_register[SA_ROWS][SA_COLS],
-        const bool active[SA_ROWS][SA_COLS],
-        elem_t probability[SA_ROWS][SA_COLS]
-    ){
-        #pragma HLS INLINE off
-        #pragma HLS PIPELINE II=1
-        #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=k_tile complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=v_tile complete dim=2
-        #pragma HLS ARRAY_PARTITION variable=pe_register complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=active complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=probability complete dim=0
-        // 同一阶段的相邻wave不会读写同一个状态：QK/PV只读，
-        // PWL各piece只做有序的条件写。阶段边界由函数调用排空。
-        #pragma HLS DEPENDENCE variable=pe_register inter false
-        #pragma HLS DEPENDENCE variable=probability inter false
-
-        elem_t horizontal[SA_ROWS]{};
-        #pragma HLS ARRAY_PARTITION variable=horizontal complete dim=1
-        for(int row=0; row<SA_ROWS; ++row){
-            #pragma HLS UNROLL
-            if(wave.op==PeWaveOp::QK){
-                horizontal[row] =
-                    k_tile[wave.index.to_uint()][row];
-            }else if(wave.op==PeWaveOp::SCALE){
-                horizontal[row] = elemAttentionScale();
-            }else if(wave.op==PeWaveOp::PWL){
-                horizontal[row] =
-                    EXP2_SLOPES[wave.index.to_uint()];
-            }else if(wave.op==PeWaveOp::PV){
-                horizontal[row] = row<SA_COLS
-                    ? v_tile[row][wave.index.to_uint()] : elemZero();
-            }else{
-                horizontal[row] = elemOne();
-            }
-        }
-
-        SpatialPeRows<0>::run(
-            wave,
-            horizontal,
-            pe_register,
-            active,
-            probability
-        );
-        return wave;
-    }
 
     /**
-     * 一套SA_ROWS x SA_COLS物理PE依次驻留Q、S/N、P。
+     * @brief 一套常驻CMP + PE阵列的逐拍token引擎
      *
-     * 抽象层级与Scala实现一致：阵列在整个tile期间常驻，
-     * 一个wave穿过展开的4排空间PE，HLS在排间数据依赖上
-     * 插入FMA管线寄存器，外层仍可每拍发射一个新wave。
-     * QK、softmax和PV在每个物理PE中只有一个MacUnit
-     * 调用点，因此不会形成按阶段复制的多套算术阵列。
+     * QK token从底行向上，score经顶部CMP后每拍向下一行restream；
+     * softmax、row-sum和PV token从顶部向下。每个(row,col)只有一个
+     * spatialPeCell调用点，多个token可同时驻留在各PE的FMA流水级中。
+     * S/N/P始终只保存在pe_register，不再物化外部score/probability阵列。
      */
-    void systolicArrayTile(
+    void spatialSystolicArrayTileTick(
         const TileMeta& meta,
         const elem_t q_tile[SA_COLS][SA_ROWS],
         const elem_t k_tile[SA_COLS][SA_ROWS],
         const elem_t v_tile[SA_COLS][SA_ROWS],
-        acc_t cmp_max[SA_COLS],
-        SaTileResult& result
+        CMPState cmp_state[SA_COLS],
+        SaResultStream& result_stream
     ){
         #pragma HLS INLINE off
-        // 只允许一套参数化空间阵列，各计算阶段按时分复用。
-        #pragma HLS ALLOCATION function instances=spatialPeArray limit=1
         #pragma HLS ARRAY_PARTITION variable=q_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=k_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=v_tile type=complete dim=2
-        #pragma HLS ARRAY_PARTITION variable=cmp_max type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=cmp_state type=complete dim=1
+
+        constexpr int KEY_TILE = SA_COLS;
+        // 与当前peMacUnit综合延迟一致；data/valid/op/tag共用此延迟。
+        constexpr int PE_TOKEN_LATENCY = 9;
+        constexpr int QK_START = SA_COLS;
+        constexpr int FIRST_SCORE =
+            QK_START+SA_ROWS*PE_TOKEN_LATENCY;
+        constexpr int SCORES_READY = FIRST_SCORE+2*KEY_TILE-2;
+        constexpr int MAX_DIFF_CYCLE = SCORES_READY+1;
+        constexpr int SUB_MAX_CYCLE = MAX_DIFF_CYCLE+1;
+        constexpr int SCALE_CYCLE =
+            SUB_MAX_CYCLE+PE_TOKEN_LATENCY+1;
+        constexpr int PWL_START = SCALE_CYCLE+PE_TOKEN_LATENCY+1;
+        constexpr int PWL_END = PWL_START+exp2PWLPieces-1;
+        constexpr int ROW_SUM_CYCLE =
+            PWL_END+PE_TOKEN_LATENCY+1;
+        constexpr int PV_START = ROW_SUM_CYCLE+1;
+        constexpr int LAST_RESULT_CYCLE =
+            PV_START+SA_ROWS-1+SA_ROWS*PE_TOKEN_LATENCY;
+        constexpr int TOTAL_CYCLES = LAST_RESULT_CYCLE+1;
 
         elem_t pe_register[SA_ROWS][SA_COLS]{};
-        acc_t scores[SA_COLS][SA_COLS]{};
         bool active[SA_ROWS][SA_COLS]{};
-        elem_t probability[SA_ROWS][SA_COLS]{};
-        #pragma HLS ARRAY_PARTITION variable=pe_register type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=scores type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=active type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=probability type=complete dim=0
-        // QK的每个key写独立bank；阶段结束后才读取scores。
-        #pragma HLS DEPENDENCE variable=scores inter false
-
-        for(int feature=0; feature<SA_ROWS; ++feature){
-            #pragma HLS UNROLL
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                pe_register[feature][query] = q_tile[query][feature];
-            }
-        }
-
-        acc_t previous_max[SA_COLS]{};
-        #pragma HLS ARRAY_PARTITION variable=previous_max type=complete dim=1
-        for(int query=0; query<SA_COLS; ++query){
-            #pragma HLS UNROLL
-            previous_max[query] = cmp_max[query];
-            if(meta.initialize){
-                cmp_max[query] = accMinimum();
-            }
-        }
-
-        // QK只负责连续发射key wave。最大值在流水排空后归约，
-        // 不再形成“本次max写回 -> 下一cycle阶段读取”的假反馈。
-        for(int key=0; key<SA_COLS; ++key){
-            #pragma HLS PIPELINE II=1
-            PeWave wave{};
-            #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
-            wave.valid = true;
-            wave.op = PeWaveOp::QK;
-            wave.index = (PeWaveIndex)key;
-            const PeWave completed = spatialPeArray(
-                wave,
-                k_tile,
-                v_tile,
-                pe_register,
-                active,
-                probability
-            );
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                scores[query][key] = completed.partial[query];
-            }
-        }
-
-        for(int query=0; query<SA_COLS; ++query){
-            #pragma HLS UNROLL
-            acc_t next_max = cmp_max[query];
-            for(int key=0; key<SA_COLS; ++key){
-                #pragma HLS UNROLL
-                if(laneEnabled(meta, query, key)){
-                    next_max = finiteAccMax(
-                        scores[query][key], next_max
-                    );
-                }
-            }
-            cmp_max[query] = next_max;
-        }
+        PeWave pe_pipeline[SA_ROWS][PE_TOKEN_LATENCY]{};
+        ScoreWave score_pipeline[SA_ROWS]{};
+        #pragma HLS ARRAY_PARTITION variable=pe_register complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=active complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=pe_pipeline complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=score_pipeline complete dim=1
 
         for(int row=0; row<SA_ROWS; ++row){
             #pragma HLS UNROLL
             for(int query=0; query<SA_COLS; ++query){
                 #pragma HLS UNROLL
-                active[row][query] = row<SA_COLS &&
+                active[row][query] = row<KEY_TILE &&
                     laneEnabled(meta, query, row);
-                probability[row][query] = elemZero();
-                pe_register[row][query] = active[row][query]
-                    ? cvtAtoE(scores[query][row]) : elemZero();
             }
         }
 
-        // S-max与attention scale之间存在真实的PE寄存器依赖，
-        // 因而作为两个顺序wave执行，而不是伪装成同一流水循环。
-        {
-            PeWave wave{};
-            #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
-            wave.valid = true;
-            wave.op = PeWaveOp::SUB_MAX;
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                wave.partial[query] = -cmp_max[query];
-            }
-            (void)spatialPeArray(
-                wave,
-                k_tile,
-                v_tile,
-                pe_register,
-                active,
-                probability
-            );
-        }
-
-        {
-            PeWave wave{};
-            #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
-            wave.valid = true;
-            wave.op = PeWaveOp::SCALE;
-            (void)spatialPeArray(
-                wave,
-                k_tile,
-                v_tile,
-                pe_register,
-                active,
-                probability
-            );
-        }
-
-        for(int piece=0; piece<exp2PWLPieces; ++piece){
+        for(int cycle=0; cycle<TOTAL_CYCLES; ++cycle){
             #pragma HLS PIPELINE II=1
-            #pragma HLS DEPENDENCE variable=probability inter false
-            PeWave wave{};
-            #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
-            wave.valid = true;
-            wave.op = PeWaveOp::PWL;
-            wave.index = (PeWaveIndex)piece;
-            const acc_t intercept = exp2PWLIntercept(
-                (exp2_counter_t)piece
-            );
+            #pragma HLS LOOP_FLATTEN off
+            // 调度器保证下一次读取发生在对应commit后；同拍RAW仍保留。
+            #pragma HLS DEPENDENCE variable=pe_register inter false
+
+            const int pipeline_slot = cycle%PE_TOKEN_LATENCY;
+            PeWave row_input[SA_ROWS]{};
+            PeWave row_result[SA_ROWS]{};
+            #pragma HLS ARRAY_PARTITION variable=row_input complete dim=0
+            #pragma HLS ARRAY_PARTITION variable=row_result complete dim=0
+
+            PeWave qk_at_cmp{};
+            PeWave bottom_result{};
+
+            // 每个PE行取出九拍前启动的token，提交本行结果后送往邻行。
+            for(int row=0; row<SA_ROWS; ++row){
+                #pragma HLS UNROLL
+                const PeWave completed = pe_pipeline[row][pipeline_slot];
+                if(completed.valid){
+                    for(int query=0; query<SA_COLS; ++query){
+                        #pragma HLS UNROLL
+                        if(active[row][query] &&
+                                (completed.op==PeWaveOp::SUB_MAX ||
+                                 completed.op==PeWaveOp::SCALE)){
+                            pe_register[row][query] =
+                                completed.element[query];
+                        }else if(active[row][query] &&
+                                completed.op==PeWaveOp::PWL &&
+                                completed.exp2_match[query]){
+                            pe_register[row][query] =
+                                completed.element[query];
+                        }
+                    }
+
+                    if(completed.direction==PeWaveDirection::UP){
+                        if(row==0){
+                            qk_at_cmp = completed;
+                        }else{
+                            row_input[row-1] = completed;
+                        }
+                    }else if(row+1==SA_ROWS){
+                        bottom_result = completed;
+                    }else{
+                        row_input[row+1] = completed;
+                    }
+                }
+            }
+
+            // Tile feeder每拍装入一个query列。SRAM读延迟与InputDelayer
+            // 属于本轮明确不修改的存储边界。
+            if(cycle<SA_COLS){
+                for(int row=0; row<SA_ROWS; ++row){
+                    #pragma HLS UNROLL
+                    pe_register[row][cycle] = q_tile[cycle][row];
+                }
+            }
+
+            // 连续KEY_TILE拍从阵列底部启动QK wave。
+            if(cycle>=QK_START && cycle<QK_START+KEY_TILE){
+                PeWave source{};
+                #pragma HLS ARRAY_PARTITION variable=source.partial complete dim=1
+                source.valid = true;
+                source.op = PeWaveOp::QK;
+                source.direction = PeWaveDirection::UP;
+                source.index = (PeWaveIndex)(cycle-QK_START);
+                row_input[SA_ROWS-1] = source;
+            }
+
+            CmpWaveOp cmp_op = CmpWaveOp::HOLD;
+            bool cmp_valid = false;
+            int cmp_item = 0;
+            if(cycle==0 && meta.initialize){
+                cmp_valid = true;
+                cmp_op = CmpWaveOp::RESET;
+            }else if(qk_at_cmp.valid){
+                cmp_valid = true;
+                cmp_op = CmpWaveOp::UPDATE;
+                cmp_item = qk_at_cmp.index.to_int();
+            }else if(cycle==MAX_DIFF_CYCLE){
+                cmp_valid = true;
+                cmp_op = CmpWaveOp::PROP_MAX_DIFF;
+            }else if(cycle==SUB_MAX_CYCLE){
+                cmp_valid = true;
+                cmp_op = CmpWaveOp::PROP_MAX;
+            }else if(cycle>=PWL_START && cycle<=PWL_END){
+                cmp_valid = true;
+                cmp_op = CmpWaveOp::PROP_EXP2_INTERCEPTS;
+                cmp_item = cycle-PWL_START;
+            }else if(cycle==ROW_SUM_CYCLE){
+                cmp_valid = true;
+                cmp_op = CmpWaveOp::PROP_ZERO;
+            }
+
+            acc_t cmp_input[SA_COLS]{};
+            acc_t cmp_output[SA_COLS]{};
+            #pragma HLS ARRAY_PARTITION variable=cmp_input complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=cmp_output complete dim=1
             for(int query=0; query<SA_COLS; ++query){
                 #pragma HLS UNROLL
-                wave.partial[query] = intercept;
+                cmp_input[query] = qk_at_cmp.partial[query];
             }
-            (void)spatialPeArray(
-                wave,
-                k_tile,
-                v_tile,
-                pe_register,
-                active,
-                probability
+            SpatialCmpColumns<0>::run(
+                cmp_valid, cmp_op, cmp_item, meta,
+                cmp_input, cmp_state, cmp_output
             );
-        }
 
-        {
-            PeWave wave{};
-            #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
-            wave.valid = true;
-            wave.op = PeWaveOp::ROW_SUM;
-            const PeWave completed = spatialPeArray(
-                wave,
-                k_tile,
-                v_tile,
-                pe_register,
-                active,
-                probability
-            );
+            ScoreWave injected_score{};
+            #pragma HLS ARRAY_PARTITION variable=injected_score.score complete dim=1
+            if(cmp_op==CmpWaveOp::UPDATE){
+                injected_score.valid = true;
+                injected_score.key = (PeWaveIndex)cmp_item;
+                for(int query=0; query<SA_COLS; ++query){
+                    #pragma HLS UNROLL
+                    injected_score.score[query] =
+                        viewAasE(cmp_output[query]);
+                }
+            }
+
+            // Score从CMP每拍向下一行移动；到tag对应行时原地覆盖Q。
+            ScoreWave next_score_pipeline[SA_ROWS]{};
+            #pragma HLS ARRAY_PARTITION variable=next_score_pipeline complete dim=1
+            for(int row=0; row<SA_ROWS; ++row){
+                #pragma HLS UNROLL
+                const ScoreWave score_wave = row==0 && injected_score.valid
+                    ? injected_score : score_pipeline[row];
+                if(score_wave.valid){
+                    if(score_wave.key.to_int()==row){
+                        for(int query=0; query<SA_COLS; ++query){
+                            #pragma HLS UNROLL
+                            pe_register[row][query] = active[row][query]
+                                ? score_wave.score[query] : elemZero();
+                        }
+                    }
+                    if(row+1<SA_ROWS){
+                        next_score_pipeline[row+1] = score_wave;
+                    }
+                }
+            }
+            for(int row=0; row<SA_ROWS; ++row){
+                #pragma HLS UNROLL
+                score_pipeline[row] = next_score_pipeline[row];
+            }
+
+            PeWave down_source{};
+            #pragma HLS ARRAY_PARTITION variable=down_source.partial complete dim=1
+            int source_item = 0;
+            if(cycle==SUB_MAX_CYCLE){
+                down_source.valid = true;
+                down_source.op = PeWaveOp::SUB_MAX;
+            }else if(cycle==SCALE_CYCLE){
+                down_source.valid = true;
+                down_source.op = PeWaveOp::SCALE;
+            }else if(cycle>=PWL_START && cycle<=PWL_END){
+                source_item = cycle-PWL_START;
+                down_source.valid = true;
+                down_source.op = PeWaveOp::PWL;
+                down_source.index = (PeWaveIndex)source_item;
+            }else if(cycle==ROW_SUM_CYCLE){
+                down_source.valid = true;
+                down_source.op = PeWaveOp::ROW_SUM;
+            }else if(cycle>=PV_START && cycle<PV_START+SA_ROWS){
+                source_item = cycle-PV_START;
+                down_source.valid = true;
+                down_source.op = PeWaveOp::PV;
+                down_source.index = (PeWaveIndex)source_item;
+            }
+            down_source.direction = PeWaveDirection::DOWN;
             for(int query=0; query<SA_COLS; ++query){
                 #pragma HLS UNROLL
-                result.rowsum[query] = completed.partial[query];
+                if(down_source.op==PeWaveOp::SUB_MAX ||
+                        down_source.op==PeWaveOp::PWL ||
+                        down_source.op==PeWaveOp::ROW_SUM){
+                    down_source.partial[query] = cmp_output[query];
+                }
             }
-        }
+            if(down_source.valid){
+                row_input[0] = down_source;
+            }
 
-        for(int feature=0; feature<SA_ROWS; ++feature){
-            #pragma HLS PIPELINE II=1
-            PeWave wave{};
-            #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
-            wave.valid = true;
-            wave.op = PeWaveOp::PV;
-            wave.index = (PeWaveIndex)feature;
-            const PeWave completed = spatialPeArray(
-                wave,
-                k_tile,
-                v_tile,
-                pe_register,
-                active,
-                probability
-            );
-            for(int query=0; query<SA_COLS; ++query){
+            elem_t horizontal[SA_ROWS]{};
+            #pragma HLS ARRAY_PARTITION variable=horizontal complete dim=1
+            for(int row=0; row<SA_ROWS; ++row){
                 #pragma HLS UNROLL
-                result.pv[query][feature] = completed.partial[query];
+                const PeWaveOp op = row_input[row].op;
+                const int item = row_input[row].index.to_int();
+                if(op==PeWaveOp::QK){
+                    horizontal[row] = k_tile[item][row];
+                }else if(op==PeWaveOp::SCALE){
+                    horizontal[row] = elemAttentionScale();
+                }else if(op==PeWaveOp::PWL){
+                    horizontal[row] = EXP2_SLOPES[item];
+                }else if(op==PeWaveOp::PV){
+                    horizontal[row] = row<KEY_TILE
+                        ? v_tile[row][item] : elemZero();
+                }else{
+                    horizontal[row] = elemOne();
+                }
+                row_result[row] = row_input[row];
+            }
+
+            SpatialPeRowsTick<0>::run(
+                row_result, horizontal, pe_register, active
+            );
+            for(int row=0; row<SA_ROWS; ++row){
+                #pragma HLS UNROLL
+                pe_pipeline[row][pipeline_slot] = row_result[row];
+            }
+
+            if(cmp_op==CmpWaveOp::PROP_MAX_DIFF){
+                SaResultToken token{};
+                #pragma HLS ARRAY_PARTITION variable=token.data complete dim=1
+                token.kind = SaResultKind::MAX_DIFF;
+                token.initialize = meta.initialize;
+                token.finalize = meta.finalize;
+                token.active_queries = meta.active_queries;
+                for(int query=0; query<SA_COLS; ++query){
+                    #pragma HLS UNROLL
+                    token.data[query] = cmp_output[query];
+                }
+                result_stream.write(token);
+            }else if(bottom_result.valid &&
+                    bottom_result.op==PeWaveOp::ROW_SUM){
+                SaResultToken token{};
+                #pragma HLS ARRAY_PARTITION variable=token.data complete dim=1
+                token.kind = SaResultKind::ROW_SUM;
+                for(int query=0; query<SA_COLS; ++query){
+                    #pragma HLS UNROLL
+                    token.data[query] = bottom_result.partial[query];
+                }
+                result_stream.write(token);
+            }else if(bottom_result.valid &&
+                    bottom_result.op==PeWaveOp::PV){
+                SaResultToken token{};
+                #pragma HLS ARRAY_PARTITION variable=token.data complete dim=1
+                token.kind = SaResultKind::PV;
+                token.index = bottom_result.index;
+                for(int query=0; query<SA_COLS; ++query){
+                    #pragma HLS UNROLL
+                    token.data[query] = bottom_result.partial[query];
+                }
+                result_stream.write(token);
             }
         }
-
-        for(int query=0; query<SA_COLS; ++query){
-            #pragma HLS UNROLL
-            result.max_diff[query] =
-                previous_max[query]-cmp_max[query];
-        }
-        result.initialize = meta.initialize;
-        result.finalize = meta.finalize;
-        result.active_queries = meta.active_queries;
     }
 
     void systolicArrayProcess(
@@ -751,11 +923,11 @@ namespace streaming_v2_detail{
         elem_t q_tile[SA_COLS][SA_ROWS]{};
         elem_t k_tile[SA_COLS][SA_ROWS]{};
         elem_t v_tile[SA_COLS][SA_ROWS]{};
-        acc_t cmp_max[SA_COLS]{};
+        CMPState cmp_state[SA_COLS]{};
         #pragma HLS ARRAY_PARTITION variable=q_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=k_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=v_tile type=complete dim=2
-        #pragma HLS ARRAY_PARTITION variable=cmp_max type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=cmp_state type=complete dim=1
 
         const unsigned tiles = tileCount(length);
         for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
@@ -783,14 +955,10 @@ namespace streaming_v2_detail{
                     }
                 }
 
-                SaTileResult result{};
-                #pragma HLS ARRAY_PARTITION variable=result.max_diff type=complete dim=1
-                #pragma HLS ARRAY_PARTITION variable=result.rowsum type=complete dim=1
-                #pragma HLS ARRAY_PARTITION variable=result.pv type=complete dim=0
-                systolicArrayTile(
-                    meta, q_tile, k_tile, v_tile, cmp_max, result
+                spatialSystolicArrayTileTick(
+                    meta, q_tile, k_tile, v_tile,
+                    cmp_state, sa_result_stream
                 );
-                sa_result_stream.write(result);
             }
         }
     }
@@ -816,51 +984,43 @@ namespace streaming_v2_detail{
             #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
             for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
-                const SaTileResult result = sa_result_stream.read();
+                const SaResultToken max_token = sa_result_stream.read();
                 acc_t alpha[SA_COLS]{};
                 #pragma HLS ARRAY_PARTITION variable=alpha type=complete dim=1
 
                 // 与FSA一致：oldMax-newMax的exp2属于Accumulator，而非SA。
                 for(int query=0; query<SA_COLS; ++query){
                     #pragma HLS UNROLL
-                    alpha[query] = result.initialize
+                    alpha[query] = max_token.initialize
                         ? accZero()
                         : accExp2PWL(
-                            result.max_diff[query]*attentionScale()
+                            max_token.data[query]*attentionScale()
                         );
                 }
 
-                if(result.initialize){
-                    for(int row=0; row<ACC_ROWS; ++row){
-                        #pragma HLS PIPELINE II=1
-                        for(int query=0; query<SA_COLS; ++query){
-                            #pragma HLS UNROLL
-                            accumulator_sram[row][query] = accZero();
-                        }
-                    }
-                }
-
-                for(int query=0; query<SA_COLS; ++query){
-                    #pragma HLS UNROLL
-                    accumulator_sram[0][query] = accUnit(
-                        alpha[query],
-                        accumulator_sram[0][query],
-                        result.rowsum[query]
-                    );
-                }
-                for(int feature=0; feature<SA_ROWS; ++feature){
+                // rowsum后紧跟SA_ROWS个PV token。每拍只更新一行L/O，
+                // 同一组SA_COLS个Accumulator lane在所有行之间时分复用。
+                for(int event=0; event<SA_ROWS+1; ++event){
                     #pragma HLS PIPELINE II=1
+                    const SaResultToken value_token =
+                        sa_result_stream.read();
+                    const int accumulator_row =
+                        value_token.kind==SaResultKind::ROW_SUM
+                            ? 0 : value_token.index.to_int()+1;
                     for(int query=0; query<SA_COLS; ++query){
                         #pragma HLS UNROLL
-                        accumulator_sram[feature+1][query] = accUnit(
+                        const acc_t old_value = max_token.initialize
+                            ? accZero()
+                            : accumulator_sram[accumulator_row][query];
+                        accumulator_sram[accumulator_row][query] = accUnit(
                             alpha[query],
-                            accumulator_sram[feature+1][query],
-                            result.pv[query][feature]
+                            old_value,
+                            value_token.data[query]
                         );
                     }
                 }
 
-                if(result.finalize){
+                if(max_token.finalize){
                     acc_t inverse_l[SA_COLS]{};
                     #pragma HLS ARRAY_PARTITION \
                         variable=inverse_l type=complete dim=1
@@ -874,7 +1034,7 @@ namespace streaming_v2_detail{
                     }
 
                     for(int query=0;
-                            query<result.active_queries.to_int(); ++query){
+                            query<max_token.active_queries.to_int(); ++query){
                         #pragma HLS PIPELINE II=1
                         AccRowPacket packet{};
                         for(int feature=0; feature<SA_ROWS; ++feature){
