@@ -384,17 +384,6 @@ namespace fsa{
         return peMacUnitImpl(in_a, in_b, in_c, in_exp2);
     }
 
-    PeMacUnitOutput peMacUnitSpatial(
-        const elem_t in_a,
-        const elem_t in_b,
-        const acc_t in_c,
-        const bool in_exp2
-    ){
-        // 新路径在4x4 UNROLL位置实例化空间PE。
-        #pragma HLS INLINE
-        return peMacUnitImpl(in_a, in_b, in_c, in_exp2);
-    }
-
     acc_t accUnit(const acc_t in_a, const acc_t in_b, const acc_t in_c){
         return hls::fma(in_a, in_b, in_c);
     }

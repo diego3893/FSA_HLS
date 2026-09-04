@@ -314,6 +314,22 @@ namespace streaming_v2_detail{
         PV = 6
     };
 
+    constexpr int maxConstexpr(const int a, const int b){
+        return a>b ? a : b;
+    }
+
+    constexpr int unsignedWidth(const unsigned value){
+        return value<=1U ? 1 : 1+unsignedWidth(value>>1);
+    }
+
+    constexpr int PE_WAVE_ITEM_COUNT = maxConstexpr(
+        maxConstexpr(SA_ROWS, SA_COLS), exp2PWLPieces
+    );
+    constexpr int PE_WAVE_INDEX_WIDTH = unsignedWidth(
+        (unsigned)(PE_WAVE_ITEM_COUNT-1)
+    );
+    using PeWaveIndex = ap_uint<PE_WAVE_INDEX_WIDTH>;
+
     /**
      * 流过SA的一个控制波。partial对应Scala PE的上/下方数据，
      * index在QK时是key、PWL时是piece、PV时是feature。
@@ -321,14 +337,145 @@ namespace streaming_v2_detail{
     struct PeWave{
         bool valid = false;
         PeWaveOp op = PeWaveOp::IDLE;
-        ap_uint<4> index = 0;
+        PeWaveIndex index = 0;
         acc_t partial[SA_COLS]{};
     };
 
-    // 当前综合报告中单PE MacUnit为9拍。它只影响wave latency，
-    // 不影响阵列每拍接收新wave的throughput。
-    constexpr int PE_MAC_LATENCY = 9;
-    constexpr int SA_REDUCTION_LATENCY = SA_ROWS*PE_MAC_LATENCY;
+    /**
+     * 每个坐标特化为一个不内联的PE层次。这不是为不同坐标
+     * 实现不同算法，而是告诉HLS这些调用是同时存在的空间PE，
+     * 不得把它们折叠为少量共享运算器。每个PE内部仍只有一个
+     * 原始peMacUnit，MAC和exp2按控制时分复用同一条通路。
+     */
+    template<int ROW, int COL>
+    PeMacUnitOutput spatialPeCell(
+        const elem_t operand_a,
+        const elem_t operand_b,
+        const acc_t operand_c,
+        const bool exp2_mode
+    ){
+        static_assert(ROW>=0 && ROW<SA_ROWS, "PE row out of range");
+        static_assert(COL>=0 && COL<SA_COLS, "PE col out of range");
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        return peMacUnit(
+            operand_a, operand_b, operand_c, exp2_mode
+        );
+    }
+
+    template<int ROW, int COL>
+    struct SpatialPeColumns{
+        static void run(
+            PeWave& wave,
+            const elem_t horizontal[SA_ROWS],
+            const acc_t vertical[SA_COLS],
+            elem_t pe_register[SA_ROWS][SA_COLS],
+            const bool active[SA_ROWS][SA_COLS],
+            elem_t probability[SA_ROWS][SA_COLS]
+        ){
+            #pragma HLS INLINE
+            const bool reduce = wave.op==PeWaveOp::QK ||
+                wave.op==PeWaveOp::ROW_SUM ||
+                wave.op==PeWaveOp::PV;
+            const bool use_probability = wave.op==PeWaveOp::ROW_SUM ||
+                wave.op==PeWaveOp::PV;
+            const elem_t operand_a = use_probability
+                ? probability[ROW][COL] : pe_register[ROW][COL];
+            const acc_t operand_c = reduce
+                ? wave.partial[COL] : vertical[COL];
+            const bool exp2_mode = wave.op==PeWaveOp::PWL;
+
+            const PeMacUnitOutput unit = spatialPeCell<ROW, COL>(
+                operand_a,
+                horizontal[ROW],
+                operand_c,
+                exp2_mode
+            );
+
+            if(wave.valid && reduce){
+                wave.partial[COL] = unit.out_accType;
+            }else if(wave.valid && active[ROW][COL] &&
+                    (wave.op==PeWaveOp::SUB_MAX ||
+                     wave.op==PeWaveOp::SCALE)){
+                pe_register[ROW][COL] = unit.out_elemType;
+            }else if(wave.valid && active[ROW][COL] &&
+                    wave.op==PeWaveOp::PWL && unit.out_exp2){
+                probability[ROW][COL] = unit.out_elemType;
+            }
+
+            SpatialPeColumns<ROW, COL+1>::run(
+                wave,
+                horizontal,
+                vertical,
+                pe_register,
+                active,
+                probability
+            );
+        }
+    };
+
+    template<int ROW>
+    struct SpatialPeColumns<ROW, SA_COLS>{
+        static void run(
+            PeWave&,
+            const elem_t[SA_ROWS],
+            const acc_t[SA_COLS],
+            elem_t[SA_ROWS][SA_COLS],
+            const bool[SA_ROWS][SA_COLS],
+            elem_t[SA_ROWS][SA_COLS]
+        ){
+            #pragma HLS INLINE
+        }
+    };
+
+    template<int ROW>
+    struct SpatialPeRows{
+        static void run(
+            PeWave& wave,
+            const elem_t horizontal[SA_ROWS],
+            const acc_t vertical[SA_COLS],
+            elem_t pe_register[SA_ROWS][SA_COLS],
+            const bool active[SA_ROWS][SA_COLS],
+            elem_t probability[SA_ROWS][SA_COLS]
+        ){
+            #pragma HLS INLINE
+            SpatialPeColumns<ROW, 0>::run(
+                wave,
+                horizontal,
+                vertical,
+                pe_register,
+                active,
+                probability
+            );
+            SpatialPeRows<ROW+1>::run(
+                wave,
+                horizontal,
+                vertical,
+                pe_register,
+                active,
+                probability
+            );
+        }
+    };
+
+    template<>
+    struct SpatialPeRows<SA_ROWS>{
+        static void run(
+            PeWave&,
+            const elem_t[SA_ROWS],
+            const acc_t[SA_COLS],
+            elem_t[SA_ROWS][SA_COLS],
+            const bool[SA_ROWS][SA_COLS],
+            elem_t[SA_ROWS][SA_COLS]
+        ){
+            #pragma HLS INLINE
+        }
+    };
+
+    // peMacUnit本体为9拍，再保留一拍PE层次的边界裕量。
+    // 这只扩展wave latency，每个空间PE仍可每拍接收新wave。
+    constexpr int PE_WAVE_LATENCY = 10;
+    constexpr int SA_REDUCTION_LATENCY = SA_ROWS*PE_WAVE_LATENCY;
 
     /**
      * 一套SA_ROWS x SA_COLS物理PE依次驻留Q、S/N、P。
@@ -362,6 +509,9 @@ namespace streaming_v2_detail{
         #pragma HLS ARRAY_PARTITION variable=scores type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=active type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=probability type=complete dim=0
+        // QK写入和LOAD_S读取由cycle调度隔开了整个SA排空窗口。
+        // 对流水迭代而言不存在同一scores bank的冲突。
+        #pragma HLS DEPENDENCE variable=scores inter false
 
         for(int feature=0; feature<SA_ROWS; ++feature){
             #pragma HLS UNROLL
@@ -388,11 +538,11 @@ namespace streaming_v2_detail{
             SA_COLS+SA_REDUCTION_LATENCY+1;
         static const int POST_START_CYCLE = LOAD_S_CYCLE+3;
         static const int SCALE_CYCLE =
-            POST_START_CYCLE+PE_MAC_LATENCY+1;
+            POST_START_CYCLE+PE_WAVE_LATENCY+1;
         static const int PWL_START_CYCLE =
-            SCALE_CYCLE+PE_MAC_LATENCY+1;
+            SCALE_CYCLE+PE_WAVE_LATENCY+1;
         static const int ROW_SUM_CYCLE = PWL_START_CYCLE+
-            exp2PWLPieces+PE_MAC_LATENCY;
+            exp2PWLPieces+PE_WAVE_LATENCY;
         static const int PV_START_CYCLE = ROW_SUM_CYCLE+1;
         static const int SA_TILE_CYCLES = PV_START_CYCLE+SA_ROWS;
 
@@ -419,7 +569,7 @@ namespace streaming_v2_detail{
             if(cycle<SA_COLS){
                 injected.valid = true;
                 injected.op = PeWaveOp::QK;
-                injected.index = (ap_uint<4>)cycle;
+                injected.index = (PeWaveIndex)cycle;
             }else if(cycle==POST_START_CYCLE){
                 injected.valid = true;
                 injected.op = PeWaveOp::SUB_MAX;
@@ -431,7 +581,7 @@ namespace streaming_v2_detail{
                 injected.valid = true;
                 injected.op = PeWaveOp::PWL;
                 injected.index =
-                    (ap_uint<4>)(cycle-PWL_START_CYCLE);
+                    (PeWaveIndex)(cycle-PWL_START_CYCLE);
             }else if(cycle==ROW_SUM_CYCLE){
                 injected.valid = true;
                 injected.op = PeWaveOp::ROW_SUM;
@@ -440,90 +590,52 @@ namespace streaming_v2_detail{
                 injected.valid = true;
                 injected.op = PeWaveOp::PV;
                 injected.index =
-                    (ap_uint<4>)(cycle-PV_START_CYCLE);
+                    (PeWaveIndex)(cycle-PV_START_CYCLE);
             }
 
             PeWave wave = injected;
             #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
+            elem_t horizontal[SA_ROWS]{};
+            acc_t vertical[SA_COLS]{};
+            #pragma HLS ARRAY_PARTITION variable=horizontal complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=vertical complete dim=1
+
             for(int row=0; row<SA_ROWS; ++row){
                 #pragma HLS UNROLL
-                for(int query=0; query<SA_COLS; ++query){
-                    #pragma HLS UNROLL
-                    elem_t operand_a = elemZero();
-                    elem_t operand_b = elemZero();
-                    acc_t operand_c = accZero();
-                    bool exp2_mode = false;
-
-                    if(wave.valid){
-                        switch(wave.op){
-                        case PeWaveOp::QK:
-                            operand_a = pe_register[row][query];
-                            operand_b =
-                                k_tile[wave.index.to_uint()][row];
-                            operand_c = wave.partial[query];
-                            break;
-                        case PeWaveOp::SUB_MAX:
-                            operand_a = pe_register[row][query];
-                            operand_b = elemOne();
-                            operand_c = -cmp_max[query];
-                            break;
-                        case PeWaveOp::SCALE:
-                            operand_a = pe_register[row][query];
-                            operand_b = elemAttentionScale();
-                            break;
-                        case PeWaveOp::PWL:
-                            operand_a = pe_register[row][query];
-                            operand_b =
-                                EXP2_SLOPES[wave.index.to_uint()];
-                            operand_c = exp2PWLIntercept(
-                                (exp2_counter_t)wave.index
-                            );
-                            exp2_mode = true;
-                            break;
-                        case PeWaveOp::ROW_SUM:
-                            operand_a = active[row][query]
-                                ? probability[row][query] : elemZero();
-                            operand_b = elemOne();
-                            operand_c = wave.partial[query];
-                            break;
-                        case PeWaveOp::PV:
-                            operand_a = active[row][query]
-                                ? probability[row][query] : elemZero();
-                            if(row<SA_COLS){
-                                operand_b =
-                                    v_tile[row][wave.index.to_uint()];
-                            }
-                            operand_c = wave.partial[query];
-                            break;
-                        default:
-                            break;
-                        }
-                    }
-
-                    // 每个物理PE在整个调度器中只有这一个算术调用点。
-                    const PeMacUnitOutput unit = peMacUnitSpatial(
-                        operand_a, operand_b, operand_c, exp2_mode
-                    );
-
-                    if(wave.valid && (wave.op==PeWaveOp::QK ||
-                            wave.op==PeWaveOp::ROW_SUM ||
-                            wave.op==PeWaveOp::PV)){
-                        wave.partial[query] = unit.out_accType;
-                    }else if(wave.valid && active[row][query] &&
-                            (wave.op==PeWaveOp::SUB_MAX ||
-                             wave.op==PeWaveOp::SCALE)){
-                        pe_register[row][query] = unit.out_elemType;
-                    }else if(wave.valid && active[row][query] &&
-                            wave.op==PeWaveOp::PWL &&
-                            unit.out_exp2){
-                        // 8个piece始终读取同一份scaled-score快照。
-                        // 只有命中piece写probability，因此piece间没有
-                        // current-next式的读改写反馈。
-                        probability[row][query] = unit.out_elemType;
-                    }
+                if(wave.valid && wave.op==PeWaveOp::QK){
+                    horizontal[row] =
+                        k_tile[wave.index.to_uint()][row];
+                }else if(wave.valid && wave.op==PeWaveOp::SCALE){
+                    horizontal[row] = elemAttentionScale();
+                }else if(wave.valid && wave.op==PeWaveOp::PWL){
+                    horizontal[row] =
+                        EXP2_SLOPES[wave.index.to_uint()];
+                }else if(wave.valid && wave.op==PeWaveOp::PV){
+                    horizontal[row] = row<SA_COLS
+                        ? v_tile[row][wave.index.to_uint()] : elemZero();
+                }else if(wave.valid){
+                    horizontal[row] = elemOne();
                 }
-
             }
+            for(int query=0; query<SA_COLS; ++query){
+                #pragma HLS UNROLL
+                if(wave.valid && wave.op==PeWaveOp::SUB_MAX){
+                    vertical[query] = -cmp_max[query];
+                }else if(wave.valid && wave.op==PeWaveOp::PWL){
+                    vertical[query] = exp2PWLIntercept(
+                        (exp2_counter_t)wave.index
+                    );
+                }
+            }
+
+            SpatialPeRows<0>::run(
+                wave,
+                horizontal,
+                vertical,
+                pe_register,
+                active,
+                probability
+            );
 
             const PeWave completed = wave;
             #pragma HLS ARRAY_PARTITION variable=completed.partial complete dim=1
