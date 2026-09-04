@@ -337,6 +337,40 @@ namespace fsa{
             return index;
         }
 
+        PeMacUnitOutput peMacUnitImpl(
+            const elem_t in_a,
+            const elem_t in_b,
+            const acc_t in_c,
+            const bool in_exp2
+        ){
+            #pragma HLS INLINE
+
+            const PePwlInput pwl_input = preparePePwlInput(in_a);
+            const acc_t fma_a = in_exp2
+                ? pwl_input.fractional : (acc_t)in_a;
+            const acc_t fma_c = in_exp2
+                ? restoreExp2PWLIntercept(in_c) : in_c;
+
+            // PE内唯一的浮点算术通路；模式只选择FMA的输入。
+            const acc_t fma_result = hls::fma(
+                fma_a, (acc_t)in_b, fma_c
+            );
+            acc_t result = in_exp2
+                ? ldexpByBits(fma_result, pwl_input.integer)
+                : fma_result;
+
+            if(in_exp2 && pwl_input.negative_infinity){
+                result = accZero();
+            }
+
+            PeMacUnitOutput output{};
+            output.out_accType = result;
+            output.out_elemType = cvtAtoE(result);
+            output.out_exp2 = in_exp2 &&
+                decodeExp2PWLIndex(in_c)==pwl_input.piece;
+            return output;
+        }
+
     }  // namespace
 
     acc_t peMac(const elem_t in_a, const elem_t in_b, const acc_t in_c){
@@ -345,31 +379,20 @@ namespace fsa{
 
     PeMacUnitOutput peMacUnit(const elem_t in_a, const elem_t in_b, 
                             const acc_t in_c, const bool in_exp2){
-        // 保留这一层，使综合层次能直接核对每个物理PE的单一MacUnit。
+        // 旧路径保留独立MacUnit层次。
         #pragma HLS INLINE off
+        return peMacUnitImpl(in_a, in_b, in_c, in_exp2);
+    }
 
-        const PePwlInput pwl_input = preparePePwlInput(in_a);
-        const acc_t fma_a = in_exp2
-            ? pwl_input.fractional : (acc_t)in_a;
-        const acc_t fma_c = in_exp2
-            ? restoreExp2PWLIntercept(in_c) : in_c;
-
-        // 这是PE中唯一的浮点算术通路；模式仅选择FMA的输入。
-        const acc_t fma_result = hls::fma(fma_a, (acc_t)in_b, fma_c);
-        acc_t result = in_exp2
-            ? ldexpByBits(fma_result, pwl_input.integer)
-            : fma_result;
-
-        if(in_exp2 && pwl_input.negative_infinity){
-            result = accZero();
-        }
-
-        PeMacUnitOutput output{};
-        output.out_accType = result;
-        output.out_elemType = cvtAtoE(result);
-        output.out_exp2 = in_exp2 &&
-            decodeExp2PWLIndex(in_c)==pwl_input.piece;
-        return output;
+    PeMacUnitOutput peMacUnitSpatial(
+        const elem_t in_a,
+        const elem_t in_b,
+        const acc_t in_c,
+        const bool in_exp2
+    ){
+        // 新路径在4x4 UNROLL位置实例化空间PE。
+        #pragma HLS INLINE
+        return peMacUnitImpl(in_a, in_b, in_c, in_exp2);
     }
 
     acc_t accUnit(const acc_t in_a, const acc_t in_b, const acc_t in_c){

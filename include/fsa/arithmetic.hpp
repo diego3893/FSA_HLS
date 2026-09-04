@@ -47,6 +47,20 @@ namespace fsa{
     PeMacUnitOutput peMacUnit(elem_t in_a, elem_t in_b, acc_t in_c, bool in_exp2);
 
     /**
+     * @brief streaming_v2空间PE使用的MacUnit入口
+     *
+     * 算术与peMacUnit完全相同，但会被内联到完全展开的
+     * PE网格，使每个空间PE保留一条独立的FMA/exp2通路。
+     * 独立入口用于避免改变旧路径peMacUnit的综合层次。
+     */
+    PeMacUnitOutput peMacUnitSpatial(
+        elem_t in_a,
+        elem_t in_b,
+        acc_t in_c,
+        bool in_exp2
+    );
+
+    /**
      * @brief Acc的mac计算
      * 
      * @param in_a scale

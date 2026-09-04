@@ -1,6 +1,7 @@
 #include "fsa/streaming_v2.hpp"
 
 #include <hls_stream.h>
+#include <utils/x_hls_utils.h>
 
 #include "fsa/accumulator.hpp"
 #include "fsa/arithmetic.hpp"
@@ -277,6 +278,32 @@ namespace streaming_v2_detail{
             meta.query_base.to_uint()+(unsigned)query;
     }
 
+    /**
+     * @brief 有限FP32的组合max选择
+     *
+     * Attention score不会产生NaN。直接比较IEEE位序可以保留
+     * Scala CMP中的组合max mux，避免HLS生成一个多拍浮点
+     * compare并再次形成key间反馈。CMP的浮点差值通路仍由
+     * result.max_diff的四个列通路保留。
+     */
+    acc_t finiteAccMax(const acc_t a, const acc_t b){
+        #pragma HLS INLINE
+        const fp_struct<acc_t> a_view(a);
+        const fp_struct<acc_t> b_view(b);
+        const ap_uint<32> a_bits = a_view.data();
+        const ap_uint<32> b_bits = b_view.data();
+        const bool a_sign = a_bits[31];
+        const bool b_sign = b_bits[31];
+
+        if(a_sign != b_sign){
+            return a_sign ? b : a;
+        }
+        if(a_sign){
+            return a_bits<b_bits ? a : b;
+        }
+        return a_bits>b_bits ? a : b;
+    }
+
     enum class PeWaveOp : std::uint8_t{
         IDLE = 0,
         QK = 1,
@@ -298,14 +325,19 @@ namespace streaming_v2_detail{
         acc_t partial[SA_COLS]{};
     };
 
+    // 当前综合报告中单PE MacUnit为9拍。它只影响wave latency，
+    // 不影响阵列每拍接收新wave的throughput。
+    constexpr int PE_MAC_LATENCY = 9;
+    constexpr int SA_REDUCTION_LATENCY = SA_ROWS*PE_MAC_LATENCY;
+
     /**
      * 一套SA_ROWS x SA_COLS物理PE依次驻留Q、S/N、P。
      *
-     * 抽象层级与Scala实现一致：阵列在整个tile期间常驻。每拍只向
-     * 第0行注入一个
-     * 控制wave，旧wave通过行间寄存器逐拍向下传递。QK、softmax和PV
-     * 在每个物理PE中只有一个peMacUnit调用点，因此不会形成按阶段复制
-     * 的多套算术阵列。
+     * 抽象层级与Scala实现一致：阵列在整个tile期间常驻，
+     * 一个wave穿过展开的4排空间PE，HLS在排间数据依赖上
+     * 插入FMA管线寄存器，外层仍可每拍发射一个新wave。
+     * QK、softmax和PV在每个物理PE中只有一个MacUnit
+     * 调用点，因此不会形成按阶段复制的多套算术阵列。
      */
     void systolicArrayTile(
         const TileMeta& meta,
@@ -317,7 +349,6 @@ namespace streaming_v2_detail{
     ){
         #pragma HLS INLINE off
         // 4x4 FSA只允许16个物理MacUnit，各计算阶段按时分复用。
-        #pragma HLS ALLOCATION function instances=peMacUnit limit=16
         #pragma HLS ARRAY_PARTITION variable=q_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=k_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=v_tile type=complete dim=2
@@ -326,13 +357,11 @@ namespace streaming_v2_detail{
         elem_t pe_register[SA_ROWS][SA_COLS]{};
         acc_t scores[SA_COLS][SA_COLS]{};
         bool active[SA_ROWS][SA_COLS]{};
-        bool pwl_done[SA_ROWS][SA_COLS]{};
-        PeWave wave_pipe[SA_ROWS]{};
+        elem_t probability[SA_ROWS][SA_COLS]{};
         #pragma HLS ARRAY_PARTITION variable=pe_register type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=scores type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=active type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=pwl_done type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=wave_pipe type=complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=probability type=complete dim=0
 
         for(int feature=0; feature<SA_ROWS; ++feature){
             #pragma HLS UNROLL
@@ -352,16 +381,20 @@ namespace streaming_v2_detail{
             }
         }
 
-        // 周期坐标与AttentionScoreExecPlan对齐：2*rows+1时S从
-        // CMP回填PE，之后SUB/SCALE/PWL/ROWSUM连续流过阵列。
-        static const int LOAD_S_CYCLE = 2*SA_ROWS+1;
-        static const int POST_START_CYCLE = LOAD_S_CYCLE+1;
-        static const int PWL_START_CYCLE = POST_START_CYCLE+2;
-        static const int ROW_SUM_CYCLE = PWL_START_CYCLE+exp2PWLPieces;
+        // Scala计划中相邻PE只隔一个逻辑拍；HLS版的FP FMA是多拍
+        // pipeline。下面保留相同wave顺序，同时把数据依赖的间隔
+        // 扩展为实际算术latency，避免用增大II来隐式等待。
+        static const int LOAD_S_CYCLE =
+            SA_COLS+SA_REDUCTION_LATENCY+1;
+        static const int POST_START_CYCLE = LOAD_S_CYCLE+3;
+        static const int SCALE_CYCLE =
+            POST_START_CYCLE+PE_MAC_LATENCY+1;
+        static const int PWL_START_CYCLE =
+            SCALE_CYCLE+PE_MAC_LATENCY+1;
+        static const int ROW_SUM_CYCLE = PWL_START_CYCLE+
+            exp2PWLPieces+PE_MAC_LATENCY;
         static const int PV_START_CYCLE = ROW_SUM_CYCLE+1;
-        // 包含列间传播和OutputDelayer的排空窗口；4x4配置为30拍。
-        static const int SA_TILE_CYCLES =
-            5*SA_ROWS+exp2PWLPieces+2;
+        static const int SA_TILE_CYCLES = PV_START_CYCLE+SA_ROWS;
 
         for(int cycle=0; cycle<SA_TILE_CYCLES; ++cycle){
             #pragma HLS PIPELINE II=1
@@ -374,7 +407,7 @@ namespace streaming_v2_detail{
                         #pragma HLS UNROLL
                         active[row][query] = row<SA_COLS &&
                             laneEnabled(meta, query, row);
-                        pwl_done[row][query] = false;
+                        probability[row][query] = elemZero();
                         pe_register[row][query] = active[row][query]
                             ? cvtAtoE(scores[query][row]) : elemZero();
                     }
@@ -390,7 +423,7 @@ namespace streaming_v2_detail{
             }else if(cycle==POST_START_CYCLE){
                 injected.valid = true;
                 injected.op = PeWaveOp::SUB_MAX;
-            }else if(cycle==POST_START_CYCLE+1){
+            }else if(cycle==SCALE_CYCLE){
                 injected.valid = true;
                 injected.op = PeWaveOp::SCALE;
             }else if(cycle>=PWL_START_CYCLE &&
@@ -410,15 +443,10 @@ namespace streaming_v2_detail{
                     (ap_uint<4>)(cycle-PV_START_CYCLE);
             }
 
-            PeWave next_pipe[SA_ROWS]{};
-            PeWave completed{};
-            #pragma HLS ARRAY_PARTITION variable=next_pipe complete dim=1
-            #pragma HLS ARRAY_PARTITION variable=completed.partial complete dim=1
+            PeWave wave = injected;
+            #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
             for(int row=0; row<SA_ROWS; ++row){
                 #pragma HLS UNROLL
-                PeWave wave = row==0 ? injected : wave_pipe[row-1];
-                #pragma HLS ARRAY_PARTITION variable=wave.partial complete dim=1
-
                 for(int query=0; query<SA_COLS; ++query){
                     #pragma HLS UNROLL
                     elem_t operand_a = elemZero();
@@ -454,13 +482,13 @@ namespace streaming_v2_detail{
                             break;
                         case PeWaveOp::ROW_SUM:
                             operand_a = active[row][query]
-                                ? pe_register[row][query] : elemZero();
+                                ? probability[row][query] : elemZero();
                             operand_b = elemOne();
                             operand_c = wave.partial[query];
                             break;
                         case PeWaveOp::PV:
                             operand_a = active[row][query]
-                                ? pe_register[row][query] : elemZero();
+                                ? probability[row][query] : elemZero();
                             if(row<SA_COLS){
                                 operand_b =
                                     v_tile[row][wave.index.to_uint()];
@@ -473,7 +501,7 @@ namespace streaming_v2_detail{
                     }
 
                     // 每个物理PE在整个调度器中只有这一个算术调用点。
-                    const PeMacUnitOutput unit = peMacUnit(
+                    const PeMacUnitOutput unit = peMacUnitSpatial(
                         operand_a, operand_b, operand_c, exp2_mode
                     );
 
@@ -487,22 +515,18 @@ namespace streaming_v2_detail{
                         pe_register[row][query] = unit.out_elemType;
                     }else if(wave.valid && active[row][query] &&
                             wave.op==PeWaveOp::PWL &&
-                            !pwl_done[row][query] && unit.out_exp2){
-                        pe_register[row][query] = unit.out_elemType;
-                        pwl_done[row][query] = true;
+                            unit.out_exp2){
+                        // 8个piece始终读取同一份scaled-score快照。
+                        // 只有命中piece写probability，因此piece间没有
+                        // current-next式的读改写反馈。
+                        probability[row][query] = unit.out_elemType;
                     }
                 }
 
-                next_pipe[row] = wave;
-                if(row==SA_ROWS-1){
-                    completed = wave;
-                }
             }
 
-            for(int row=0; row<SA_ROWS; ++row){
-                #pragma HLS UNROLL
-                wave_pipe[row] = next_pipe[row];
-            }
+            const PeWave completed = wave;
+            #pragma HLS ARRAY_PARTITION variable=completed.partial complete dim=1
 
             if(completed.valid && completed.op==PeWaveOp::QK){
                 const int key = completed.index.to_int();
@@ -510,9 +534,12 @@ namespace streaming_v2_detail{
                     #pragma HLS UNROLL
                     scores[query][key] = completed.partial[query];
                     if(laneEnabled(meta, query, key)){
-                        cmp_max[query] = accCmp(
+                        // Scala CMP的max选择是组合路径；差值FMA只在
+                        // PROP_MAX_DIFF时使用。将两者拆开可避免把
+                        // 9拍FP FMA延迟误形成key间II=9的max反馈。
+                        cmp_max[query] = finiteAccMax(
                             completed.partial[query], cmp_max[query]
-                        ).out_max;
+                        );
                     }
                 }
             }else if(completed.valid &&
