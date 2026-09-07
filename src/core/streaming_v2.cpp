@@ -5,6 +5,7 @@
 
 #include "fsa/accumulator.hpp"
 #include "fsa/arithmetic.hpp"
+#include "fsa/delayer.hpp"
 #include "fsa/state.hpp"
 
 namespace fsa{
@@ -13,6 +14,17 @@ namespace streaming_v2_detail{
     static_assert(
         SA_ROWS>=SA_COLS,
         "streaming v2要求SA高度不小于token tile宽度"
+    );
+
+    constexpr int SPAD_Q_BASE_ADDRESS = 0;
+    constexpr int SPAD_K_BASE_ADDRESS =
+        SPAD_Q_BASE_ADDRESS+SA_COLS;
+    constexpr int SPAD_VT_BASE_ADDRESS =
+        SPAD_K_BASE_ADDRESS+SA_ROWS;
+
+    static_assert(
+        SPAD_VT_BASE_ADDRESS+SA_ROWS<=SPAD_ROWS,
+        "streaming v2的Q/K/V_t布局超出Scratchpad容量"
     );
 
     // 与FSA execution plan一致：8拍依次从SA左侧广播FP16 PWL斜率。
@@ -46,6 +58,33 @@ namespace streaming_v2_detail{
         ap_uint<32> key_base = 0;
     };
 
+    /**
+     * @brief 一条FSA指令在Scratchpad出口选择的InputDelayer布局。
+     *
+     * 三个字段直接对应MatrixInstruction.spad中的revInput、
+     * delayOutput和revOutput。控制器只生成布局，数据通路只消费布局，
+     * 避免把FSA的五阶段控制重新塞回SA算术函数。
+     */
+    struct InputLayoutControl{
+        bool rev_input = false;
+        bool delay_output = false;
+        bool rev_output = false;
+    };
+
+    /**
+     * @brief 一个query/KV tile对应的FSA Core控制token。
+     *
+     * LOAD_STATIONARY、ATTENTION_SCORE和ATTENTION_VALUE三条指令的
+     * Scratchpad/Delayer控制随tile一起流过Core。LSE更新和最终归一化
+     * 由同一tile产生的SA结果token继续驱动Accumulator阶段。
+     */
+    struct CoreTileControl{
+        TileMeta meta{};
+        InputLayoutControl load_stationary{};
+        InputLayoutControl attention_score{};
+        InputLayoutControl attention_value{};
+    };
+
     enum class SaResultKind : std::uint8_t{
         MAX_DIFF = 0,
         ROW_SUM = 1,
@@ -67,7 +106,7 @@ namespace streaming_v2_detail{
     };
 
     using ElemRowStream = hls::stream<ElemRowPacket>;
-    using MetaStream = hls::stream<TileMeta>;
+    using CoreControlStream = hls::stream<CoreTileControl>;
     using SaResultStream = hls::stream<SaResultToken>;
     using AccRowStream = hls::stream<AccRowPacket>;
     using DmaWordStream = hls::stream<dma_word_t>;
@@ -75,6 +114,65 @@ namespace streaming_v2_detail{
     unsigned tileCount(const unsigned length){
         #pragma HLS INLINE
         return (length+(unsigned)SA_COLS-1U)/(unsigned)SA_COLS;
+    }
+
+    /**
+     * @brief 逐tile生成与旧ExecutionPlan一致的Core阶段控制。
+     *
+     * 该进程只产生控制token，不调用状态数据通路。因而控制生成可以与
+     * DMA、Scratchpad和前一个tile的计算通过DATAFLOW并行推进。
+     */
+    void fsaCoreControllerProcess(
+        const unsigned length,
+        const bool causal,
+        CoreControlStream& control_stream
+    ){
+        #pragma HLS INLINE off
+
+        const unsigned tiles = tileCount(length);
+        for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+            for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
+                #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+                #pragma HLS PIPELINE II=1
+                CoreTileControl control{};
+                control.meta.initialize = key_tile==0;
+                control.meta.finalize = key_tile+1U==tiles;
+                control.meta.causal = causal;
+                control.meta.query_base =
+                    query_tile*(unsigned)SA_COLS;
+                control.meta.key_base = key_tile*(unsigned)SA_COLS;
+
+                const unsigned remaining_queries =
+                    length-control.meta.query_base.to_uint();
+                const unsigned remaining_keys =
+                    length-control.meta.key_base.to_uint();
+                control.meta.active_queries = (ap_uint<16>)(
+                    remaining_queries<(unsigned)SA_COLS
+                        ? remaining_queries : (unsigned)SA_COLS
+                );
+                control.meta.active_keys = (ap_uint<16>)(
+                    remaining_keys<(unsigned)SA_COLS
+                        ? remaining_keys : (unsigned)SA_COLS
+                );
+
+                // LOAD_STATIONARY：Q按Scratchpad读出的自然顺序直通。
+                control.load_stationary = InputLayoutControl{};
+
+                // ATTENTION_SCORE：与旧requestInstruction完全相同。
+                control.attention_score.rev_input = true;
+                control.attention_score.delay_output = true;
+                control.attention_score.rev_output = true;
+
+                // ATTENTION_VALUE：V_t使用相同输入反转和阶梯延迟，
+                // 但不执行最终输出反转。
+                control.attention_value.rev_input = true;
+                control.attention_value.delay_output = true;
+                control.attention_value.rev_output = false;
+
+                control_stream.write(control);
+            }
+        }
     }
 
     void dmaReadQ(
@@ -156,34 +254,50 @@ namespace streaming_v2_detail{
         }
     }
 
+    /** @brief FSA Scratchpad唯一整行同步读端口。 */
+    void scratchpadReadRow(
+        const elem_t spad_sram[2][SPAD_ROWS][SA_ROWS],
+        const unsigned bank,
+        const int address,
+        elem_t data[SA_ROWS]
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LATENCY min=1 max=1
+        for(int feature=0; feature<SA_ROWS; ++feature){
+            #pragma HLS UNROLL
+            data[feature] = spad_sram[bank][address][feature];
+        }
+    }
+
     /**
-     * DMA流先写入显式双缓冲Scratchpad，再由整行端口送入SA流。
-     * Q只从DDR读取一次/Query tile，但会从Q SRAM为每个KV tile重播。
+     * DMA流先写入显式双缓冲Scratchpad，再通过唯一一拍整行读端口送入
+     * InputDelayer。Q只从DDR读取一次/Query tile，但会为每个KV tile重播。
      */
     void scratchpadProcess(
         const unsigned length,
-        const bool causal,
         ElemRowStream& q_dma_stream,
         ElemRowStream& k_dma_stream,
         ElemRowStream& v_dma_stream,
-        MetaStream& meta_stream,
+        CoreControlStream& control_in,
+        CoreControlStream& control_out,
         ElemRowStream& q_sa_stream,
         ElemRowStream& k_sa_stream,
         ElemRowStream& v_sa_stream
     ){
         #pragma HLS INLINE off
+        #pragma HLS ALLOCATION \
+            function instances=scratchpadReadRow limit=1
 
-        elem_t q_sram[2][SA_COLS][SA_ROWS]{};
-        elem_t k_sram[2][SA_COLS][SA_ROWS]{};
-        elem_t v_sram[2][SA_COLS][SA_ROWS]{};
+        // 与旧FSA Core相同，Q/K/V_t共享一个逻辑Scratchpad地址空间。
+        // 最外层两个物理bank用于tile级ping-pong；最后一维是一整行，
+        // 对应SA_ROWS个并行elem_t。
+        elem_t spad_sram[2][SPAD_ROWS][SA_ROWS]{};
         bool q_valid[2][SA_COLS]{};
         bool k_valid[2][SA_COLS]{};
-        #pragma HLS BIND_STORAGE variable=q_sram type=ram_t2p impl=bram
-        #pragma HLS BIND_STORAGE variable=k_sram type=ram_t2p impl=bram
-        #pragma HLS BIND_STORAGE variable=v_sram type=ram_t2p impl=bram
-        #pragma HLS ARRAY_RESHAPE variable=q_sram type=complete dim=3
-        #pragma HLS ARRAY_RESHAPE variable=k_sram type=complete dim=3
-        #pragma HLS ARRAY_RESHAPE variable=v_sram type=complete dim=3
+        #pragma HLS BIND_STORAGE variable=spad_sram type=ram_t2p impl=bram
+        #pragma HLS ARRAY_PARTITION variable=spad_sram type=complete dim=1
+        #pragma HLS ARRAY_RESHAPE variable=spad_sram type=complete dim=3
         #pragma HLS ARRAY_PARTITION variable=q_valid type=complete dim=2
         #pragma HLS ARRAY_PARTITION variable=k_valid type=complete dim=2
 
@@ -198,7 +312,8 @@ namespace streaming_v2_detail{
                 q_valid[q_bank][query_lane] = packet.valid;
                 for(int feature=0; feature<SA_ROWS; ++feature){
                     #pragma HLS UNROLL
-                    q_sram[q_bank][query_lane][feature] =
+                    spad_sram[q_bank]
+                        [SPAD_Q_BASE_ADDRESS+query_lane][feature] =
                         packet.data[feature];
                 }
             }
@@ -214,32 +329,19 @@ namespace streaming_v2_detail{
                     k_valid[kv_bank][key_lane] = k_packet.valid;
                     for(int feature=0; feature<SA_ROWS; ++feature){
                         #pragma HLS UNROLL
-                        k_sram[kv_bank][key_lane][feature] =
+                        spad_sram[kv_bank]
+                            [SPAD_K_BASE_ADDRESS+key_lane][feature] =
                             k_packet.data[feature];
-                        v_sram[kv_bank][key_lane][feature] =
+                        // ATTENTION_VALUE按feature行读取V_t。
+                        spad_sram[kv_bank]
+                            [SPAD_VT_BASE_ADDRESS+feature][key_lane] =
                             v_packet.data[feature];
                     }
                 }
 
-                TileMeta meta{};
-                meta.initialize = key_tile==0;
-                meta.finalize = key_tile+1U==tiles;
-                meta.causal = causal;
-                meta.query_base = query_tile*(unsigned)SA_COLS;
-                meta.key_base = key_tile*(unsigned)SA_COLS;
-                const unsigned remaining_queries =
-                    length-meta.query_base.to_uint();
-                const unsigned remaining_keys =
-                    length-meta.key_base.to_uint();
-                meta.active_queries = (ap_uint<16>)(
-                    remaining_queries<(unsigned)SA_COLS
-                        ? remaining_queries : (unsigned)SA_COLS
-                );
-                meta.active_keys = (ap_uint<16>)(
-                    remaining_keys<(unsigned)SA_COLS
-                        ? remaining_keys : (unsigned)SA_COLS
-                );
-                meta_stream.write(meta);
+                // 控制token与本tile的Scratchpad数据一起向下游推进。
+                const CoreTileControl control = control_in.read();
+                control_out.write(control);
 
                 // FSA中P会覆盖PE reg，因此每个KV tile都从Q SRAM重载Q。
                 for(int query_lane=0;
@@ -247,10 +349,18 @@ namespace streaming_v2_detail{
                     #pragma HLS PIPELINE II=1
                     ElemRowPacket packet{};
                     packet.valid = q_valid[q_bank][query_lane];
+                    elem_t row_data[SA_ROWS]{};
+                    #pragma HLS ARRAY_PARTITION \
+                        variable=row_data complete dim=1
+                    scratchpadReadRow(
+                        spad_sram,
+                        q_bank,
+                        SPAD_Q_BASE_ADDRESS+query_lane,
+                        row_data
+                    );
                     for(int feature=0; feature<SA_ROWS; ++feature){
                         #pragma HLS UNROLL
-                        packet.data[feature] =
-                            q_sram[q_bank][query_lane][feature];
+                        packet.data[feature] = row_data[feature];
                     }
                     q_sa_stream.write(packet);
                 }
@@ -258,18 +368,160 @@ namespace streaming_v2_detail{
                 for(int key_lane=0; key_lane<SA_COLS; ++key_lane){
                     #pragma HLS PIPELINE II=1
                     ElemRowPacket k_packet{};
-                    ElemRowPacket v_packet{};
                     k_packet.valid = k_valid[kv_bank][key_lane];
+                    elem_t row_data[SA_ROWS]{};
+                    #pragma HLS ARRAY_PARTITION \
+                        variable=row_data complete dim=1
+                    scratchpadReadRow(
+                        spad_sram,
+                        kv_bank,
+                        SPAD_K_BASE_ADDRESS+key_lane,
+                        row_data
+                    );
+                    for(int feature=0; feature<SA_ROWS; ++feature){
+                        #pragma HLS UNROLL
+                        k_packet.data[feature] = row_data[feature];
+                    }
+                    k_sa_stream.write(k_packet);
+                }
+
+                // ATTENTION_VALUE按feature顺序整行读取V_t，再为当前
+                // 多周期SA适配器恢复成每个key一个packet。
+                elem_t v_transposed[SA_ROWS][SA_ROWS]{};
+                #pragma HLS ARRAY_PARTITION \
+                    variable=v_transposed complete dim=2
+                for(int feature=0; feature<SA_ROWS; ++feature){
+                    #pragma HLS PIPELINE II=1
+                    scratchpadReadRow(
+                        spad_sram,
+                        kv_bank,
+                        SPAD_VT_BASE_ADDRESS+feature,
+                        v_transposed[feature]
+                    );
+                }
+                for(int key_lane=0; key_lane<SA_COLS; ++key_lane){
+                    #pragma HLS PIPELINE II=1
+                    ElemRowPacket v_packet{};
                     v_packet.valid = k_valid[kv_bank][key_lane];
                     for(int feature=0; feature<SA_ROWS; ++feature){
                         #pragma HLS UNROLL
-                        k_packet.data[feature] =
-                            k_sram[kv_bank][key_lane][feature];
                         v_packet.data[feature] =
-                            v_sram[kv_bank][key_lane][feature];
+                            v_transposed[feature][key_lane];
                     }
-                    k_sa_stream.write(k_packet);
                     v_sa_stream.write(v_packet);
+                }
+            }
+        }
+    }
+
+    /**
+     * @brief 显式FSA InputDelayer阶段。
+     *
+     * Scratchpad以完整tile提供Q/K/V行。这里按旧ExecutionPlan的布局控制
+     * 逐拍驱动唯一一套InputDelayer，并把错拍输出重新收集为下游SA使用的
+     * tile。重新收集只适配当前多周期PE调度器；实际数据必须经过Delayer
+     * 状态寄存器，不能再由SA直接索引原始K/V绕过该模块。
+     */
+    void inputDelayerProcess(
+        const unsigned length,
+        CoreControlStream& control_in,
+        ElemRowStream& q_spad_stream,
+        ElemRowStream& k_spad_stream,
+        ElemRowStream& v_spad_stream,
+        CoreControlStream& control_out,
+        ElemRowStream& q_sa_stream,
+        ElemRowStream& k_sa_stream,
+        ElemRowStream& v_sa_stream
+    ){
+        #pragma HLS INLINE off
+
+        ElemInputDelayerState delayer_state{};
+        #pragma HLS ARRAY_PARTITION \
+            variable=delayer_state.out_delay_pipe type=complete dim=0
+
+        const unsigned tiles = tileCount(length);
+        for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+            for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
+                #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+                const CoreTileControl control = control_in.read();
+
+                ElemRowPacket source[3][SA_COLS]{};
+                ElemRowPacket restored[3][SA_COLS]{};
+                #pragma HLS ARRAY_PARTITION variable=source complete dim=0
+                #pragma HLS ARRAY_PARTITION variable=restored complete dim=0
+
+                for(int lane=0; lane<SA_COLS; ++lane){
+                    #pragma HLS PIPELINE II=1
+                    source[0][lane] = q_spad_stream.read();
+                    source[1][lane] = k_spad_stream.read();
+                    source[2][lane] = v_spad_stream.read();
+                    restored[0][lane].valid = source[0][lane].valid;
+                    restored[1][lane].valid = source[1][lane].valid;
+                    restored[2][lane].valid = source[2][lane].valid;
+                }
+
+                for(int phase=0; phase<3; ++phase){
+                    // LOAD_STATIONARY、SCORE和VALUE时分复用同一套Delayer。
+                    reset_input_delayer_state(delayer_state);
+                    const InputLayoutControl layout = phase==0
+                        ? control.load_stationary
+                        : (phase==1
+                            ? control.attention_score
+                            : control.attention_value);
+
+                    for(int cycle=0;
+                            cycle<SA_COLS+SA_ROWS-1; ++cycle){
+                        #pragma HLS PIPELINE II=1
+                        InputDelayerIO io{};
+                        io.in.valid = cycle<SA_COLS;
+                        io.in.bits.rev_input = layout.rev_input;
+                        io.in.bits.delay_output = layout.delay_output;
+                        io.in.bits.rev_output = layout.rev_output;
+                        if(cycle<SA_COLS){
+                            for(int feature=0;
+                                    feature<SA_ROWS; ++feature){
+                                #pragma HLS UNROLL
+                                io.in.bits.data[(std::size_t)feature] =
+                                    source[phase][cycle].data[feature];
+                            }
+                        }
+
+                        ElemInputDelayerState next_state{};
+                        #pragma HLS ARRAY_PARTITION \
+                            variable=next_state.out_delay_pipe \
+                            type=complete dim=0
+                        input_delayer_step(
+                            delayer_state, next_state, io
+                        );
+                        delayer_state = next_state;
+
+                        // 由rev/delay配置反推出当前输出来自哪个tile行和
+                        // feature，将真实错拍波前恢复成多周期SA的tile输入。
+                        for(int output_lane=0;
+                                output_lane<SA_ROWS; ++output_lane){
+                            #pragma HLS UNROLL
+                            const int internal_lane = layout.rev_output
+                                ? SA_ROWS-1-output_lane : output_lane;
+                            const int source_feature = layout.rev_input
+                                ? SA_ROWS-1-internal_lane : internal_lane;
+                            const int source_lane = cycle-
+                                (layout.delay_output ? internal_lane : 0);
+                            if(source_lane>=0 && source_lane<SA_COLS){
+                                restored[phase][source_lane]
+                                    .data[source_feature] =
+                                    io.out[(std::size_t)output_lane];
+                            }
+                        }
+                    }
+                }
+
+                control_out.write(control);
+                for(int lane=0; lane<SA_COLS; ++lane){
+                    #pragma HLS PIPELINE II=1
+                    q_sa_stream.write(restored[0][lane]);
+                    k_sa_stream.write(restored[1][lane]);
+                    v_sa_stream.write(restored[2][lane]);
                 }
             }
         }
@@ -386,6 +638,139 @@ namespace streaming_v2_detail{
         RESET = 5,
         PROP_EXP2_INTERCEPTS = 6
     };
+
+    // 单套物理SA的逐拍微程序参数。PE算术流水本身为9拍；额外7拍是
+    // 当前HLS调度器从环形槽读取到结果写回的固定前后级。所有阶段边界
+    // 集中在这里生成，数据通路不再自行推导“当前是哪一拍”。
+    constexpr int PE_TOKEN_LATENCY = 9;
+    constexpr int PE_SCHEDULER_GUARD_CYCLES = 7;
+    constexpr int PE_HOP_CYCLES =
+        PE_TOKEN_LATENCY+PE_SCHEDULER_GUARD_CYCLES;
+    constexpr int QK_START = SA_COLS;
+    constexpr int FIRST_SCORE =
+        QK_START+SA_ROWS*PE_HOP_CYCLES;
+    constexpr int SCORES_READY = FIRST_SCORE+2*SA_COLS-2;
+    constexpr int MAX_DIFF_CYCLE = SCORES_READY+1;
+    constexpr int SUB_MAX_CYCLE = MAX_DIFF_CYCLE+1;
+    constexpr int SCALE_CYCLE =
+        SUB_MAX_CYCLE+PE_HOP_CYCLES+1;
+    constexpr int PWL_START = SCALE_CYCLE+PE_HOP_CYCLES+1;
+    constexpr int PWL_END = PWL_START+exp2PWLPieces-1;
+    constexpr int ROW_SUM_CYCLE =
+        PWL_END+PE_HOP_CYCLES+1;
+    constexpr int PV_START = ROW_SUM_CYCLE+1;
+    constexpr int LAST_RESULT_CYCLE =
+        PV_START+SA_ROWS-1+SA_ROWS*PE_HOP_CYCLES;
+    constexpr int SA_TILE_CYCLES = LAST_RESULT_CYCLE+1;
+
+    /**
+     * @brief ExecutionPlan送入单套SA的一拍控制。
+     *
+     * 这相当于Scala ExecutionPlanStep中与PE/CMP有关的部分。控制token
+     * 不携带数据，QK/softmax/PV在同一套PE阵列中按时间复用。
+     */
+    struct SaCycleControl{
+        bool load_query = false;
+        PeWaveIndex query_index = 0;
+        bool launch_qk = false;
+        PeWaveIndex qk_index = 0;
+        bool cmp_valid = false;
+        CmpWaveOp cmp_op = CmpWaveOp::HOLD;
+        PeWaveIndex cmp_item = 0;
+        bool launch_down = false;
+        PeWaveOp down_op = PeWaveOp::IDLE;
+        PeWaveIndex down_item = 0;
+    };
+
+    using SaCycleControlStream = hls::stream<SaCycleControl>;
+
+    SaCycleControl makeSaCycleControl(
+        const int cycle,
+        const bool initialize
+    ){
+        #pragma HLS INLINE
+
+        SaCycleControl control{};
+        if(cycle<SA_COLS){
+            control.load_query = true;
+            control.query_index = (PeWaveIndex)cycle;
+        }
+        if(cycle>=QK_START && cycle<QK_START+SA_COLS){
+            control.launch_qk = true;
+            control.qk_index = (PeWaveIndex)(cycle-QK_START);
+        }
+
+        if(cycle==0 && initialize){
+            control.cmp_valid = true;
+            control.cmp_op = CmpWaveOp::RESET;
+        }else if(cycle>=FIRST_SCORE &&
+                cycle<FIRST_SCORE+SA_COLS){
+            control.cmp_valid = true;
+            control.cmp_op = CmpWaveOp::UPDATE;
+            control.cmp_item =
+                (PeWaveIndex)(cycle-FIRST_SCORE);
+        }else if(cycle==MAX_DIFF_CYCLE){
+            control.cmp_valid = true;
+            control.cmp_op = CmpWaveOp::PROP_MAX_DIFF;
+        }else if(cycle==SUB_MAX_CYCLE){
+            control.cmp_valid = true;
+            control.cmp_op = CmpWaveOp::PROP_MAX;
+        }else if(cycle>=PWL_START && cycle<=PWL_END){
+            control.cmp_valid = true;
+            control.cmp_op = CmpWaveOp::PROP_EXP2_INTERCEPTS;
+            control.cmp_item = (PeWaveIndex)(cycle-PWL_START);
+        }else if(cycle==ROW_SUM_CYCLE){
+            control.cmp_valid = true;
+            control.cmp_op = CmpWaveOp::PROP_ZERO;
+        }
+
+        if(cycle==SUB_MAX_CYCLE){
+            control.launch_down = true;
+            control.down_op = PeWaveOp::SUB_MAX;
+        }else if(cycle==SCALE_CYCLE){
+            control.launch_down = true;
+            control.down_op = PeWaveOp::SCALE;
+        }else if(cycle>=PWL_START && cycle<=PWL_END){
+            control.launch_down = true;
+            control.down_op = PeWaveOp::PWL;
+            control.down_item = (PeWaveIndex)(cycle-PWL_START);
+        }else if(cycle==ROW_SUM_CYCLE){
+            control.launch_down = true;
+            control.down_op = PeWaveOp::ROW_SUM;
+        }else if(cycle>=PV_START && cycle<PV_START+SA_ROWS){
+            control.launch_down = true;
+            control.down_op = PeWaveOp::PV;
+            control.down_item = (PeWaveIndex)(cycle-PV_START);
+        }
+        return control;
+    }
+
+    /**
+     * @brief 逐拍产生SA微程序，不阻塞tile/地址控制的预取路径。
+     *
+     * 拆成独立DATAFLOW actor后，Scratchpad可以继续提前准备后续tile；
+     * 此处仅在SA消费速度不足时通过本控制FIFO自然反压。
+     */
+    void saExecutionPlanProcess(
+        const unsigned length,
+        SaCycleControlStream& cycle_control_stream
+    ){
+        #pragma HLS INLINE off
+
+        const unsigned tiles = tileCount(length);
+        for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+            for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
+                #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+                for(int cycle=0; cycle<SA_TILE_CYCLES; ++cycle){
+                    #pragma HLS PIPELINE II=1
+                    cycle_control_stream.write(
+                        makeSaCycleControl(cycle, key_tile==0)
+                    );
+                }
+            }
+        }
+    }
 
     /**
      * @brief 每列CMP的多周期输出通路
@@ -643,6 +1028,7 @@ namespace streaming_v2_detail{
         const elem_t k_tile[SA_COLS][SA_ROWS],
         const elem_t v_tile[SA_COLS][SA_ROWS],
         CMPState cmp_state[SA_COLS],
+        SaCycleControlStream& cycle_control_stream,
         SaResultStream& result_stream
     ){
         #pragma HLS INLINE off
@@ -650,37 +1036,6 @@ namespace streaming_v2_detail{
         #pragma HLS ARRAY_PARTITION variable=k_tile type=complete dim=0
         #pragma HLS ARRAY_PARTITION variable=v_tile type=complete dim=2
         #pragma HLS ARRAY_PARTITION variable=cmp_state type=complete dim=1
-
-        constexpr int KEY_TILE = SA_COLS;
-        // 与当前peMacUnit综合延迟一致；data/valid/op/tag共用此延迟。
-        constexpr int PE_TOKEN_LATENCY = 9;
-        // v3综合中，外层逐拍调度器从读取pe_pipeline槽到16个PE结果
-        // 真正写回共跨15级：前端完成commit/路由/CMP/operand选择，随后
-        // 进入9拍PE。原先10槽会在旧partial写回前再次读取同一槽，形成
-        // distance=10的真实跨迭代依赖并把外层II抬到2。
-        //
-        // 使用16个槽后，上一token在第15级写回，下一次读取发生在下一
-        // 拍；这是当前单套PE阵列在II=1下的最小安全反馈距离。16还是
-        // 2的幂，动态槽选择可直接使用计数器低位，避免10路取模选择器。
-        constexpr int PE_SCHEDULER_GUARD_CYCLES = 7;
-        constexpr int PE_HOP_CYCLES =
-            PE_TOKEN_LATENCY+PE_SCHEDULER_GUARD_CYCLES;
-        constexpr int QK_START = SA_COLS;
-        constexpr int FIRST_SCORE =
-            QK_START+SA_ROWS*PE_HOP_CYCLES;
-        constexpr int SCORES_READY = FIRST_SCORE+2*KEY_TILE-2;
-        constexpr int MAX_DIFF_CYCLE = SCORES_READY+1;
-        constexpr int SUB_MAX_CYCLE = MAX_DIFF_CYCLE+1;
-        constexpr int SCALE_CYCLE =
-            SUB_MAX_CYCLE+PE_HOP_CYCLES+1;
-        constexpr int PWL_START = SCALE_CYCLE+PE_HOP_CYCLES+1;
-        constexpr int PWL_END = PWL_START+exp2PWLPieces-1;
-        constexpr int ROW_SUM_CYCLE =
-            PWL_END+PE_HOP_CYCLES+1;
-        constexpr int PV_START = ROW_SUM_CYCLE+1;
-        constexpr int LAST_RESULT_CYCLE =
-            PV_START+SA_ROWS-1+SA_ROWS*PE_HOP_CYCLES;
-        constexpr int TOTAL_CYCLES = LAST_RESULT_CYCLE+1;
 
         // These arrays are completely written before their first meaningful
         // read.  Avoid aggregate initialization here: in HLS it becomes a
@@ -698,16 +1053,19 @@ namespace streaming_v2_detail{
             #pragma HLS UNROLL
             for(int query=0; query<SA_COLS; ++query){
                 #pragma HLS UNROLL
-                active[row][query] = row<KEY_TILE &&
+                active[row][query] = row<SA_COLS &&
                     laneEnabled(meta, query, row);
             }
         }
 
-        for(int cycle=0; cycle<TOTAL_CYCLES; ++cycle){
+        for(int cycle=0; cycle<SA_TILE_CYCLES; ++cycle){
             #pragma HLS PIPELINE II=1
             #pragma HLS LOOP_FLATTEN off
             // 调度器保证下一次读取发生在对应commit后；同拍RAW仍保留。
             #pragma HLS DEPENDENCE variable=pe_register inter false
+
+            const SaCycleControl cycle_control =
+                cycle_control_stream.read();
 
             const int pipeline_slot = cycle%PE_HOP_CYCLES;
             PeWave row_input[SA_ROWS]{};
@@ -756,50 +1114,32 @@ namespace streaming_v2_detail{
                 }
             }
 
-            // Tile feeder每拍装入一个query列。SRAM读延迟与InputDelayer
-            // 属于本轮明确不修改的存储边界。
-            if(cycle<SA_COLS){
+            // ExecutionPlan每拍允许装入一个query列；数据已经依次经过
+            // Scratchpad的一拍整行读边界和InputDelayer。
+            if(cycle_control.load_query){
+                const int query_index =
+                    cycle_control.query_index.to_int();
                 for(int row=0; row<SA_ROWS; ++row){
                     #pragma HLS UNROLL
-                    pe_register[row][cycle] = q_tile[cycle][row];
+                    pe_register[row][query_index] =
+                        q_tile[query_index][row];
                 }
             }
 
-            // 连续KEY_TILE拍从阵列底部启动QK wave。
-            if(cycle>=QK_START && cycle<QK_START+KEY_TILE){
+            // 连续SA_COLS拍从阵列底部启动QK wave。
+            if(cycle_control.launch_qk){
                 PeWave source{};
                 #pragma HLS ARRAY_PARTITION variable=source.partial complete dim=1
                 source.valid = true;
                 source.op = PeWaveOp::QK;
                 source.direction = PeWaveDirection::UP;
-                source.index = (PeWaveIndex)(cycle-QK_START);
+                source.index = cycle_control.qk_index;
                 row_input[SA_ROWS-1] = source;
             }
 
-            CmpWaveOp cmp_op = CmpWaveOp::HOLD;
-            bool cmp_valid = false;
-            int cmp_item = 0;
-            if(cycle==0 && meta.initialize){
-                cmp_valid = true;
-                cmp_op = CmpWaveOp::RESET;
-            }else if(qk_at_cmp.valid){
-                cmp_valid = true;
-                cmp_op = CmpWaveOp::UPDATE;
-                cmp_item = qk_at_cmp.index.to_int();
-            }else if(cycle==MAX_DIFF_CYCLE){
-                cmp_valid = true;
-                cmp_op = CmpWaveOp::PROP_MAX_DIFF;
-            }else if(cycle==SUB_MAX_CYCLE){
-                cmp_valid = true;
-                cmp_op = CmpWaveOp::PROP_MAX;
-            }else if(cycle>=PWL_START && cycle<=PWL_END){
-                cmp_valid = true;
-                cmp_op = CmpWaveOp::PROP_EXP2_INTERCEPTS;
-                cmp_item = cycle-PWL_START;
-            }else if(cycle==ROW_SUM_CYCLE){
-                cmp_valid = true;
-                cmp_op = CmpWaveOp::PROP_ZERO;
-            }
+            CmpWaveOp cmp_op = cycle_control.cmp_op;
+            bool cmp_valid = cycle_control.cmp_valid;
+            int cmp_item = cycle_control.cmp_item.to_int();
 
             acc_t cmp_input[SA_COLS]{};
             acc_t cmp_output[SA_COLS]{};
@@ -858,27 +1198,9 @@ namespace streaming_v2_detail{
 
             PeWave down_source{};
             #pragma HLS ARRAY_PARTITION variable=down_source.partial complete dim=1
-            int source_item = 0;
-            if(cycle==SUB_MAX_CYCLE){
-                down_source.valid = true;
-                down_source.op = PeWaveOp::SUB_MAX;
-            }else if(cycle==SCALE_CYCLE){
-                down_source.valid = true;
-                down_source.op = PeWaveOp::SCALE;
-            }else if(cycle>=PWL_START && cycle<=PWL_END){
-                source_item = cycle-PWL_START;
-                down_source.valid = true;
-                down_source.op = PeWaveOp::PWL;
-                down_source.index = (PeWaveIndex)source_item;
-            }else if(cycle==ROW_SUM_CYCLE){
-                down_source.valid = true;
-                down_source.op = PeWaveOp::ROW_SUM;
-            }else if(cycle>=PV_START && cycle<PV_START+SA_ROWS){
-                source_item = cycle-PV_START;
-                down_source.valid = true;
-                down_source.op = PeWaveOp::PV;
-                down_source.index = (PeWaveIndex)source_item;
-            }
+            down_source.valid = cycle_control.launch_down;
+            down_source.op = cycle_control.down_op;
+            down_source.index = cycle_control.down_item;
             down_source.direction = PeWaveDirection::DOWN;
             for(int query=0; query<SA_COLS; ++query){
                 #pragma HLS UNROLL
@@ -905,7 +1227,7 @@ namespace streaming_v2_detail{
                 }else if(op==PeWaveOp::PWL){
                     horizontal[row] = EXP2_SLOPES[item];
                 }else if(op==PeWaveOp::PV){
-                    horizontal[row] = row<KEY_TILE
+                    horizontal[row] = row<SA_COLS
                         ? v_tile[row][item] : elemZero();
                 }else{
                     horizontal[row] = elemOne();
@@ -960,7 +1282,8 @@ namespace streaming_v2_detail{
 
     void systolicArrayProcess(
         const unsigned length,
-        MetaStream& meta_stream,
+        CoreControlStream& control_stream,
+        SaCycleControlStream& cycle_control_stream,
         ElemRowStream& q_sa_stream,
         ElemRowStream& k_sa_stream,
         ElemRowStream& v_sa_stream,
@@ -982,7 +1305,8 @@ namespace streaming_v2_detail{
             #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
             for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
-                const TileMeta meta = meta_stream.read();
+                const CoreTileControl control = control_stream.read();
+                const TileMeta meta = control.meta;
 
                 for(int query=0; query<SA_COLS; ++query){
                     #pragma HLS PIPELINE II=1
@@ -1005,8 +1329,65 @@ namespace streaming_v2_detail{
 
                 spatialSystolicArrayTileTick(
                     meta, q_tile, k_tile, v_tile,
-                    cmp_state, sa_result_stream
+                    cmp_state, cycle_control_stream, sa_result_stream
                 );
+            }
+        }
+    }
+
+    /**
+     * @brief 显式FSA OutputDelayer阶段。
+     *
+     * 当前多周期SA在一个SaResultToken中给出完整列向量。这里先按物理SA
+     * 底边的列错拍顺序逐列注入，再由唯一一套OutputDelayer恢复为同拍的
+     * SA_COLS路Accumulator输入。这样Accumulator不能再绕过输出对齐网络。
+     */
+    void outputDelayerProcess(
+        const unsigned length,
+        SaResultStream& raw_result_stream,
+        SaResultStream& aligned_result_stream
+    ){
+        #pragma HLS INLINE off
+
+        OutputDelayerState delayer_state{};
+        #pragma HLS ARRAY_PARTITION \
+            variable=delayer_state.out_delay_pipe type=complete dim=0
+
+        const unsigned tiles = tileCount(length);
+        for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+            for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
+                #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+                for(int token_index=0;
+                        token_index<SA_ROWS+2; ++token_index){
+                    const SaResultToken raw = raw_result_stream.read();
+                    SaResultToken aligned = raw;
+                    reset_output_delayer_state(delayer_state);
+
+                    for(int cycle=0; cycle<SA_COLS; ++cycle){
+                        #pragma HLS PIPELINE II=1
+                        OutputDelayerIO io{};
+                        io.in[(std::size_t)cycle] = raw.data[cycle];
+
+                        OutputDelayerState next_state{};
+                        #pragma HLS ARRAY_PARTITION \
+                            variable=next_state.out_delay_pipe \
+                            type=complete dim=0
+                        output_delayer_step(
+                            delayer_state, next_state, io
+                        );
+                        delayer_state = next_state;
+
+                        if(cycle+1==SA_COLS){
+                            for(int col=0; col<SA_COLS; ++col){
+                                #pragma HLS UNROLL
+                                aligned.data[col] =
+                                    io.out[(std::size_t)col];
+                            }
+                        }
+                    }
+                    aligned_result_stream.write(aligned);
+                }
             }
         }
     }
@@ -1062,8 +1443,42 @@ namespace streaming_v2_detail{
         }
     };
 
+    /** @brief AccRAM整行同步读边界。 */
+    void accumulatorSramReadRow(
+        const acc_t accumulator_sram[ACC_ROWS][SA_COLS],
+        const int address,
+        acc_t data[SA_COLS]
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LATENCY min=1 max=1
+        for(int col=0; col<SA_COLS; ++col){
+            #pragma HLS UNROLL
+            data[col] = accumulator_sram[address][col];
+        }
+    }
+
+    /** @brief AccRAM整行同步写边界。 */
+    void accumulatorSramWriteRow(
+        acc_t accumulator_sram[ACC_ROWS][SA_COLS],
+        const int address,
+        const acc_t data[SA_COLS]
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LATENCY min=1 max=1
+        for(int col=0; col<SA_COLS; ++col){
+            #pragma HLS UNROLL
+            accumulator_sram[address][col] = data[col];
+        }
+    }
+
     /**
-     * FSA Accumulator：row0保存L，row1..SA_ROWS保存O；列bank完全分割。
+     * @brief FSA Accumulator算术与显式AccRAM端口。
+     *
+     * RAM仍由本DATAFLOW进程独占，避免形成C仿真和RTL都可能死锁的
+     * 双向进程环；所有访问必须经过两个非内联的一拍行端口，算术逻辑
+     * 不再直接索引L/O数组。
      */
     void accumulatorProcess(
         const unsigned length,
@@ -1101,13 +1516,8 @@ namespace streaming_v2_detail{
                 // event=0更新L，event=1..SA_ROWS更新对应O行。
                 for(int event=0; event<SA_ROWS+1; ++event){
                     #pragma HLS PIPELINE II=1
-                    // 本循环每次访问不同的固定行；跨key tile的同一行
-                    // 反馈发生在循环排空之后，因此这里不是L/O真依赖。
-                    #pragma HLS DEPENDENCE \
-                        variable=accumulator_sram inter false
                     const SaResultToken value_token =
                         sa_result_stream.read();
-                    const int accumulator_row = event;
                     acc_t old_value[SA_COLS]{};
                     acc_t contribution[SA_COLS]{};
                     acc_t updated_value[SA_COLS]{};
@@ -1117,32 +1527,43 @@ namespace streaming_v2_detail{
                         variable=contribution complete dim=1
                     #pragma HLS ARRAY_PARTITION \
                         variable=updated_value complete dim=1
+                    accumulatorSramReadRow(
+                        accumulator_sram, event, old_value
+                    );
                     for(int query=0; query<SA_COLS; ++query){
                         #pragma HLS UNROLL
                         old_value[query] = max_token.initialize
                             ? accZero()
-                            : accumulator_sram[accumulator_row][query];
+                            : old_value[query];
                         contribution[query] = value_token.data[query];
                     }
                     AccumulatorMacColumns<0>::run(
                         alpha, old_value, contribution, updated_value
                     );
-                    for(int query=0; query<SA_COLS; ++query){
-                        #pragma HLS UNROLL
-                        accumulator_sram[accumulator_row][query] =
-                            updated_value[query];
-                    }
+                    accumulatorSramWriteRow(
+                        accumulator_sram, event, updated_value
+                    );
                 }
 
                 if(max_token.finalize){
+                    acc_t final_rows[ACC_ROWS][SA_COLS]{};
+                    #pragma HLS ARRAY_PARTITION \
+                        variable=final_rows complete dim=2
+                    for(int row=0; row<ACC_ROWS; ++row){
+                        #pragma HLS PIPELINE II=1
+                        accumulatorSramReadRow(
+                            accumulator_sram, row, final_rows[row]
+                        );
+                    }
+
                     acc_t inverse_l[SA_COLS]{};
                     #pragma HLS ARRAY_PARTITION \
                         variable=inverse_l type=complete dim=1
                     for(int query=0; query<SA_COLS; ++query){
                         #pragma HLS UNROLL
-                        inverse_l[query] = accumulator_sram[0][query]!=accZero()
+                        inverse_l[query] = final_rows[0][query]!=accZero()
                             ? accumulator_reciprocal(
-                                accumulator_sram[0][query]
+                                final_rows[0][query]
                             )
                             : accZero();
                     }
@@ -1154,7 +1575,7 @@ namespace streaming_v2_detail{
                         for(int feature=0; feature<SA_ROWS; ++feature){
                             #pragma HLS UNROLL
                             packet.data[feature] =
-                                accumulator_sram[feature+1][query]*
+                                final_rows[feature+1][query]*
                                 inverse_l[query];
                         }
                         output_stream.write(packet);
@@ -1219,8 +1640,9 @@ namespace streaming_v2_detail{
 
     /**
      * 规范DATAFLOW区域只包含局部stream声明和进程调用。外层参数检查不
-     * 再妨碍Vitis把DMA、Scratchpad、单一SA和Accumulator抽取成并行
-     * 进程。QK、softmax和PV在同一个SA进程中顺序复用唯一PE网格。
+     * 再妨碍Vitis把DMA、Core控制器、Scratchpad、InputDelayer、单一SA、
+     * OutputDelayer、Accumulator和AccRAM抽取成并行进程。QK、softmax
+     * 和PV仍在同一个SA进程中顺序复用唯一PE网格。
      */
     void fsaStreamingDataflow(
         const dma_word_t q_address[DMA_MAX_QKV_WORDS],
@@ -1236,40 +1658,72 @@ namespace streaming_v2_detail{
         ElemRowStream q_dma_stream("v2_q_dma");
         ElemRowStream k_dma_stream("v2_k_dma");
         ElemRowStream v_dma_stream("v2_v_dma");
-        MetaStream meta_stream("v2_meta");
+        CoreControlStream control_to_spad("v2_control_to_spad");
+        CoreControlStream control_to_delayer("v2_control_to_delayer");
+        CoreControlStream control_to_sa("v2_control_to_sa");
+        SaCycleControlStream sa_cycle_control_stream(
+            "v2_sa_cycle_control"
+        );
+        ElemRowStream q_spad_stream("v2_q_spad");
+        ElemRowStream k_spad_stream("v2_k_spad");
+        ElemRowStream v_spad_stream("v2_v_spad");
         ElemRowStream q_sa_stream("v2_q_sa");
         ElemRowStream k_sa_stream("v2_k_sa");
         ElemRowStream v_sa_stream("v2_v_sa");
-        SaResultStream sa_result_stream("v2_sa_result");
+        SaResultStream raw_sa_result_stream("v2_raw_sa_result");
+        SaResultStream aligned_sa_result_stream("v2_aligned_sa_result");
         AccRowStream output_stream("v2_output");
         DmaWordStream output_word_stream("v2_output_words");
         #pragma HLS STREAM variable=q_dma_stream depth=2*SA_COLS
         #pragma HLS STREAM variable=k_dma_stream depth=2*SA_COLS
         #pragma HLS STREAM variable=v_dma_stream depth=2*SA_COLS
-        #pragma HLS STREAM variable=meta_stream depth=2
+        #pragma HLS STREAM variable=control_to_spad depth=2
+        #pragma HLS STREAM variable=control_to_delayer depth=2
+        #pragma HLS STREAM variable=control_to_sa depth=2
+        #pragma HLS STREAM variable=sa_cycle_control_stream depth=32
+        #pragma HLS STREAM variable=q_spad_stream depth=2*SA_COLS
+        #pragma HLS STREAM variable=k_spad_stream depth=2*SA_COLS
+        #pragma HLS STREAM variable=v_spad_stream depth=2*SA_COLS
         #pragma HLS STREAM variable=q_sa_stream depth=2*SA_COLS
         #pragma HLS STREAM variable=k_sa_stream depth=2*SA_COLS
         #pragma HLS STREAM variable=v_sa_stream depth=2*SA_COLS
-        #pragma HLS STREAM variable=sa_result_stream depth=2
+        #pragma HLS STREAM variable=raw_sa_result_stream depth=2
+        #pragma HLS STREAM variable=aligned_sa_result_stream depth=2
         #pragma HLS STREAM variable=output_stream depth=2
         #pragma HLS STREAM variable=output_word_stream \
             depth=2*SA_COLS*DMA_O_WORDS_PER_ROW
         #pragma HLS DATAFLOW
 
+        fsaCoreControllerProcess(length, causal, control_to_spad);
+        saExecutionPlanProcess(length, sa_cycle_control_stream);
         dmaReadQ(q_address, length, q_dma_stream);
         dmaReadK(k_address, length, k_dma_stream);
         dmaReadV(v_address, length, v_dma_stream);
         scratchpadProcess(
-            length, causal,
+            length,
             q_dma_stream, k_dma_stream, v_dma_stream,
-            meta_stream, q_sa_stream, k_sa_stream, v_sa_stream
+            control_to_spad, control_to_delayer,
+            q_spad_stream, k_spad_stream, v_spad_stream
+        );
+        inputDelayerProcess(
+            length,
+            control_to_delayer,
+            q_spad_stream, k_spad_stream, v_spad_stream,
+            control_to_sa,
+            q_sa_stream, k_sa_stream, v_sa_stream
         );
         systolicArrayProcess(
             length,
-            meta_stream, q_sa_stream, k_sa_stream, v_sa_stream,
-            sa_result_stream
+            control_to_sa, sa_cycle_control_stream,
+            q_sa_stream, k_sa_stream, v_sa_stream,
+            raw_sa_result_stream
         );
-        accumulatorProcess(length, sa_result_stream, output_stream);
+        outputDelayerProcess(
+            length, raw_sa_result_stream, aligned_sa_result_stream
+        );
+        accumulatorProcess(
+            length, aligned_sa_result_stream, output_stream
+        );
         outputPackProcess(length, output_stream, output_word_stream);
         dmaWriteO(o_address, length, output_word_stream, status);
     }

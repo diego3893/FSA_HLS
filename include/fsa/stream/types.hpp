@@ -1,0 +1,128 @@
+/**
+ * @file types.hpp
+ * @author diego3893 (diegozcx@foxmail.com)
+ * @brief 工程内部类型声明
+ * @date 2026-08-05
+ * 
+ * 
+ */
+#ifndef FSA_STREAM_TYPES_HPP
+#define FSA_STREAM_TYPES_HPP
+
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <ap_int.h>
+#include <hls_half.h>
+
+#include "fsa/stream/config.hpp"
+
+namespace fsa{
+
+    /// @brief 元素精度，水平方向数据
+    using elem_t = half;
+
+    /// @brief 累加精度，竖直方向数据
+    using acc_t = float;
+
+    /**
+     * @brief 计算索引count个对象至少需要的位数
+     * 
+     * @param count 对象数量
+     * @return 保存该索引所需的位数
+     */
+    constexpr int bankedSramIndexWidth(const int count){
+        int width = 0;
+        int maximum_index = count-1;
+        while(maximum_index>0){
+            ++width;
+            maximum_index >>= 1;
+        }
+        return width==0 ? 1 : width;
+    }
+
+    /// @brief Scratchpad和Accumulator RAM所需的最大逻辑行数。
+    constexpr int SRAM_MAX_ROWS =
+        SPAD_ROWS>ACC_ROWS ? SPAD_ROWS : ACC_ROWS;
+
+    /// @brief 随阵列规模自动扩展的片上SRAM行地址宽度。
+    constexpr int SRAM_ADDRESS_WIDTH = bankedSramIndexWidth(SRAM_MAX_ROWS);
+    using sram_address_t = ap_uint<SRAM_ADDRESS_WIDTH>;
+
+    /**
+     * @brief BankedSRAM中sub-bank编号的定宽整数类型
+     * 
+     * @tparam NSubBanks 一整行包含的sub-bank数量
+     */
+    template <int NSubBanks>
+    using sub_bank_index_t = ap_uint<bankedSramIndexWidth(NSubBanks)>;
+
+    /// @brief 内存地址
+    using memory_address_t = std::uint64_t;
+    /// @brief 地址访问步长，多一位用于表示负步长。
+    using sram_stride_t = ap_int<SRAM_ADDRESS_WIDTH+1>;
+    using memory_stride_t = ap_int<21>;
+    /// @brief 硬件计数器
+    using exp2_counter_t = ap_uint<3>;
+    using reciprocal_iter_count_t = ap_uint<4>;
+    // TODO: mem_addr 根据AXI修改。无符号
+
+    /// @brief 信号量编号
+    using semaphore_id_t = ap_uint<5>;
+    /// @brief 信号值
+    using semaphore_value_t = ap_uint<3>;
+
+    /// @brief 定长向量
+    /// @tparam T 数据类型
+    /// @tparam N 向量长度
+    template <typename T, std::size_t N>
+    using FixedVector = std::array<T, N>;
+
+    /// @brief elem_t类型的定长向量
+    using ElemVector = FixedVector<elem_t, (std::size_t)SA_ROWS>;
+
+    /// @brief acc_t类型的定长向量
+    using AccVector = FixedVector<acc_t, (std::size_t)SA_COLS>;
+
+    /// @brief Valid数据，valid=true时数据有效
+    /// @tparam T 数据类型
+    template <typename T>
+    struct ValidData{
+        bool valid = false;
+        T bits{};
+    };
+
+    /// @brief Decoupled数据，valid&&ready时传输成功，valid=true时数据有效
+    /// @tparam T 数据类型
+    template <typename T>
+    struct DecoupledData{
+        bool valid = false;
+        bool ready = false;
+        T bits{};
+    };
+
+    /// @brief 信号量
+    struct Semaphore{
+        semaphore_id_t id = 0;
+        semaphore_value_t value = 0;
+    };
+
+    /// @brief 产生一个valid=false的数据
+    /// @tparam T 数据类型
+    /// @return 生成的传输值
+    template <typename T>
+    inline ValidData<T> make_invalid(){
+        return ValidData<T>{false, T{}};
+    }
+
+    /// @brief 产生一个valid=true的数据
+    /// @tparam T 数据类型
+    /// @param value 需要被包装的数据
+    /// @return 生成的传输值
+    template <typename T>
+    inline ValidData<T> make_valid(const T& value){
+        return ValidData<T>{true, value};
+    }
+
+}  // namespace fsa
+#endif // !FSA_STREAM_TYPES_HPP

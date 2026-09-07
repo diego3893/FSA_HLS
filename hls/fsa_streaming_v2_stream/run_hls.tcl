@@ -1,5 +1,5 @@
 set RUN_CSIM  1
-set RUN_COSIM 1
+set RUN_COSIM 0
 set EXPORT_IP 0
 
 set SCRIPT_DIR [file dirname [file normalize [info script]]]
@@ -22,27 +22,32 @@ if {[info exists ::env(FSA_MAX_SEQUENCE_LENGTH)]} {
     set MAX_SEQUENCE_LENGTH $::env(FSA_MAX_SEQUENCE_LENGTH)
 }
 
-puts "FSA streaming v2: SA_ROWS=$SA_ROWS SA_COLS=$SA_COLS L_MAX=$MAX_SEQUENCE_LENGTH"
+puts "FSA stream split: SA_ROWS=$SA_ROWS SA_COLS=$SA_COLS L_MAX=$MAX_SEQUENCE_LENGTH"
 set QKV_DEPTH [expr {$MAX_SEQUENCE_LENGTH*$SA_ROWS/4}]
 set O_DEPTH [expr {$MAX_SEQUENCE_LENGTH*$SA_ROWS/2}]
 set CFLAGS "-std=c++14 -I[file join $PROJECT_ROOT include] -DFSA_SA_ROWS=$SA_ROWS -DFSA_SA_COLS=$SA_COLS -DFSA_MAX_SEQUENCE_LENGTH=$MAX_SEQUENCE_LENGTH -DFSA_DMA_AXI_QKV_DEPTH=$QKV_DEPTH -DFSA_DMA_AXI_O_DEPTH=$O_DEPTH"
 
-add_files [file join $PROJECT_ROOT "src/hls/fsa_streaming_v2_top.cpp"] \
-    -cflags $CFLAGS
-add_files [file join $PROJECT_ROOT "src/core/streaming_v2.cpp"] \
-    -cflags $CFLAGS
-add_files [file join $PROJECT_ROOT "src/core/dma.cpp"] \
-    -cflags $CFLAGS
-add_files [file join $PROJECT_ROOT "src/core/arithmetic.cpp"] \
-    -cflags $CFLAGS
-add_files [file join $PROJECT_ROOT "src/core/accumulator.cpp"] \
-    -cflags $CFLAGS
-add_files [file join $PROJECT_ROOT "src/core/delayer.cpp"] \
-    -cflags $CFLAGS
+foreach SOURCE {
+    fsa_streaming_v2_top.cpp
+    dataflow.cpp
+    controller.cpp
+    dma_process.cpp
+    scratchpad.cpp
+    input_delayer.cpp
+    systolic_array.cpp
+    output_delayer.cpp
+    accumulator_process.cpp
+    arithmetic.cpp
+    dma.cpp
+    accumulator.cpp
+    delayer.cpp
+} {
+    add_files [file join $PROJECT_ROOT "src/stream/$SOURCE"] -cflags $CFLAGS
+}
 
 if {$RUN_CSIM || $RUN_COSIM} {
     add_files -tb \
-        [file join $PROJECT_ROOT "tests/hls/test_fsa_streaming_v2_top.cpp"] \
+        [file join $PROJECT_ROOT "tests/stream/test_fsa_streaming_v2_top.cpp"] \
         -cflags $CFLAGS
 }
 
