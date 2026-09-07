@@ -62,9 +62,8 @@ namespace streaming_v2_detail{
         const int address,
         acc_t data[SA_COLS]
     ){
-        #pragma HLS INLINE off
-        #pragma HLS PIPELINE II=1
-        #pragma HLS LATENCY min=1 max=1
+        // 内联后，event循环能直接比较本次读地址和前后迭代写地址。
+        #pragma HLS INLINE
         for(int col=0; col<SA_COLS; ++col){
             #pragma HLS UNROLL
             data[col] = accumulator_sram[address][col];
@@ -77,9 +76,8 @@ namespace streaming_v2_detail{
         const int address,
         const acc_t data[SA_COLS]
     ){
-        #pragma HLS INLINE off
-        #pragma HLS PIPELINE II=1
-        #pragma HLS LATENCY min=1 max=1
+        // 与读端口一起内联，但底层数组仍绑定为同一组T2P BRAM。
+        #pragma HLS INLINE
         for(int col=0; col<SA_COLS; ++col){
             #pragma HLS UNROLL
             accumulator_sram[address][col] = data[col];
@@ -90,8 +88,8 @@ namespace streaming_v2_detail{
      * @brief FSA Accumulator算术与显式AccRAM端口。
      *
      * RAM仍由本DATAFLOW进程独占，避免形成C仿真和RTL都可能死锁的
-     * 双向进程环；所有访问必须经过两个非内联的一拍行端口，算术逻辑
-     * 不再直接索引L/O数组。
+     * 双向进程环；行访问函数内联到调度循环，使HLS既保留同步AccRAM
+     * 端口，也能识别同一个KV tile内各event访问的是不同L/O行。
      */
     void accumulatorProcess(
         const unsigned length,
@@ -100,7 +98,9 @@ namespace streaming_v2_detail{
     ){
         #pragma HLS INLINE off
 
-        acc_t accumulator_sram[ACC_ROWS][SA_COLS]{};
+        // 每个query tile的首个KV tile会把全部L/O行直接写成新值，
+        // 因此不在事务开始时清零整块AccRAM。
+        acc_t accumulator_sram[ACC_ROWS][SA_COLS];
         #pragma HLS BIND_STORAGE \
             variable=accumulator_sram type=ram_t2p impl=bram
         #pragma HLS ARRAY_PARTITION \
@@ -129,6 +129,12 @@ namespace streaming_v2_detail{
                 // event=0更新L，event=1..SA_ROWS更新对应O行。
                 for(int event=0; event<SA_ROWS+1; ++event){
                     #pragma HLS PIPELINE II=1
+                    // 本循环的地址就是event，所有迭代分别访问不同的
+                    // L/O行，因此不存在跨event的同地址RAW/WAR/WAW。
+                    // pragma只作用于这一层；下一个KV tile对相同行的
+                    // 真实read-modify-write反馈仍由外层顺序保证。
+                    #pragma HLS DEPENDENCE \
+                        variable=accumulator_sram inter false
                     const SaResultToken value_token =
                         sa_result_stream.read();
                     acc_t old_value[SA_COLS]{};
@@ -140,9 +146,11 @@ namespace streaming_v2_detail{
                         variable=contribution complete dim=1
                     #pragma HLS ARRAY_PARTITION \
                         variable=updated_value complete dim=1
-                    accumulatorSramReadRow(
-                        accumulator_sram, event, old_value
-                    );
+                    if(!max_token.initialize){
+                        accumulatorSramReadRow(
+                            accumulator_sram, event, old_value
+                        );
+                    }
                     for(int query=0; query<SA_COLS; ++query){
                         #pragma HLS UNROLL
                         old_value[query] = max_token.initialize

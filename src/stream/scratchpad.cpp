@@ -11,9 +11,9 @@ namespace streaming_v2_detail{
         const int address,
         elem_t data[SA_ROWS]
     ){
-        #pragma HLS INLINE off
-        #pragma HLS PIPELINE II=1
-        #pragma HLS LATENCY min=1 max=1
+        // 访问必须内联到三个互斥的读循环中。这样HLS能看到它们共享同一
+        // Scratchpad端口，不会因为跨调用点函数克隆而复制读端口逻辑。
+        #pragma HLS INLINE
         for(int feature=0; feature<SA_ROWS; ++feature){
             #pragma HLS UNROLL
             data[feature] = spad_sram[bank][address][feature];
@@ -36,15 +36,16 @@ namespace streaming_v2_detail{
         ElemRowStream& v_sa_stream
     ){
         #pragma HLS INLINE off
-        #pragma HLS ALLOCATION \
-            function instances=scratchpadReadRow limit=1
 
         // 与旧FSA Core相同，Q/K/V_t共享一个逻辑Scratchpad地址空间。
         // 最外层两个物理bank用于tile级ping-pong；最后一维是一整行，
         // 对应SA_ROWS个并行elem_t。
-        elem_t spad_sram[2][SPAD_ROWS][SA_ROWS]{};
-        bool q_valid[2][SA_COLS]{};
-        bool k_valid[2][SA_COLS]{};
+        // 每个即将使用的Q/K/V位置及其valid都会先被DMA流完整覆盖，
+        // 因此不能使用聚合零初始化；否则HLS会在每次顶层事务开始时
+        // 生成遍历整个Scratchpad的清零循环，增加启动延迟并形成伪相关。
+        elem_t spad_sram[2][SPAD_ROWS][SA_ROWS];
+        bool q_valid[2][SA_COLS];
+        bool k_valid[2][SA_COLS];
         #pragma HLS BIND_STORAGE variable=spad_sram type=ram_t2p impl=bram
         #pragma HLS ARRAY_PARTITION variable=spad_sram type=complete dim=1
         #pragma HLS ARRAY_RESHAPE variable=spad_sram type=complete dim=3
@@ -99,7 +100,7 @@ namespace streaming_v2_detail{
                     #pragma HLS PIPELINE II=1
                     ElemRowPacket packet{};
                     packet.valid = q_valid[q_bank][query_lane];
-                    elem_t row_data[SA_ROWS]{};
+                    elem_t row_data[SA_ROWS];
                     #pragma HLS ARRAY_PARTITION \
                         variable=row_data complete dim=1
                     scratchpadReadRow(
@@ -119,7 +120,7 @@ namespace streaming_v2_detail{
                     #pragma HLS PIPELINE II=1
                     ElemRowPacket k_packet{};
                     k_packet.valid = k_valid[kv_bank][key_lane];
-                    elem_t row_data[SA_ROWS]{};
+                    elem_t row_data[SA_ROWS];
                     #pragma HLS ARRAY_PARTITION \
                         variable=row_data complete dim=1
                     scratchpadReadRow(
@@ -137,7 +138,7 @@ namespace streaming_v2_detail{
 
                 // ATTENTION_VALUE按feature顺序整行读取V_t，再为当前
                 // 多周期SA适配器恢复成每个key一个packet。
-                elem_t v_transposed[SA_ROWS][SA_ROWS]{};
+                elem_t v_transposed[SA_ROWS][SA_ROWS];
                 #pragma HLS ARRAY_PARTITION \
                     variable=v_transposed complete dim=2
                 for(int feature=0; feature<SA_ROWS; ++feature){
