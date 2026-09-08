@@ -88,88 +88,6 @@ namespace streaming_v2_detail{
         );
     }
 
-    /**
-     * 独立DATAFLOW actor是整核中唯一的Accumulator向量算术调用点。
-     * 请求来自alpha生成、L/O更新和最终归一化，但在这里统一经过同一组
-     * C列FP32 MAC/exp2 lane，防止Vitis按调用上下文克隆第二套阵列。
-     */
-    void accumulatorArithmeticProcess(
-        const unsigned length,
-        const bool causal,
-        AccArithmeticRequestStream& request_stream,
-        AccArithmeticResponseStream& response_stream
-    ){
-        #pragma HLS INLINE off
-
-        const unsigned tiles = tileCount(length);
-        const unsigned tile_visits = causal
-            ? tiles*(tiles+1U)/2U : tiles*tiles;
-        const unsigned request_count =
-            2U*(tile_visits-tiles)
-            + tile_visits*(unsigned)(SA_ROWS+1)
-            + tiles*(unsigned)SA_ROWS;
-
-        for(unsigned request_index=0;
-                request_index<request_count; ++request_index){
-            #pragma HLS PIPELINE II=1
-            #pragma HLS LOOP_TRIPCOUNT min=2*SA_ROWS+1 \
-                max=MAX_ACC_ARITHMETIC_REQUESTS
-            const AccArithmeticRequest request = request_stream.read();
-            AccArithmeticResponse response{};
-            accumulatorArithmeticVector(
-                request.exp2_mode,
-                request.in_a, request.in_b, request.in_c,
-                response.data
-            );
-            response_stream.write(response);
-        }
-    }
-
-    void requestAccumulatorArithmetic(
-        AccArithmeticRequestStream& request_stream,
-        AccArithmeticResponseStream& response_stream,
-        const bool exp2_mode,
-        const acc_t in_a[SA_COLS],
-        const acc_t in_b[SA_COLS],
-        const acc_t in_c[SA_COLS]
-    ){
-        #pragma HLS INLINE
-        AccArithmeticRequest request{};
-        request.exp2_mode = exp2_mode;
-        for(int col=0; col<SA_COLS; ++col){
-            #pragma HLS UNROLL
-            request.in_a[col] = in_a[col];
-            request.in_b[col] = in_b[col];
-            request.in_c[col] = in_c[col];
-        }
-        #ifdef __SYNTHESIS__
-        request_stream.write(request);
-        #else
-        // 普通C/C++仿真顺序执行DATAFLOW函数，无法模拟请求/响应环的
-        // 并发actor。仿真时在此执行同一个算术函数；综合和RTL协同时
-        // 则只走stream，由唯一accumulatorArithmeticProcess实现硬件。
-        AccArithmeticResponse response{};
-        accumulatorArithmeticVector(
-            request.exp2_mode,
-            request.in_a, request.in_b, request.in_c,
-            response.data
-        );
-        response_stream.write(response);
-        #endif
-    }
-
-    void receiveAccumulatorArithmetic(
-        AccArithmeticResponseStream& response_stream,
-        acc_t output[SA_COLS]
-    ){
-        #pragma HLS INLINE
-        const AccArithmeticResponse response = response_stream.read();
-        for(int col=0; col<SA_COLS; ++col){
-            #pragma HLS UNROLL
-            output[col] = response.data[col];
-        }
-    }
-
     template<int COL>
     acc_t accumulatorReciprocalLane(const acc_t denominator){
         static_assert(COL>=0 && COL<SA_COLS,
@@ -206,8 +124,6 @@ namespace streaming_v2_detail{
         const unsigned length,
         const bool causal,
         SaResultStream& sa_result_stream,
-        AccArithmeticRequestStream& arithmetic_request_stream,
-        AccArithmeticResponseStream& arithmetic_response_stream,
         DmaWordStream& output_word_stream
     ){
         #pragma HLS INLINE off
@@ -228,105 +144,114 @@ namespace streaming_v2_detail{
                 const SaResultToken max_token = sa_result_stream.read();
 
                 acc_t alpha[SA_COLS]{};
-                acc_t zeros[SA_COLS]{};
-                acc_t scale_value[SA_COLS]{};
                 acc_t scaled_diff[SA_COLS]{};
+                acc_t inverse_l[SA_COLS]{};
                 #pragma HLS ARRAY_PARTITION variable=alpha complete dim=1
-                #pragma HLS ARRAY_PARTITION variable=zeros complete dim=1
-                #pragma HLS ARRAY_PARTITION variable=scale_value complete dim=1
                 #pragma HLS ARRAY_PARTITION variable=scaled_diff complete dim=1
+                #pragma HLS ARRAY_PARTITION variable=inverse_l complete dim=1
 
-                if(!max_token.initialize){
-                    for(int col=0; col<SA_COLS; ++col){
-                        #pragma HLS UNROLL
-                        scale_value[col] = attentionScale();
-                    }
-                    requestAccumulatorArithmetic(
-                        arithmetic_request_stream,
-                        arithmetic_response_stream,
-                        false, max_token.data, scale_value, zeros
-                    );
-                    receiveAccumulatorArithmetic(
-                        arithmetic_response_stream, scaled_diff
-                    );
-                    requestAccumulatorArithmetic(
-                        arithmetic_request_stream,
-                        arithmetic_response_stream,
-                        true, scaled_diff, zeros, zeros
-                    );
-                    receiveAccumulatorArithmetic(
-                        arithmetic_response_stream, alpha
-                    );
-                }
+                const int alpha_ops = max_token.initialize ? 0 : 2;
+                const int update_begin = alpha_ops;
+                const int normalize_begin = update_begin+SA_ROWS+1;
+                const int arithmetic_ops = normalize_begin+
+                    (max_token.finalize ? SA_ROWS : 0);
 
-                // 先连续发出L/O更新，再按同一顺序接收并写回。算术actor
-                // 可以II=1接收整批请求，同时避免控制进程逐项等待FMA延迟。
-                for(int event=0; event<SA_ROWS+1; ++event){
-                    #pragma HLS PIPELINE II=1
-                    const SaResultToken value_token =
-                        sa_result_stream.read();
-                    acc_t old_value[SA_COLS]{};
-                    #pragma HLS ARRAY_PARTITION variable=old_value complete dim=1
-                    if(!max_token.initialize){
-                        bankedSramFullRead<
-                            AccumulatorStorage, acc_t, SA_COLS
-                        >(storage, event, old_value);
-                    }
-                    requestAccumulatorArithmetic(
-                        arithmetic_request_stream,
-                        arithmetic_response_stream,
-                        false, alpha, old_value, value_token.data
-                    );
-                }
-                for(int event=0; event<SA_ROWS+1; ++event){
-                    #pragma HLS PIPELINE II=1
-                    #pragma HLS DEPENDENCE variable=storage.data inter false
-                    acc_t updated[SA_COLS]{};
-                    #pragma HLS ARRAY_PARTITION variable=updated complete dim=1
-                    receiveAccumulatorArithmetic(
-                        arithmetic_response_stream, updated
-                    );
-                    bankedSramFullWrite<
-                        AccumulatorStorage, acc_t, SA_COLS
-                    >(storage, event, updated);
-                }
+                // 一个循环、一个调用点就是FSA Accumulator的逐命令复用。
+                // alpha两步存在真实前后依赖，因此允许它们等待同一流水单元；
+                // 整个Acc阶段仍短于对应SA tile，不成为tile吞吐瓶颈。
+                for(int op=0; op<arithmetic_ops; ++op){
+                    #pragma HLS LOOP_TRIPCOUNT min=SA_ROWS+1 \
+                        max=2*SA_ROWS+3
+                    acc_t in_a[SA_COLS]{};
+                    acc_t in_b[SA_COLS]{};
+                    acc_t in_c[SA_COLS]{};
+                    acc_t result[SA_COLS]{};
+                    #pragma HLS ARRAY_PARTITION variable=in_a complete dim=1
+                    #pragma HLS ARRAY_PARTITION variable=in_b complete dim=1
+                    #pragma HLS ARRAY_PARTITION variable=in_c complete dim=1
+                    #pragma HLS ARRAY_PARTITION variable=result complete dim=1
 
-                if(max_token.finalize){
-                    acc_t l_row[SA_COLS]{};
-                    acc_t inverse_l[SA_COLS]{};
-                    #pragma HLS ARRAY_PARTITION variable=l_row complete dim=1
-                    #pragma HLS ARRAY_PARTITION variable=inverse_l complete dim=1
-                    bankedSramFullRead<
-                        AccumulatorStorage, acc_t, SA_COLS
-                    >(storage, 0, l_row);
-                    AccumulatorReciprocalColumns<0>::run(l_row, inverse_l);
+                    bool exp2_mode = false;
+                    unsigned write_address = 0;
+                    bool write_result = false;
 
-                    // 连续送出所有O/L请求，统一复用算术actor中的C路MAC。
-                    for(int feature=0; feature<SA_ROWS; ++feature){
-                        #pragma HLS PIPELINE II=1
+                    if(op<alpha_ops){
+                        exp2_mode = op==1;
+                        for(int col=0; col<SA_COLS; ++col){
+                            #pragma HLS UNROLL
+                            in_a[col] = op==0
+                                ? max_token.data[col] : scaled_diff[col];
+                            in_b[col] = op==0
+                                ? attentionScale() : accZero();
+                        }
+                    }else if(op<normalize_begin){
+                        const unsigned event =
+                            (unsigned)(op-update_begin);
+                        const SaResultToken value_token =
+                            sa_result_stream.read();
+                        acc_t old_value[SA_COLS]{};
+                        #pragma HLS ARRAY_PARTITION variable=old_value complete dim=1
+                        if(!max_token.initialize){
+                            bankedSramFullRead<
+                                AccumulatorStorage, acc_t, SA_COLS
+                            >(storage, event, old_value);
+                        }
+                        for(int col=0; col<SA_COLS; ++col){
+                            #pragma HLS UNROLL
+                            in_a[col] = alpha[col];
+                            in_b[col] = old_value[col];
+                            in_c[col] = value_token.data[col];
+                        }
+                        write_address = event;
+                        write_result = true;
+                    }else{
+                        const unsigned feature =
+                            (unsigned)(op-normalize_begin);
+                        if(feature==0){
+                            acc_t l_row[SA_COLS]{};
+                            #pragma HLS ARRAY_PARTITION variable=l_row complete dim=1
+                            bankedSramFullRead<
+                                AccumulatorStorage, acc_t, SA_COLS
+                            >(storage, 0, l_row);
+                            AccumulatorReciprocalColumns<0>::run(
+                                l_row, inverse_l
+                            );
+                        }
                         acc_t old_row[SA_COLS]{};
                         #pragma HLS ARRAY_PARTITION variable=old_row complete dim=1
                         bankedSramFullRead<
                             AccumulatorStorage, acc_t, SA_COLS
                         >(storage, feature+1, old_row);
-                        requestAccumulatorArithmetic(
-                            arithmetic_request_stream,
-                            arithmetic_response_stream,
-                            false, inverse_l, old_row, zeros
-                        );
+                        for(int col=0; col<SA_COLS; ++col){
+                            #pragma HLS UNROLL
+                            in_a[col] = inverse_l[col];
+                            in_b[col] = old_row[col];
+                        }
+                        write_address = feature+1;
+                        write_result = true;
                     }
-                    for(int feature=0; feature<SA_ROWS; ++feature){
-                        #pragma HLS PIPELINE II=1
-                        #pragma HLS DEPENDENCE variable=storage.data inter false
-                        acc_t normalized[SA_COLS]{};
-                        #pragma HLS ARRAY_PARTITION variable=normalized complete dim=1
-                        receiveAccumulatorArithmetic(
-                            arithmetic_response_stream, normalized
-                        );
+
+                    accumulatorArithmeticVector(
+                        exp2_mode, in_a, in_b, in_c, result
+                    );
+
+                    if(op<alpha_ops){
+                        for(int col=0; col<SA_COLS; ++col){
+                            #pragma HLS UNROLL
+                            if(op==0){
+                                scaled_diff[col] = result[col];
+                            }else{
+                                alpha[col] = result[col];
+                            }
+                        }
+                    }else if(write_result){
                         bankedSramFullWrite<
                             AccumulatorStorage, acc_t, SA_COLS
-                        >(storage, feature+1, normalized);
+                        >(storage, write_address, result);
                     }
+                }
+
+                if(max_token.finalize){
 
                     // AXI是query-major。每个64-bit word从两个feature行执行
                     // narrow-read，并选取当前query所在的sub-bank lane。

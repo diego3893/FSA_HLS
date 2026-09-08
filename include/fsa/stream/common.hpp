@@ -110,25 +110,6 @@ namespace streaming_v2_detail{
     using SaResultStream = hls::stream<SaResultToken>;
     using DmaWordStream = hls::stream<dma_word_t>;
 
-    /** Accumulator控制/存储进程送往唯一向量算术阵列的一条微操作。 */
-    struct AccArithmeticRequest{
-        bool exp2_mode = false;
-        acc_t in_a[SA_COLS]{};
-        acc_t in_b[SA_COLS]{};
-        acc_t in_c[SA_COLS]{};
-    };
-
-    struct AccArithmeticResponse{
-        acc_t data[SA_COLS]{};
-    };
-
-    using AccArithmeticRequestStream = hls::stream<AccArithmeticRequest>;
-    using AccArithmeticResponseStream = hls::stream<AccArithmeticResponse>;
-
-    constexpr unsigned MAX_ACC_ARITHMETIC_REQUESTS =
-        (unsigned)DMA_MAX_SEQUENCE_TILES
-        *(unsigned)DMA_MAX_SEQUENCE_TILES*(unsigned)(SA_ROWS+3);
-
     inline unsigned tileCount(const unsigned length){
         #pragma HLS INLINE
         return (length+(unsigned)SA_COLS-1U)/(unsigned)SA_COLS;
@@ -269,14 +250,7 @@ namespace streaming_v2_detail{
     void accumulatorProcess(
         unsigned length, bool causal,
         SaResultStream& sa_result_stream,
-        AccArithmeticRequestStream& arithmetic_request_stream,
-        AccArithmeticResponseStream& arithmetic_response_stream,
         DmaWordStream& output_word_stream
-    );
-    void accumulatorArithmeticProcess(
-        unsigned length, bool causal,
-        AccArithmeticRequestStream& request_stream,
-        AccArithmeticResponseStream& response_stream
     );
     void dmaWriteO(
         dma_word_t o_address[DMA_MAX_O_WORDS],
