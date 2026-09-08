@@ -320,23 +320,6 @@ namespace fsa{
             return view.to_ieee();
         }
 
-        /**
-         * @brief 根据[-1, 0]内的小数部分选择Accumulator PWL分段
-         *
-         * 绝对值只用于计算分段编号；真正的FMA仍使用带符号小数部分。
-         */
-        unsigned int accExp2PieceForFraction(const acc_t fractional_part){
-            const acc_t scaled_fraction =
-                hls::fabs(fractional_part)*(acc_t)exp2PWLPieces;
-            unsigned int index = static_cast<unsigned int>(scaled_fraction);
-
-            // 防止浮点边界误差造成数组越界。
-            if(index >= static_cast<unsigned int>(exp2PWLPieces)){
-                index = static_cast<unsigned int>(exp2PWLPieces-1);
-            }
-            return index;
-        }
-
         PeMacUnitOutput peMacUnitImpl(
             const elem_t in_a,
             const elem_t in_b,
@@ -450,11 +433,94 @@ namespace fsa{
 
     AccPwlInput prepareAccPwlInput(const acc_t x){
         #pragma HLS INLINE
+
+        // Scala RawFloat_MulAddExp2直接从浮点位域拆出整数、小数和
+        // exp2分段。这里采用同样方式，避免x-trunc(x)的FP32减法器以及
+        // abs(fraction)*8的第二个FP32乘法器落在Acc关键路径上。
+        const fp_struct<acc_t> x_view(x);
+        const ap_uint<32> bits = x_view.data();
+        const bool sign = bits[31];
+        const ap_uint<8> exponent_bits = bits.range(30, 23);
+        const ap_uint<23> mantissa = bits.range(22, 0);
+
         AccPwlInput prepared{};
-        prepared.integer = static_cast<int>(hls::trunc(x));
-        prepared.fractional = x-static_cast<acc_t>(prepared.integer);
-        const unsigned int index =
-            accExp2PieceForFraction(prepared.fractional);
+
+        if(exponent_bits==(ap_uint<8>)0xff){
+            // Acc路径的合法输入不大于0；-INF来自完全无效的score行，
+            // 对应exp2结果必须为0。正INF保留为饱和指数。
+            prepared.force_zero = sign && mantissa==0;
+            prepared.integer = sign ? -255 : 255;
+        }else if(exponent_bits==0){
+            // 0和次正规数没有整数部分，且必定位于第0段。
+            prepared.fractional = x;
+        }else{
+            const int exponent = (int)exponent_bits-127;
+            const int binary_scale = exponent-23;
+            ap_uint<24> significand = mantissa;
+            significand[23] = 1;
+
+            ap_uint<32> integer_magnitude = 0;
+            ap_uint<24> remainder = 0;
+            if(binary_scale>=0){
+                integer_magnitude = binary_scale<8
+                    ? (ap_uint<32>)significand << binary_scale
+                    : (ap_uint<32>)0x7fffffff;
+            }else{
+                const int right_shift = -binary_scale;
+                if(right_shift>=24){
+                    remainder = significand;
+                }else{
+                    integer_magnitude = significand >> right_shift;
+                    const ap_uint<24> mask =
+                        ((ap_uint<24>)1 << right_shift)-1;
+                    remainder = significand&mask;
+                }
+            }
+            prepared.integer = sign
+                ? -(int)integer_magnitude : (int)integer_magnitude;
+
+            int highest_bit = -1;
+            for(int bit=23; bit>=0; --bit){
+                #pragma HLS UNROLL
+                if(highest_bit<0 && remainder[bit]){
+                    highest_bit = bit;
+                }
+            }
+
+            if(highest_bit>=0){
+                ap_uint<32> fractional_bits = 0;
+                fractional_bits[31] = sign;
+                fractional_bits.range(30, 23) =
+                    (ap_uint<8>)(highest_bit+binary_scale+127);
+                const ap_uint<47> normalized =
+                    (ap_uint<47>)remainder << (23-highest_bit);
+                fractional_bits.range(22, 0) =
+                    normalized.range(22, 0);
+                prepared.fractional =
+                    accFloatFromBits(fractional_bits);
+
+                const int piece_shift = binary_scale+3;
+                ap_uint<32> piece_value = 0;
+                if(piece_shift>=0){
+                    piece_value = piece_shift<8
+                        ? (ap_uint<32>)remainder << piece_shift
+                        : (ap_uint<32>)(exp2PWLPieces-1);
+                }else if(-piece_shift<24){
+                    piece_value = remainder >> (-piece_shift);
+                }
+                if(piece_value>=(ap_uint<32>)exp2PWLPieces){
+                    piece_value = (ap_uint<32>)(exp2PWLPieces-1);
+                }
+                const unsigned index = piece_value.to_uint();
+                prepared.slope =
+                    accFloatFromBits(ACC_EXP2_PWL_SLOPE_BITS[index]);
+                prepared.intercept =
+                    accFloatFromBits(ACC_EXP2_PWL_INTERCEPT_BITS[index]);
+                return prepared;
+            }
+        }
+
+        const unsigned index = 0;
         prepared.slope =
             accFloatFromBits(ACC_EXP2_PWL_SLOPE_BITS[index]);
         prepared.intercept =
@@ -467,7 +533,7 @@ namespace fsa{
         const int integer
     ){
         #pragma HLS INLINE
-        return hls::ldexp(fractional_result, integer);
+        return ldexpByBits(fractional_result, integer);
     }
 
     acc_t accExp2PWL(const acc_t x){
@@ -475,7 +541,8 @@ namespace fsa{
         const acc_t fractional_result = hls::fma(
             prepared.fractional, prepared.slope, prepared.intercept
         );
-        return finishAccPwl(fractional_result, prepared.integer);
+        return prepared.force_zero ? accZero()
+            : finishAccPwl(fractional_result, prepared.integer);
     }
 
     elem_t elemZero(){

@@ -19,6 +19,10 @@ $TestFile = Join-Path $ProjectRoot `
 $BuildDirectory = Join-Path $ProjectRoot "build\stream_tests"
 $Executable = Join-Path $BuildDirectory `
     "test_fsa_streaming_v2_${Rows}x${Cols}.exe"
+$PwlTestFile = Join-Path $ProjectRoot `
+    "tests\stream\test_acc_pwl_bits.cpp"
+$PwlExecutable = Join-Path $BuildDirectory `
+    "test_acc_pwl_bits_${Rows}x${Cols}.exe"
 
 if(-not (Get-Command g++ -ErrorAction SilentlyContinue)){
     Write-Host "[ERROR] g++ was not found." -ForegroundColor Red
@@ -64,6 +68,23 @@ Write-Host "[RUN]   streaming_v2 ${Rows}x${Cols}" -ForegroundColor Cyan
 & $Executable
 if($LASTEXITCODE -ne 0){
     Write-Host "[FAIL] stream-only test failed." -ForegroundColor Red
+    exit $LASTEXITCODE
+}
+
+Write-Host "[BUILD] stream Acc PWL bit preprocessing" -ForegroundColor Cyan
+& g++ @CompilerOptions `
+    (Join-Path $StreamSourceDirectory "arithmetic.cpp") `
+    (Join-Path $StreamSourceDirectory "local_math_stubs.cpp") `
+    $PwlTestFile -o $PwlExecutable
+if($LASTEXITCODE -ne 0){
+    Write-Host "[FAIL] stream Acc PWL build failed." -ForegroundColor Red
+    exit $LASTEXITCODE
+}
+
+Write-Host "[RUN]   stream Acc PWL bit preprocessing" -ForegroundColor Cyan
+& $PwlExecutable
+if($LASTEXITCODE -ne 0){
+    Write-Host "[FAIL] stream Acc PWL test failed." -ForegroundColor Red
     exit $LASTEXITCODE
 }
 

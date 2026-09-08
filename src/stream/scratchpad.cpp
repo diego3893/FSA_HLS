@@ -6,7 +6,7 @@ namespace fsa{
 namespace streaming_v2_detail{
 
     using ScratchpadStorage = BankedSramStorage<
-        elem_t, SPAD_ROWS, SA_ROWS, spadBanks, SPAD_SUB_BANKS
+        elem_t, elemWidth, SPAD_ROWS, SA_ROWS, spadBanks, SPAD_SUB_BANKS
     >;
 
     void writeScratchpadBeat(
@@ -96,16 +96,24 @@ namespace streaming_v2_detail{
                 const unsigned v_base = kv_buffer
                     ? SPAD_V1_BASE_ADDRESS : SPAD_V0_BASE_ADDRESS;
 
+                // FSA的每个sub-bank只有一个写端口。K/V地址虽然不同，
+                // 默认布局下仍可能命中同一bank/sub-bank，因此分成两个
+                // II=1阶段，避免HLS在一个迭代中推断两个竞争写请求。
                 for(int lane=0; lane<SA_COLS; ++lane){
                     for(int word=0; word<SPAD_SUB_BANKS; ++word){
                         #pragma HLS PIPELINE II=1
                         const SpadWritePacket k_packet = k_dma_stream.read();
-                        const SpadWritePacket v_packet = v_dma_stream.read();
                         writeScratchpadBeat(storage, k_packet);
-                        writeScratchpadBeat(storage, v_packet);
                         if(word==0){
                             k_valid[kv_buffer][lane] = k_packet.row_valid;
                         }
+                    }
+                }
+                for(int lane=0; lane<SA_COLS; ++lane){
+                    for(int word=0; word<SPAD_SUB_BANKS; ++word){
+                        #pragma HLS PIPELINE II=1
+                        const SpadWritePacket v_packet = v_dma_stream.read();
+                        writeScratchpadBeat(storage, v_packet);
                     }
                 }
 

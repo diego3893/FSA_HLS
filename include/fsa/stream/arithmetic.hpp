@@ -118,6 +118,7 @@ namespace fsa{
         acc_t slope{};
         acc_t intercept{};
         int integer = 0;
+        bool force_zero = false;
     };
 
     AccPwlInput prepareAccPwlInput(acc_t x);

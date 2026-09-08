@@ -35,6 +35,12 @@ namespace streaming_v2_detail{
         DelayedElemStream delayed_sa_stream("v2_delayed_sa");
         SaResultStream raw_sa_result_stream("v2_raw_sa_result");
         SaResultStream aligned_sa_result_stream("v2_aligned_sa_result");
+        AccArithmeticRequestStream accumulator_request_stream(
+            "v2_accumulator_request"
+        );
+        AccArithmeticResponseStream accumulator_response_stream(
+            "v2_accumulator_response"
+        );
         DmaWordStream output_word_stream("v2_output_words");
         #pragma HLS STREAM variable=q_dma_stream depth=2*SA_COLS
         #pragma HLS STREAM variable=k_dma_stream depth=2*SA_COLS
@@ -49,6 +55,8 @@ namespace streaming_v2_detail{
         #pragma HLS STREAM variable=delayed_sa_stream depth=2*SA_ROWS
         #pragma HLS STREAM variable=raw_sa_result_stream depth=2
         #pragma HLS STREAM variable=aligned_sa_result_stream depth=2
+        #pragma HLS STREAM variable=accumulator_request_stream depth=2
+        #pragma HLS STREAM variable=accumulator_response_stream depth=SA_ROWS+1
         #pragma HLS STREAM variable=output_word_stream \
             depth=2*SA_COLS*DMA_O_WORDS_PER_ROW
         #pragma HLS DATAFLOW
@@ -81,8 +89,16 @@ namespace streaming_v2_detail{
         );
         accumulatorProcess(
             length, causal,
-            aligned_sa_result_stream, output_word_stream
+            aligned_sa_result_stream,
+            accumulator_request_stream, accumulator_response_stream,
+            output_word_stream
         );
+        #ifdef __SYNTHESIS__
+        accumulatorArithmeticProcess(
+            length, causal,
+            accumulator_request_stream, accumulator_response_stream
+        );
+        #endif
         dmaWriteO(o_address, length, output_word_stream, status);
     }
 

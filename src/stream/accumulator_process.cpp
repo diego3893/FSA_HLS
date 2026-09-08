@@ -6,7 +6,7 @@ namespace fsa{
 namespace streaming_v2_detail{
 
     using AccumulatorStorage = BankedSramStorage<
-        acc_t, ACC_ROWS, SA_COLS, accBanks, ACC_SUB_BANKS
+        acc_t, accWidth, ACC_ROWS, SA_COLS, accBanks, ACC_SUB_BANKS
     >;
 
     /**
@@ -32,7 +32,10 @@ namespace streaming_v2_detail{
             exp2_mode ? pwl.slope : in_b,
             exp2_mode ? pwl.intercept : in_c
         );
-        return exp2_mode ? finishAccPwl(result, pwl.integer) : result;
+        return exp2_mode
+            ? (pwl.force_zero ? accZero()
+                              : finishAccPwl(result, pwl.integer))
+            : result;
     }
 
     template<int COL>
@@ -85,6 +88,88 @@ namespace streaming_v2_detail{
         );
     }
 
+    /**
+     * 独立DATAFLOW actor是整核中唯一的Accumulator向量算术调用点。
+     * 请求来自alpha生成、L/O更新和最终归一化，但在这里统一经过同一组
+     * C列FP32 MAC/exp2 lane，防止Vitis按调用上下文克隆第二套阵列。
+     */
+    void accumulatorArithmeticProcess(
+        const unsigned length,
+        const bool causal,
+        AccArithmeticRequestStream& request_stream,
+        AccArithmeticResponseStream& response_stream
+    ){
+        #pragma HLS INLINE off
+
+        const unsigned tiles = tileCount(length);
+        const unsigned tile_visits = causal
+            ? tiles*(tiles+1U)/2U : tiles*tiles;
+        const unsigned request_count =
+            2U*(tile_visits-tiles)
+            + tile_visits*(unsigned)(SA_ROWS+1)
+            + tiles*(unsigned)SA_ROWS;
+
+        for(unsigned request_index=0;
+                request_index<request_count; ++request_index){
+            #pragma HLS PIPELINE II=1
+            #pragma HLS LOOP_TRIPCOUNT min=2*SA_ROWS+1 \
+                max=MAX_ACC_ARITHMETIC_REQUESTS
+            const AccArithmeticRequest request = request_stream.read();
+            AccArithmeticResponse response{};
+            accumulatorArithmeticVector(
+                request.exp2_mode,
+                request.in_a, request.in_b, request.in_c,
+                response.data
+            );
+            response_stream.write(response);
+        }
+    }
+
+    void requestAccumulatorArithmetic(
+        AccArithmeticRequestStream& request_stream,
+        AccArithmeticResponseStream& response_stream,
+        const bool exp2_mode,
+        const acc_t in_a[SA_COLS],
+        const acc_t in_b[SA_COLS],
+        const acc_t in_c[SA_COLS]
+    ){
+        #pragma HLS INLINE
+        AccArithmeticRequest request{};
+        request.exp2_mode = exp2_mode;
+        for(int col=0; col<SA_COLS; ++col){
+            #pragma HLS UNROLL
+            request.in_a[col] = in_a[col];
+            request.in_b[col] = in_b[col];
+            request.in_c[col] = in_c[col];
+        }
+        #ifdef __SYNTHESIS__
+        request_stream.write(request);
+        #else
+        // 普通C/C++仿真顺序执行DATAFLOW函数，无法模拟请求/响应环的
+        // 并发actor。仿真时在此执行同一个算术函数；综合和RTL协同时
+        // 则只走stream，由唯一accumulatorArithmeticProcess实现硬件。
+        AccArithmeticResponse response{};
+        accumulatorArithmeticVector(
+            request.exp2_mode,
+            request.in_a, request.in_b, request.in_c,
+            response.data
+        );
+        response_stream.write(response);
+        #endif
+    }
+
+    void receiveAccumulatorArithmetic(
+        AccArithmeticResponseStream& response_stream,
+        acc_t output[SA_COLS]
+    ){
+        #pragma HLS INLINE
+        const AccArithmeticResponse response = response_stream.read();
+        for(int col=0; col<SA_COLS; ++col){
+            #pragma HLS UNROLL
+            output[col] = response.data[col];
+        }
+    }
+
     template<int COL>
     acc_t accumulatorReciprocalLane(const acc_t denominator){
         static_assert(COL>=0 && COL<SA_COLS,
@@ -121,11 +206,11 @@ namespace streaming_v2_detail{
         const unsigned length,
         const bool causal,
         SaResultStream& sa_result_stream,
+        AccArithmeticRequestStream& arithmetic_request_stream,
+        AccArithmeticResponseStream& arithmetic_response_stream,
         DmaWordStream& output_word_stream
     ){
         #pragma HLS INLINE off
-        #pragma HLS ALLOCATION function \
-            instances=accumulatorArithmeticVector limit=1
 
         AccumulatorStorage storage;
         #pragma HLS BIND_STORAGE variable=storage.data type=ram_t2p impl=bram
@@ -156,33 +241,50 @@ namespace streaming_v2_detail{
                         #pragma HLS UNROLL
                         scale_value[col] = attentionScale();
                     }
-                    accumulatorArithmeticVector(
-                        false, max_token.data, scale_value, zeros,
-                        scaled_diff
+                    requestAccumulatorArithmetic(
+                        arithmetic_request_stream,
+                        arithmetic_response_stream,
+                        false, max_token.data, scale_value, zeros
                     );
-                    accumulatorArithmeticVector(
-                        true, scaled_diff, zeros, zeros, alpha
+                    receiveAccumulatorArithmetic(
+                        arithmetic_response_stream, scaled_diff
+                    );
+                    requestAccumulatorArithmetic(
+                        arithmetic_request_stream,
+                        arithmetic_response_stream,
+                        true, scaled_diff, zeros, zeros
+                    );
+                    receiveAccumulatorArithmetic(
+                        arithmetic_response_stream, alpha
                     );
                 }
 
-                // event 0更新L，event 1..SA_ROWS更新O各feature行。
+                // 先连续发出L/O更新，再按同一顺序接收并写回。算术actor
+                // 可以II=1接收整批请求，同时避免控制进程逐项等待FMA延迟。
                 for(int event=0; event<SA_ROWS+1; ++event){
                     #pragma HLS PIPELINE II=1
-                    #pragma HLS DEPENDENCE variable=storage.data inter false
                     const SaResultToken value_token =
                         sa_result_stream.read();
                     acc_t old_value[SA_COLS]{};
-                    acc_t updated[SA_COLS]{};
                     #pragma HLS ARRAY_PARTITION variable=old_value complete dim=1
-                    #pragma HLS ARRAY_PARTITION variable=updated complete dim=1
                     if(!max_token.initialize){
                         bankedSramFullRead<
                             AccumulatorStorage, acc_t, SA_COLS
                         >(storage, event, old_value);
                     }
-                    accumulatorArithmeticVector(
-                        false, alpha, old_value,
-                        value_token.data, updated
+                    requestAccumulatorArithmetic(
+                        arithmetic_request_stream,
+                        arithmetic_response_stream,
+                        false, alpha, old_value, value_token.data
+                    );
+                }
+                for(int event=0; event<SA_ROWS+1; ++event){
+                    #pragma HLS PIPELINE II=1
+                    #pragma HLS DEPENDENCE variable=storage.data inter false
+                    acc_t updated[SA_COLS]{};
+                    #pragma HLS ARRAY_PARTITION variable=updated complete dim=1
+                    receiveAccumulatorArithmetic(
+                        arithmetic_response_stream, updated
                     );
                     bankedSramFullWrite<
                         AccumulatorStorage, acc_t, SA_COLS
@@ -199,19 +301,27 @@ namespace streaming_v2_detail{
                     >(storage, 0, l_row);
                     AccumulatorReciprocalColumns<0>::run(l_row, inverse_l);
 
-                    // 用同一组每列FMA原地归一化O，不再生成额外乘法器组。
+                    // 连续送出所有O/L请求，统一复用算术actor中的C路MAC。
                     for(int feature=0; feature<SA_ROWS; ++feature){
                         #pragma HLS PIPELINE II=1
-                        #pragma HLS DEPENDENCE variable=storage.data inter false
                         acc_t old_row[SA_COLS]{};
-                        acc_t normalized[SA_COLS]{};
                         #pragma HLS ARRAY_PARTITION variable=old_row complete dim=1
-                        #pragma HLS ARRAY_PARTITION variable=normalized complete dim=1
                         bankedSramFullRead<
                             AccumulatorStorage, acc_t, SA_COLS
                         >(storage, feature+1, old_row);
-                        accumulatorArithmeticVector(
-                            false, inverse_l, old_row, zeros, normalized
+                        requestAccumulatorArithmetic(
+                            arithmetic_request_stream,
+                            arithmetic_response_stream,
+                            false, inverse_l, old_row, zeros
+                        );
+                    }
+                    for(int feature=0; feature<SA_ROWS; ++feature){
+                        #pragma HLS PIPELINE II=1
+                        #pragma HLS DEPENDENCE variable=storage.data inter false
+                        acc_t normalized[SA_COLS]{};
+                        #pragma HLS ARRAY_PARTITION variable=normalized complete dim=1
+                        receiveAccumulatorArithmetic(
+                            arithmetic_response_stream, normalized
                         );
                         bankedSramFullWrite<
                             AccumulatorStorage, acc_t, SA_COLS
