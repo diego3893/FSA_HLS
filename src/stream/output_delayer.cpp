@@ -14,6 +14,7 @@ namespace streaming_v2_detail{
      */
     void outputDelayerProcess(
         const unsigned length,
+        const bool causal,
         SaResultStream& raw_result_stream,
         SaResultStream& aligned_result_stream
     ){
@@ -26,7 +27,10 @@ namespace streaming_v2_detail{
         const unsigned tiles = tileCount(length);
         for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
             #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
-            for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
+            const unsigned key_tiles = keyTileCountForQuery(
+                query_tile, tiles, causal
+            );
+            for(unsigned key_tile=0; key_tile<key_tiles; ++key_tile){
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
                 for(int token_index=0;
                         token_index<SA_ROWS+2; ++token_index){
@@ -37,7 +41,13 @@ namespace streaming_v2_detail{
                     for(int cycle=0; cycle<SA_COLS; ++cycle){
                         #pragma HLS PIPELINE II=1
                         OutputDelayerIO io{};
-                        io.in[(std::size_t)cycle] = raw.data[cycle];
+                        // 静态列索引避免综合器把cycle当成可能越界的动态
+                        // array select，同时仍保持每拍仅一列有效。
+                        for(int col=0; col<SA_COLS; ++col){
+                            #pragma HLS UNROLL
+                            io.in[(std::size_t)col] = cycle==col
+                                ? raw.data[col] : accZero();
+                        }
 
                         OutputDelayerState next_state{};
                         #pragma HLS ARRAY_PARTITION \

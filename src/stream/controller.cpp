@@ -15,13 +15,17 @@ namespace streaming_v2_detail{
         const unsigned tiles = tileCount(length);
         for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
             #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
-            for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
+            const unsigned key_tiles = keyTileCountForQuery(
+                query_tile, tiles, causal
+            );
+            for(unsigned key_tile=0; key_tile<key_tiles; ++key_tile){
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
                 #pragma HLS PIPELINE II=1
                 CoreTileControl control{};
                 control.meta.initialize = key_tile==0;
-                control.meta.finalize = key_tile+1U==tiles;
-                control.meta.causal = causal;
+                control.meta.finalize = key_tile+1U==key_tiles;
+                // 未来tile已在控制层跳过，只有对角tile需要CMP逐拍mask。
+                control.meta.causal = causal && key_tile==query_tile;
                 control.meta.query_base =
                     query_tile*(unsigned)SA_COLS;
                 control.meta.key_base = key_tile*(unsigned)SA_COLS;
@@ -128,6 +132,7 @@ namespace streaming_v2_detail{
      */
     void saExecutionPlanProcess(
         const unsigned length,
+        const bool causal,
         SaCycleControlStream& cycle_control_stream
     ){
         #pragma HLS INLINE off
@@ -135,7 +140,10 @@ namespace streaming_v2_detail{
         const unsigned tiles = tileCount(length);
         for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
             #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
-            for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
+            const unsigned key_tiles = keyTileCountForQuery(
+                query_tile, tiles, causal
+            );
+            for(unsigned key_tile=0; key_tile<key_tiles; ++key_tile){
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
                 for(int cycle=0; cycle<SA_TILE_CYCLES; ++cycle){
                     #pragma HLS PIPELINE II=1

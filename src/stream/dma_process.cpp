@@ -8,7 +8,7 @@ namespace streaming_v2_detail{
     void dmaReadQ(
         const dma_word_t q_address[DMA_MAX_QKV_WORDS],
         const unsigned length,
-        ElemRowStream& q_dma_stream
+        SpadWriteStream& q_dma_stream
     ){
         #pragma HLS INLINE off
 
@@ -16,16 +16,23 @@ namespace streaming_v2_detail{
         for(unsigned query_tile=0;
                 query_tile<query_tiles; ++query_tile){
             #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+            const unsigned base = (query_tile&1U)
+                ? SPAD_Q1_BASE_ADDRESS : SPAD_Q0_BASE_ADDRESS;
             for(int lane=0; lane<SA_COLS; ++lane){
-                #pragma HLS PIPELINE II=1
-                ElemRowPacket packet{};
                 const unsigned query =
                     query_tile*(unsigned)SA_COLS+(unsigned)lane;
-                packet.valid = query<length;
-                if(packet.valid){
-                    dma_load_elem_row(q_address, query, packet.data);
+                for(int word=0; word<SPAD_SUB_BANKS; ++word){
+                    #pragma HLS PIPELINE II=1
+                    SpadWritePacket packet{};
+                    packet.address = (sram_address_t)(base+lane);
+                    packet.sub_bank =
+                        (sub_bank_index_t<SPAD_SUB_BANKS>)word;
+                    packet.row_valid = query<length;
+                    packet.data = packet.row_valid
+                        ? q_address[query*DMA_QKV_WORDS_PER_ROW+word]
+                        : (dma_word_t)0;
+                    q_dma_stream.write(packet);
                 }
-                q_dma_stream.write(packet);
             }
         }
     }
@@ -33,25 +40,36 @@ namespace streaming_v2_detail{
     void dmaReadK(
         const dma_word_t k_address[DMA_MAX_QKV_WORDS],
         const unsigned length,
-        ElemRowStream& k_dma_stream
+        const bool causal,
+        SpadWriteStream& k_dma_stream
     ){
         #pragma HLS INLINE off
 
         const unsigned tiles = tileCount(length);
         for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
             #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
-            for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
+            const unsigned key_tiles = keyTileCountForQuery(
+                query_tile, tiles, causal
+            );
+            for(unsigned key_tile=0; key_tile<key_tiles; ++key_tile){
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+                const unsigned base = (key_tile&1U)
+                    ? SPAD_K1_BASE_ADDRESS : SPAD_K0_BASE_ADDRESS;
                 for(int lane=0; lane<SA_COLS; ++lane){
-                    #pragma HLS PIPELINE II=1
-                    ElemRowPacket packet{};
                     const unsigned key =
                         key_tile*(unsigned)SA_COLS+(unsigned)lane;
-                    packet.valid = key<length;
-                    if(packet.valid){
-                        dma_load_elem_row(k_address, key, packet.data);
+                    for(int word=0; word<SPAD_SUB_BANKS; ++word){
+                        #pragma HLS PIPELINE II=1
+                        SpadWritePacket packet{};
+                        packet.address = (sram_address_t)(base+lane);
+                        packet.sub_bank =
+                            (sub_bank_index_t<SPAD_SUB_BANKS>)word;
+                        packet.row_valid = key<length;
+                        packet.data = packet.row_valid
+                            ? k_address[key*DMA_QKV_WORDS_PER_ROW+word]
+                            : (dma_word_t)0;
+                        k_dma_stream.write(packet);
                     }
-                    k_dma_stream.write(packet);
                 }
             }
         }
@@ -60,57 +78,37 @@ namespace streaming_v2_detail{
     void dmaReadV(
         const dma_word_t v_address[DMA_MAX_QKV_WORDS],
         const unsigned length,
-        ElemRowStream& v_dma_stream
+        const bool causal,
+        SpadWriteStream& v_dma_stream
     ){
         #pragma HLS INLINE off
 
         const unsigned tiles = tileCount(length);
         for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
             #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
-            for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
+            const unsigned key_tiles = keyTileCountForQuery(
+                query_tile, tiles, causal
+            );
+            for(unsigned key_tile=0; key_tile<key_tiles; ++key_tile){
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+                const unsigned base = (key_tile&1U)
+                    ? SPAD_V1_BASE_ADDRESS : SPAD_V0_BASE_ADDRESS;
                 for(int lane=0; lane<SA_COLS; ++lane){
-                    #pragma HLS PIPELINE II=1
-                    ElemRowPacket packet{};
                     const unsigned key =
                         key_tile*(unsigned)SA_COLS+(unsigned)lane;
-                    packet.valid = key<length;
-                    if(packet.valid){
-                        dma_load_elem_row(v_address, key, packet.data);
+                    for(int word=0; word<SPAD_SUB_BANKS; ++word){
+                        #pragma HLS PIPELINE II=1
+                        SpadWritePacket packet{};
+                        packet.address = (sram_address_t)(base+lane);
+                        packet.sub_bank =
+                            (sub_bank_index_t<SPAD_SUB_BANKS>)word;
+                        packet.row_valid = key<length;
+                        packet.data = packet.row_valid
+                            ? v_address[key*DMA_QKV_WORDS_PER_ROW+word]
+                            : (dma_word_t)0;
+                        v_dma_stream.write(packet);
                     }
-                    v_dma_stream.write(packet);
                 }
-            }
-        }
-    }
-
-    /** @brief FSA Scratchpad唯一整行同步读端口。 */
-
-    /**
-     * Accumulator输出与AXI写事务解耦。每个FP32行连续打包成64-bit word，
-     * 使后级只处理单一宽度的顺序数据流。
-     */
-    void outputPackProcess(
-        const unsigned length,
-        AccRowStream& output_stream,
-        DmaWordStream& output_word_stream
-    ){
-        #pragma HLS INLINE off
-
-        for(unsigned query=0; query<length; ++query){
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=MAX_SEQUENCE_LENGTH
-            const AccRowPacket packet = output_stream.read();
-            for(int word=0; word<DMA_O_WORDS_PER_ROW; ++word){
-                #pragma HLS PIPELINE II=1
-                acc_t values[DMA_ACCS_PER_WORD]{};
-                #pragma HLS ARRAY_PARTITION variable=values type=complete dim=1
-                for(int lane=0; lane<DMA_ACCS_PER_WORD; ++lane){
-                    #pragma HLS UNROLL
-                    values[lane] = packet.data[
-                        word*DMA_ACCS_PER_WORD+lane
-                    ];
-                }
-                output_word_stream.write(dma_pack_acc_word(values));
             }
         }
     }

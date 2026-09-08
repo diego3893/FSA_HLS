@@ -359,7 +359,9 @@ namespace fsa{
     }  // namespace
 
     acc_t accumulator_reciprocal(const acc_t denominator){
-        #pragma HLS INLINE off
+        // 调用者按列特化；内联后每列保留独立恢复除法状态/组合级，
+        // 对应Scala Accumulator的每列一个reciprocal单元。
+        #pragma HLS INLINE
 
         ReciprocalDividerState state{};
         begin_reciprocal(state, denominator);

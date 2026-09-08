@@ -112,6 +112,17 @@ namespace fsa{
      */
     acc_t exp2PWLIntercept(exp2_counter_t index);
 
+    /** Acc exp2的位域/查表前处理；FMA由每列统一算术单元执行。 */
+    struct AccPwlInput{
+        acc_t fractional{};
+        acc_t slope{};
+        acc_t intercept{};
+        int integer = 0;
+    };
+
+    AccPwlInput prepareAccPwlInput(acc_t x);
+    acc_t finishAccPwl(acc_t fractional_result, int integer);
+
     /**
      * @brief Acc的exp2计算
      * 

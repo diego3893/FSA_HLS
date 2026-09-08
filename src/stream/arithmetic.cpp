@@ -448,19 +448,34 @@ namespace fsa{
         return view.to_ieee();
     }
 
-    acc_t accExp2PWL(const acc_t x){
-        const int integer_part = static_cast<int>(hls::trunc(x));
-        const acc_t fractional_part = x-static_cast<acc_t>(integer_part);
-        const unsigned int index = accExp2PieceForFraction(fractional_part);
-
-        const acc_t slope =
+    AccPwlInput prepareAccPwlInput(const acc_t x){
+        #pragma HLS INLINE
+        AccPwlInput prepared{};
+        prepared.integer = static_cast<int>(hls::trunc(x));
+        prepared.fractional = x-static_cast<acc_t>(prepared.integer);
+        const unsigned int index =
+            accExp2PieceForFraction(prepared.fractional);
+        prepared.slope =
             accFloatFromBits(ACC_EXP2_PWL_SLOPE_BITS[index]);
-        const acc_t intercept =
+        prepared.intercept =
             accFloatFromBits(ACC_EXP2_PWL_INTERCEPT_BITS[index]);
+        return prepared;
+    }
 
-        const acc_t fractional_result =
-            hls::fma(fractional_part, slope, intercept);
-        return hls::ldexp(fractional_result, integer_part);
+    acc_t finishAccPwl(
+        const acc_t fractional_result,
+        const int integer
+    ){
+        #pragma HLS INLINE
+        return hls::ldexp(fractional_result, integer);
+    }
+
+    acc_t accExp2PWL(const acc_t x){
+        const AccPwlInput prepared = prepareAccPwlInput(x);
+        const acc_t fractional_result = hls::fma(
+            prepared.fractional, prepared.slope, prepared.intercept
+        );
+        return finishAccPwl(fractional_result, prepared.integer);
     }
 
     elem_t elemZero(){

@@ -27,9 +27,7 @@ namespace streaming_v2_detail{
                 key>=meta.active_keys.to_int()){
             return false;
         }
-        return !meta.causal ||
-            meta.key_base.to_uint()+(unsigned)key<=
-            meta.query_base.to_uint()+(unsigned)query;
+        return true;
     }
 
     /**
@@ -145,14 +143,17 @@ namespace streaming_v2_detail{
             const bool valid,
             const CmpWaveOp op,
             const int key,
+            const int causal_counter,
             const TileMeta& meta,
             const acc_t d_input[SA_COLS],
             CMPState state[SA_COLS],
             acc_t d_output[SA_COLS]
         ){
             #pragma HLS INLINE
-            const bool enabled = op!=CmpWaveOp::UPDATE ||
-                laneEnabled(meta, COL, key);
+            const bool enabled = op!=CmpWaveOp::UPDATE || (
+                laneEnabled(meta, COL, key) &&
+                (!meta.causal || causal_counter==0)
+            );
             const acc_t old_max = state[COL].oldMax;
             const acc_t new_max = state[COL].newMax;
             const exp2_counter_t exp2_counter = state[COL].exp2_counter;
@@ -179,7 +180,9 @@ namespace streaming_v2_detail{
                 old_max, new_max, exp2_counter
             );
             SpatialCmpColumns<COL+1>::run(
-                valid, op, key, meta, d_input, state, d_output
+                valid, op, key,
+                causal_counter>0 ? causal_counter-1 : 0,
+                meta, d_input, state, d_output
             );
         }
     };
@@ -189,6 +192,7 @@ namespace streaming_v2_detail{
         static void run(
             const bool,
             const CmpWaveOp,
+            const int,
             const int,
             const TileMeta&,
             const acc_t[SA_COLS],
@@ -466,7 +470,7 @@ namespace streaming_v2_detail{
                 cmp_input[query] = qk_at_cmp.partial[query];
             }
             SpatialCmpColumns<0>::run(
-                cmp_valid, cmp_op, cmp_item, meta,
+                cmp_valid, cmp_op, cmp_item, cmp_item, meta,
                 cmp_input, cmp_state, cmp_output
             );
 
@@ -598,11 +602,10 @@ namespace streaming_v2_detail{
 
     void systolicArrayProcess(
         const unsigned length,
+        const bool causal,
         CoreControlStream& control_stream,
         SaCycleControlStream& cycle_control_stream,
-        ElemRowStream& q_sa_stream,
-        ElemRowStream& k_sa_stream,
-        ElemRowStream& v_sa_stream,
+        DelayedElemStream& delayed_sa_stream,
         SaResultStream& sa_result_stream
     ){
         #pragma HLS INLINE off
@@ -619,27 +622,46 @@ namespace streaming_v2_detail{
         const unsigned tiles = tileCount(length);
         for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
             #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
-            for(unsigned key_tile=0; key_tile<tiles; ++key_tile){
+            const unsigned key_tiles = keyTileCountForQuery(
+                query_tile, tiles, causal
+            );
+            for(unsigned key_tile=0; key_tile<key_tiles; ++key_tile){
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
                 const CoreTileControl control = control_stream.read();
                 const TileMeta meta = control.meta;
 
-                for(int query=0; query<SA_COLS; ++query){
+                // InputDelayer输出保持逐拍波前协议。当前SA微程序仍使用
+                // tile寄存器作发射源，因此只在SA边界恢复坐标，不再在
+                // Delayer actor中缓存/复制三套完整tile。
+                for(int beat_index=0;
+                        beat_index<3*(SA_COLS+SA_ROWS-1); ++beat_index){
                     #pragma HLS PIPELINE II=1
-                    const ElemRowPacket packet = q_sa_stream.read();
-                    for(int feature=0; feature<SA_ROWS; ++feature){
+                    const DelayedElemBeat beat = delayed_sa_stream.read();
+                    const int cycle = beat.cycle.to_int();
+                    for(int output_lane=0;
+                            output_lane<SA_ROWS; ++output_lane){
                         #pragma HLS UNROLL
-                        q_tile[query][feature] = packet.data[feature];
-                    }
-                }
-                for(int key=0; key<SA_COLS; ++key){
-                    #pragma HLS PIPELINE II=1
-                    const ElemRowPacket k_packet = k_sa_stream.read();
-                    const ElemRowPacket v_packet = v_sa_stream.read();
-                    for(int feature=0; feature<SA_ROWS; ++feature){
-                        #pragma HLS UNROLL
-                        k_tile[key][feature] = k_packet.data[feature];
-                        v_tile[key][feature] = v_packet.data[feature];
+                        const int internal_lane = beat.layout.rev_output
+                            ? SA_ROWS-1-output_lane : output_lane;
+                        const int feature = beat.layout.rev_input
+                            ? SA_ROWS-1-internal_lane : internal_lane;
+                        const int source_lane = cycle-
+                            (beat.layout.delay_output ? internal_lane : 0);
+                        for(int lane=0; lane<SA_COLS; ++lane){
+                            #pragma HLS UNROLL
+                            if(source_lane==lane){
+                                if(beat.phase==DelayerPhase::LOAD_Q){
+                                    q_tile[lane][feature] =
+                                        beat.data[output_lane];
+                                }else if(beat.phase==DelayerPhase::SCORE_K){
+                                    k_tile[lane][feature] =
+                                        beat.data[output_lane];
+                                }else{
+                                    v_tile[lane][feature] =
+                                        beat.data[output_lane];
+                                }
+                            }
+                        }
                     }
                 }
 

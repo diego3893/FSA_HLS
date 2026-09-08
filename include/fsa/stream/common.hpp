@@ -12,6 +12,7 @@
 #include "fsa/stream/state.hpp"
 #include "fsa/stream/accumulator.hpp"
 #include "fsa/stream/arithmetic.hpp"
+#include "fsa/stream/banked_sram.hpp"
 #include "fsa/stream/delayer.hpp"
 #include "fsa/stream/fsa_streaming_v2.hpp"
 
@@ -23,15 +24,18 @@ namespace streaming_v2_detail{
         "streaming v2要求SA高度不小于token tile宽度"
     );
 
-    constexpr int SPAD_Q_BASE_ADDRESS = 0;
-    constexpr int SPAD_K_BASE_ADDRESS =
-        SPAD_Q_BASE_ADDRESS+SA_COLS;
-    constexpr int SPAD_VT_BASE_ADDRESS =
-        SPAD_K_BASE_ADDRESS+SA_ROWS;
+    // 与FSA-main相同的双缓冲逻辑地址布局。bank是地址低位选择的物理
+    // SRAM bank，不再额外作为一维数组复制整个逻辑地址空间。
+    constexpr int SPAD_Q0_BASE_ADDRESS = 0;
+    constexpr int SPAD_Q1_BASE_ADDRESS = SPAD_Q0_BASE_ADDRESS+SA_COLS;
+    constexpr int SPAD_K0_BASE_ADDRESS = SPAD_Q1_BASE_ADDRESS+SA_COLS;
+    constexpr int SPAD_K1_BASE_ADDRESS = SPAD_K0_BASE_ADDRESS+SA_ROWS;
+    constexpr int SPAD_V0_BASE_ADDRESS = SPAD_K1_BASE_ADDRESS+SA_ROWS;
+    constexpr int SPAD_V1_BASE_ADDRESS = SPAD_V0_BASE_ADDRESS+SA_ROWS;
 
     static_assert(
-        SPAD_VT_BASE_ADDRESS+SA_ROWS<=SPAD_ROWS,
-        "streaming v2的Q/K/V_t布局超出Scratchpad容量"
+        SPAD_V1_BASE_ADDRESS+SA_ROWS==SPAD_ROWS,
+        "streaming v2的Q/K/V双缓冲布局必须覆盖整个Scratchpad"
     );
 
     struct ElemRowPacket{
@@ -39,8 +43,32 @@ namespace streaming_v2_detail{
         elem_t data[SA_ROWS]{};
     };
 
-    struct AccRowPacket{
-        acc_t data[SA_ROWS]{};
+    /** 一个AXI beat对应一次Scratchpad narrow-write。 */
+    struct SpadWritePacket{
+        sram_address_t address = 0;
+        sub_bank_index_t<SPAD_SUB_BANKS> sub_bank = 0;
+        bool row_valid = false;
+        dma_word_t data = 0;
+    };
+
+    enum class DelayerPhase : std::uint8_t{
+        LOAD_Q = 0,
+        SCORE_K = 1,
+        VALUE_V = 2
+    };
+
+    struct InputLayoutControl{
+        bool rev_input = false;
+        bool delay_output = false;
+        bool rev_output = false;
+    };
+
+    /** InputDelayer每推进一拍产生一个beat，bubble也必须显式发送。 */
+    struct DelayedElemBeat{
+        DelayerPhase phase = DelayerPhase::LOAD_Q;
+        ap_uint<16> cycle = 0;
+        InputLayoutControl layout{};
+        elem_t data[SA_ROWS]{};
     };
 
     struct TileMeta{
@@ -51,12 +79,6 @@ namespace streaming_v2_detail{
         ap_uint<16> active_keys = 0;
         ap_uint<32> query_base = 0;
         ap_uint<32> key_base = 0;
-    };
-
-    struct InputLayoutControl{
-        bool rev_input = false;
-        bool delay_output = false;
-        bool rev_output = false;
     };
 
     struct CoreTileControl{
@@ -82,14 +104,24 @@ namespace streaming_v2_detail{
     };
 
     using ElemRowStream = hls::stream<ElemRowPacket>;
+    using SpadWriteStream = hls::stream<SpadWritePacket>;
+    using DelayedElemStream = hls::stream<DelayedElemBeat>;
     using CoreControlStream = hls::stream<CoreTileControl>;
     using SaResultStream = hls::stream<SaResultToken>;
-    using AccRowStream = hls::stream<AccRowPacket>;
     using DmaWordStream = hls::stream<dma_word_t>;
 
     inline unsigned tileCount(const unsigned length){
         #pragma HLS INLINE
         return (length+(unsigned)SA_COLS-1U)/(unsigned)SA_COLS;
+    }
+
+    inline unsigned keyTileCountForQuery(
+        const unsigned query_tile,
+        const unsigned tiles,
+        const bool causal
+    ){
+        #pragma HLS INLINE
+        return causal ? query_tile+1U : tiles;
     }
 
     enum class PeWaveOp : std::uint8_t{
@@ -168,25 +200,26 @@ namespace streaming_v2_detail{
         unsigned length, bool causal, CoreControlStream& control_stream
     );
     void saExecutionPlanProcess(
-        unsigned length, SaCycleControlStream& cycle_control_stream
+        unsigned length, bool causal,
+        SaCycleControlStream& cycle_control_stream
     );
     void dmaReadQ(
         const dma_word_t q_address[DMA_MAX_QKV_WORDS],
-        unsigned length, ElemRowStream& q_dma_stream
+        unsigned length, SpadWriteStream& q_dma_stream
     );
     void dmaReadK(
         const dma_word_t k_address[DMA_MAX_QKV_WORDS],
-        unsigned length, ElemRowStream& k_dma_stream
+        unsigned length, bool causal, SpadWriteStream& k_dma_stream
     );
     void dmaReadV(
         const dma_word_t v_address[DMA_MAX_QKV_WORDS],
-        unsigned length, ElemRowStream& v_dma_stream
+        unsigned length, bool causal, SpadWriteStream& v_dma_stream
     );
     void scratchpadProcess(
-        unsigned length,
-        ElemRowStream& q_dma_stream,
-        ElemRowStream& k_dma_stream,
-        ElemRowStream& v_dma_stream,
+        unsigned length, bool causal,
+        SpadWriteStream& q_dma_stream,
+        SpadWriteStream& k_dma_stream,
+        SpadWriteStream& v_dma_stream,
         CoreControlStream& control_in,
         CoreControlStream& control_out,
         ElemRowStream& q_sa_stream,
@@ -194,38 +227,29 @@ namespace streaming_v2_detail{
         ElemRowStream& v_sa_stream
     );
     void inputDelayerProcess(
-        unsigned length,
+        unsigned length, bool causal,
         CoreControlStream& control_in,
         ElemRowStream& q_spad_stream,
         ElemRowStream& k_spad_stream,
         ElemRowStream& v_spad_stream,
         CoreControlStream& control_out,
-        ElemRowStream& q_sa_stream,
-        ElemRowStream& k_sa_stream,
-        ElemRowStream& v_sa_stream
+        DelayedElemStream& delayed_sa_stream
     );
     void systolicArrayProcess(
-        unsigned length,
+        unsigned length, bool causal,
         CoreControlStream& control_stream,
         SaCycleControlStream& cycle_control_stream,
-        ElemRowStream& q_sa_stream,
-        ElemRowStream& k_sa_stream,
-        ElemRowStream& v_sa_stream,
+        DelayedElemStream& delayed_sa_stream,
         SaResultStream& sa_result_stream
     );
     void outputDelayerProcess(
-        unsigned length,
+        unsigned length, bool causal,
         SaResultStream& raw_result_stream,
         SaResultStream& aligned_result_stream
     );
     void accumulatorProcess(
-        unsigned length,
+        unsigned length, bool causal,
         SaResultStream& sa_result_stream,
-        AccRowStream& output_stream
-    );
-    void outputPackProcess(
-        unsigned length,
-        AccRowStream& output_stream,
         DmaWordStream& output_word_stream
     );
     void dmaWriteO(
