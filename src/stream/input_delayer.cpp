@@ -35,7 +35,10 @@ namespace streaming_v2_detail{
                 const CoreTileControl control = control_in.read();
                 control_out.write(control);
 
-                for(int phase=0; phase<3; ++phase){
+                // Q只在每个query tile的第一个KV tile进入Delayer；后续
+                // tile直接复用SA边界已经保存的q_tile。
+                const int first_phase = key_tile==0 ? 0 : 1;
+                for(int phase=first_phase; phase<3; ++phase){
                     const InputLayoutControl layout = phase==0
                         ? control.load_stationary
                         : (phase==1

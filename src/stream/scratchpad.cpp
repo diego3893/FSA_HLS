@@ -85,6 +85,16 @@ namespace streaming_v2_detail{
                 }
             }
 
+            // Q在同一个query tile的所有KV tile之间保持不变。只从
+            // Scratchpad读出一次并交给InputDelayer；SA边界保留q_tile，
+            // 后续KV tile仍会用该副本重新装载PE寄存器。
+            for(int lane=0; lane<SA_COLS; ++lane){
+                #pragma HLS PIPELINE II=1
+                q_sa_stream.write(readScratchpadRow(
+                    storage, q_base+lane, q_valid[q_buffer][lane]
+                ));
+            }
+
             const unsigned key_tiles = keyTileCountForQuery(
                 query_tile, tiles, causal
             );
@@ -120,12 +130,6 @@ namespace streaming_v2_detail{
                 const CoreTileControl control = control_in.read();
                 control_out.write(control);
 
-                for(int lane=0; lane<SA_COLS; ++lane){
-                    #pragma HLS PIPELINE II=1
-                    q_sa_stream.write(readScratchpadRow(
-                        storage, q_base+lane, q_valid[q_buffer][lane]
-                    ));
-                }
                 for(int lane=0; lane<SA_COLS; ++lane){
                     #pragma HLS PIPELINE II=1
                     k_sa_stream.write(readScratchpadRow(

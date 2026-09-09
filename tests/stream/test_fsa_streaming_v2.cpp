@@ -11,8 +11,8 @@
 #include "fsa/stream/dma.hpp"
 #include "fsa/stream/fsa_streaming_v2.hpp"
 
-#ifdef FSA_STREAMING_V2_HLS_TOP
-#include "fsa/stream/fsa_streaming_v2_top.hpp"
+#ifdef FSA_STREAM_HLS_TOP
+#include "fsa/stream/fsa_stream.hpp"
 #endif
 
 namespace{
@@ -110,8 +110,8 @@ namespace{
     }
 
     void callDut(const bool causal, ap_uint<8>& status){
-#ifdef FSA_STREAMING_V2_HLS_TOP
-        fsa_streaming_v2_top(
+#ifdef FSA_STREAM_HLS_TOP
+        fsa_stream(
             q_memory, k_memory, v_memory, o_memory,
             (ap_uint<32>)L, causal, status
         );
@@ -165,8 +165,8 @@ namespace{
             (fsa::dma_word_t)0x6b6bb4b46b6bb4b4ULL;
         o_memory[0] = canary;
         ap_uint<8> status = 0xff;
-#ifdef FSA_STREAMING_V2_HLS_TOP
-        fsa_streaming_v2_top(
+#ifdef FSA_STREAM_HLS_TOP
+        fsa_stream(
             q_memory, k_memory, v_memory, o_memory,
             (ap_uint<32>)0, false, status
         );

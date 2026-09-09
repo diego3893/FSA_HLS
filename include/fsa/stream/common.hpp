@@ -161,7 +161,19 @@ namespace streaming_v2_detail{
     };
 
     constexpr int PE_TOKEN_LATENCY = 9;
-    constexpr int PE_SCHEDULER_GUARD_CYCLES = 7;
+
+    // spatialPeCell的当前综合latency为9拍。环形wave槽默认额外保留
+    // 1拍，避免结果写回与下一次读取同一槽发生同拍RAW；需要做调度
+    // 探索时可由编译选项覆盖，但不得小于0。
+    #ifndef FSA_STREAM_PE_SCHEDULER_GUARD_CYCLES
+    #define FSA_STREAM_PE_SCHEDULER_GUARD_CYCLES 1
+    #endif
+    constexpr int PE_SCHEDULER_GUARD_CYCLES =
+        FSA_STREAM_PE_SCHEDULER_GUARD_CYCLES;
+    static_assert(
+        PE_SCHEDULER_GUARD_CYCLES>=0,
+        "PE scheduler guard must not be negative"
+    );
     constexpr int PE_HOP_CYCLES =
         PE_TOKEN_LATENCY+PE_SCHEDULER_GUARD_CYCLES;
     constexpr int QK_START = SA_COLS;

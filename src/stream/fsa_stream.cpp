@@ -1,6 +1,6 @@
-#include "fsa/stream/fsa_streaming_v2_top.hpp"
+#include "fsa/stream/fsa_stream.hpp"
 
-void fsa_streaming_v2_top(
+void fsa_stream(
     const fsa::dma_word_t q_address[fsa::DMA_MAX_QKV_WORDS],
     const fsa::dma_word_t k_address[fsa::DMA_MAX_QKV_WORDS],
     const fsa::dma_word_t v_address[fsa::DMA_MAX_QKV_WORDS],

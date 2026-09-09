@@ -378,6 +378,7 @@ namespace streaming_v2_detail{
             }
         }
 
+        int pipeline_slot = 0;
         for(int cycle=0; cycle<SA_TILE_CYCLES; ++cycle){
             #pragma HLS PIPELINE II=1
             #pragma HLS LOOP_FLATTEN off
@@ -387,7 +388,6 @@ namespace streaming_v2_detail{
             const SaCycleControl cycle_control =
                 cycle_control_stream.read();
 
-            const int pipeline_slot = cycle%PE_HOP_CYCLES;
             PeWave row_input[SA_ROWS]{};
             PeWave row_result[SA_ROWS]{};
             #pragma HLS ARRAY_PARTITION variable=row_input complete dim=0
@@ -441,8 +441,13 @@ namespace streaming_v2_detail{
                     cycle_control.query_index.to_int();
                 for(int row=0; row<SA_ROWS; ++row){
                     #pragma HLS UNROLL
-                    pe_register[row][query_index] =
-                        q_tile[query_index][row];
+                    for(int query=0; query<SA_COLS; ++query){
+                        #pragma HLS UNROLL
+                        if(query_index==query){
+                            pe_register[row][query] =
+                                q_tile[query][row];
+                        }
+                    }
                 }
             }
 
@@ -541,14 +546,30 @@ namespace streaming_v2_detail{
                 const PeWaveOp op = row_input[row].op;
                 const int item = row_input[row].index.to_int();
                 if(op==PeWaveOp::QK){
-                    horizontal[row] = k_tile[item][row];
+                    for(int key=0; key<SA_COLS; ++key){
+                        #pragma HLS UNROLL
+                        if(item==key){
+                            horizontal[row] = k_tile[key][row];
+                        }
+                    }
                 }else if(op==PeWaveOp::SCALE){
                     horizontal[row] = elemAttentionScale();
                 }else if(op==PeWaveOp::PWL){
-                    horizontal[row] = EXP2_SLOPES[item];
+                    for(int piece=0; piece<exp2PWLPieces; ++piece){
+                        #pragma HLS UNROLL
+                        if(item==piece){
+                            horizontal[row] = EXP2_SLOPES[piece];
+                        }
+                    }
                 }else if(op==PeWaveOp::PV){
-                    horizontal[row] = row<SA_COLS
-                        ? v_tile[row][item] : elemZero();
+                    if(row<SA_COLS){
+                        for(int feature=0; feature<SA_ROWS; ++feature){
+                            #pragma HLS UNROLL
+                            if(item==feature){
+                                horizontal[row] = v_tile[row][feature];
+                            }
+                        }
+                    }
                 }else{
                     horizontal[row] = elemOne();
                 }
@@ -597,6 +618,14 @@ namespace streaming_v2_detail{
                 }
                 result_stream.write(token);
             }
+
+            // 显式环形计数代替对非2幂PE_HOP_CYCLES执行动态取模。
+            // 计数值保持为int数组索引，避免重新引入位扩展索引告警。
+            if(pipeline_slot+1==PE_HOP_CYCLES){
+                pipeline_slot = 0;
+            }else{
+                ++pipeline_slot;
+            }
         }
     }
 
@@ -633,8 +662,10 @@ namespace streaming_v2_detail{
                 // InputDelayer输出保持逐拍波前协议。当前SA微程序仍使用
                 // tile寄存器作发射源，因此只在SA边界恢复坐标，不再在
                 // Delayer actor中缓存/复制三套完整tile。
+                const int phase_count = key_tile==0 ? 3 : 2;
                 for(int beat_index=0;
-                        beat_index<3*(SA_COLS+SA_ROWS-1); ++beat_index){
+                        beat_index<phase_count*(SA_COLS+SA_ROWS-1);
+                        ++beat_index){
                     #pragma HLS PIPELINE II=1
                     const DelayedElemBeat beat = delayed_sa_stream.read();
                     const int cycle = beat.cycle.to_int();

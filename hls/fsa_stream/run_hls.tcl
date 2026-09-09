@@ -7,7 +7,7 @@ set PROJECT_ROOT [file normalize [file join $SCRIPT_DIR "../.."]]
 set HLS_PROJECT_DIR [file join $SCRIPT_DIR "build"]
 
 open_project -reset $HLS_PROJECT_DIR
-set_top fsa_streaming_v2_top
+set_top fsa_stream
 
 set SA_ROWS 4
 set SA_COLS 4
@@ -28,7 +28,7 @@ set O_DEPTH [expr {$MAX_SEQUENCE_LENGTH*$SA_ROWS/2}]
 set CFLAGS "-std=c++14 -I[file join $PROJECT_ROOT include] -DFSA_SA_ROWS=$SA_ROWS -DFSA_SA_COLS=$SA_COLS -DFSA_MAX_SEQUENCE_LENGTH=$MAX_SEQUENCE_LENGTH -DFSA_DMA_AXI_QKV_DEPTH=$QKV_DEPTH -DFSA_DMA_AXI_O_DEPTH=$O_DEPTH"
 
 foreach SOURCE {
-    fsa_streaming_v2_top.cpp
+    fsa_stream.cpp
     dataflow.cpp
     controller.cpp
     dma_process.cpp

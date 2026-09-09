@@ -1,13 +1,13 @@
 /**
- * @file fsa_streaming_v2_top.hpp
- * @brief 拆分后streaming v2的Vitis HLS AXI顶层。
+ * @file fsa_stream.hpp
+ * @brief 拆分后stream架构的Vitis HLS AXI顶层。
  */
-#ifndef FSA_STREAM_FSA_STREAMING_V2_TOP_HPP
-#define FSA_STREAM_FSA_STREAMING_V2_TOP_HPP
+#ifndef FSA_STREAM_HPP
+#define FSA_STREAM_HPP
 
 #include "fsa/stream/fsa_streaming_v2.hpp"
 
-void fsa_streaming_v2_top(
+void fsa_stream(
     const fsa::dma_word_t q_address[fsa::DMA_MAX_QKV_WORDS],
     const fsa::dma_word_t k_address[fsa::DMA_MAX_QKV_WORDS],
     const fsa::dma_word_t v_address[fsa::DMA_MAX_QKV_WORDS],
@@ -17,4 +17,4 @@ void fsa_streaming_v2_top(
     ap_uint<8>& status
 );
 
-#endif  // FSA_STREAM_FSA_STREAMING_V2_TOP_HPP
+#endif  // FSA_STREAM_HPP
