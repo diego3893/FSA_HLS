@@ -61,10 +61,11 @@ namespace streaming_v2_detail{
 
         fsaCoreControllerProcess(length, causal, control_to_spad);
         saExecutionPlanProcess(length, causal, sa_cycle_control_stream);
-        dmaRequestProcess(
-            length, causal,
-            q_request_stream, k_request_stream, v_request_stream
-        );
+        // 每个descriptor FIFO只有一个独立生产者，避免多输出producer
+        // 因某一路反压而饿死Scratchpad当前正在等待的另一路请求。
+        dmaQRequestProcess(length, q_request_stream);
+        dmaKRequestProcess(length, causal, k_request_stream);
+        dmaVRequestProcess(length, causal, v_request_stream);
         dmaReadQ(q_address, length, q_request_stream, q_dma_stream);
         dmaReadK(
             k_address, length, causal,

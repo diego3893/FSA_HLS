@@ -49,7 +49,7 @@ namespace streaming_v2_detail{
         V = 2
     };
 
-    /** 控制器发给专用物理DMA actor的统一内部读请求。 */
+    /** 单输出请求actor发给专用物理DMA actor的统一内部读请求。 */
     struct DmaReadRequest{
         DmaTransferKind kind = DmaTransferKind::Q;
         ap_uint<32> request_id = 0;
@@ -247,10 +247,16 @@ namespace streaming_v2_detail{
         unsigned length, bool causal,
         SaCycleControlStream& cycle_control_stream
     );
-    void dmaRequestProcess(
+    void dmaQRequestProcess(
+        unsigned length,
+        DmaReadRequestStream& q_request_stream
+    );
+    void dmaKRequestProcess(
         unsigned length, bool causal,
-        DmaReadRequestStream& q_request_stream,
-        DmaReadRequestStream& k_request_stream,
+        DmaReadRequestStream& k_request_stream
+    );
+    void dmaVRequestProcess(
+        unsigned length, bool causal,
         DmaReadRequestStream& v_request_stream
     );
     void dmaReadQ(

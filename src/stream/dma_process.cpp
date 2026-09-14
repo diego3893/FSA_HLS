@@ -21,22 +21,20 @@ namespace streaming_v2_detail{
     }  // namespace
 
     /**
-     * 统一产生DMA descriptor；Q/K/V仍由三个专用actor和三个AXI bundle
-     * 并发执行。request_id和packet.last构成内部请求/完成协议。
+     * Q/K/V请求必须由三个单输出actor独立产生。一个actor顺序写三个
+     * 有限深度FIFO时，任一非当前通道的FIFO写满都会阻止它产生当前通道
+     * 的后续请求，进而与Scratchpad形成DATAFLOW循环等待。
      */
-    void dmaRequestProcess(
+    void dmaQRequestProcess(
         const unsigned length,
-        const bool causal,
-        DmaReadRequestStream& q_request_stream,
-        DmaReadRequestStream& k_request_stream,
-        DmaReadRequestStream& v_request_stream
+        DmaReadRequestStream& q_request_stream
     ){
         #pragma HLS INLINE off
 
         const unsigned tiles = tileCount(length);
         ap_uint<32> q_request_id = 0;
-        ap_uint<32> kv_request_id = 0;
         for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
+            #pragma HLS PIPELINE II=1
             #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
             DmaReadRequest q_request{};
             q_request.kind = DmaTransferKind::Q;
@@ -50,7 +48,20 @@ namespace streaming_v2_detail{
                 q_request.source_row.to_uint(), length
             );
             q_request_stream.write(q_request);
+        }
+    }
 
+    void dmaKRequestProcess(
+        const unsigned length,
+        const bool causal,
+        DmaReadRequestStream& k_request_stream
+    ){
+        #pragma HLS INLINE off
+
+        const unsigned tiles = tileCount(length);
+        ap_uint<32> request_id = 0;
+        for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
             const unsigned key_tiles = keyTileCountForQuery(
                 query_tile, tiles, causal
             );
@@ -58,27 +69,49 @@ namespace streaming_v2_detail{
                 #pragma HLS PIPELINE II=1
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
                 DmaReadRequest k_request{};
-                DmaReadRequest v_request{};
                 k_request.kind = DmaTransferKind::K;
-                v_request.kind = DmaTransferKind::V;
-                k_request.request_id = kv_request_id;
-                v_request.request_id = kv_request_id++;
+                k_request.request_id = request_id++;
                 const unsigned source_row =
                     key_tile*(unsigned)SA_COLS;
                 k_request.source_row = source_row;
-                v_request.source_row = source_row;
                 k_request.scratchpad_base = (sram_address_t)(
                     (key_tile&1U)
                         ? SPAD_K1_BASE_ADDRESS : SPAD_K0_BASE_ADDRESS
                 );
+                k_request.active_rows = activeRows(source_row, length);
+                k_request_stream.write(k_request);
+            }
+        }
+    }
+
+    void dmaVRequestProcess(
+        const unsigned length,
+        const bool causal,
+        DmaReadRequestStream& v_request_stream
+    ){
+        #pragma HLS INLINE off
+
+        const unsigned tiles = tileCount(length);
+        ap_uint<32> request_id = 0;
+        for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+            const unsigned key_tiles = keyTileCountForQuery(
+                query_tile, tiles, causal
+            );
+            for(unsigned key_tile=0; key_tile<key_tiles; ++key_tile){
+                #pragma HLS PIPELINE II=1
+                #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+                DmaReadRequest v_request{};
+                v_request.kind = DmaTransferKind::V;
+                v_request.request_id = request_id++;
+                const unsigned source_row =
+                    key_tile*(unsigned)SA_COLS;
+                v_request.source_row = source_row;
                 v_request.scratchpad_base = (sram_address_t)(
                     (key_tile&1U)
                         ? SPAD_V1_BASE_ADDRESS : SPAD_V0_BASE_ADDRESS
                 );
-                const ap_uint<16> rows = activeRows(source_row, length);
-                k_request.active_rows = rows;
-                v_request.active_rows = rows;
-                k_request_stream.write(k_request);
+                v_request.active_rows = activeRows(source_row, length);
                 v_request_stream.write(v_request);
             }
         }
