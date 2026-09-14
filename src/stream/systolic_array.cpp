@@ -389,9 +389,8 @@ namespace streaming_v2_detail{
         #pragma HLS ARRAY_PARTITION variable=score_pipeline complete dim=1
         #pragma HLS ARRAY_PARTITION variable=cmp_pipeline complete dim=0
 
-        // 显式回绕形成小型环形计数器，避免用通用余数运算表达slot选择；
-        // 当前hop恢复为16，也保持与其他hop配置相同的实现形式。
-        int pipeline_slot = 0;
+        // CMP仍用4槽回绕计数器。PE hop固定为16时，直接使用cycle%16
+        // 恢复8b7aab7中的静态低位slot选择，使HLS能够看见环形bank模式。
         int cmp_pipeline_slot = 0;
 
         for(int row=0; row<SA_ROWS; ++row){
@@ -406,15 +405,12 @@ namespace streaming_v2_detail{
         for(int cycle=0; cycle<SA_TILE_CYCLES; ++cycle){
             #pragma HLS PIPELINE II=1
             #pragma HLS LOOP_FLATTEN off
-            // pe_register就是Scala PE.reg的唯一状态。SCALE写回到首个PWL读取、
-            // PWL写回到ROW_SUM/PV读取都是真实的跨迭代RAW，不能用
-            // DEPENDENCE inter false隐藏，否则II=1 RTL可能读取写回前的旧值。
-            // pe_pipeline/cmp_pipeline的写入来自9拍/3拍子函数返回，读取又
-            // 决定下一跳token。即使C模型中的slot复用距离分别为10和4，
-            // 也不能无条件删除全部inter RAW/WAW：该pragma只改变RTL调度，
-            // 曾导致C测试通过而CoSim产生稳定的48个输出错误。先保留HLS
-            // 推导的真实依赖；后续若要恢复II=1，必须用显式前递或可证明的
-            // 静态stage实现，不能再次全局声明inter false。
+            // 微程序保证每次SCALE/PWL/ROW_SUM/PV读取都晚于对应PE.reg
+            // 写回；恢复8b7aab7中对该控制相关性的调度证明，避免HLS把
+            // 不可能相邻发生的PE.reg访问误判成distance=1。该提示只用于
+            // PE.reg；不得扩展到多拍子函数写回的pe_pipeline/cmp_pipeline，
+            // 后两者的全局inter false曾在RTL CoSim中造成48个数值错误。
+            #pragma HLS DEPENDENCE variable=pe_register inter false
 
             const SaCycleControl cycle_control =
                 cycle_control_stream.read();
@@ -453,7 +449,7 @@ namespace streaming_v2_detail{
                 }
             }
 
-            const int current_pipeline_slot = pipeline_slot;
+            const int current_pipeline_slot = cycle%PE_HOP_CYCLES;
             const int current_cmp_pipeline_slot = cmp_pipeline_slot;
             CmpToPeStage completed_cmp{};
             if(cycle>=CMP_HOP_CYCLES){
@@ -648,8 +644,6 @@ namespace streaming_v2_detail{
             }
             cmp_pipeline[current_cmp_pipeline_slot] = next_cmp_to_pe;
 
-            pipeline_slot = current_pipeline_slot+1==PE_HOP_CYCLES
-                ? 0 : current_pipeline_slot+1;
             cmp_pipeline_slot =
                 current_cmp_pipeline_slot+1==CMP_HOP_CYCLES
                     ? 0 : current_cmp_pipeline_slot+1;
