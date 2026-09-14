@@ -70,10 +70,6 @@ namespace streaming_v2_detail{
         #pragma HLS INLINE
 
         SaCycleControl control{};
-        if(cycle<SA_COLS){
-            control.load_query = true;
-            control.query_index = (PeWaveIndex)cycle;
-        }
         if(cycle>=QK_START && cycle<QK_START+SA_COLS){
             control.launch_qk = true;
             control.qk_index = (PeWaveIndex)(cycle-QK_START);

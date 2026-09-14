@@ -74,15 +74,22 @@ namespace streaming_v2_detail{
             const unsigned q_base = q_buffer
                 ? SPAD_Q1_BASE_ADDRESS : SPAD_Q0_BASE_ADDRESS;
 
-            for(int lane=0; lane<SA_COLS; ++lane){
-                for(int word=0; word<SPAD_SUB_BANKS; ++word){
-                    #pragma HLS PIPELINE II=1
-                    const SpadWritePacket packet = q_dma_stream.read();
-                    writeScratchpadBeat(storage, packet);
-                    if(word==0){
+            bool q_complete = false;
+            while(!q_complete){
+                #pragma HLS PIPELINE II=1
+                #pragma HLS LOOP_TRIPCOUNT \
+                    min=SA_COLS*SPAD_SUB_BANKS \
+                    max=SA_COLS*SPAD_SUB_BANKS
+                const SpadWritePacket packet = q_dma_stream.read();
+                writeScratchpadBeat(storage, packet);
+                if(packet.sub_bank.to_uint()==0U){
+                    const unsigned lane =
+                        packet.address.to_uint()-q_base;
+                    if(lane<(unsigned)SA_COLS){
                         q_valid[q_buffer][lane] = packet.row_valid;
                     }
                 }
+                q_complete = packet.transfer_last;
             }
 
             const unsigned key_tiles = keyTileCountForQuery(
@@ -96,24 +103,43 @@ namespace streaming_v2_detail{
                 const unsigned v_base = kv_buffer
                     ? SPAD_V1_BASE_ADDRESS : SPAD_V0_BASE_ADDRESS;
 
-                // FSA的每个sub-bank只有一个写端口。K/V地址虽然不同，
-                // 默认布局下仍可能命中同一bank/sub-bank，因此分成两个
-                // II=1阶段，避免HLS在一个迭代中推断两个竞争写请求。
-                for(int lane=0; lane<SA_COLS; ++lane){
-                    for(int word=0; word<SPAD_SUB_BANKS; ++word){
-                        #pragma HLS PIPELINE II=1
-                        const SpadWritePacket k_packet = k_dma_stream.read();
-                        writeScratchpadBeat(storage, k_packet);
-                        if(word==0){
-                            k_valid[kv_buffer][lane] = k_packet.row_valid;
+                // 唯一Scratchpad owner在同一个II=1服务循环中公平仲裁K/V
+                // 完成流。下一buffer可在SA消费当前tile期间继续写入；由于
+                // 每个bank/sub-bank只有一个写端口，每拍最多提交一个beat。
+                bool k_complete = false;
+                bool v_complete = false;
+                bool prefer_k = true;
+                while(!k_complete || !v_complete){
+                    #pragma HLS PIPELINE II=1
+                    #pragma HLS LOOP_TRIPCOUNT \
+                        min=2*SA_COLS*SPAD_SUB_BANKS \
+                        max=2*SA_COLS*SPAD_SUB_BANKS
+                    const bool k_available =
+                        !k_complete && !k_dma_stream.empty();
+                    const bool v_available =
+                        !v_complete && !v_dma_stream.empty();
+                    const bool take_k = !k_complete &&
+                        (v_complete || (k_available &&
+                            (!v_available || prefer_k)));
+
+                    if(take_k){
+                        const SpadWritePacket packet = k_dma_stream.read();
+                        writeScratchpadBeat(storage, packet);
+                        if(packet.sub_bank.to_uint()==0U){
+                            const unsigned lane =
+                                packet.address.to_uint()-k_base;
+                            if(lane<(unsigned)SA_COLS){
+                                k_valid[kv_buffer][lane] =
+                                    packet.row_valid;
+                            }
                         }
-                    }
-                }
-                for(int lane=0; lane<SA_COLS; ++lane){
-                    for(int word=0; word<SPAD_SUB_BANKS; ++word){
-                        #pragma HLS PIPELINE II=1
-                        const SpadWritePacket v_packet = v_dma_stream.read();
-                        writeScratchpadBeat(storage, v_packet);
+                        k_complete = packet.transfer_last;
+                        prefer_k = false;
+                    }else{
+                        const SpadWritePacket packet = v_dma_stream.read();
+                        writeScratchpadBeat(storage, packet);
+                        v_complete = packet.transfer_last;
+                        prefer_k = true;
                     }
                 }
 

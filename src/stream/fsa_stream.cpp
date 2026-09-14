@@ -23,7 +23,7 @@ void fsa_stream(
         max_widen_bitwidth=512
     #pragma HLS INTERFACE m_axi port=o_address offset=slave bundle=o_gmem \
         depth=FSA_DMA_AXI_O_DEPTH latency=64 \
-        num_write_outstanding=16 max_write_burst_length=64 \
+        num_write_outstanding=8 max_write_burst_length=64 \
         max_widen_bitwidth=512
 
     #pragma HLS INTERFACE s_axilite port=q_address bundle=control

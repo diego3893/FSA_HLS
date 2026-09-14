@@ -6,11 +6,12 @@ namespace fsa{
 namespace streaming_v2_detail{
 
     /**
-     * @brief 显式FSA OutputDelayer阶段。
+     * @brief 显式FSA OutputDelayer协议边界。
      *
-     * 当前多周期SA在一个SaResultToken中给出完整列向量。这里先按物理SA
-     * 底边的列错拍顺序逐列注入，再由唯一一套OutputDelayer恢复为同拍的
-     * SA_COLS路Accumulator输入。这样Accumulator不能再绕过输出对齐网络。
+     * 当前tagged SA只有在一个完整逻辑结果到达底边时才产生token，列数据
+     * 在token内已经对齐。因此这里保持独立OutputDelayer actor，但不再把
+     * 每个完整token人为拆成SA_COLS拍再拼回；连续结果可做到token II=1。
+     * 若后续把第3项替换成真正逐PE mesh，再把本边界改回逐列valid错拍。
      */
     void outputDelayerProcess(
         const unsigned length,
@@ -19,10 +20,6 @@ namespace streaming_v2_detail{
         SaResultStream& aligned_result_stream
     ){
         #pragma HLS INLINE off
-
-        OutputDelayerState delayer_state{};
-        #pragma HLS ARRAY_PARTITION \
-            variable=delayer_state.out_delay_pipe type=complete dim=0
 
         const unsigned tiles = tileCount(length);
         for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
@@ -34,39 +31,8 @@ namespace streaming_v2_detail{
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
                 for(int token_index=0;
                         token_index<SA_ROWS+2; ++token_index){
-                    const SaResultToken raw = raw_result_stream.read();
-                    SaResultToken aligned = raw;
-                    reset_output_delayer_state(delayer_state);
-
-                    for(int cycle=0; cycle<SA_COLS; ++cycle){
-                        #pragma HLS PIPELINE II=1
-                        OutputDelayerIO io{};
-                        // 静态列索引避免综合器把cycle当成可能越界的动态
-                        // array select，同时仍保持每拍仅一列有效。
-                        for(int col=0; col<SA_COLS; ++col){
-                            #pragma HLS UNROLL
-                            io.in[(std::size_t)col] = cycle==col
-                                ? raw.data[col] : accZero();
-                        }
-
-                        OutputDelayerState next_state{};
-                        #pragma HLS ARRAY_PARTITION \
-                            variable=next_state.out_delay_pipe \
-                            type=complete dim=0
-                        output_delayer_step(
-                            delayer_state, next_state, io
-                        );
-                        delayer_state = next_state;
-
-                        if(cycle+1==SA_COLS){
-                            for(int col=0; col<SA_COLS; ++col){
-                                #pragma HLS UNROLL
-                                aligned.data[col] =
-                                    io.out[(std::size_t)col];
-                            }
-                        }
-                    }
-                    aligned_result_stream.write(aligned);
+                    #pragma HLS PIPELINE II=1
+                    aligned_result_stream.write(raw_result_stream.read());
                 }
             }
         }

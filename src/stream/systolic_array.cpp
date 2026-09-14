@@ -361,27 +361,28 @@ namespace streaming_v2_detail{
      */
     void spatialSystolicArrayTileTick(
         const TileMeta& meta,
-        const elem_t q_tile[SA_COLS][SA_ROWS],
-        const elem_t k_tile[SA_COLS][SA_ROWS],
-        const elem_t v_tile[SA_COLS][SA_ROWS],
         CMPState cmp_state[SA_COLS],
         SaCycleControlStream& cycle_control_stream,
+        DelayedElemStream& delayed_sa_stream,
         SaResultStream& result_stream
     ){
         #pragma HLS INLINE off
-        #pragma HLS ARRAY_PARTITION variable=q_tile type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=k_tile type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=v_tile type=complete dim=2
         #pragma HLS ARRAY_PARTITION variable=cmp_state type=complete dim=1
 
         // These arrays are completely written before their first meaningful
         // read.  Avoid aggregate initialization here: in HLS it becomes a
         // serialized per-tile clear loop and hides the II=1 wavefront gain.
+        // K/V仍需跨越多周期PE hop保存；它们在SA循环内边到边装入，不再
+        // 构成调用SA之前的Q/K/V三tile事务屏障。Q则直接进入PE.reg。
+        elem_t k_operand[SA_COLS][SA_ROWS];
+        elem_t v_operand[SA_COLS][SA_ROWS];
         elem_t pe_register[SA_ROWS][SA_COLS];
         bool active[SA_ROWS][SA_COLS];
         PeWave pe_pipeline[SA_ROWS][PE_HOP_CYCLES];
         ScoreWave score_pipeline[SA_ROWS];
         CmpToPeStage cmp_pipeline[CMP_HOP_CYCLES];
+        #pragma HLS ARRAY_PARTITION variable=k_operand type=complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=v_operand type=complete dim=2
         #pragma HLS ARRAY_PARTITION variable=pe_register complete dim=0
         #pragma HLS ARRAY_PARTITION variable=active complete dim=0
         #pragma HLS ARRAY_PARTITION variable=pe_pipeline complete dim=0
@@ -405,8 +406,9 @@ namespace streaming_v2_detail{
         for(int cycle=0; cycle<SA_TILE_CYCLES; ++cycle){
             #pragma HLS PIPELINE II=1
             #pragma HLS LOOP_FLATTEN off
-            // 调度器保证下一次读取发生在对应commit后；同拍RAW仍保留。
-            #pragma HLS DEPENDENCE variable=pe_register inter false
+            // pe_register就是Scala PE.reg的唯一状态。SCALE写回到首个PWL读取、
+            // PWL写回到ROW_SUM/PV读取都是真实的跨迭代RAW，不能用
+            // DEPENDENCE inter false隐藏，否则II=1 RTL可能读取写回前的旧值。
             // 动态slot每PE_HOP_CYCLES拍才重用一次，远大于相邻循环距离。
             // 告诉HLS忽略错误推断的distance=1依赖；同一迭代内仍保持先读后写。
             #pragma HLS DEPENDENCE variable=pe_pipeline inter false
@@ -415,6 +417,40 @@ namespace streaming_v2_detail{
 
             const SaCycleControl cycle_control =
                 cycle_control_stream.read();
+
+            // 每拍直接消费一个InputDelayer beat。Q phase写入驻留PE.reg；
+            // K phase结束后的下一拍即可启动QK，V phase与QK发射重叠。
+            // 当前9拍PE流水使K/V仍必须作为operand cache跨hop保存；这不再
+            // 阻塞SA入口，也没有额外保存Q tile。
+            if(cycle<INPUT_DELAYER_TILE_CYCLES){
+                const DelayedElemBeat beat = delayed_sa_stream.read();
+                const int delayer_cycle = beat.cycle.to_int();
+                for(int output_lane=0;
+                        output_lane<SA_ROWS; ++output_lane){
+                    #pragma HLS UNROLL
+                    const int internal_lane = beat.layout.rev_output
+                        ? SA_ROWS-1-output_lane : output_lane;
+                    const int feature = beat.layout.rev_input
+                        ? SA_ROWS-1-internal_lane : internal_lane;
+                    const int source_lane = delayer_cycle-
+                        (beat.layout.delay_output ? internal_lane : 0);
+                    for(int lane=0; lane<SA_COLS; ++lane){
+                        #pragma HLS UNROLL
+                        if(source_lane==lane){
+                            if(beat.phase==DelayerPhase::LOAD_Q){
+                                pe_register[feature][lane] =
+                                    beat.data[output_lane];
+                            }else if(beat.phase==DelayerPhase::SCORE_K){
+                                k_operand[lane][feature] =
+                                    beat.data[output_lane];
+                            }else{
+                                v_operand[lane][feature] =
+                                    beat.data[output_lane];
+                            }
+                        }
+                    }
+                }
+            }
 
             const int current_pipeline_slot = pipeline_slot;
             const int current_cmp_pipeline_slot = cmp_pipeline_slot;
@@ -466,18 +502,6 @@ namespace streaming_v2_detail{
                             row_input[row+1] = completed;
                         }
                     }
-                }
-            }
-
-            // ExecutionPlan每拍允许装入一个query列；数据已经依次经过
-            // Scratchpad的一拍整行读边界和InputDelayer。
-            if(cycle_control.load_query){
-                const int query_index =
-                    cycle_control.query_index.to_int();
-                for(int row=0; row<SA_ROWS; ++row){
-                    #pragma HLS UNROLL
-                    pe_register[row][query_index] =
-                        q_tile[query_index][row];
                 }
             }
 
@@ -587,14 +611,14 @@ namespace streaming_v2_detail{
                 const PeWaveOp op = row_input[row].op;
                 const int item = row_input[row].index.to_int();
                 if(op==PeWaveOp::QK){
-                    horizontal[row] = k_tile[item][row];
+                    horizontal[row] = k_operand[item][row];
                 }else if(op==PeWaveOp::SCALE){
                     horizontal[row] = elemAttentionScale();
                 }else if(op==PeWaveOp::PWL){
                     horizontal[row] = EXP2_SLOPES[item];
                 }else if(op==PeWaveOp::PV){
                     horizontal[row] = row<SA_COLS
-                        ? v_tile[row][item] : elemZero();
+                        ? v_operand[row][item] : elemZero();
                 }else{
                     horizontal[row] = elemOne();
                 }
@@ -677,13 +701,7 @@ namespace streaming_v2_detail{
     ){
         #pragma HLS INLINE off
 
-        elem_t q_tile[SA_COLS][SA_ROWS]{};
-        elem_t k_tile[SA_COLS][SA_ROWS]{};
-        elem_t v_tile[SA_COLS][SA_ROWS]{};
         CMPState cmp_state[SA_COLS]{};
-        #pragma HLS ARRAY_PARTITION variable=q_tile type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=k_tile type=complete dim=0
-        #pragma HLS ARRAY_PARTITION variable=v_tile type=complete dim=2
         #pragma HLS ARRAY_PARTITION variable=cmp_state type=complete dim=1
 
         const unsigned tiles = tileCount(length);
@@ -697,47 +715,9 @@ namespace streaming_v2_detail{
                 const CoreTileControl control = control_stream.read();
                 const TileMeta meta = control.meta;
 
-                // InputDelayer输出保持逐拍波前协议。当前SA微程序仍使用
-                // tile寄存器作发射源，因此只在SA边界恢复坐标，不再在
-                // Delayer actor中缓存/复制三套完整tile。
-                // 每个KV tile都与Scala一样执行Q/K/V三个输入阶段。
-                const int phase_count = 3;
-                for(int beat_index=0;
-                        beat_index<phase_count*(SA_COLS+SA_ROWS-1);
-                        ++beat_index){
-                    #pragma HLS PIPELINE II=1
-                    const DelayedElemBeat beat = delayed_sa_stream.read();
-                    const int cycle = beat.cycle.to_int();
-                    for(int output_lane=0;
-                            output_lane<SA_ROWS; ++output_lane){
-                        #pragma HLS UNROLL
-                        const int internal_lane = beat.layout.rev_output
-                            ? SA_ROWS-1-output_lane : output_lane;
-                        const int feature = beat.layout.rev_input
-                            ? SA_ROWS-1-internal_lane : internal_lane;
-                        const int source_lane = cycle-
-                            (beat.layout.delay_output ? internal_lane : 0);
-                        for(int lane=0; lane<SA_COLS; ++lane){
-                            #pragma HLS UNROLL
-                            if(source_lane==lane){
-                                if(beat.phase==DelayerPhase::LOAD_Q){
-                                    q_tile[lane][feature] =
-                                        beat.data[output_lane];
-                                }else if(beat.phase==DelayerPhase::SCORE_K){
-                                    k_tile[lane][feature] =
-                                        beat.data[output_lane];
-                                }else{
-                                    v_tile[lane][feature] =
-                                        beat.data[output_lane];
-                                }
-                            }
-                        }
-                    }
-                }
-
                 spatialSystolicArrayTileTick(
-                    meta, q_tile, k_tile, v_tile,
-                    cmp_state, cycle_control_stream, sa_result_stream
+                    meta, cmp_state, cycle_control_stream,
+                    delayed_sa_stream, sa_result_stream
                 );
             }
         }

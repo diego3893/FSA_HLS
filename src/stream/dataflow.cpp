@@ -20,6 +20,9 @@ namespace streaming_v2_detail{
     ){
         #pragma HLS INLINE off
 
+        DmaReadRequestStream q_request_stream("v2_q_request");
+        DmaReadRequestStream k_request_stream("v2_k_request");
+        DmaReadRequestStream v_request_stream("v2_v_request");
         SpadWriteStream q_dma_stream("v2_q_dma");
         SpadWriteStream k_dma_stream("v2_k_dma");
         SpadWriteStream v_dma_stream("v2_v_dma");
@@ -36,6 +39,9 @@ namespace streaming_v2_detail{
         SaResultStream raw_sa_result_stream("v2_raw_sa_result");
         SaResultStream aligned_sa_result_stream("v2_aligned_sa_result");
         DmaWordStream output_word_stream("v2_output_words");
+        #pragma HLS STREAM variable=q_request_stream depth=2
+        #pragma HLS STREAM variable=k_request_stream depth=2
+        #pragma HLS STREAM variable=v_request_stream depth=2
         #pragma HLS STREAM variable=q_dma_stream depth=2*SA_COLS
         #pragma HLS STREAM variable=k_dma_stream depth=2*SA_COLS
         #pragma HLS STREAM variable=v_dma_stream depth=2*SA_COLS
@@ -55,9 +61,19 @@ namespace streaming_v2_detail{
 
         fsaCoreControllerProcess(length, causal, control_to_spad);
         saExecutionPlanProcess(length, causal, sa_cycle_control_stream);
-        dmaReadQ(q_address, length, q_dma_stream);
-        dmaReadK(k_address, length, causal, k_dma_stream);
-        dmaReadV(v_address, length, causal, v_dma_stream);
+        dmaRequestProcess(
+            length, causal,
+            q_request_stream, k_request_stream, v_request_stream
+        );
+        dmaReadQ(q_address, length, q_request_stream, q_dma_stream);
+        dmaReadK(
+            k_address, length, causal,
+            k_request_stream, k_dma_stream
+        );
+        dmaReadV(
+            v_address, length, causal,
+            v_request_stream, v_dma_stream
+        );
         scratchpadProcess(
             length, causal,
             q_dma_stream, k_dma_stream, v_dma_stream,

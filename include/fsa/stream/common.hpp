@@ -43,11 +43,31 @@ namespace streaming_v2_detail{
         elem_t data[SA_ROWS]{};
     };
 
+    enum class DmaTransferKind : std::uint8_t{
+        Q = 0,
+        K = 1,
+        V = 2
+    };
+
+    /** 控制器发给专用物理DMA actor的统一内部读请求。 */
+    struct DmaReadRequest{
+        DmaTransferKind kind = DmaTransferKind::Q;
+        ap_uint<32> request_id = 0;
+        ap_uint<32> source_row = 0;
+        sram_address_t scratchpad_base = 0;
+        ap_uint<16> active_rows = 0;
+    };
+
     /** 一个AXI beat对应一次Scratchpad narrow-write。 */
     struct SpadWritePacket{
+        DmaTransferKind kind = DmaTransferKind::Q;
+        ap_uint<32> request_id = 0;
         sram_address_t address = 0;
         sub_bank_index_t<SPAD_SUB_BANKS> sub_bank = 0;
         bool row_valid = false;
+        // last是该request的显式完成标记；Scratchpad不再依赖DMA actor
+        // 的隐含循环边界判断tile是否可读。
+        bool transfer_last = false;
         dma_word_t data = 0;
     };
 
@@ -104,6 +124,7 @@ namespace streaming_v2_detail{
     };
 
     using ElemRowStream = hls::stream<ElemRowPacket>;
+    using DmaReadRequestStream = hls::stream<DmaReadRequest>;
     using SpadWriteStream = hls::stream<SpadWritePacket>;
     using DelayedElemStream = hls::stream<DelayedElemBeat>;
     using CoreControlStream = hls::stream<CoreTileControl>;
@@ -174,7 +195,13 @@ namespace streaming_v2_detail{
     constexpr int CMP_TO_PE_REGISTER_CYCLES = 1;
     constexpr int CMP_HOP_CYCLES =
         CMP_TOKEN_LATENCY+CMP_TO_PE_REGISTER_CYCLES;
-    constexpr int QK_START = SA_COLS;
+    // InputDelayer依次发送Q、K、V三个错拍phase。SA不再等三个phase全部
+    // 恢复成tile后才启动；Q直接写入PE.reg，K在第二个phase结束后即可
+    // 发射QK，而V与QK前几拍重叠装入operand cache。
+    constexpr int INPUT_DELAYER_PHASE_CYCLES = SA_COLS+SA_ROWS-1;
+    constexpr int INPUT_DELAYER_TILE_CYCLES =
+        3*INPUT_DELAYER_PHASE_CYCLES;
+    constexpr int QK_START = 2*INPUT_DELAYER_PHASE_CYCLES;
     constexpr int FIRST_SCORE =
         QK_START+SA_ROWS*PE_HOP_CYCLES;
     constexpr int SCORES_READY = FIRST_SCORE+2*SA_COLS-2+
@@ -201,8 +228,6 @@ namespace streaming_v2_detail{
     constexpr int SA_TILE_CYCLES = LAST_RESULT_CYCLE+1;
 
     struct SaCycleControl{
-        bool load_query = false;
-        PeWaveIndex query_index = 0;
         bool launch_qk = false;
         PeWaveIndex qk_index = 0;
         bool cmp_valid = false;
@@ -222,17 +247,29 @@ namespace streaming_v2_detail{
         unsigned length, bool causal,
         SaCycleControlStream& cycle_control_stream
     );
+    void dmaRequestProcess(
+        unsigned length, bool causal,
+        DmaReadRequestStream& q_request_stream,
+        DmaReadRequestStream& k_request_stream,
+        DmaReadRequestStream& v_request_stream
+    );
     void dmaReadQ(
         const dma_word_t q_address[DMA_MAX_QKV_WORDS],
-        unsigned length, SpadWriteStream& q_dma_stream
+        unsigned length,
+        DmaReadRequestStream& request_stream,
+        SpadWriteStream& q_dma_stream
     );
     void dmaReadK(
         const dma_word_t k_address[DMA_MAX_QKV_WORDS],
-        unsigned length, bool causal, SpadWriteStream& k_dma_stream
+        unsigned length, bool causal,
+        DmaReadRequestStream& request_stream,
+        SpadWriteStream& k_dma_stream
     );
     void dmaReadV(
         const dma_word_t v_address[DMA_MAX_QKV_WORDS],
-        unsigned length, bool causal, SpadWriteStream& v_dma_stream
+        unsigned length, bool causal,
+        DmaReadRequestStream& request_stream,
+        SpadWriteStream& v_dma_stream
     );
     void scratchpadProcess(
         unsigned length, bool causal,

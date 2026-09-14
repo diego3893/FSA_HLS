@@ -38,6 +38,15 @@
 
 ## 4. Current State
 
+### Latest server run（当前候选，用户提供末尾日志）
+
+- 服务器路径：`/home/zhangchenxuan/FSA_HLS/hls/fsa_stream/build/solution1`；xsim 于 2026-09-14 11:02:13 结束。
+- RTL正常执行到 `$finish`（38995 ns），没有死锁；失败发生在随后的C post-check。
+- 9x4 non-causal/causal共报告48个O元素不匹配，最终为 `COSIM 212-361`、`C/RTL co-simulation finished: FAIL`。
+- **Current assessment:** 仿真结束时间较旧run明显缩短，主循环很可能已接近II=1，但尚未取得该次build的综合报告，不能确认精确II、时序、资源或分事务latency。
+- **Root-cause assessment:** `pe_register inter false` 隐藏了Scala `PE.reg`的真实跨迭代RAW。SCALE写回到首个PWL读取、PWL写回到ROW_SUM/PV读取都要求严格有序；pragma不影响C仿真，却可能让II=1 RTL读取旧状态。
+- 当前源码已撤销这一条错误依赖覆盖；保留有明确槽复用距离的 `pe_pipeline`/`cmp_pipeline inter false`，等待下一次服务器验证。
+
 ### Latest build（修复前性能失败基线，已旧于当前源码）
 
 - 构建目录：`build/fsa_stream_build/solution1`；生成时间 2026-09-14 09:42--09:50。该build对应修复前hop=10源码，但当前源码已再次修改，因此只作为失败基线。
@@ -63,19 +72,23 @@
 - `PE_TOKEN_LATENCY=9`。
 - `PE_SCHEDULER_GUARD_CYCLES` 已从 7 改为 1，因此 `PE_HOP_CYCLES=10`。
 - 当前显式建模 `CMP_TOKEN_LATENCY=3`，并保留 Chisel CMP->PE 的一级 Pipe，因此 `CMP_HOP_CYCLES=4`。
-- 4x4、PWL=8 时，修复后的源码微程序 `SA_TILE_CYCLES` 为145；这是静态公式，尚无新综合结果。
+- 4x4、PWL=8 时，当前源码微程序 `SA_TILE_CYCLES` 为155；其中前21拍直接消费Q/K/V Delayer beat，QK在K phase结束后的第14拍启动，V装入与QK发射重叠。这是静态公式，尚无新综合结果。
 - `systolic_array.cpp` 用显式回绕 `pipeline_slot` 取代 `% PE_HOP_CYCLES`，仍保留动态数组索引。
 - SA主循环对 `pe_pipeline` 增加经调度证明安全的inter-dependence覆盖：同一slot每10拍才重用，而PE结果延迟9拍；同迭代先读后写依赖保持不变。
+- SA主循环不再对 `pe_register` 使用 `inter false`；该数组是Scala `PE.reg`的真实状态，必须保留SCALE/PWL/ROW_SUM/PV之间的RAW顺序。
 - 新增4槽 `CmpToPeStage` 环形通道：前三拍容纳当前HLS CMP输出流水，最后一拍对应Chisel `pipe_no_reset(cmp.io.d_output)`；UPDATE score回流以及PROP_MAX/PWL/ROW_SUM经过该通道，SCALE/PV仍直接注入。
 - `spatialCmpOutputCell` 保持独立的 II=1、latency=3 流水函数，避免把CMP与PE组合串联；微程序已为score回流、SUB_MAX依赖、PWL和ROW_SUM/PV入口重新对齐。
 - 每个 KV tile 已恢复 Q/K/V 三个 InputDelayer phase；Q 从原 Scratchpad Q buffer 重放，每个 KV tile 都重新执行逻辑 `LOAD_STATIONARY`。
-- 当前仍在 SA 边界把 Delayer 输出恢复到完整 `q_tile/k_tile/v_tile` 局部数组后再调用 tile tick；尚未改成 Scala 式逐拍直连。
-- 本轮按用户要求没有运行测试或综合；修复后源码的功能、II、时序、资源与CoSim均待服务器验证。
+- SA已从周期循环第0拍直接消费带phase/tag的Delayer beat：Q直接写唯一 `PE.reg`，不再形成 `q_tile`；K phase结束即启动QK，V phase与QK发射重叠。由于第3项仍采用10拍hop的tagged wave，K/V仍保留跨hop operand cache，尚不是Scala逐PE mesh的逐线直连。
+- OutputDelayer保留为独立actor，但当前tagged SA输出本已按列对齐，因此不再将每个完整token重新串行化成 `SA_COLS` 拍；循环目标为token II=1。
+- Scratchpad仍是唯一banked SRAM owner；Q以显式last完成，K/V由同一个II=1循环公平仲裁并以last分别完成。当前tile的行被推入FIFO后，owner即可在SA计算期间装入下一双缓冲区。
+- DMA新增统一内部 `DmaReadRequest` descriptor以及每个写流的 `request_id/kind/transfer_last` 完成语义；顶层仍保留Q/K/V/O四个专用AXI bundle，O写outstanding已从16恢复为8。
+- 撤销 `pe_register inter false` 之前的4x2、4x4、8x4本地C++回归均通过；该pragma不影响C语义。撤销后的源码未运行本地测试；HLS II、时序、资源与CoSim均待服务器验证。
 
 ### Main issue
 
-- 修复代码已针对旧build的两个直接根因：错误的 `pe_pipeline` distance=1依赖，以及未显式保留的Chisel CMP->PE Pipe；同时保留旧build已观测到的3拍CMP算术流水。
-- 新源码尚无对应build；在确认SA主循环恢复II=1、关键路径不再串联CMP与PE之前，不继续叠加逐拍直连或PE算术重构。
+- 最新服务器run已经从“II=12且功能正确”转为“运行明显加快但RTL结果错误”。`$finish`是正常结束，不是死锁；真正失败是48个输出的C/RTL post-check不一致。
+- 首要根因是无条件忽略 `pe_register` 的真实RAW，当前已撤销。下一次build必须先确认CoSim恢复正确，再判断移除pragma后II是否仍为1；在此之前暂停继续叠加2/4/5/7或PE算术改动。
 
 ## 5. Architecture / Mental Model
 
@@ -97,7 +110,7 @@ Q/K/V AXI DMA
 - non-causal 的 tile 对数量为 `ceil(L/C)^2`；causal 为 `1+...+ceil(L/C)`。
 - Chisel 4x4、PWL=8 的独立指令静态周期：LOAD 5、SCORE 28、VALUE 12、RECIPROCAL 16、NORM 5。
 - HLS PE cell 已是 II=1，但 latency=9。KV 瓶颈来自跨行依赖和保守 hop，不是单个 PE 的启动间隔。
-- 4x4、PWL=8、3拍CMP流水加一级CMP->PE寄存器时，当前源码 `SA_TILE_CYCLES=145`。
+- 4x4、PWL=8、3拍CMP流水加一级CMP->PE寄存器时，当前源码 `SA_TILE_CYCLES=155`；旧结构还需在调用SA前另等21拍收集输入，而当前155拍已经包含输入消费。
 
 ## 6. Important Files
 
@@ -172,11 +185,23 @@ Q/K/V AXI DMA
 
 **Reason:** Chisel `SystolicArray.scala` 明确使用 `pipe_no_reset(cmp.io.d_output)`；旧HLS build遗漏该边界并错误推断相邻迭代slot依赖，分别造成13.883 ns组合路径和II=12。
 
-**Evidence/Result:** 代码已完成，4x4静态微程序由137调整为145拍；尚未运行CSim/综合/CoSim。
+**Evidence/Result:** CMP/PE代码已完成；D006并入输入消费后4x4总微程序为155拍。11:02服务器run无死锁但C post-check出现48个输出不匹配；确认无条件屏蔽 `pe_register` RAW的实现不可接受，现已撤销该pragma。
 
 **Implication:** 下一build必须同时确认II=1和CMP/PE关键路径分离；若仍失败，只继续处理这一调度边界，不改变单SA结构。
 
-**Status:** Active, unverified
+**Status:** Active after RAW-ordering correction; unverified
+
+### D006 — 优先重构输入/输出/存储/DMA流
+
+**Decision:** 保留单SA和现有多周期PE token调度，依次实现：Delayer数据在SA周期循环内消费、OutputDelayer每拍推进、唯一Scratchpad owner的读写请求调度、DMA内部统一请求/完成语义；顶层四个AXI bundle暂不改变。
+
+**Reason:** 用户明确指定优先处理架构差异2、4、5、7；专用Q/K/V/O物理端口仍有利于当前HBM带宽，先统一内部协议可避免无收益的顶层接口破坏。
+
+**Evidence/Result:** 四项代码均已实现：SA周期内消费Delayer；OutputDelayer token II=1；Scratchpad owner公平仲裁K/V并以last收敛；DMA descriptor/完成标记和store outstanding=8。4x2、4x4、8x4本地功能回归通过，尚无新综合结果。
+
+**Implication:** 不复制Q/K/V SRAM、不复制SA/FMA；允许保留多周期PE所需的小型operand/token流水状态，但删除“所有Q/K/V完整收集后才启动SA”和“完整结果重新串行化”的事务屏障。
+
+**Status:** Active, locally verified; HLS unverified
 
 ## 8. Experiments / Results
 
@@ -204,6 +229,22 @@ Q/K/V AXI DMA
 
 **Conclusion:** 功能、单SA结构、KV II=1和64-bit BRAM均成立，但调度优化失败。与旧基线相比，non-causal慢5.68倍、causal慢5.36倍；下一步只处理SA主循环依赖和CMP->PE关键路径。
 
+### E004 — 2026-09-14架构差异2/4/5/7本地回归
+
+**Setup:** 直接消费Delayer、token级OutputDelayer、Scratchpad K/V公平仲裁和DMA descriptor/last协议；运行 `run_stream_test.ps1` 的4x2、4x4、8x4配置。
+
+**Result:** 三组 streaming v2 causal/non-causal attention与Accumulator PWL测试全部通过；分别覆盖5x4、9x4、9x8矩阵。
+
+**Conclusion:** C++功能、参数化和stream生产/消费计数闭合；不能据此声称HLS主循环II=1、OutputDelayer综合II=1、时序达标或资源未增加。
+
+### E005 — 2026-09-14 11:02快速RTL候选
+
+**Setup:** hop=10、4拍CMP通道、2/4/5/7重构以及SA循环依赖覆盖；用户提供CoSim末尾日志，本地没有对应server build报告。
+
+**Result:** xsim正常结束于38995 ns，无死锁；C post-check报告non-causal/causal共48个O元素不匹配，CoSim FAIL。
+
+**Conclusion:** 吞吐很可能已经改善，但RTL功能错误。C++回归通过而RTL失败，与只在综合阶段生效的错误 `pe_register inter false` 高度一致；当前已撤销该pragma。
+
 ## 9. Failed Attempts / Things Not To Repeat
 
 ### F001 — Accumulator反馈DATAFLOW环
@@ -226,6 +267,16 @@ Q/K/V AXI DMA
 
 **Retry only if:** 一次只改变一个变量并读取完整综合报告。2026-09-14重试仍得到II=12；在明确消除 `pe_pipeline.partial` 读写依赖前不再重复该结构。
 
+### F003 — 无条件屏蔽PE状态寄存器的跨迭代依赖
+
+**Tried:** 在SA主循环使用 `#pragma HLS DEPENDENCE variable=pe_register inter false`，让HLS忽略全部跨迭代状态相关性。
+
+**Result:** 本地C++回归通过，但快速RTL候选post-check有48个输出不匹配。
+
+**Why it failed:** `pe_register`就是Chisel `PE.reg`。SCALE写回到下一拍PWL读取、匹配PWL写回到ROW_SUM/PV读取均为真实RAW；该pragma只改变综合调度，因此会产生C/RTL分歧。
+
+**Retry only if:** 对具体假依赖使用窄范围证明，或以显式前递保持真实RAW；不得再次对整个 `pe_register` 声明 `inter false`。
+
 ## 10. Bugs / Open Problems
 
 ### P001 — SA主循环II=12且时序失败
@@ -242,18 +293,26 @@ Q/K/V AXI DMA
 
 **Plan:** 在保持每PE单FMA和数值语义的前提下，研究FP32部分和与FP16写回的完成点分离，或实现等价混合精度FMA。
 
-### P003 — SA入口仍完整收集tile
+### P003 — Tagged wave仍需K/V operand cache
 
-**Known facts:** InputDelayer已逐拍输出，但 `systolicArrayProcess` 先恢复完整Q/K/V数组，再调用tile tick。
+**Known facts:** SA已逐拍直接消费InputDelayer，Q直接进入PE.reg，入口完整tile屏障已删除；但10拍PE hop使QK/PV操作数不能像Chisel一拍跨行，K/V需要在tile tick内跨hop保存。
 
-**Plan:** 仅在hop=10验证稳定后，评估按Scala ExecutionPlan逐拍消费Scratchpad/Delayer数据；不得增加额外完整tile缓存。
+**Plan:** 先综合验证当前第3项。若要完全消除K/V cache，必须把tagged wave替换成真正逐PE mesh或让operand随wave携带；这属于第3项的后续架构改动，不能仅靠Delayer接口完成。
+
+### P004 — 快速候选发生C/RTL数值分歧
+
+**Symptoms:** RTL正常完成且无死锁，但non-causal/causal共48个O元素不匹配。
+
+**Known facts:** C++功能回归通过；被撤销的 `pe_register inter false` 只影响综合调度，并隐藏了真实状态RAW。错误随query/feature扩散，符合softmax/PV读取旧PE状态的表现。
+
+**Next investigation:** 服务器重建撤销pragma后的源码。先确认CoSim恢复正确；再读取SA loop schedule，确认自然RAW是否保持II=1，并校验PE/CMP调用返回到环形槽写入的实际stage。
 
 ## 11. Current Working Set
 
-- 当前修改文件：`include/fsa/stream/common.hpp`、`src/stream/scratchpad.cpp`、`src/stream/input_delayer.cpp`、`src/stream/systolic_array.cpp`。
-- 当前焦点：验证4拍 `CmpToPeStage` 环形通道与 `pe_pipeline inter false` 是否让hop=10环形token调度恢复II=1，同时切断CMP到PE的同拍关键路径。
-- 当前修改：`include/fsa/stream/common.hpp`、`src/stream/systolic_array.cpp`；此前Q重放相关修改仍在 `src/stream/scratchpad.cpp`、`src/stream/input_delayer.cpp`。
-- 下一检查：服务器重新构建；当前build不可代表修复后源码。
+- 当前修改范围：`include/fsa/stream/common.hpp`、`src/stream/controller.cpp`、`src/stream/dataflow.cpp`、`src/stream/dma_process.cpp`、`src/stream/scratchpad.cpp`、`src/stream/input_delayer.cpp`、`src/stream/output_delayer.cpp`、`src/stream/systolic_array.cpp`、相关stream测试。
+- 当前焦点：修复11:02服务器run的C/RTL不一致；已撤销错误的 `pe_register inter false`，保留4拍 `CmpToPeStage` 与有槽距离依据的环形依赖覆盖。
+- 当前设计边界：顶层 `fsa_stream` 形参、四个AXI bundle、器件和时钟约束保持不变；内部协议可调整。
+- 下一检查：在服务器重新构建，先看CoSim是否恢复，再读取loop II、OutputDelayer II、时序和资源。
 
 ## 12. Next Actions
 
@@ -261,10 +320,15 @@ Q/K/V AXI DMA
 - [x] 顶层/RTL名为 `fsa_stream`；DSP/BRAM未增加；仍为单SA/单Accumulator向量。
 - [x] 源码已处理 `pe_pipeline.partial` 错误distance=1依赖。
 - [x] 源码已用3拍CMP流水加一级寄存器恢复Chisel CMP->PE边界，并重排微程序周期。
-- [ ] 在服务器运行 `./run_hls.sh fsa_stream`，验证修复后CSim、综合与CoSim。
-- [ ] 确认SA主循环从II=12恢复II=1，且CMP/PE不再形成同拍关键路径。
-- [ ] 修复后重新确认tile latency低于222、9x4延迟优于2737/1954，且DSP/BRAM不增加。
-- [ ] 若当前阶段通过，再开始Scala式逐拍Scratchpad/InputDelayer/SA重构。
+- [x] 去除SA调用前的Q/K/V完整tile收集屏障，在SA周期循环内消费带phase/tag的Delayer beat；Q直接进入PE.reg，K/V cache为当前第3项所需。
+- [x] 将OutputDelayer改为持续token II=1的协议流水，不再对每个完整token重置并串行化。
+- [x] 将Scratchpad改为唯一owner下的显式完成/公平仲裁调度，允许下一buffer写入与当前tile计算重叠。
+- [x] 统一DMA内部请求和完成语义，保留四个专用物理AXI bundle并把store outstanding恢复为8。
+- [x] 运行4x2、4x4、8x4本地C++测试并检查token计数、输出和参数化。
+- [x] 11:02服务器候选完成RTL运行且无死锁，但post-check有48个输出不匹配，候选判定失败。
+- [x] 撤销无条件的 `pe_register inter false`，恢复Scala `PE.reg`的真实跨迭代RAW。
+- [ ] 在服务器运行 `./run_hls.sh fsa_stream`，验证RAW修复后的CSim、综合与CoSim。
+- [ ] 确认SA主循环恢复II=1、CMP/PE关键路径分离、OutputDelayer token II=1，且DSP/BRAM未因重构复制。
 - [ ] 最后研究PE FP32结果早出和等价混合精度FMA；每次只改变一个性能变量。
 
 ## 13. Validation Status
@@ -272,10 +336,12 @@ Q/K/V AXI DMA
 - [x] 旧基线4x4 CSim通过（旧build）。
 - [x] 旧基线4x4 RTL CoSim通过且无死锁（旧build）。
 - [x] 旧基线结构为单SA/单Accumulator向量（旧build）。
-- [ ] 当前hop=10/Q每KV重放源码的本地功能测试。
+- [x] 当前hop=10/Q每KV重放及2/4/5/7重构源码的4x2、4x4、8x4本地功能测试。
 - [x] 当前源码C综合、II、资源和时序已读取：II=12、13.883 ns，性能判定失败。
 - [x] 当前源码RTL CoSim通过：9x4为15540/10466 cycles，无死锁。
-- [ ] 2026-09-14四拍CMP通道与slot依赖修复后的CSim、综合、RTL CoSim（本轮未运行）。
+- [x] 2026-09-14四拍CMP通道、slot依赖修复与2/4/5/7重构后的本地C++ CSim等价测试。
+- [x] 2026-09-14 11:02候选RTL CoSim执行完成但FAIL：48个输出不匹配，无死锁（用户日志）。
+- [ ] 撤销 `pe_register inter false` 后的Vitis CSim、综合和RTL CoSim。
 - [ ] IP导出。
 - [ ] Vivado实现时序。
 - [ ] FPGA板级验证。
@@ -297,9 +363,9 @@ Q/K/V AXI DMA
 1. 正在把完整FSA attention核迁移并优化到HLS，结构目标是Chisel FSA。
 2. 当前坚持单SA、单PE MacUnit、单列Accumulator，通过等价流水重定时降低延迟。
 3. 旧稳定build为2737/1954 cycles；最新现有build功能通过但退化为15540/10466 cycles，该build现已旧于当前源码。
-4. 已用“3拍HLS CMP流水 + 1拍Chisel边界”恢复CMP->PE通道、解除错误slot distance=1依赖，并把4x4微程序重排为145拍；尚未验证。
+4. 11:02快速RTL候选无死锁但有48个输出不匹配；根因判断为错误屏蔽Scala `PE.reg`真实RAW，源码已撤销该pragma。
 5. 已排除复制阵列、多query状态复制、Accumulator反馈环和一次混合多项激进改写。
-6. 第一下一步是在服务器重建并检查II/关键路径；结果出来前不要继续叠加PE或数据流重构。
+6. 下一步是在服务器重建并先确认CoSim恢复正确，再检查II/关键路径/资源；结果出来前不继续叠加PE或数据流重构。
 
 ## 16. Decision / Progress Log
 
@@ -308,3 +374,5 @@ Q/K/V AXI DMA
 - 2026-09-14 — 启用持久项目上下文；确认build早于当前源码，下一步必须先重新构建。
 - 2026-09-14 — 读取当前源码新build：CSim/CoSim通过且无死锁，但SA主循环II=12、tile=1651、时钟13.883 ns，9x4为15540/10466 cycles；当前hop=10实现判定为性能失败。
 - 2026-09-14 — 直接修复SA调度：用4槽环形通道表达3拍HLS CMP流水和一级Chisel CMP->PE Pipe，对10拍PE环形slot解除错误distance=1依赖，并将4x4微程序对齐到145拍；按用户要求未运行任何测试或综合。
+- 2026-09-14 — 按用户优先级完成2/4/5/7：SA周期内直接消费Delayer（4x4总微程序155拍）、OutputDelayer去除逐token重串行化、Scratchpad K/V公平仲裁、DMA descriptor/last协议及O outstanding=8；4x2、4x4、8x4本地回归全部通过，Vitis待验证。
+- 2026-09-14 — 用户提供11:02服务器CoSim：RTL于38995 ns正常结束、无死锁，但post-check有48个O不匹配。重新读取本地修改后，撤销 `pe_register inter false`；该pragma错误隐藏SCALE/PWL/ROW_SUM/PV之间的真实状态RAW，修复尚待服务器验证。
