@@ -369,6 +369,10 @@ namespace streaming_v2_detail{
         #pragma HLS ARRAY_PARTITION variable=pe_pipeline complete dim=0
         #pragma HLS ARRAY_PARTITION variable=score_pipeline complete dim=1
 
+        // PE_HOP_CYCLES不再是2的幂。显式回绕只形成一个小计数器，
+        // 避免cycle%PE_HOP_CYCLES推断通用余数网络。
+        int pipeline_slot = 0;
+
         for(int row=0; row<SA_ROWS; ++row){
             #pragma HLS UNROLL
             for(int query=0; query<SA_COLS; ++query){
@@ -387,7 +391,7 @@ namespace streaming_v2_detail{
             const SaCycleControl cycle_control =
                 cycle_control_stream.read();
 
-            const int pipeline_slot = cycle%PE_HOP_CYCLES;
+            const int current_pipeline_slot = pipeline_slot;
             PeWave row_input[SA_ROWS]{};
             PeWave row_result[SA_ROWS]{};
             #pragma HLS ARRAY_PARTITION variable=row_input complete dim=0
@@ -402,7 +406,7 @@ namespace streaming_v2_detail{
                 #pragma HLS UNROLL
                 if(cycle>=PE_HOP_CYCLES){
                     const PeWave completed =
-                        pe_pipeline[row][pipeline_slot];
+                        pe_pipeline[row][current_pipeline_slot];
                     if(completed.valid){
                         for(int query=0; query<SA_COLS; ++query){
                             #pragma HLS UNROLL
@@ -560,8 +564,11 @@ namespace streaming_v2_detail{
             );
             for(int row=0; row<SA_ROWS; ++row){
                 #pragma HLS UNROLL
-                pe_pipeline[row][pipeline_slot] = row_result[row];
+                pe_pipeline[row][current_pipeline_slot] = row_result[row];
             }
+
+            pipeline_slot = current_pipeline_slot+1==PE_HOP_CYCLES
+                ? 0 : current_pipeline_slot+1;
 
             if(cmp_op==CmpWaveOp::PROP_MAX_DIFF){
                 SaResultToken token{};
@@ -634,7 +641,8 @@ namespace streaming_v2_detail{
                 // InputDelayer输出保持逐拍波前协议。当前SA微程序仍使用
                 // tile寄存器作发射源，因此只在SA边界恢复坐标，不再在
                 // Delayer actor中缓存/复制三套完整tile。
-                const int phase_count = key_tile==0 ? 3 : 2;
+                // 每个KV tile都与Scala一样执行Q/K/V三个输入阶段。
+                const int phase_count = 3;
                 for(int beat_index=0;
                         beat_index<phase_count*(SA_COLS+SA_ROWS-1);
                         ++beat_index){

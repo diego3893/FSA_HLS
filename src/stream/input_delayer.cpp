@@ -35,10 +35,9 @@ namespace streaming_v2_detail{
                 const CoreTileControl control = control_in.read();
                 control_out.write(control);
 
-                // Q只在每个query tile的第一个KV tile进入Delayer；后续
-                // tile直接复用SA边界已经保存的q_tile。
-                const int first_phase = key_tile==0 ? 0 : 1;
-                for(int phase=first_phase; phase<3; ++phase){
+                // Scala kernel在每个KV block前执行LOAD_STATIONARY。
+                // 三个阶段始终按Q、K、V顺序经过同一套InputDelayer。
+                for(int phase=0; phase<3; ++phase){
                     const InputLayoutControl layout = phase==0
                         ? control.load_stationary
                         : (phase==1

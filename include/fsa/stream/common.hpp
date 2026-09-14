@@ -161,7 +161,10 @@ namespace streaming_v2_detail{
     };
 
     constexpr int PE_TOKEN_LATENCY = 9;
-    constexpr int PE_SCHEDULER_GUARD_CYCLES = 7;
+    // spatialPeCell的综合流水延迟为9拍。只保留一拍提交保护，确保
+    // 环形槽中的完成token在被下一次发射覆盖前已经写回；原来的7拍
+    // 保护会把Chisel中逐行传播的控制波额外拉长到16拍。
+    constexpr int PE_SCHEDULER_GUARD_CYCLES = 1;
     constexpr int PE_HOP_CYCLES =
         PE_TOKEN_LATENCY+PE_SCHEDULER_GUARD_CYCLES;
     constexpr int QK_START = SA_COLS;
