@@ -182,10 +182,10 @@ namespace streaming_v2_detail{
     };
 
     constexpr int PE_TOKEN_LATENCY = 9;
-    // spatialPeCell的综合流水延迟为9拍。只保留一拍提交保护，确保
-    // 环形槽中的完成token在被下一次发射覆盖前已经写回；原来的7拍
-    // 保护会把Chisel中逐行传播的控制波额外拉长到16拍。
-    constexpr int PE_SCHEDULER_GUARD_CYCLES = 1;
+    // spatialPeCell的综合流水延迟为9拍。暂时恢复历史验证过的7拍
+    // 调度余量，使同一环形槽每16拍才复用；本次只改变hop，保留
+    // 当前已经通过RTL CoSim的数据流和真实依赖约束，作为单变量对照。
+    constexpr int PE_SCHEDULER_GUARD_CYCLES = 7;
     constexpr int PE_HOP_CYCLES =
         PE_TOKEN_LATENCY+PE_SCHEDULER_GUARD_CYCLES;
     // 当前综合中每列CMP输出通路为3拍、II=1；Chisel SystolicArray还在

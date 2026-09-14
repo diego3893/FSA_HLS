@@ -389,8 +389,8 @@ namespace streaming_v2_detail{
         #pragma HLS ARRAY_PARTITION variable=score_pipeline complete dim=1
         #pragma HLS ARRAY_PARTITION variable=cmp_pipeline complete dim=0
 
-        // PE_HOP_CYCLES不再是2的幂。显式回绕只形成一个小计数器，
-        // 避免cycle%PE_HOP_CYCLES推断通用余数网络。
+        // 显式回绕形成小型环形计数器，避免用通用余数运算表达slot选择；
+        // 当前hop恢复为16，也保持与其他hop配置相同的实现形式。
         int pipeline_slot = 0;
         int cmp_pipeline_slot = 0;
 
