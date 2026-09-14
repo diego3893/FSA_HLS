@@ -167,19 +167,35 @@ namespace streaming_v2_detail{
     constexpr int PE_SCHEDULER_GUARD_CYCLES = 1;
     constexpr int PE_HOP_CYCLES =
         PE_TOKEN_LATENCY+PE_SCHEDULER_GUARD_CYCLES;
+    // 当前综合中每列CMP输出通路为3拍、II=1；Chisel SystolicArray还在
+    // CMP.d_output与首行PE.u_input之间使用一级Pipe。HLS用4拍环形token
+    // 通道表达这两个边界，保持单CMP吞吐而不把CMP和PE组合串联。
+    constexpr int CMP_TOKEN_LATENCY = 3;
+    constexpr int CMP_TO_PE_REGISTER_CYCLES = 1;
+    constexpr int CMP_HOP_CYCLES =
+        CMP_TOKEN_LATENCY+CMP_TO_PE_REGISTER_CYCLES;
     constexpr int QK_START = SA_COLS;
     constexpr int FIRST_SCORE =
         QK_START+SA_ROWS*PE_HOP_CYCLES;
-    constexpr int SCORES_READY = FIRST_SCORE+2*SA_COLS-2;
+    constexpr int SCORES_READY = FIRST_SCORE+2*SA_COLS-2+
+        CMP_HOP_CYCLES;
     constexpr int MAX_DIFF_CYCLE = SCORES_READY+1;
     constexpr int SUB_MAX_CYCLE = MAX_DIFF_CYCLE+1;
+    // PROP_MAX先经过3拍CMP流水和一级CMP->PE寄存器，再等待PE结果提交，
+    // SCALE必须在提交后的下一拍才读取更新后的PE.reg。
     constexpr int SCALE_CYCLE =
-        SUB_MAX_CYCLE+PE_HOP_CYCLES+1;
-    constexpr int PWL_START = SCALE_CYCLE+PE_HOP_CYCLES+1;
+        SUB_MAX_CYCLE+CMP_HOP_CYCLES+
+        PE_HOP_CYCLES+1;
+    // CMP可以在SCALE提交前启动；4拍CMP通道把PWL数据对齐到
+    // SCALE写回后的下一拍，不复制任何算术单元。
+    constexpr int PWL_START = SCALE_CYCLE+PE_HOP_CYCLES+1-
+        CMP_HOP_CYCLES;
     constexpr int PWL_END = PWL_START+exp2PWLPieces-1;
     constexpr int ROW_SUM_CYCLE =
         PWL_END+PE_HOP_CYCLES+1;
-    constexpr int PV_START = ROW_SUM_CYCLE+1;
+    // ROW_SUM也来自CMP通道，PV要到下一拍才能占用首行PE入口。
+    constexpr int PV_START = ROW_SUM_CYCLE+
+        CMP_HOP_CYCLES+1;
     constexpr int LAST_RESULT_CYCLE =
         PV_START+SA_ROWS-1+SA_ROWS*PE_HOP_CYCLES;
     constexpr int SA_TILE_CYCLES = LAST_RESULT_CYCLE+1;

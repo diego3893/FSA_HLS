@@ -87,12 +87,26 @@ namespace streaming_v2_detail{
     };
 
     /**
-     * @brief 每列CMP的多周期输出通路
+     * CMP输出到首行PE之间的流水token。3拍算术延迟来自当前HLS CMP，
+     * 最后一拍对应Chisel SystolicArray中的
+     * pipe_no_reset(cmp.io.d_output)。score_valid用于UPDATE回流，
+     * down_valid用于PROP_MAX/PWL/ROW_SUM控制波。
+     */
+    struct CmpToPeStage{
+        bool score_valid;
+        PeWaveIndex item;
+        bool down_valid;
+        PeWaveOp down_op;
+        acc_t data[SA_COLS];
+    };
+
+    /**
+     * @brief 每列CMP的II=1输出流水
      *
      * oldMax/newMax/exp2_counter均按值传入，函数内部不修改CMP状态。
-     * 这样FP32差值和FP32到FP16转换可以保持II=1流水，而不会把函数
-     * latency错误地放到newMax的逐拍反馈环上。状态寄存器仍然只有
-     * SA_COLS组，并在SpatialCmpColumns中与该输出通路一一对应。
+     * FP32差值和FP32到FP16转换走3拍流水；newMax的逐拍反馈仍只经过
+     * finiteAccMax。状态寄存器仍然只有SA_COLS组，并在
+     * SpatialCmpColumns中与该输出通路一一对应。
      */
     template<int COL>
     acc_t spatialCmpOutputCell(
@@ -105,8 +119,11 @@ namespace streaming_v2_detail{
         const exp2_counter_t exp2_counter
     ){
         static_assert(COL>=0 && COL<SA_COLS, "CMP col out of range");
+        static_assert(CMP_TOKEN_LATENCY==3,
+            "update CMP HLS latency pragma with CMP_TOKEN_LATENCY");
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=1
+        #pragma HLS LATENCY min=3 max=3
 
         if(!valid || op==CmpWaveOp::HOLD){
             return accZero();
@@ -364,14 +381,17 @@ namespace streaming_v2_detail{
         bool active[SA_ROWS][SA_COLS];
         PeWave pe_pipeline[SA_ROWS][PE_HOP_CYCLES];
         ScoreWave score_pipeline[SA_ROWS];
+        CmpToPeStage cmp_pipeline[CMP_HOP_CYCLES];
         #pragma HLS ARRAY_PARTITION variable=pe_register complete dim=0
         #pragma HLS ARRAY_PARTITION variable=active complete dim=0
         #pragma HLS ARRAY_PARTITION variable=pe_pipeline complete dim=0
         #pragma HLS ARRAY_PARTITION variable=score_pipeline complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=cmp_pipeline complete dim=0
 
         // PE_HOP_CYCLES不再是2的幂。显式回绕只形成一个小计数器，
         // 避免cycle%PE_HOP_CYCLES推断通用余数网络。
         int pipeline_slot = 0;
+        int cmp_pipeline_slot = 0;
 
         for(int row=0; row<SA_ROWS; ++row){
             #pragma HLS UNROLL
@@ -387,11 +407,22 @@ namespace streaming_v2_detail{
             #pragma HLS LOOP_FLATTEN off
             // 调度器保证下一次读取发生在对应commit后；同拍RAW仍保留。
             #pragma HLS DEPENDENCE variable=pe_register inter false
+            // 动态slot每PE_HOP_CYCLES拍才重用一次，远大于相邻循环距离。
+            // 告诉HLS忽略错误推断的distance=1依赖；同一迭代内仍保持先读后写。
+            #pragma HLS DEPENDENCE variable=pe_pipeline inter false
+            // CMP槽每4拍重用：3拍CMP结果提交后再留一拍进入首行PE。
+            #pragma HLS DEPENDENCE variable=cmp_pipeline inter false
 
             const SaCycleControl cycle_control =
                 cycle_control_stream.read();
 
             const int current_pipeline_slot = pipeline_slot;
+            const int current_cmp_pipeline_slot = cmp_pipeline_slot;
+            CmpToPeStage completed_cmp{};
+            if(cycle>=CMP_HOP_CYCLES){
+                completed_cmp =
+                    cmp_pipeline[current_cmp_pipeline_slot];
+            }
             PeWave row_input[SA_ROWS]{};
             PeWave row_result[SA_ROWS]{};
             #pragma HLS ARRAY_PARTITION variable=row_input complete dim=0
@@ -461,9 +492,9 @@ namespace streaming_v2_detail{
                 row_input[SA_ROWS-1] = source;
             }
 
-            CmpWaveOp cmp_op = cycle_control.cmp_op;
-            bool cmp_valid = cycle_control.cmp_valid;
-            int cmp_item = cycle_control.cmp_item.to_int();
+            const CmpWaveOp cmp_op = cycle_control.cmp_op;
+            const bool cmp_valid = cycle_control.cmp_valid;
+            const int cmp_item = cycle_control.cmp_item.to_int();
 
             acc_t cmp_input[SA_COLS]{};
             acc_t cmp_output[SA_COLS]{};
@@ -478,15 +509,17 @@ namespace streaming_v2_detail{
                 cmp_input, cmp_state, cmp_output
             );
 
+            // 使用4拍CMP通道完成的输出：前三拍容纳CMP算术，最后一拍恢复
+            // Chisel的CMP->PE流水边界。当前拍CMP结果不再与当前拍PE组合串联。
             ScoreWave injected_score{};
             #pragma HLS ARRAY_PARTITION variable=injected_score.score complete dim=1
-            if(cmp_op==CmpWaveOp::UPDATE){
+            if(completed_cmp.score_valid){
                 injected_score.valid = true;
-                injected_score.key = (PeWaveIndex)cmp_item;
+                injected_score.key = completed_cmp.item;
                 for(int query=0; query<SA_COLS; ++query){
                     #pragma HLS UNROLL
                     injected_score.score[query] =
-                        viewAasE(cmp_output[query]);
+                        viewAasE(completed_cmp.data[query]);
                 }
             }
 
@@ -520,22 +553,31 @@ namespace streaming_v2_detail{
                 score_pipeline[row] = next_score_pipeline[row];
             }
 
-            PeWave down_source{};
-            #pragma HLS ARRAY_PARTITION variable=down_source.partial complete dim=1
-            down_source.valid = cycle_control.launch_down;
-            down_source.op = cycle_control.down_op;
-            down_source.index = cycle_control.down_item;
-            down_source.direction = PeWaveDirection::DOWN;
-            for(int query=0; query<SA_COLS; ++query){
-                #pragma HLS UNROLL
-                if(down_source.op==PeWaveOp::SUB_MAX ||
-                        down_source.op==PeWaveOp::PWL ||
-                        down_source.op==PeWaveOp::ROW_SUM){
-                    down_source.partial[query] = cmp_output[query];
+            PeWave registered_down_source{};
+            #pragma HLS ARRAY_PARTITION variable=registered_down_source.partial complete dim=1
+            registered_down_source.valid = completed_cmp.down_valid;
+            registered_down_source.op = completed_cmp.down_op;
+            registered_down_source.index = completed_cmp.item;
+            registered_down_source.direction = PeWaveDirection::DOWN;
+            if(registered_down_source.valid){
+                for(int query=0; query<SA_COLS; ++query){
+                    #pragma HLS UNROLL
+                    registered_down_source.partial[query] =
+                        completed_cmp.data[query];
                 }
+                row_input[0] = registered_down_source;
             }
-            if(down_source.valid){
-                row_input[0] = down_source;
+
+            // SCALE和PV不消费CMP输出，仍直接从控制器进入首行。
+            // 调度常量保证它们不会与registered_down_source同拍争用。
+            if(cycle_control.launch_down && !cmp_valid){
+                PeWave direct_down_source{};
+                #pragma HLS ARRAY_PARTITION variable=direct_down_source.partial complete dim=1
+                direct_down_source.valid = true;
+                direct_down_source.op = cycle_control.down_op;
+                direct_down_source.index = cycle_control.down_item;
+                direct_down_source.direction = PeWaveDirection::DOWN;
+                row_input[0] = direct_down_source;
             }
 
             elem_t horizontal[SA_ROWS]{};
@@ -567,8 +609,25 @@ namespace streaming_v2_detail{
                 pe_pipeline[row][current_pipeline_slot] = row_result[row];
             }
 
+            CmpToPeStage next_cmp_to_pe;
+            #pragma HLS ARRAY_PARTITION variable=next_cmp_to_pe.data complete dim=1
+            next_cmp_to_pe.score_valid = cmp_valid &&
+                cmp_op==CmpWaveOp::UPDATE;
+            next_cmp_to_pe.item = cycle_control.cmp_item;
+            next_cmp_to_pe.down_valid = cmp_valid &&
+                cycle_control.launch_down;
+            next_cmp_to_pe.down_op = cycle_control.down_op;
+            for(int query=0; query<SA_COLS; ++query){
+                #pragma HLS UNROLL
+                next_cmp_to_pe.data[query] = cmp_output[query];
+            }
+            cmp_pipeline[current_cmp_pipeline_slot] = next_cmp_to_pe;
+
             pipeline_slot = current_pipeline_slot+1==PE_HOP_CYCLES
                 ? 0 : current_pipeline_slot+1;
+            cmp_pipeline_slot =
+                current_cmp_pipeline_slot+1==CMP_HOP_CYCLES
+                    ? 0 : current_cmp_pipeline_slot+1;
 
             if(cmp_op==CmpWaveOp::PROP_MAX_DIFF){
                 SaResultToken token{};
