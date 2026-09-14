@@ -409,11 +409,12 @@ namespace streaming_v2_detail{
             // pe_register就是Scala PE.reg的唯一状态。SCALE写回到首个PWL读取、
             // PWL写回到ROW_SUM/PV读取都是真实的跨迭代RAW，不能用
             // DEPENDENCE inter false隐藏，否则II=1 RTL可能读取写回前的旧值。
-            // 动态slot每PE_HOP_CYCLES拍才重用一次，远大于相邻循环距离。
-            // 告诉HLS忽略错误推断的distance=1依赖；同一迭代内仍保持先读后写。
-            #pragma HLS DEPENDENCE variable=pe_pipeline inter false
-            // CMP槽每4拍重用：3拍CMP结果提交后再留一拍进入首行PE。
-            #pragma HLS DEPENDENCE variable=cmp_pipeline inter false
+            // pe_pipeline/cmp_pipeline的写入来自9拍/3拍子函数返回，读取又
+            // 决定下一跳token。即使C模型中的slot复用距离分别为10和4，
+            // 也不能无条件删除全部inter RAW/WAW：该pragma只改变RTL调度，
+            // 曾导致C测试通过而CoSim产生稳定的48个输出错误。先保留HLS
+            // 推导的真实依赖；后续若要恢复II=1，必须用显式前递或可证明的
+            // 静态stage实现，不能再次全局声明inter false。
 
             const SaCycleControl cycle_control =
                 cycle_control_stream.read();

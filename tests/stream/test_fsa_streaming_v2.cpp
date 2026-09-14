@@ -154,7 +154,10 @@ namespace{
                         std::fabs(actual-expected[query][feature])<=0.18F,
                     std::string(causal ? "causal" : "non-causal")+
                         " O mismatch at query "+std::to_string(query)+
-                        ", feature "+std::to_string(feature)
+                        ", feature "+std::to_string(feature)+
+                        ", actual="+std::to_string(actual)+
+                        ", expected="+
+                            std::to_string(expected[query][feature])
                 );
             }
         }
