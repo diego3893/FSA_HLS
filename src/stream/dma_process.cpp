@@ -130,28 +130,36 @@ namespace streaming_v2_detail{
                 query_tile<query_tiles; ++query_tile){
             #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
             const DmaReadRequest request = request_stream.read();
-            for(int lane=0; lane<SA_COLS; ++lane){
+            // 单一扁平循环每拍只发起一次AXI读并写入一个Scratchpad beat。
+            // 原两层循环在4x4配置下被Vitis提升为query-tile流水并完全展开
+            // lane循环，导致同一AXI口每次迭代需要4次读取，实际II只能为4。
+            for(int transfer_word=0;
+                    transfer_word<SA_COLS*SPAD_SUB_BANKS;
+                    ++transfer_word){
+                #pragma HLS PIPELINE II=1
+                #pragma HLS LOOP_TRIPCOUNT \
+                    min=SA_COLS*SPAD_SUB_BANKS \
+                    max=SA_COLS*SPAD_SUB_BANKS
+                const int lane = transfer_word/SPAD_SUB_BANKS;
+                const int word = transfer_word%SPAD_SUB_BANKS;
                 const unsigned query =
                     request.source_row.to_uint()+(unsigned)lane;
-                for(int word=0; word<SPAD_SUB_BANKS; ++word){
-                    #pragma HLS PIPELINE II=1
-                    SpadWritePacket packet{};
-                    packet.kind = request.kind;
-                    packet.request_id = request.request_id;
-                    packet.address = (sram_address_t)(
-                        request.scratchpad_base.to_uint()+lane
-                    );
-                    packet.sub_bank =
-                        (sub_bank_index_t<SPAD_SUB_BANKS>)word;
-                    packet.row_valid =
-                        lane<request.active_rows.to_int();
-                    packet.transfer_last = lane+1==SA_COLS &&
-                        word+1==SPAD_SUB_BANKS;
-                    packet.data = packet.row_valid
-                        ? q_address[query*DMA_QKV_WORDS_PER_ROW+word]
-                        : (dma_word_t)0;
-                    q_dma_stream.write(packet);
-                }
+                SpadWritePacket packet{};
+                packet.kind = request.kind;
+                packet.request_id = request.request_id;
+                packet.address = (sram_address_t)(
+                    request.scratchpad_base.to_uint()+lane
+                );
+                packet.sub_bank =
+                    (sub_bank_index_t<SPAD_SUB_BANKS>)word;
+                packet.row_valid =
+                    lane<request.active_rows.to_int();
+                packet.transfer_last =
+                    transfer_word+1==SA_COLS*SPAD_SUB_BANKS;
+                packet.data = packet.row_valid
+                    ? q_address[query*DMA_QKV_WORDS_PER_ROW+word]
+                    : (dma_word_t)0;
+                q_dma_stream.write(packet);
             }
         }
     }
@@ -174,28 +182,33 @@ namespace streaming_v2_detail{
             for(unsigned key_tile=0; key_tile<key_tiles; ++key_tile){
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
                 const DmaReadRequest request = request_stream.read();
-                for(int lane=0; lane<SA_COLS; ++lane){
+                for(int transfer_word=0;
+                        transfer_word<SA_COLS*SPAD_SUB_BANKS;
+                        ++transfer_word){
+                    #pragma HLS PIPELINE II=1
+                    #pragma HLS LOOP_TRIPCOUNT \
+                        min=SA_COLS*SPAD_SUB_BANKS \
+                        max=SA_COLS*SPAD_SUB_BANKS
+                    const int lane = transfer_word/SPAD_SUB_BANKS;
+                    const int word = transfer_word%SPAD_SUB_BANKS;
                     const unsigned key =
                         request.source_row.to_uint()+(unsigned)lane;
-                    for(int word=0; word<SPAD_SUB_BANKS; ++word){
-                        #pragma HLS PIPELINE II=1
-                        SpadWritePacket packet{};
-                        packet.kind = request.kind;
-                        packet.request_id = request.request_id;
-                        packet.address = (sram_address_t)(
-                            request.scratchpad_base.to_uint()+lane
-                        );
-                        packet.sub_bank =
-                            (sub_bank_index_t<SPAD_SUB_BANKS>)word;
-                        packet.row_valid =
-                            lane<request.active_rows.to_int();
-                        packet.transfer_last = lane+1==SA_COLS &&
-                            word+1==SPAD_SUB_BANKS;
-                        packet.data = packet.row_valid
-                            ? k_address[key*DMA_QKV_WORDS_PER_ROW+word]
-                            : (dma_word_t)0;
-                        k_dma_stream.write(packet);
-                    }
+                    SpadWritePacket packet{};
+                    packet.kind = request.kind;
+                    packet.request_id = request.request_id;
+                    packet.address = (sram_address_t)(
+                        request.scratchpad_base.to_uint()+lane
+                    );
+                    packet.sub_bank =
+                        (sub_bank_index_t<SPAD_SUB_BANKS>)word;
+                    packet.row_valid =
+                        lane<request.active_rows.to_int();
+                    packet.transfer_last =
+                        transfer_word+1==SA_COLS*SPAD_SUB_BANKS;
+                    packet.data = packet.row_valid
+                        ? k_address[key*DMA_QKV_WORDS_PER_ROW+word]
+                        : (dma_word_t)0;
+                    k_dma_stream.write(packet);
                 }
             }
         }
@@ -219,28 +232,33 @@ namespace streaming_v2_detail{
             for(unsigned key_tile=0; key_tile<key_tiles; ++key_tile){
                 #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
                 const DmaReadRequest request = request_stream.read();
-                for(int lane=0; lane<SA_COLS; ++lane){
+                for(int transfer_word=0;
+                        transfer_word<SA_COLS*SPAD_SUB_BANKS;
+                        ++transfer_word){
+                    #pragma HLS PIPELINE II=1
+                    #pragma HLS LOOP_TRIPCOUNT \
+                        min=SA_COLS*SPAD_SUB_BANKS \
+                        max=SA_COLS*SPAD_SUB_BANKS
+                    const int lane = transfer_word/SPAD_SUB_BANKS;
+                    const int word = transfer_word%SPAD_SUB_BANKS;
                     const unsigned key =
                         request.source_row.to_uint()+(unsigned)lane;
-                    for(int word=0; word<SPAD_SUB_BANKS; ++word){
-                        #pragma HLS PIPELINE II=1
-                        SpadWritePacket packet{};
-                        packet.kind = request.kind;
-                        packet.request_id = request.request_id;
-                        packet.address = (sram_address_t)(
-                            request.scratchpad_base.to_uint()+lane
-                        );
-                        packet.sub_bank =
-                            (sub_bank_index_t<SPAD_SUB_BANKS>)word;
-                        packet.row_valid =
-                            lane<request.active_rows.to_int();
-                        packet.transfer_last = lane+1==SA_COLS &&
-                            word+1==SPAD_SUB_BANKS;
-                        packet.data = packet.row_valid
-                            ? v_address[key*DMA_QKV_WORDS_PER_ROW+word]
-                            : (dma_word_t)0;
-                        v_dma_stream.write(packet);
-                    }
+                    SpadWritePacket packet{};
+                    packet.kind = request.kind;
+                    packet.request_id = request.request_id;
+                    packet.address = (sram_address_t)(
+                        request.scratchpad_base.to_uint()+lane
+                    );
+                    packet.sub_bank =
+                        (sub_bank_index_t<SPAD_SUB_BANKS>)word;
+                    packet.row_valid =
+                        lane<request.active_rows.to_int();
+                    packet.transfer_last =
+                        transfer_word+1==SA_COLS*SPAD_SUB_BANKS;
+                    packet.data = packet.row_valid
+                        ? v_address[key*DMA_QKV_WORDS_PER_ROW+word]
+                        : (dma_word_t)0;
+                    v_dma_stream.write(packet);
                 }
             }
         }
