@@ -235,9 +235,11 @@ namespace streaming_v2_detail{
     ){
         static_assert(ROW>=0 && ROW<SA_ROWS, "PE row out of range");
         static_assert(COL>=0 && COL<SA_COLS, "PE col out of range");
+        static_assert(PE_TOKEN_LATENCY==5,
+            "update spatialPeCell latency with PE_TOKEN_LATENCY");
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=1
-        #pragma HLS LATENCY min=9 max=9
+        #pragma HLS LATENCY min=5 max=5
         return peMacUnit(
             operand_a, operand_b, operand_c, exp2_mode
         );
@@ -389,8 +391,8 @@ namespace streaming_v2_detail{
         #pragma HLS ARRAY_PARTITION variable=score_pipeline complete dim=1
         #pragma HLS ARRAY_PARTITION variable=cmp_pipeline complete dim=0
 
-        // CMP仍用4槽回绕计数器。PE hop固定为16时，直接使用cycle%16
-        // 恢复8b7aab7中的静态低位slot选择，使HLS能够看见环形bank模式。
+        // CMP仍用4槽回绕计数器。PE hop固定为8时，直接使用cycle%8
+        // 延续8b7aab7中的静态低位slot选择，使HLS能够看见环形bank模式。
         int cmp_pipeline_slot = 0;
 
         for(int row=0; row<SA_ROWS; ++row){
@@ -417,7 +419,7 @@ namespace streaming_v2_detail{
 
             // 每拍直接消费一个InputDelayer beat。Q phase写入驻留PE.reg；
             // K phase结束后的下一拍即可启动QK，V phase与QK发射重叠。
-            // 当前9拍PE流水使K/V仍必须作为operand cache跨hop保存；这不再
+            // 当前5拍PE流水使K/V仍必须作为operand cache跨hop保存；这不再
             // 阻塞SA入口，也没有额外保存Q tile。
             if(cycle<INPUT_DELAYER_TILE_CYCLES){
                 const DelayedElemBeat beat = delayed_sa_stream.read();
@@ -706,13 +708,12 @@ namespace streaming_v2_detail{
         const unsigned total_tiles = attentionTileCount(tiles, causal);
 
         // 把动态query/key嵌套循环改成单一tile事务流。当前4x4构建中的
-        // TileTick是latency=237、interval=222的auto-rewind流水模块；
-        // 外层调用间隔与该单实例的可重入间隔对齐，只重叠相邻tile的
-        // 15拍入口/排空阶段，不要求HLS展开微程序或复制第二套SA。
+        // 外层调用间隔与当前hop下单实例TileTick的预计可重入间隔对齐，
+        // 只重叠相邻tile的入口/排空阶段，不要求HLS展开微程序或复制SA。
         for(unsigned tile=0; tile<total_tiles; ++tile){
             // 不能把完整tile的II误当成内部逐拍控制循环的II。后者已经
-            // 达到1；单套TileTick当前每222拍才能接受一个新tile。
-            #pragma HLS PIPELINE II=222
+            // 达到1；调用II随参数化微程序长度变化，不能写死旧hop的222。
+            #pragma HLS PIPELINE II=SA_TILE_CALL_II
             #pragma HLS LOOP_TRIPCOUNT \
                 min=1 \
                 max=DMA_MAX_SEQUENCE_TILES*DMA_MAX_SEQUENCE_TILES

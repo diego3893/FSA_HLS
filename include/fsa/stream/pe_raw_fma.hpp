@@ -1,6 +1,6 @@
 /**
  * @file pe_raw_fma.hpp
- * @brief PE专用混合精度Raw FMA的独立阶段一接口
+ * @brief PE专用混合精度Raw FMA接口
  */
 #ifndef PE_RAW_FMA_HPP
 #define PE_RAW_FMA_HPP
@@ -32,14 +32,14 @@ namespace fsa{
     /**
      * @brief 只用定宽整数位域实现PE的混合精度FMA
      *
-     * 该函数是阶段一独立候选，尚未接入正式SA。综合验收目标是
-     * latency不超过5、II=1，并且只生成一条尾数乘加数据通路。
+     * 独立顶层已确认latency=5、II=1，并且只生成一个11x11
+     * 尾数乘法器；正式PE与独立验证顶层复用同一实现。
      */
     PeRawFmaOutput peRawFma(const PeRawFmaInput& input);
 
 }  // namespace fsa
 
-/** @brief 阶段一独立Vitis HLS顶层。 */
+/** @brief Raw FMA的独立Vitis HLS验证顶层。 */
 void pe_raw_fma_top(
     const fsa::PeRawFmaInput& input,
     fsa::PeRawFmaOutput& output

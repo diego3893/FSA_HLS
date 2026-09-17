@@ -192,11 +192,11 @@ namespace streaming_v2_detail{
         PROP_EXP2_INTERCEPTS = 6
     };
 
-    constexpr int PE_TOKEN_LATENCY = 9;
-    // spatialPeCell的综合流水延迟为9拍。暂时恢复历史验证过的7拍
-    // 调度余量，使同一环形槽每16拍才复用；本次只改变hop，保留
-    // 当前已经通过RTL CoSim的数据流和真实依赖约束，作为单变量对照。
-    constexpr int PE_SCHEDULER_GUARD_CYCLES = 7;
+    // 阶段一独立综合确认手写混合精度Raw FMA为5拍、II=1。
+    constexpr int PE_TOKEN_LATENCY = 5;
+    // 第二阶段保留3拍调度余量，使同一环形槽每8拍复用。hop仍大于
+    // 实际PE latency，且保持2的幂，便于HLS将cycle%8识别为静态bank。
+    constexpr int PE_SCHEDULER_GUARD_CYCLES = 3;
     constexpr int PE_HOP_CYCLES =
         PE_TOKEN_LATENCY+PE_SCHEDULER_GUARD_CYCLES;
     // 当前综合中每列CMP输出通路为3拍、II=1；Chisel SystolicArray还在
@@ -237,6 +237,9 @@ namespace streaming_v2_detail{
     constexpr int LAST_RESULT_CYCLE =
         PV_START+SA_ROWS-1+SA_ROWS*PE_HOP_CYCLES;
     constexpr int SA_TILE_CYCLES = LAST_RESULT_CYCLE+1;
+    // TileTick的可重入间隔比内部固定周期循环多一拍调用边界。
+    // 该值随阵列参数和PE hop变化，不能继续写死为旧hop=16的222。
+    constexpr int SA_TILE_CALL_II = SA_TILE_CYCLES+1;
 
     struct SaCycleControl{
         bool launch_qk = false;

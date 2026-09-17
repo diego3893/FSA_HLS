@@ -1,4 +1,5 @@
 #include "fsa/stream/arithmetic.hpp"
+#include "fsa/stream/pe_raw_fma.hpp"
 
 #include <cmath>
 #include <limits>
@@ -187,18 +188,6 @@ namespace fsa{
         }
 
         /**
-         * @brief 从编码截距中读取分段编号
-         * 
-         * @param encoded_intercept 编码过后的截距
-         * @return exp2_counter_t 解码后的分段编号
-         */
-        exp2_counter_t decodeExp2PWLIndex(const acc_t encoded_intercept){
-            const fp_struct<acc_t> view(encoded_intercept);
-            const ap_uint<32> bits = view.data();
-            return bits.range(26, 24);
-        }
-
-        /**
          * @brief 恢复截距的阶码部分
          * 
          * @param encoded_intercept 编码过后的截距
@@ -220,97 +209,6 @@ namespace fsa{
         }
 
         /**
-         * PE的exp2前处理结果。Scala版RawFloat_MulAddExp2在进入
-         * MulAdd前直接拆分浮点位域，而不再实例化一个浮点减法器
-         * 来计算小数部分。
-         */
-        struct PePwlInput{
-            acc_t fractional = (acc_t)0.0F;
-            int integer = 0;
-            exp2_counter_t piece = 0;
-            bool negative_infinity = false;
-        };
-
-        /**
-         * @brief 从FP16位模式生成有符号小数、整数指数和PWL分段
-         *
-         * 整个过程只使用整数移位和位域重组。这使PE的普通MAC和
-         * exp2模式只剩下后面那一条共享FMA数据通路。
-         */
-        PePwlInput preparePePwlInput(const elem_t x){
-            #pragma HLS INLINE
-
-            const fp_struct<elem_t> x_view(x);
-            const ap_uint<16> bits = x_view.data();
-            const bool sign = bits[15];
-            const ap_uint<5> exponent_bits = bits.range(14, 10);
-            const ap_uint<10> mantissa = bits.range(9, 0);
-
-            PePwlInput prepared{};
-            if(exponent_bits==(ap_uint<5>)0x1f){
-                prepared.negative_infinity = sign && mantissa==0;
-                return prepared;
-            }
-
-            ap_uint<11> significand = mantissa;
-            int binary_scale = -24;
-            if(exponent_bits!=0){
-                significand[10] = 1;
-                binary_scale = (int)exponent_bits-25;
-            }
-
-            ap_uint<16> integer_magnitude = 0;
-            ap_uint<11> remainder = 0;
-            if(binary_scale>=0){
-                integer_magnitude =
-                    (ap_uint<16>)significand << binary_scale;
-            }else{
-                const int right_shift = -binary_scale;
-                if(right_shift>=11){
-                    remainder = significand;
-                }else{
-                    integer_magnitude = significand >> right_shift;
-                    const ap_uint<11> mask =
-                        ((ap_uint<11>)1 << right_shift)-1;
-                    remainder = significand & mask;
-                }
-            }
-            prepared.integer = sign
-                ? -(int)integer_magnitude : (int)integer_magnitude;
-
-            int highest_bit = -1;
-            for(int bit=10; bit>=0; --bit){
-                #pragma HLS UNROLL
-                if(highest_bit<0 && remainder[bit]){
-                    highest_bit = bit;
-                }
-            }
-
-            if(highest_bit>=0){
-                ap_uint<32> fractional_bits = 0;
-                fractional_bits[31] = sign;
-                fractional_bits.range(30, 23) =
-                    (ap_uint<8>)(highest_bit+binary_scale+127);
-                const ap_uint<24> normalized =
-                    (ap_uint<24>)remainder << (23-highest_bit);
-                fractional_bits.range(22, 0) = normalized.range(22, 0);
-                prepared.fractional =
-                    fp_struct<acc_t>(fractional_bits).to_ieee();
-
-                const int piece_shift = binary_scale+3;
-                ap_uint<14> piece_value = piece_shift>=0
-                    ? (ap_uint<14>)remainder << piece_shift
-                    : (ap_uint<14>)remainder >> (-piece_shift);
-                if(piece_value>=(ap_uint<14>)exp2PWLPieces){
-                    piece_value = (ap_uint<14>)(exp2PWLPieces-1);
-                }
-                prepared.piece =
-                    (exp2_counter_t)piece_value.range(2, 0);
-            }
-            return prepared;
-        }
-
-        /**
          * @brief 把32位IEEE-754位模式解释为acc_t数值
          *
          * 这里是位视图转换，不是把无符号整数的数值转换为float。
@@ -328,29 +226,24 @@ namespace fsa{
         ){
             #pragma HLS INLINE
 
-            const PePwlInput pwl_input = preparePePwlInput(in_a);
-            const acc_t fma_a = in_exp2
-                ? pwl_input.fractional : (acc_t)in_a;
-            const acc_t fma_c = in_exp2
-                ? restoreExp2PWLIntercept(in_c) : in_c;
+            const fp_struct<elem_t> a_view(in_a);
+            const fp_struct<elem_t> b_view(in_b);
+            const fp_struct<acc_t> c_view(in_c);
+            PeRawFmaInput raw_input{};
+            raw_input.in_a_bits = a_view.data();
+            raw_input.in_b_bits = b_view.data();
+            raw_input.in_c_bits = c_view.data();
+            raw_input.in_exp2 = in_exp2;
 
-            // PE内唯一的浮点算术通路；模式只选择FMA的输入。
-            const acc_t fma_result = hls::fma(
-                fma_a, (acc_t)in_b, fma_c
-            );
-            acc_t result = in_exp2
-                ? ldexpByBits(fma_result, pwl_input.integer)
-                : fma_result;
-
-            if(in_exp2 && pwl_input.negative_infinity){
-                result = accZero();
-            }
+            // 普通MAC与exp2继续时分复用PE内唯一一条Raw FMA通路。
+            const PeRawFmaOutput raw_output = peRawFma(raw_input);
 
             PeMacUnitOutput output{};
-            output.out_accType = result;
-            output.out_elemType = cvtAtoE(result);
-            output.out_exp2 = in_exp2 &&
-                decodeExp2PWLIndex(in_c)==pwl_input.piece;
+            output.out_accType =
+                fp_struct<acc_t>(raw_output.out_acc_bits).to_ieee();
+            output.out_elemType =
+                fp_struct<elem_t>(raw_output.out_elem_bits).to_ieee();
+            output.out_exp2 = raw_output.out_exp2;
             return output;
         }
 
@@ -362,7 +255,7 @@ namespace fsa{
 
     PeMacUnitOutput peMacUnit(const elem_t in_a, const elem_t in_b, 
                             const acc_t in_c, const bool in_exp2){
-        // 旧路径保留独立MacUnit层次。
+        // 保留独立MacUnit层次，使每个空间PE只实例化一条Raw FMA。
         #pragma HLS INLINE off
         return peMacUnitImpl(in_a, in_b, in_c, in_exp2);
     }

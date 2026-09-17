@@ -38,6 +38,7 @@ foreach SOURCE {
     output_delayer.cpp
     accumulator_process.cpp
     arithmetic.cpp
+    pe_raw_fma.cpp
     dma.cpp
     accumulator.cpp
     delayer.cpp
