@@ -12,7 +12,7 @@
 ## 2. Hard Constraints
 
 - Chisel `FSA-main/src/main/scala/fsa/` 是功能、结构和时序语义的主要参考，不修改该目录。
-- 只维护新路径：`src/stream/`、`include/fsa/stream/`、`tests/stream/`、`hls/fsa_stream/`。
+- 只维护新路径：`src/stream/`、`include/fsa/stream/`、`tests/stream/`、`hls/fsa_stream/`；PE latency第一阶段允许使用独立验证目录 `hls/pe_raw_fma/`，但在验收前不得接入正式SA。
 - 顶层固定为 `fsa_stream`；不改器件、100 MHz 时钟约束、2.7 ns uncertainty、AXI 位宽或顶层协议。
 - `SA_ROWS`、`SA_COLS` 必须参数化，不能写死 4x4。
 - 只有一套 `R x C` SA；QK 与 PV 顺序复用；每个 PE 只有一个 MacUnit 和一个元素精度 `PE.reg`。
@@ -80,7 +80,7 @@
 
 - `%16` PE slot与仅限 `pe_register` 的依赖提示已把SA主循环从II=9恢复到II=1，并通过当前9x4 CSim和RTL CoSim；PE算术文件与参考commit一致，无需修改FMA。
 - 第一阶段DMA已经验收：Q/K/V均为II=1，CSim/RTL CoSim通过，端到端周期和计算/存储部件未退化；代价是三个DMA读模块共增加14304 FF，仍仅占器件3.40%。
-- 第二阶段已实现第一版tile调用流水候选：把动态query/key嵌套循环改为单一有效tile循环，显式 `PIPELINE II=1` 目标并用 `ALLOCATION limit=1` 禁止复制完整SA。目标是在单SA条件下利用TileTick现有237/222 latency/interval重叠相邻tile的入口与排空；新Vitis build待验收。
+- 第二阶段已将动态query/key嵌套循环压平成单一有效tile循环，并用 `ALLOCATION limit=1` 禁止复制完整SA。外层 `PIPELINE II=1` 造成Unroll/Inline中间表示放大约100倍，现已改为与单TileTick已验证可重入间隔一致的 `II=222`；新Vitis build待验收。
 - 时序方面基线build顶层7.300 ns仅零裕量满足HLS有效预算，需要第三阶段单独处理；第二阶段不修改时钟约束。
 
 ## 5. Architecture / Mental Model
@@ -118,6 +118,8 @@ Q/K/V AXI DMA
 | `src/stream/systolic_array.cpp` | 单SA、PE/CMP与环形token流水 | 8b7aab7的cycle%16 slot和PE.reg提示已由CSim/CoSim验证 |
 | `src/stream/accumulator_process.cpp` | 单actor微指令 Accumulator | 避免反馈环死锁 |
 | `src/stream/arithmetic.cpp` | PE/Acc FMA、PWL、reciprocal | PE latency优化入口 |
+| `include/fsa/stream/pe_raw_fma.hpp`、`src/stream/pe_raw_fma*.cpp` | 阶段一独立Raw FMA候选与HLS顶层 | 尚未接入SA；目标latency<=5、II=1、单尾数乘法器 |
+| `hls/pe_raw_fma/run_hls.tcl` | 独立Raw FMA综合入口 | `./run_hls.sh pe_raw_fma`，默认CSim+CSynth，不跑CoSim/IP导出 |
 | `src/stream/dataflow.cpp` | 顶层actor连接 | 检查生产/消费与死锁 |
 | `hls/fsa_stream/run_hls.tcl` | HLS入口 | `set_top fsa_stream` |
 | `build/fsa_stream_build/solution1/` | 最新已验证构建 | 15:44当前源码，CSim/综合/CoSim通过，SA II=1 |
@@ -247,15 +249,27 @@ Q/K/V AXI DMA
 
 ### D011 — 第二阶段在单SA约束下流水化tile调用
 
-**Decision:** 将 `systolicArrayProcess` 的动态query/key嵌套循环压平成单一有效tile事务循环，对循环设置 `PIPELINE II=1`目标，并以 `ALLOCATION instances=spatialSystolicArrayTileTick limit=1 function`明确限制完整SA函数只有一个实例。
+**Decision:** 将 `systolicArrayProcess` 的动态query/key嵌套循环压平成单一有效tile事务循环，以 `ALLOCATION instances=spatialSystolicArrayTileTick limit=1 function`明确限制完整SA函数只有一个实例；外层流水目标由不可实现的II=1改为当前单TileTick可重入间隔II=222。
 
-**Reason:** `spatialSystolicArrayTileTick`本身综合为latency=237、interval=222；原外层顺序调用可能等待完整237拍。调用循环流水化可在不复制PE/CMP/SA的情况下，让下一tile尝试在前一tile15拍排空阶段开始。II=1只是优化目标，最终achieved II必须由单实例和真实跨tile状态依赖决定。
+**Reason:** `spatialSystolicArrayTileTick`本身综合为latency=237、interval=222；II=222可在不复制PE/CMP/SA的情况下重叠前一tile最后15拍排空。II=1与单实例真实interval矛盾，并在服务器综合中触发约100倍Unroll/Inline IR膨胀。
 
-**Evidence/Result:** 代码只修改 `include/fsa/stream/common.hpp` 和 `src/stream/systolic_array.cpp`；4x2、4x4、8x4本地回归全部通过。当前尚无对应Vitis综合或RTL CoSim结果。
+**Evidence/Result:** 压平代码的4x2、4x4、8x4本地回归全部通过。II=1服务器构建在Unroll/Inline阶段从基线37172/27858条指令膨胀为4135964/2865164条；2026-09-17已只改pragma为II=222，尚无对应Vitis综合或RTL CoSim结果。
 
 **Implication:** 新build必须同时确认：TileTick仅一个实例、16 PE/4 CMP/108 DSP不增加，外层tile循环II低于原顺序调用间隔，且CSim/CoSim、SA tile 237/222及其他部件不退化。未通过则继续停留第二阶段修复，不进入时序阶段。
 
-**Status:** Implemented locally; awaiting server build and user acceptance
+**Status:** Retargeted to II=222 locally; awaiting server build and user acceptance
+
+### D012 — PE内部latency按三阶段门控优化
+
+**Decision:** 新优化分为三个必须由用户Vitis验收后才推进的阶段：第一阶段为独立手写Raw FMA及其单实例资源/latency/II验证；第二阶段才把候选接入SA并使用hop=8完成全链路验证；第三阶段再单变量尝试hop=4。
+
+**Reason:** 把算术单元本身的QoR与SA token调度分开，避免再次把FMA、slot、hop和依赖提示同时修改而无法归因。每个阶段失败时停在该阶段修复，不用下一阶段掩盖问题。
+
+**Evidence/Result:** 第一阶段源码已新增独立 `pe_raw_fma_top`：普通模式用唯一11x11尾数乘法调用、FP32对阶/规格化/舍入，exp2模式复用同一通路。正式 `peMacUnit`、`PE_TOKEN_LATENCY=9`和hop=16均未修改。本地30000组随机MAC、定向IEEE及exp2位精确回归通过；Vitis综合尚未运行。
+
+**Implication:** 当前只能声明第一阶段代码和本地C++功能完成。必须读取用户生成的 `pe_raw_fma` CSim/CSynth报告，确认latency<=5、II=1、乘法/DSP实例不超过当前PE的5 DSP且时序满足后，才允许开始SA集成。
+
+**Status:** Stage 1 implemented locally; waiting for user Vitis acceptance
 
 ## 8. Experiments / Results
 
@@ -397,7 +411,7 @@ Q/K/V AXI DMA
 
 **Known facts:** 旧报告中每PE为5 DSP、latency=9、II=1；内部包含half到float、FP32乘加和float到half转换。
 
-**Plan:** 在保持每PE单FMA和数值语义的前提下，研究FP32部分和与FP16写回的完成点分离，或实现等价混合精度FMA。
+**Plan:** 第一阶段独立Raw FMA已实现并通过本地位精确回归，等待Vitis确认latency<=5、II=1及单乘法/DSP资源。验收后第二阶段接入SA并以hop=8为目标，预计4x4静态tile由221拍降至133拍；第二阶段完整CoSim验收后第三阶段才尝试hop=4，预计89拍。所有性能数字均须由新综合和RTL CoSim确认。
 
 ### P003 — Tagged wave仍需K/V operand cache
 
@@ -422,8 +436,9 @@ Q/K/V AXI DMA
 ## 11. Current Working Set
 
 - 第一阶段DMA扁平循环已由2026-09-17 14:09 build验收；保留 `src/stream/dma_process.cpp` 修改。
-- 第二阶段新增修改：`include/fsa/stream/common.hpp` 增加有效tile计数；`src/stream/systolic_array.cpp` 将tile调用压平并流水化，同时限制TileTick函数实例数为1。
-- 当前焦点：等待新Vitis build确认单SA条件下的外层tile achieved II、端到端周期和层次数量；用户验收前不开始升频。
+- 第二阶段新增修改：`include/fsa/stream/common.hpp` 增加有效tile计数；`src/stream/systolic_array.cpp` 将tile调用压平，以外层II=222和TileTick实例数限制保持单SA。
+- PE内部latency优化第一阶段新增独立 `pe_raw_fma` 顶层、位域实现、testbench和HLS入口；尚未接入正式SA。
+- 当前焦点：等待用户运行 `./run_hls.sh pe_raw_fma`，读取独立报告确认latency<=5、II=1、单尾数乘法器/DSP<=5和100MHz时序；验收前不开始hop=8集成。
 - 当前设计边界：顶层 `fsa_stream` 形参、四个AXI bundle、器件和时钟约束保持不变；内部协议可调整。
 - 下一检查：用户运行 `./run_hls.sh fsa_stream` 后读取新build，核对外层tile循环II、TileTick实例数、16 PE/4 CMP、CSim/CoSim、总周期、时序和资源；第二阶段验收通过后才进入时序阶段。
 
@@ -453,7 +468,9 @@ Q/K/V AXI DMA
 - [x] 服务器构建8b7aab7调度移植候选：SA II=1、tile 237/222、顶层7.300 ns、资源20 BRAM/108 DSP/74357 FF/109091 LUT，RTL CoSim通过。
 - [x] 将Q/K/V DMA读改为每拍单AXI访问的扁平beat循环，并通过4x2、4x4、8x4本地功能回归。
 - [x] 新Vitis build确认dmaReadQ/K/V achieved II=1，并通过CSim与RTL CoSim；第一阶段验收通过。
-- [x] 第二阶段将有效tile调用压平成单循环，设置II=1优化目标并限制完整SA实例数为1；4x2、4x4、8x4本地回归通过。
+- [x] 第二阶段将有效tile调用压平成单循环并限制完整SA实例数为1；II=1引发IR爆炸后已改为单实例可实现的II=222。
+- [x] PE latency新阶段一：实现独立Raw FMA、独立顶层/testbench/Tcl，并通过30000组随机MAC、定向IEEE和exp2本地位精确回归；正式SA未改。
+- [ ] 用户运行 `./run_hls.sh pe_raw_fma`，读取报告确认latency<=5、II=1、单乘法/DSP<=5和时序满足；验收成功后才开始hop=8集成。
 - [ ] 新Vitis build确认单SA/16 PE/4 CMP/108 DSP保持，读取外层tile achieved II、端到端周期并通过CSim/RTL CoSim；由用户完成第二阶段验收。
 - [ ] 用户验收第二阶段后，才开始第三阶段时序优化及150/200 MHz评估。
 
@@ -478,6 +495,8 @@ Q/K/V AXI DMA
 - [x] 第一阶段DMA扁平化后的4x2、4x4、8x4本地C++功能回归。
 - [x] 第一阶段DMA扁平化后的Vitis CSim、综合与RTL CoSim：Q/K/V II=1，无死锁或数值错误。
 - [x] 第二阶段tile调用流水候选的4x2、4x4、8x4本地C++功能回归。
+- [x] 独立 `pe_raw_fma_top` 本地C++位精确回归：30000随机MAC、定向IEEE特殊值和exp2模式通过。
+- [ ] 独立 `pe_raw_fma_top` Vitis CSim/C综合及latency/II/DSP/时序验收。
 - [ ] 第二阶段tile调用流水候选的Vitis CSim、综合与RTL CoSim。
 - [ ] IP导出。
 - [ ] Vivado实现时序。
@@ -504,9 +523,10 @@ Q/K/V AXI DMA
 5. 相对13:15基线端到端加速6.75--7.14x；相对9月9日稳定版本也快约6.1%--6.5%，说明2/4/5/7外围改造得到保留并产生净收益。
 6. 顶层HLS估算周期7.300 ns，恰等于7.300 ns有效预算，HLS无违例但零裕量；第一阶段资源BRAM20/DSP108/FF88661/LUT108077，尚无Vivado实现证明。
 7. 第一阶段DMA已验收：Q/K/V read均II=1；计算、存储、端到端周期均未退化，代价为DMA流水FF增加。
-8. 第二阶段候选已把有效tile调用压平并设置II=1目标，以ALLOCATION明确保持单TileTick实例；本地三组回归通过，Vitis待验收。
-9. 用户要求三个阶段严格串行：当前第二阶段未验收，不得开始第三阶段时序/频率修改。
-10. SRAM/Scratchpad、DMA三请求actor、Delayer、Accumulator和当前CMP寄存器通路全部保留；禁止恢复 `pe_pipeline/cmp_pipeline inter false`。
+8. 第二阶段候选已把有效tile调用压平，以ALLOCATION保持单TileTick实例；II=1因IR爆炸已撤销，当前外层目标为II=222，Vitis待验收。
+9. PE内部latency另设三阶段门控：独立Raw FMA综合 -> hop=8接入SA并完整验证 -> hop=4单变量实验；当前只完成第一阶段源码和本地测试，等待用户Vitis验收。
+10. 用户要求各阶段严格串行；当前不得开始hop=8集成，也不得开始频率修改。
+11. SRAM/Scratchpad、DMA三请求actor、Delayer、Accumulator和当前CMP寄存器通路全部保留；禁止恢复 `pe_pipeline/cmp_pipeline inter false`。
 
 ## 16. Decision / Progress Log
 
@@ -528,3 +548,6 @@ Q/K/V AXI DMA
 - 2026-09-17 — 用户确定三阶段门控计划：先DMA，再tile流水，最后时序/频率；每阶段必须由用户验收后才能进入下一阶段。第一阶段将Q/K/V DMA读的lane/word嵌套循环扁平化，使流水体每拍仅一次AXI读和一次FIFO写；4x2、4x4、8x4本地回归通过，等待新Vitis综合与CoSim验收。
 - 2026-09-17 — 读取14:09第一阶段新build：Q/K/V DMA读循环均由II=4降至II=1；CSim/RTL CoSim通过，9x4仍为2569/1828 cycles，SA tile 237/222、PE/CMP/Acc、BRAM20/DSP108和7.300 ns均未退化。FF因三个DMA流水从74357增至88661，LUT从109091降至108077。第一阶段通过，进入第二阶段。
 - 2026-09-17 — 第二阶段第一版：把SA有效tile调用压平成单循环，设置PIPELINE II=1优化目标，并以ALLOCATION limit=1禁止复制TileTick；4x2、4x4、8x4本地回归通过，等待Vitis确认单实例条件下的最低achieved II和RTL正确性。
+- 2026-09-17 — 第二阶段服务器综合在外层tile `PIPELINE II=1` 后出现中间表示爆炸：Compile/Link仍为292765条，与14:09基线292771几乎一致；但Unroll/Inline升至4135964/2865164条，分别约为基线37172/27858的111/103倍。该告警统计的是编译IR而非最终RTL实例数；新csynth报告尚未同步，不能据此断言PE/SA已复制。最可能原因是单TileTick真实interval=222却要求调用循环II=1，促使HLS展开/内联221拍tile循环。若构建不能合理完成，下一候选应把外层目标改为单实例可实现的II=222并复核16 PE/4 CMP/108 DSP。
+- 2026-09-17 — 按用户要求将外层tile流水目标从II=1改为II=222，保留压平循环和TileTick `ALLOCATION limit=1`。后续内部latency主方案为手写raw FP16乘FP16/FP32累加FMA，先以latency=4、II=1、hop=8作为安全目标，再在完整综合/CoSim通过后尝试hop=4；不得通过复制FMA或屏蔽pe/cmp token真实依赖换性能。
+- 2026-09-17 — 用户将PE内部latency优化重分为三阶段门控：步骤1/2（独立FMA与资源确认）为第一阶段，步骤3/4（hop=8集成与全链路验证）为第二阶段，步骤5（hop=4）为第三阶段，每阶段由用户手动Vitis验收。第一阶段已新增 `pe_raw_fma_top`、整数位域Raw FMA、30000随机+定向+exp2 testbench和 `./run_hls.sh pe_raw_fma`入口；本地位精确回归通过，正式SA/hop未改，等待Vitis报告。

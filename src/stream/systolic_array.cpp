@@ -705,14 +705,14 @@ namespace streaming_v2_detail{
         const unsigned tiles = tileCount(length);
         const unsigned total_tiles = attentionTileCount(tiles, causal);
 
-        // 把动态query/key嵌套循环改成单一tile事务流。TileTick本身已经是
-        // latency=237、interval=222的auto-rewind流水模块；流水化调用循环
-        // 后，下一tile可在前一tile最后15拍仍在排空时进入同一套SA。
-        // 这只重叠相邻tile的入口/排空阶段，不复制PE/CMP或第二套SA。
+        // 把动态query/key嵌套循环改成单一tile事务流。当前4x4构建中的
+        // TileTick是latency=237、interval=222的auto-rewind流水模块；
+        // 外层调用间隔与该单实例的可重入间隔对齐，只重叠相邻tile的
+        // 15拍入口/排空阶段，不要求HLS展开微程序或复制第二套SA。
         for(unsigned tile=0; tile<total_tiles; ++tile){
-            // II=1是优化目标；在单实例约束下，最终achieved II由同一套
-            // TileTick的真实可重入间隔和跨tile状态依赖决定。
-            #pragma HLS PIPELINE II=1
+            // 不能把完整tile的II误当成内部逐拍控制循环的II。后者已经
+            // 达到1；单套TileTick当前每222拍才能接受一个新tile。
+            #pragma HLS PIPELINE II=222
             #pragma HLS LOOP_TRIPCOUNT \
                 min=1 \
                 max=DMA_MAX_SEQUENCE_TILES*DMA_MAX_SEQUENCE_TILES
