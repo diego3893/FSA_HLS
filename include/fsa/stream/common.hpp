@@ -145,6 +145,17 @@ namespace streaming_v2_detail{
         return causal ? query_tile+1U : tiles;
     }
 
+    /** 完整attention中需要送入同一SA的有效(query,key) tile数量。 */
+    inline unsigned attentionTileCount(
+        const unsigned tiles,
+        const bool causal
+    ){
+        #pragma HLS INLINE
+        return causal
+            ? tiles*(tiles+1U)/2U
+            : tiles*tiles;
+    }
+
     enum class PeWaveOp : std::uint8_t{
         IDLE = 0,
         QK = 1,

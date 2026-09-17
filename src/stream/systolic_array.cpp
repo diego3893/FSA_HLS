@@ -698,23 +698,31 @@ namespace streaming_v2_detail{
 
         CMPState cmp_state[SA_COLS]{};
         #pragma HLS ARRAY_PARTITION variable=cmp_state type=complete dim=1
+        // 外层tile流水不得通过复制完整SA来满足吞吐约束。
+        #pragma HLS ALLOCATION \
+            instances=spatialSystolicArrayTileTick limit=1 function
 
         const unsigned tiles = tileCount(length);
-        for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
-            #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
-            const unsigned key_tiles = keyTileCountForQuery(
-                query_tile, tiles, causal
-            );
-            for(unsigned key_tile=0; key_tile<key_tiles; ++key_tile){
-                #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
-                const CoreTileControl control = control_stream.read();
-                const TileMeta meta = control.meta;
+        const unsigned total_tiles = attentionTileCount(tiles, causal);
 
-                spatialSystolicArrayTileTick(
-                    meta, cmp_state, cycle_control_stream,
-                    delayed_sa_stream, sa_result_stream
-                );
-            }
+        // 把动态query/key嵌套循环改成单一tile事务流。TileTick本身已经是
+        // latency=237、interval=222的auto-rewind流水模块；流水化调用循环
+        // 后，下一tile可在前一tile最后15拍仍在排空时进入同一套SA。
+        // 这只重叠相邻tile的入口/排空阶段，不复制PE/CMP或第二套SA。
+        for(unsigned tile=0; tile<total_tiles; ++tile){
+            // II=1是优化目标；在单实例约束下，最终achieved II由同一套
+            // TileTick的真实可重入间隔和跨tile状态依赖决定。
+            #pragma HLS PIPELINE II=1
+            #pragma HLS LOOP_TRIPCOUNT \
+                min=1 \
+                max=DMA_MAX_SEQUENCE_TILES*DMA_MAX_SEQUENCE_TILES
+            const CoreTileControl control = control_stream.read();
+            const TileMeta meta = control.meta;
+
+            spatialSystolicArrayTileTick(
+                meta, cmp_state, cycle_control_stream,
+                delayed_sa_stream, sa_result_stream
+            );
         }
     }
 

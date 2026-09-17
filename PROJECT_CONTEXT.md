@@ -38,9 +38,9 @@
 
 ## 4. Current State
 
-### Latest verified server run / build（当前源码）
+### Latest verified server run / build（第二阶段修改前基线）
 
-- **注意：本节构建已早于当前DMA源码。** 构建目录：`build/fsa_stream_build/solution1`；生成时间 2026-09-14 15:37--15:44。该构建仍可作为修改前基线，但不能用于证明当前DMA源码的II、时序、资源或RTL正确性。
+- **注意：本节build已验证第一阶段DMA，但早于当前tile流水源码。** 构建目录：`build/fsa_stream_build/solution1`；产物时间2026-09-17 14:01--14:09。可作为第二阶段的直接基线，不能用于证明当前tile源码的II、层次、资源或RTL正确性。
 - Vitis HLS 2024.2；器件 `xcvu37p_CIV-fsvh2892-2-e`；目标 10.0 ns，uncertainty 2.7 ns。
 - CSim 通过：一次顶层调用完成 9x4 causal 与 non-causal attention。
 - Verilog/xsim CoSim 通过，无死锁：
@@ -50,10 +50,10 @@
   - 三事务总执行：4432 cycles。
 - C post-check通过，`pe_register inter false`在当前 `%16` slot表达下未造成RTL数值错误；DMA DATAFLOW死锁也未复现。
 - 顶层估算周期 7.300 ns，恰好等于扣除2.7 ns uncertainty后的7.300 ns有效预算；本次无 `HLS 200-871`，但HLS裕量为0，仍无Vivado实现后时序证明。
-- 顶层资源：BRAM18K 20、DSP 108、FF 74357、LUT 109091、URAM 0。
+- 顶层资源：BRAM18K 20、DSP 108、FF 88661、LUT 108077、URAM 0。相对第一阶段修改前，BRAM/DSP不变，FF增加14304（+19.24%），LUT减少1014（-0.93%）；FF增长全部来自三个DMA读流水模块。
 - `spatialSystolicArrayTileTick`：latency 237、interval 222；主循环221次，iteration latency=16，最终II=1。
 - 相对13:15移植前基线，non-causal/causal分别加速7.14x/6.75x，三事务总周期降低85.57%；相对9月9日2737/1954 cycles基线也分别快6.14%/6.45%。
-- PE/CMP自身均为II=1，latency分别为9/3；OutputDelayer、Scratchpad各内部流水循环和Accumulator arithmetic循环均达到目标II=1。Q/K/V DMA read循环最终II=4，仍是次级吞吐问题。
+- PE/CMP自身均为II=1，latency分别为9/3；Accumulator arithmetic latency=10、II=1；SA tile仍为237/222，Scratchpad和Delayer未退化。Q/K/V DMA扁平读循环均达到目标II=1（修改前为II=4）。
 - 层次仍是单4x4 SA：16 PE + 4 CMP；单 `systolicArrayProcess`、单 `spatialSystolicArrayTileTick`、单 `accumulatorProcess`、单 `accumulatorArithmeticVector`，Accumulator为4个算术lane。
 - Accumulator中没有FP32 `fsub`实例；每lane仅见一组共享算术路径的FP32 `fadd`/`fmul`。`accumulatorArithmeticVector` latency=10、II=1。
 - 没有 IP export、Vivado implementation 或板级验证结果。
@@ -79,8 +79,9 @@
 ### Main issue
 
 - `%16` PE slot与仅限 `pe_register` 的依赖提示已把SA主循环从II=9恢复到II=1，并通过当前9x4 CSim和RTL CoSim；PE算术文件与参考commit一致，无需修改FMA。
-- 第一阶段正在把Q/K/V DMA read由II=4降到II=1：源码已将lane/word两层循环扁平化为每拍一次AXI读和一次FIFO写，并通过4x2、4x4、8x4本地回归；实际II、RTL正确性、时序和资源等待新Vitis build验收。
-- 时序方面旧build顶层7.300 ns仅零裕量满足HLS有效预算，需要第三阶段单独处理；第一阶段不修改时钟约束。
+- 第一阶段DMA已经验收：Q/K/V均为II=1，CSim/RTL CoSim通过，端到端周期和计算/存储部件未退化；代价是三个DMA读模块共增加14304 FF，仍仅占器件3.40%。
+- 第二阶段已实现第一版tile调用流水候选：把动态query/key嵌套循环改为单一有效tile循环，显式 `PIPELINE II=1` 目标并用 `ALLOCATION limit=1` 禁止复制完整SA。目标是在单SA条件下利用TileTick现有237/222 latency/interval重叠相邻tile的入口与排空；新Vitis build待验收。
+- 时序方面基线build顶层7.300 ns仅零裕量满足HLS有效预算，需要第三阶段单独处理；第二阶段不修改时钟约束。
 
 ## 5. Architecture / Mental Model
 
@@ -241,6 +242,18 @@ Q/K/V AXI DMA
 **Evidence/Result:** 2026-09-17本地4x2、4x4、8x4回归全部通过，覆盖5x4、9x4、9x8 causal/non-causal输出及Acc PWL测试。尚未获得当前源码的新Vitis综合或CoSim结果。
 
 **Implication:** 第一阶段代码完成但尚未验收；必须由新build确认dmaReadQ/K/V achieved II=1并通过CSim/RTL CoSim。用户验收前禁止开始tile流水阶段。
+
+**Status:** Implemented locally; awaiting server build and user acceptance
+
+### D011 — 第二阶段在单SA约束下流水化tile调用
+
+**Decision:** 将 `systolicArrayProcess` 的动态query/key嵌套循环压平成单一有效tile事务循环，对循环设置 `PIPELINE II=1`目标，并以 `ALLOCATION instances=spatialSystolicArrayTileTick limit=1 function`明确限制完整SA函数只有一个实例。
+
+**Reason:** `spatialSystolicArrayTileTick`本身综合为latency=237、interval=222；原外层顺序调用可能等待完整237拍。调用循环流水化可在不复制PE/CMP/SA的情况下，让下一tile尝试在前一tile15拍排空阶段开始。II=1只是优化目标，最终achieved II必须由单实例和真实跨tile状态依赖决定。
+
+**Evidence/Result:** 代码只修改 `include/fsa/stream/common.hpp` 和 `src/stream/systolic_array.cpp`；4x2、4x4、8x4本地回归全部通过。当前尚无对应Vitis综合或RTL CoSim结果。
+
+**Implication:** 新build必须同时确认：TileTick仅一个实例、16 PE/4 CMP/108 DSP不增加，外层tile循环II低于原顺序调用间隔，且CSim/CoSim、SA tile 237/222及其他部件不退化。未通过则继续停留第二阶段修复，不进入时序阶段。
 
 **Status:** Implemented locally; awaiting server build and user acceptance
 
@@ -408,10 +421,11 @@ Q/K/V AXI DMA
 
 ## 11. Current Working Set
 
-- 当前阶段新增修改仅限 `src/stream/dma_process.cpp`：Q/K/V读循环已改成单beat扁平流水；其余已有工作区改动和未跟踪报告属于此前工作，不能覆盖。
-- 当前焦点：等待新Vitis build确认Q/K/V DMA read achieved II=1、功能正确且无死锁；用户验收前不开始tile流水或升频。
+- 第一阶段DMA扁平循环已由2026-09-17 14:09 build验收；保留 `src/stream/dma_process.cpp` 修改。
+- 第二阶段新增修改：`include/fsa/stream/common.hpp` 增加有效tile计数；`src/stream/systolic_array.cpp` 将tile调用压平并流水化，同时限制TileTick函数实例数为1。
+- 当前焦点：等待新Vitis build确认单SA条件下的外层tile achieved II、端到端周期和层次数量；用户验收前不开始升频。
 - 当前设计边界：顶层 `fsa_stream` 形参、四个AXI bundle、器件和时钟约束保持不变；内部协议可调整。
-- 下一检查：用户运行 `./run_hls.sh fsa_stream` 后读取新build，核对dmaReadQ/K/V的II、CSim、CoSim、总周期、时序和资源；第一阶段验收通过后才规划tile流水。
+- 下一检查：用户运行 `./run_hls.sh fsa_stream` 后读取新build，核对外层tile循环II、TileTick实例数、16 PE/4 CMP、CSim/CoSim、总周期、时序和资源；第二阶段验收通过后才进入时序阶段。
 
 ## 12. Next Actions
 
@@ -438,8 +452,9 @@ Q/K/V AXI DMA
 - [x] 仅在当前SA移植上述两点，保留SRAM/DMA/Delayer/Accumulator和所有已验证死锁修复。
 - [x] 服务器构建8b7aab7调度移植候选：SA II=1、tile 237/222、顶层7.300 ns、资源20 BRAM/108 DSP/74357 FF/109091 LUT，RTL CoSim通过。
 - [x] 将Q/K/V DMA读改为每拍单AXI访问的扁平beat循环，并通过4x2、4x4、8x4本地功能回归。
-- [ ] 新Vitis build确认dmaReadQ/K/V achieved II=1，并通过CSim与RTL CoSim；由用户完成第一阶段验收。
-- [ ] 用户验收第一阶段后，才开始第二阶段tile流水。
+- [x] 新Vitis build确认dmaReadQ/K/V achieved II=1，并通过CSim与RTL CoSim；第一阶段验收通过。
+- [x] 第二阶段将有效tile调用压平成单循环，设置II=1优化目标并限制完整SA实例数为1；4x2、4x4、8x4本地回归通过。
+- [ ] 新Vitis build确认单SA/16 PE/4 CMP/108 DSP保持，读取外层tile achieved II、端到端周期并通过CSim/RTL CoSim；由用户完成第二阶段验收。
 - [ ] 用户验收第二阶段后，才开始第三阶段时序优化及150/200 MHz评估。
 
 ## 13. Validation Status
@@ -461,7 +476,9 @@ Q/K/V AXI DMA
 - [x] 静态检查commit 8b7aab7与当前PE算术：`src/stream/arithmetic.cpp`及接口无差异；无需修改PE FMA。
 - [x] `%16` PE slot和PE.reg提示移植后的Vitis CSim、综合及RTL CoSim；9x4 causal/non-causal正确，无死锁。
 - [x] 第一阶段DMA扁平化后的4x2、4x4、8x4本地C++功能回归。
-- [ ] 第一阶段DMA扁平化后的Vitis CSim、综合与RTL CoSim。
+- [x] 第一阶段DMA扁平化后的Vitis CSim、综合与RTL CoSim：Q/K/V II=1，无死锁或数值错误。
+- [x] 第二阶段tile调用流水候选的4x2、4x4、8x4本地C++功能回归。
+- [ ] 第二阶段tile调用流水候选的Vitis CSim、综合与RTL CoSim。
 - [ ] IP导出。
 - [ ] Vivado实现时序。
 - [ ] FPGA板级验证。
@@ -482,13 +499,14 @@ Q/K/V AXI DMA
 
 1. 正在把完整FSA attention核迁移并优化到HLS，结构目标是Chisel FSA。
 2. 当前坚持单SA、单PE MacUnit、单列Accumulator，通过等价流水重定时降低延迟。
-3. 最新15:44 build对应当前源码：CSim与RTL CoSim通过，9x4 non-causal/causal为2569/1828 cycles，无死锁和数值错误。
+3. 最新已验证build为2026-09-17 14:09的第一阶段DMA基线：CSim与RTL CoSim通过，9x4 non-causal/causal仍为2569/1828 cycles，无死锁和数值错误。
 4. `%16` PE slot加仅限PE.reg的调度提示已把SA主循环从II=9恢复为II=1；tile latency/interval为237/222。
 5. 相对13:15基线端到端加速6.75--7.14x；相对9月9日稳定版本也快约6.1%--6.5%，说明2/4/5/7外围改造得到保留并产生净收益。
-6. 顶层HLS估算周期7.300 ns，恰等于7.300 ns有效预算，HLS无违例但零裕量；资源BRAM20/DSP108/FF74357/LUT109091，尚无Vivado实现证明。
-7. 第一阶段DMA源码已把Q/K/V的lane/word嵌套循环改为单beat扁平循环，目标是把旧build的II=4降到II=1；4x2、4x4、8x4本地回归通过，新Vitis build待验收。
-8. 用户要求三个阶段严格串行：DMA验收后才改tile流水，tile流水验收后才提升时序/频率；当前不得开始第二阶段。
-9. SRAM/Scratchpad、DMA三请求actor、Delayer、Accumulator和当前CMP寄存器通路全部保留；禁止恢复 `pe_pipeline/cmp_pipeline inter false`。
+6. 顶层HLS估算周期7.300 ns，恰等于7.300 ns有效预算，HLS无违例但零裕量；第一阶段资源BRAM20/DSP108/FF88661/LUT108077，尚无Vivado实现证明。
+7. 第一阶段DMA已验收：Q/K/V read均II=1；计算、存储、端到端周期均未退化，代价为DMA流水FF增加。
+8. 第二阶段候选已把有效tile调用压平并设置II=1目标，以ALLOCATION明确保持单TileTick实例；本地三组回归通过，Vitis待验收。
+9. 用户要求三个阶段严格串行：当前第二阶段未验收，不得开始第三阶段时序/频率修改。
+10. SRAM/Scratchpad、DMA三请求actor、Delayer、Accumulator和当前CMP寄存器通路全部保留；禁止恢复 `pe_pipeline/cmp_pipeline inter false`。
 
 ## 16. Decision / Progress Log
 
@@ -508,3 +526,5 @@ Q/K/V AXI DMA
 - 2026-09-14 — 读取15:44 `%16` slot与PE.reg提示新build：CSim/RTL CoSim通过且无死锁、无数值错误；SA主循环II=1，tile 237/222，9x4为2569/1828，总执行4432 cycles。顶层估算7.300 ns等于有效预算，资源BRAM20/DSP108/FF74357/LUT109091。相对13:15加速6.75--7.14x，并略快于9月9日稳定版本；PE/SA修复判定成功，后续转向DMA read II=4与实现时序。
 - 2026-09-17 — 更新 `docs/fsa_stream综合报告.md` 为15:44当前build；新增与 `fsa_dma_top` 的同口径9x4综合/CoSim对比，以及与 `FSA-main` 的结构、静态微程序周期和README板级示例对比。FSA-main缺少同器件综合产物，报告明确不计算资源/Fmax/端到端加速比。
 - 2026-09-17 — 用户确定三阶段门控计划：先DMA，再tile流水，最后时序/频率；每阶段必须由用户验收后才能进入下一阶段。第一阶段将Q/K/V DMA读的lane/word嵌套循环扁平化，使流水体每拍仅一次AXI读和一次FIFO写；4x2、4x4、8x4本地回归通过，等待新Vitis综合与CoSim验收。
+- 2026-09-17 — 读取14:09第一阶段新build：Q/K/V DMA读循环均由II=4降至II=1；CSim/RTL CoSim通过，9x4仍为2569/1828 cycles，SA tile 237/222、PE/CMP/Acc、BRAM20/DSP108和7.300 ns均未退化。FF因三个DMA流水从74357增至88661，LUT从109091降至108077。第一阶段通过，进入第二阶段。
+- 2026-09-17 — 第二阶段第一版：把SA有效tile调用压平成单循环，设置PIPELINE II=1优化目标，并以ALLOCATION limit=1禁止复制TileTick；4x2、4x4、8x4本地回归通过，等待Vitis确认单实例条件下的最低achieved II和RTL正确性。
