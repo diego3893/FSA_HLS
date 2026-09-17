@@ -265,11 +265,11 @@ Q/K/V AXI DMA
 
 **Reason:** 把算术单元本身的QoR与SA token调度分开，避免再次把FMA、slot、hop和依赖提示同时修改而无法归因。每个阶段失败时停在该阶段修复，不用下一阶段掩盖问题。
 
-**Evidence/Result:** 第一阶段源码已新增独立 `pe_raw_fma_top`：普通模式用唯一11x11尾数乘法调用、FP32对阶/规格化/舍入，exp2模式复用同一通路。正式 `peMacUnit`、`PE_TOKEN_LATENCY=9`和hop=16均未修改。本地30000组随机MAC、定向IEEE及exp2位精确回归通过；Vitis综合尚未运行。
+**Evidence/Result:** 第一阶段源码已新增独立 `pe_raw_fma_top`：普通模式用唯一11x11尾数乘法调用、FP32对阶/规格化/舍入，exp2模式复用同一通路。正式 `peMacUnit`、`PE_TOKEN_LATENCY=9`和hop=16均未修改。首次Vitis CSim中FP32累加结果与golden逐项一致，但FP32到FP16转换有7094项错误：正常数为截断而非RNE、负下溢被冲刷为正零；因此未进入CSynth。当前已改为正常数RNE、FP16非规格化输出冲刷为带符号零，并用独立golden转换器完成本地30000随机MAC、定向IEEE及exp2位精确回归；等待Vitis重跑。
 
 **Implication:** 当前只能声明第一阶段代码和本地C++功能完成。必须读取用户生成的 `pe_raw_fma` CSim/CSynth报告，确认latency<=5、II=1、乘法/DSP实例不超过当前PE的5 DSP且时序满足后，才允许开始SA集成。
 
-**Status:** Stage 1 implemented locally; waiting for user Vitis acceptance
+**Status:** Stage 1 CSim failure fixed locally; waiting for user Vitis rerun and acceptance
 
 ## 8. Experiments / Results
 
@@ -411,7 +411,7 @@ Q/K/V AXI DMA
 
 **Known facts:** 旧报告中每PE为5 DSP、latency=9、II=1；内部包含half到float、FP32乘加和float到half转换。
 
-**Plan:** 第一阶段独立Raw FMA已实现并通过本地位精确回归，等待Vitis确认latency<=5、II=1及单乘法/DSP资源。验收后第二阶段接入SA并以hop=8为目标，预计4x4静态tile由221拍降至133拍；第二阶段完整CoSim验收后第三阶段才尝试hop=4，预计89拍。所有性能数字均须由新综合和RTL CoSim确认。
+**Plan:** 第一阶段独立Raw FMA已实现。首次Vitis CSim证明FP32 FMA本体正确，但发现输出half转换语义不一致；当前修复已通过本地位精确回归，等待Vitis重跑并确认CSim、latency<=5、II=1及单乘法/DSP资源。验收后第二阶段接入SA并以hop=8为目标，预计4x4静态tile由221拍降至133拍；第二阶段完整CoSim验收后第三阶段才尝试hop=4，预计89拍。所有性能数字均须由新综合和RTL CoSim确认。
 
 ### P003 — Tagged wave仍需K/V operand cache
 
@@ -438,7 +438,7 @@ Q/K/V AXI DMA
 - 第一阶段DMA扁平循环已由2026-09-17 14:09 build验收；保留 `src/stream/dma_process.cpp` 修改。
 - 第二阶段新增修改：`include/fsa/stream/common.hpp` 增加有效tile计数；`src/stream/systolic_array.cpp` 将tile调用压平，以外层II=222和TileTick实例数限制保持单SA。
 - PE内部latency优化第一阶段新增独立 `pe_raw_fma` 顶层、位域实现、testbench和HLS入口；尚未接入正式SA。
-- 当前焦点：等待用户运行 `./run_hls.sh pe_raw_fma`，读取独立报告确认latency<=5、II=1、单尾数乘法器/DSP<=5和100MHz时序；验收前不开始hop=8集成。
+- 当前焦点：首次 `pe_raw_fma` Vitis CSim因输出half转换语义失败，已仅修复RNE与带符号FTZ并通过本地回归；等待用户重新运行 `./run_hls.sh pe_raw_fma`，读取独立报告确认CSim、latency<=5、II=1、单尾数乘法器/DSP<=5和100MHz时序；验收前不开始hop=8集成。
 - 当前设计边界：顶层 `fsa_stream` 形参、四个AXI bundle、器件和时钟约束保持不变；内部协议可调整。
 - 下一检查：用户运行 `./run_hls.sh fsa_stream` 后读取新build，核对外层tile循环II、TileTick实例数、16 PE/4 CMP、CSim/CoSim、总周期、时序和资源；第二阶段验收通过后才进入时序阶段。
 
@@ -470,7 +470,7 @@ Q/K/V AXI DMA
 - [x] 新Vitis build确认dmaReadQ/K/V achieved II=1，并通过CSim与RTL CoSim；第一阶段验收通过。
 - [x] 第二阶段将有效tile调用压平成单循环并限制完整SA实例数为1；II=1引发IR爆炸后已改为单实例可实现的II=222。
 - [x] PE latency新阶段一：实现独立Raw FMA、独立顶层/testbench/Tcl，并通过30000组随机MAC、定向IEEE和exp2本地位精确回归；正式SA未改。
-- [ ] 用户运行 `./run_hls.sh pe_raw_fma`，读取报告确认latency<=5、II=1、单乘法/DSP<=5和时序满足；验收成功后才开始hop=8集成。
+- [ ] 用户重新运行 `./run_hls.sh pe_raw_fma`；首次CSim的7094项half输出错误已本地修复，下一份报告需确认CSim通过、latency<=5、II=1、单乘法/DSP<=5和时序满足；验收成功后才开始hop=8集成。
 - [ ] 新Vitis build确认单SA/16 PE/4 CMP/108 DSP保持，读取外层tile achieved II、端到端周期并通过CSim/RTL CoSim；由用户完成第二阶段验收。
 - [ ] 用户验收第二阶段后，才开始第三阶段时序优化及150/200 MHz评估。
 
@@ -496,6 +496,8 @@ Q/K/V AXI DMA
 - [x] 第一阶段DMA扁平化后的Vitis CSim、综合与RTL CoSim：Q/K/V II=1，无死锁或数值错误。
 - [x] 第二阶段tile调用流水候选的4x2、4x4、8x4本地C++功能回归。
 - [x] 独立 `pe_raw_fma_top` 本地C++位精确回归：30000随机MAC、定向IEEE特殊值和exp2模式通过。
+- [x] 独立 `pe_raw_fma_top` 首次Vitis CSim定位：7094项均为FP32到FP16输出不一致，所示FP32累加位全部匹配；CSim失败后未执行CSynth。
+- [x] 将输出half转换修为正常数RNE、非规格化数带符号FTZ，并用独立golden转换器重新通过30000随机MAC、定向IEEE和exp2本地回归。
 - [ ] 独立 `pe_raw_fma_top` Vitis CSim/C综合及latency/II/DSP/时序验收。
 - [ ] 第二阶段tile调用流水候选的Vitis CSim、综合与RTL CoSim。
 - [ ] IP导出。
@@ -524,7 +526,7 @@ Q/K/V AXI DMA
 6. 顶层HLS估算周期7.300 ns，恰等于7.300 ns有效预算，HLS无违例但零裕量；第一阶段资源BRAM20/DSP108/FF88661/LUT108077，尚无Vivado实现证明。
 7. 第一阶段DMA已验收：Q/K/V read均II=1；计算、存储、端到端周期均未退化，代价为DMA流水FF增加。
 8. 第二阶段候选已把有效tile调用压平，以ALLOCATION保持单TileTick实例；II=1因IR爆炸已撤销，当前外层目标为II=222，Vitis待验收。
-9. PE内部latency另设三阶段门控：独立Raw FMA综合 -> hop=8接入SA并完整验证 -> hop=4单变量实验；当前只完成第一阶段源码和本地测试，等待用户Vitis验收。
+9. PE内部latency另设三阶段门控：独立Raw FMA综合 -> hop=8接入SA并完整验证 -> hop=4单变量实验；首次Vitis CSim发现half输出舍入/符号FTZ问题，当前已本地修复并通过回归，仍停留第一阶段等待Vitis重验。
 10. 用户要求各阶段严格串行；当前不得开始hop=8集成，也不得开始频率修改。
 11. SRAM/Scratchpad、DMA三请求actor、Delayer、Accumulator和当前CMP寄存器通路全部保留；禁止恢复 `pe_pipeline/cmp_pipeline inter false`。
 
@@ -551,3 +553,4 @@ Q/K/V AXI DMA
 - 2026-09-17 — 第二阶段服务器综合在外层tile `PIPELINE II=1` 后出现中间表示爆炸：Compile/Link仍为292765条，与14:09基线292771几乎一致；但Unroll/Inline升至4135964/2865164条，分别约为基线37172/27858的111/103倍。该告警统计的是编译IR而非最终RTL实例数；新csynth报告尚未同步，不能据此断言PE/SA已复制。最可能原因是单TileTick真实interval=222却要求调用循环II=1，促使HLS展开/内联221拍tile循环。若构建不能合理完成，下一候选应把外层目标改为单实例可实现的II=222并复核16 PE/4 CMP/108 DSP。
 - 2026-09-17 — 按用户要求将外层tile流水目标从II=1改为II=222，保留压平循环和TileTick `ALLOCATION limit=1`。后续内部latency主方案为手写raw FP16乘FP16/FP32累加FMA，先以latency=4、II=1、hop=8作为安全目标，再在完整综合/CoSim通过后尝试hop=4；不得通过复制FMA或屏蔽pe/cmp token真实依赖换性能。
 - 2026-09-17 — 用户将PE内部latency优化重分为三阶段门控：步骤1/2（独立FMA与资源确认）为第一阶段，步骤3/4（hop=8集成与全链路验证）为第二阶段，步骤5（hop=4）为第三阶段，每阶段由用户手动Vitis验收。第一阶段已新增 `pe_raw_fma_top`、整数位域Raw FMA、30000随机+定向+exp2 testbench和 `./run_hls.sh pe_raw_fma`入口；本地位精确回归通过，正式SA/hop未改，等待Vitis报告。
+- 2026-09-18 — 读取首次 `pe_raw_fma` 服务器日志：Vitis CSim报7094项错误，日志所示FP32累加输出全部逐位匹配，差异只在half输出（正常数少1 LSB，负下溢丢失符号）；CSim失败后未进入综合，故尚无latency/II/DSP结论。仅修改独立Raw FMA的FP32->FP16转换为RNE及带符号FTZ，并把testbench golden从平台half cast改为显式规范转换；本地30000随机MAC、定向IEEE与exp2重新通过，等待用户重跑，第二阶段未开始。

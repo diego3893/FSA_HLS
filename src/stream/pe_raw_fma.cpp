@@ -296,16 +296,28 @@ namespace{
         }
 
         if(exponent>=-14){
-            if(exponent==15 && mantissa>0x7fe000){
+            ap_uint<11> rounded = mantissa >> 13;
+            const ap_uint<13> remainder = mantissa.range(12, 0);
+            const bool round_up = remainder>0x1000 ||
+                (remainder==0x1000 && rounded[0]);
+            if(round_up){
+                rounded = rounded+1;
+            }
+
+            int half_exponent = exponent+15;
+            if(rounded[10]){
+                rounded = 0;
+                ++half_exponent;
+            }
+            if(half_exponent>=0x1f){
                 result.range(14, 10) = 0x1f;
                 return result;
             }
-            result.range(14, 10) = (ap_uint<5>)(exponent+15);
-            result.range(9, 0) = mantissa.range(22, 13);
+            result.range(14, 10) = (ap_uint<5>)half_exponent;
+            result.range(9, 0) = rounded.range(9, 0);
             return result;
         }
-        // 当前工程的half转换模型把FP16非规格化输出冲刷为正零。
-        result[15] = false;
+        // Vitis half转换把FP16非规格化输出冲刷为带符号零。
         return result;
     }
 

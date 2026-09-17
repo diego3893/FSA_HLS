@@ -46,6 +46,45 @@ std::uint32_t floatBits(const fsa::acc_t value){
     return (std::uint32_t)fp_struct<fsa::acc_t>(value).data().to_uint();
 }
 
+std::uint16_t goldHalfBitsFromFloatBits(const std::uint32_t bits){
+    const std::uint16_t sign = (std::uint16_t)((bits>>16)&0x8000U);
+    const unsigned exponent_bits = (bits>>23)&0xffU;
+    const unsigned mantissa = bits&0x007fffffU;
+    if(exponent_bits==0xffU){
+        return (std::uint16_t)(sign | 0x7c00U |
+            (mantissa!=0 ? 0x03ffU : 0U));
+    }
+    if(exponent_bits==0){
+        return sign;
+    }
+
+    const int exponent = (int)exponent_bits-127;
+    if(exponent>15){
+        return (std::uint16_t)(sign | 0x7c00U);
+    }
+    if(exponent<-14){
+        // 与Vitis half转换一致：FP16非规格化输出冲刷为带符号零。
+        return sign;
+    }
+
+    unsigned rounded = mantissa>>13;
+    const unsigned remainder = mantissa&0x1fffU;
+    if(remainder>0x1000U ||
+            (remainder==0x1000U && (rounded&1U)!=0)){
+        ++rounded;
+    }
+    int half_exponent = exponent+15;
+    if((rounded&0x400U)!=0){
+        rounded = 0;
+        ++half_exponent;
+    }
+    if(half_exponent>=0x1f){
+        return (std::uint16_t)(sign | 0x7c00U);
+    }
+    return (std::uint16_t)(sign |
+        ((unsigned)half_exponent<<10) | rounded);
+}
+
 bool isNan32(const std::uint32_t bits){
     return (bits&0x7f800000U)==0x7f800000U &&
         (bits&0x007fffffU)!=0;
@@ -116,7 +155,7 @@ void checkMacVector(
     );
     const std::uint32_t expected_acc = floatBits(expected);
     const std::uint16_t expected_elem =
-        halfBits((fsa::elem_t)expected);
+        goldHalfBitsFromFloatBits(expected_acc);
     expectBits(
         runTop(a_bits, b_bits, c_bits, false),
         expected_acc, expected_elem, false, "MAC", vector
@@ -146,6 +185,10 @@ void testDirectedMac(){
         {0x7bffU, 0x7bffU, 0x00000000U},
         {0x3c00U, 0x3c00U, 0xbf800000U}, // exact cancellation
         {0x3555U, 0x3aabU, 0x3eaaaaabU},
+        {0x0000U, 0x3c00U, 0x3f1c70e4U}, // normal RNE
+        {0x0000U, 0x3c00U, 0xb62861bcU}, // signed FTZ
+        {0x0000U, 0x3c00U, 0x3f801000U}, // RNE tie to even
+        {0x0000U, 0x3c00U, 0x3f803000U}, // RNE tie from odd
         {0x7c00U, 0x0000U, 0x3f800000U}, // inf*0 -> NaN
         {0x7c00U, 0x3c00U, 0xff800000U}, // inf + -inf
         {0x7e00U, 0x3c00U, 0x00000000U}
@@ -238,7 +281,7 @@ void testExp2(){
                     EXP2_ENCODED_INTERCEPT_BITS[piece], true
                 ),
                 floatBits(expected),
-                halfBits((fsa::elem_t)expected),
+                goldHalfBitsFromFloatBits(floatBits(expected)),
                 piece==matching_piece,
                 "EXP2", vector
             );
