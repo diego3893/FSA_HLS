@@ -228,10 +228,11 @@ namespace streaming_v2_detail{
     };
 
     /**
-     * 每个坐标特化为一个不内联的PE层次。这不是为不同坐标
-     * 实现不同算法，而是告诉HLS这些调用是同时存在的空间PE，
-     * 不得把它们折叠为少量共享运算器。每个PE内部仍只有一个
-     * 原始peMacUnit，MAC和exp2按控制时分复用同一条通路。
+     * 每个坐标仍由完全展开的ROW/COL模板产生一个独立PE。这里必须
+     * 内联进TileTick：上一版保留函数边界后，5拍Raw FMA在父循环中
+     * 被扩成ST5--ST11的7级调用，结果晚于hop=8槽的下一次读取。
+     * 内联只删除控制边界，不增加坐标调用点；每个坐标仍只有一个
+     * peMacUnit，MAC和exp2继续时分复用同一条Raw FMA乘法通路。
      */
     template<int ROW, int COL>
     PeMacUnitOutput spatialPeCell(
@@ -244,9 +245,7 @@ namespace streaming_v2_detail{
         static_assert(COL>=0 && COL<SA_COLS, "PE col out of range");
         static_assert(PE_TOKEN_LATENCY==5,
             "update spatialPeCell latency with PE_TOKEN_LATENCY");
-        #pragma HLS INLINE off
-        #pragma HLS PIPELINE II=1
-        #pragma HLS LATENCY min=5 max=5
+        #pragma HLS INLINE
         return peMacUnit(
             operand_a, operand_b, operand_c, exp2_mode
         );
