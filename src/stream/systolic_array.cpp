@@ -707,13 +707,10 @@ namespace streaming_v2_detail{
         const unsigned tiles = tileCount(length);
         const unsigned total_tiles = attentionTileCount(tiles, causal);
 
-        // 把动态query/key嵌套循环改成单一tile事务流。当前4x4构建中的
-        // 外层调用间隔与当前hop下单实例TileTick的预计可重入间隔对齐，
-        // 只重叠相邻tile的入口/排空阶段，不要求HLS展开微程序或复制SA。
+        // 保留单一tile事务流，但在阶段二验收前按顺序调用唯一TileTick。
+        // 不对完整tile循环施加PIPELINE/II约束，避免HLS跨函数展开整段
+        // 固定周期微程序；TileTick内部逐拍循环及各PE仍保持II=1。
         for(unsigned tile=0; tile<total_tiles; ++tile){
-            // 不能把完整tile的II误当成内部逐拍控制循环的II。后者已经
-            // 达到1；调用II随参数化微程序长度变化，不能写死旧hop的222。
-            #pragma HLS PIPELINE II=SA_TILE_CALL_II
             #pragma HLS LOOP_TRIPCOUNT \
                 min=1 \
                 max=DMA_MAX_SEQUENCE_TILES*DMA_MAX_SEQUENCE_TILES

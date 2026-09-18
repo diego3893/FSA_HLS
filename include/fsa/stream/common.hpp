@@ -237,9 +237,6 @@ namespace streaming_v2_detail{
     constexpr int LAST_RESULT_CYCLE =
         PV_START+SA_ROWS-1+SA_ROWS*PE_HOP_CYCLES;
     constexpr int SA_TILE_CYCLES = LAST_RESULT_CYCLE+1;
-    // TileTick的可重入间隔比内部固定周期循环多一拍调用边界。
-    // 该值随阵列参数和PE hop变化，不能继续写死为旧hop=16的222。
-    constexpr int SA_TILE_CALL_II = SA_TILE_CYCLES+1;
 
     struct SaCycleControl{
         bool launch_qk = false;
