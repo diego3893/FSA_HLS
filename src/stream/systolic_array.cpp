@@ -63,8 +63,9 @@ namespace streaming_v2_detail{
     };
 
     /**
-     * 流过SA的一个控制波。partial对应Scala PE的上/下方数据，
-     * index在QK时是key、PWL时是piece、PV时是feature。
+     * 流过SA的控制波与非归约直通数据。partial只传递SUB_MAX的负max、
+     * PWL的截距等不经过FMA更新的数据；QK/ROW_SUM/PV的部分和由独立
+     * pe_results通路传递。index在QK时是key、PWL时是piece、PV时是feature。
      *
      * 成员刻意不设默认值：临时wave用`{}`显式生成bubble，环形存储则
      * 依靠写前不读协议，避免HLS在每个tile入口综合出整表清零循环。
@@ -75,8 +76,14 @@ namespace streaming_v2_detail{
         PeWaveDirection direction;
         PeWaveIndex index;
         acc_t partial[SA_COLS];
-        elem_t element[SA_COLS];
-        bool exp2_match[SA_COLS];
+    };
+
+    // PE算术输出的独立ring槽。刻意没有默认成员初始化，避免每tile清表。
+    // 所有槽先被无条件写入，8拍后才允许有效控制波消费它们。
+    struct PeResult{
+        acc_t out_accType;
+        elem_t out_elemType;
+        bool out_exp2;
     };
 
     /** score从顶部CMP逐拍向下回流；key标签决定在哪一行写入PE.reg。 */
@@ -249,15 +256,13 @@ namespace streaming_v2_detail{
     struct SpatialPeColumns{
         static void run(
             const PeWave& input_wave,
-            PeWave& output_wave,
+            PeResult output[SA_COLS],
+            const acc_t mac_partial[SA_ROWS][SA_COLS],
             const elem_t horizontal[SA_ROWS],
             elem_t pe_register[SA_ROWS][SA_COLS],
             const bool active[SA_ROWS][SA_COLS]
         ){
             #pragma HLS INLINE
-            const bool reduce = input_wave.op==PeWaveOp::QK ||
-                input_wave.op==PeWaveOp::ROW_SUM ||
-                input_wave.op==PeWaveOp::PV;
             const bool use_probability =
                 input_wave.op==PeWaveOp::ROW_SUM ||
                 input_wave.op==PeWaveOp::PV;
@@ -270,31 +275,22 @@ namespace streaming_v2_detail{
                 ? elemZero() : pe_register[ROW][COL];
             const bool exp2_mode = input_wave.op==PeWaveOp::PWL;
 
+            // 原始结果无条件写入专用结果槽。FMA返回后不再选择旧partial
+            // 或透传数据；操作/valid控制只影响消费者，不落在写回反馈链上。
             const PeMacUnitOutput unit = spatialPeCell<ROW, COL>(
                 operand_a,
                 horizontal[ROW],
-                input_wave.partial[COL],
+                mac_partial[ROW][COL],
                 exp2_mode
             );
-
-            // 每个字段直接提交到当前ring槽，避免先聚合完整PeWave再做一次
-            // 整结构写回。所有字段都显式赋值，bubble和未修改字段继续逐拍
-            // 透传；有效算术字段在对应PE结果产生后立即写入。
-            output_wave.partial[COL] = input_wave.valid && reduce
-                ? unit.out_accType : input_wave.partial[COL];
-            output_wave.element[COL] = input_wave.valid &&
-                    active[ROW][COL] &&
-                    (input_wave.op==PeWaveOp::SUB_MAX ||
-                     input_wave.op==PeWaveOp::SCALE ||
-                     input_wave.op==PeWaveOp::PWL)
-                ? unit.out_elemType : input_wave.element[COL];
-            output_wave.exp2_match[COL] = input_wave.valid &&
-                    active[ROW][COL] && input_wave.op==PeWaveOp::PWL
-                ? unit.out_exp2 : input_wave.exp2_match[COL];
+            output[COL].out_accType = unit.out_accType;
+            output[COL].out_elemType = unit.out_elemType;
+            output[COL].out_exp2 = unit.out_exp2;
 
             SpatialPeColumns<ROW, COL+1>::run(
                 input_wave,
-                output_wave,
+                output,
+                mac_partial,
                 horizontal,
                 pe_register,
                 active
@@ -306,7 +302,8 @@ namespace streaming_v2_detail{
     struct SpatialPeColumns<ROW, SA_COLS>{
         static void run(
             const PeWave&,
-            PeWave&,
+            PeResult[SA_COLS],
+            const acc_t[SA_ROWS][SA_COLS],
             const elem_t[SA_ROWS],
             elem_t[SA_ROWS][SA_COLS],
             const bool[SA_ROWS][SA_COLS]
@@ -319,30 +316,27 @@ namespace streaming_v2_detail{
     struct SpatialPeRowsTick{
         static void run(
             const PeWave input_wave[SA_ROWS],
-            PeWave pe_pipeline[SA_ROWS][PE_HOP_CYCLES],
+            PeResult pe_results[SA_ROWS][PE_HOP_CYCLES][SA_COLS],
             const int pipeline_slot,
+            const acc_t mac_partial[SA_ROWS][SA_COLS],
             const elem_t horizontal[SA_ROWS],
             elem_t pe_register[SA_ROWS][SA_COLS],
             const bool active[SA_ROWS][SA_COLS]
         ){
             #pragma HLS INLINE
-            PeWave& output_wave = pe_pipeline[ROW][pipeline_slot];
-            // 控制字段不依赖FMA结果，可在算术流水结束前提交。
-            output_wave.valid = input_wave[ROW].valid;
-            output_wave.op = input_wave[ROW].op;
-            output_wave.direction = input_wave[ROW].direction;
-            output_wave.index = input_wave[ROW].index;
             SpatialPeColumns<ROW, 0>::run(
                 input_wave[ROW],
-                output_wave,
+                pe_results[ROW][pipeline_slot],
+                mac_partial,
                 horizontal,
                 pe_register,
                 active
             );
             SpatialPeRowsTick<ROW+1>::run(
                 input_wave,
-                pe_pipeline,
+                pe_results,
                 pipeline_slot,
+                mac_partial,
                 horizontal,
                 pe_register,
                 active
@@ -354,8 +348,9 @@ namespace streaming_v2_detail{
     struct SpatialPeRowsTick<SA_ROWS>{
         static void run(
             const PeWave[SA_ROWS],
-            PeWave[SA_ROWS][PE_HOP_CYCLES],
+            PeResult[SA_ROWS][PE_HOP_CYCLES][SA_COLS],
             const int,
+            const acc_t[SA_ROWS][SA_COLS],
             const elem_t[SA_ROWS],
             elem_t[SA_ROWS][SA_COLS],
             const bool[SA_ROWS][SA_COLS]
@@ -401,6 +396,9 @@ namespace streaming_v2_detail{
         elem_t pe_register[SA_ROWS][SA_COLS];
         bool active[SA_ROWS][SA_COLS];
         PeWave pe_pipeline[SA_ROWS][PE_HOP_CYCLES];
+        // 与控制波共用slot和8拍逻辑年龄，但不通过控制波聚合/路由部分和。
+        // 每坐标仍只有一次spatialPeCell调用，真实的结果槽RAW/WAR均保留。
+        PeResult pe_results[SA_ROWS][PE_HOP_CYCLES][SA_COLS];
         ScoreWave score_pipeline[SA_ROWS];
         CmpToPeStage cmp_pipeline[CMP_HOP_CYCLES];
         #pragma HLS ARRAY_PARTITION variable=k_operand type=complete dim=0
@@ -408,6 +406,7 @@ namespace streaming_v2_detail{
         #pragma HLS ARRAY_PARTITION variable=pe_register complete dim=0
         #pragma HLS ARRAY_PARTITION variable=active complete dim=0
         #pragma HLS ARRAY_PARTITION variable=pe_pipeline complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=pe_results complete dim=0
         #pragma HLS ARRAY_PARTITION variable=score_pipeline complete dim=1
         #pragma HLS ARRAY_PARTITION variable=cmp_pipeline complete dim=0
 
@@ -430,7 +429,7 @@ namespace streaming_v2_detail{
             // 微程序保证每次SCALE/PWL/ROW_SUM/PV读取都晚于对应PE.reg
             // 写回；恢复8b7aab7中对该控制相关性的调度证明，避免HLS把
             // 不可能相邻发生的PE.reg访问误判成distance=1。该提示只用于
-            // PE.reg；不得扩展到多拍子函数写回的pe_pipeline/cmp_pipeline，
+            // PE.reg；不得扩展到pe_results/pe_pipeline/cmp_pipeline，
             // 后两者的全局inter false曾在RTL CoSim中造成48个数值错误。
             #pragma HLS DEPENDENCE variable=pe_register inter false
 
@@ -498,23 +497,38 @@ namespace streaming_v2_detail{
                                     (completed.op==PeWaveOp::SUB_MAX ||
                                      completed.op==PeWaveOp::SCALE)){
                                 pe_register[row][query] =
-                                    completed.element[query];
+                                    pe_results[row][current_pipeline_slot]
+                                        [query].out_elemType;
                             }else if(active[row][query] &&
                                     completed.op==PeWaveOp::PWL &&
-                                    completed.exp2_match[query]){
+                                    pe_results[row][current_pipeline_slot]
+                                        [query].out_exp2){
                                 pe_register[row][query] =
-                                    completed.element[query];
+                                    pe_results[row][current_pipeline_slot]
+                                        [query].out_elemType;
                             }
                         }
 
                         if(completed.direction==PeWaveDirection::UP){
                             if(row==0){
                                 qk_at_cmp = completed;
+                                for(int query=0; query<SA_COLS; ++query){
+                                    #pragma HLS UNROLL
+                                    qk_at_cmp.partial[query] =
+                                        pe_results[row][current_pipeline_slot]
+                                            [query].out_accType;
+                                }
                             }else{
                                 row_input[row-1] = completed;
                             }
                         }else if(row+1==SA_ROWS){
                             bottom_result = completed;
+                            for(int query=0; query<SA_COLS; ++query){
+                                #pragma HLS UNROLL
+                                bottom_result.partial[query] =
+                                    pe_results[row][current_pipeline_slot]
+                                        [query].out_accType;
+                            }
                         }else{
                             row_input[row+1] = completed;
                         }
@@ -641,8 +655,41 @@ namespace streaming_v2_detail{
                 }
             }
 
+            acc_t mac_partial[SA_ROWS][SA_COLS]{};
+            #pragma HLS ARRAY_PARTITION variable=mac_partial complete dim=0
+            // 先捕获所有行的旧结果，再提交本拍结果。归约只读取固定相邻行，
+            // 不再经过completed.valid/direction、row_input覆盖和输出旁路链。
+            // 控制波仍负责完整hop延迟；首行/底行的首发归约由零开始。
+            for(int row=0; row<SA_ROWS; ++row){
+                #pragma HLS UNROLL
+                for(int query=0; query<SA_COLS; ++query){
+                    #pragma HLS UNROLL
+                    if(row_input[row].valid){
+                        if(row_input[row].op==PeWaveOp::QK){
+                            if(row+1<SA_ROWS){
+                                mac_partial[row][query] =
+                                    pe_results[row+1][current_pipeline_slot]
+                                        [query].out_accType;
+                            }
+                        }else if(row_input[row].op==PeWaveOp::ROW_SUM ||
+                                row_input[row].op==PeWaveOp::PV){
+                            if(row>0){
+                                mac_partial[row][query] =
+                                    pe_results[row-1][current_pipeline_slot]
+                                        [query].out_accType;
+                            }
+                        }else{
+                            mac_partial[row][query] = row_input[row].partial[query];
+                        }
+                    }
+                }
+            }
+            for(int row=0; row<SA_ROWS; ++row){
+                #pragma HLS UNROLL
+                pe_pipeline[row][current_pipeline_slot] = row_input[row];
+            }
             SpatialPeRowsTick<0>::run(
-                row_input, pe_pipeline, current_pipeline_slot,
+                row_input, pe_results, current_pipeline_slot, mac_partial,
                 horizontal, pe_register, active
             );
 

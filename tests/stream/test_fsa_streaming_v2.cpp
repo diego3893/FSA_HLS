@@ -191,6 +191,40 @@ namespace{
 }  // namespace
 
 int main(){
+#ifdef FSA_SA_TRANSPORT_REGRESSION
+    // 可选的本地差分回归：同一testbench分别链接修改前/后的SA，逐字比较
+    // 完整O输出。常规HLS testbench仍为原来的三个事务。
+    for(unsigned scenario=0; scenario<8; ++scenario){
+        initializeMatrices();
+        std::uint32_t random_state = 0x91e10da5U+scenario;
+        for(int token=0; token<L; ++token){
+            for(int feature=0; feature<D; ++feature){
+                random_state ^= random_state << 13;
+                random_state ^= random_state >> 17;
+                random_state ^= random_state << 5;
+                if(scenario==1){
+                    Q[token][feature] = 0.0F;
+                    K[token][feature] = 0.0F;
+                }else if(scenario>=2){
+                    Q[token][feature] = ((int)(random_state&15U)-8)*0.125F;
+                    K[token][feature] = ((int)((random_state>>4)&15U)-8)*0.125F;
+                    V[token][feature] = ((int)((random_state>>8)&15U)-8)*0.125F;
+                }
+            }
+        }
+        packMatrix(Q, q_memory);
+        packMatrix(K, k_memory);
+        packMatrix(V, v_memory);
+        for(int causal=0; causal<2; ++causal){
+            runAttentionCase(causal!=0);
+            std::cout << "[BITS] " << scenario << " " << causal;
+            for(int word=0; word<OUTPUT_WORDS; ++word){
+                std::cout << " " << o_memory[word].to_uint64();
+            }
+            std::cout << std::endl;
+        }
+    }
+#else
     initializeMatrices();
     packMatrix(Q, q_memory);
     packMatrix(K, k_memory);
@@ -198,6 +232,7 @@ int main(){
 
     runAttentionCase(false);
     runAttentionCase(true);
+#endif
     runInvalidLengthCase();
 
     if(failures!=0){
