@@ -248,47 +248,53 @@ namespace streaming_v2_detail{
     template<int ROW, int COL>
     struct SpatialPeColumns{
         static void run(
-            PeWave& wave,
+            const PeWave& input_wave,
+            PeWave& output_wave,
             const elem_t horizontal[SA_ROWS],
             elem_t pe_register[SA_ROWS][SA_COLS],
             const bool active[SA_ROWS][SA_COLS]
         ){
             #pragma HLS INLINE
-            const bool reduce = wave.op==PeWaveOp::QK ||
-                wave.op==PeWaveOp::ROW_SUM ||
-                wave.op==PeWaveOp::PV;
-            const bool use_probability = wave.op==PeWaveOp::ROW_SUM ||
-                wave.op==PeWaveOp::PV;
+            const bool reduce = input_wave.op==PeWaveOp::QK ||
+                input_wave.op==PeWaveOp::ROW_SUM ||
+                input_wave.op==PeWaveOp::PV;
+            const bool use_probability =
+                input_wave.op==PeWaveOp::ROW_SUM ||
+                input_wave.op==PeWaveOp::PV;
             // A tile no longer clears every PE register before the cycle loop.
             // Invalid bubbles must therefore not observe a register before the
             // feeder has written it.  Every valid operation is launched only
             // after the corresponding Q/score/probability value is resident.
-            const elem_t operand_a = !wave.valid ||
+            const elem_t operand_a = !input_wave.valid ||
                     (use_probability && !active[ROW][COL])
                 ? elemZero() : pe_register[ROW][COL];
-            const bool exp2_mode = wave.op==PeWaveOp::PWL;
+            const bool exp2_mode = input_wave.op==PeWaveOp::PWL;
 
             const PeMacUnitOutput unit = spatialPeCell<ROW, COL>(
                 operand_a,
                 horizontal[ROW],
-                wave.partial[COL],
+                input_wave.partial[COL],
                 exp2_mode
             );
 
-            if(wave.valid && reduce){
-                wave.partial[COL] = unit.out_accType;
-            }else if(wave.valid && active[ROW][COL] &&
-                    (wave.op==PeWaveOp::SUB_MAX ||
-                     wave.op==PeWaveOp::SCALE)){
-                wave.element[COL] = unit.out_elemType;
-            }else if(wave.valid && active[ROW][COL] &&
-                    wave.op==PeWaveOp::PWL){
-                wave.element[COL] = unit.out_elemType;
-                wave.exp2_match[COL] = unit.out_exp2;
-            }
+            // 每个字段直接提交到当前ring槽，避免先聚合完整PeWave再做一次
+            // 整结构写回。所有字段都显式赋值，bubble和未修改字段继续逐拍
+            // 透传；有效算术字段在对应PE结果产生后立即写入。
+            output_wave.partial[COL] = input_wave.valid && reduce
+                ? unit.out_accType : input_wave.partial[COL];
+            output_wave.element[COL] = input_wave.valid &&
+                    active[ROW][COL] &&
+                    (input_wave.op==PeWaveOp::SUB_MAX ||
+                     input_wave.op==PeWaveOp::SCALE ||
+                     input_wave.op==PeWaveOp::PWL)
+                ? unit.out_elemType : input_wave.element[COL];
+            output_wave.exp2_match[COL] = input_wave.valid &&
+                    active[ROW][COL] && input_wave.op==PeWaveOp::PWL
+                ? unit.out_exp2 : input_wave.exp2_match[COL];
 
             SpatialPeColumns<ROW, COL+1>::run(
-                wave,
+                input_wave,
+                output_wave,
                 horizontal,
                 pe_register,
                 active
@@ -299,6 +305,7 @@ namespace streaming_v2_detail{
     template<int ROW>
     struct SpatialPeColumns<ROW, SA_COLS>{
         static void run(
+            const PeWave&,
             PeWave&,
             const elem_t[SA_ROWS],
             elem_t[SA_ROWS][SA_COLS],
@@ -311,20 +318,31 @@ namespace streaming_v2_detail{
     template<int ROW>
     struct SpatialPeRowsTick{
         static void run(
-            PeWave wave[SA_ROWS],
+            const PeWave input_wave[SA_ROWS],
+            PeWave pe_pipeline[SA_ROWS][PE_HOP_CYCLES],
+            const int pipeline_slot,
             const elem_t horizontal[SA_ROWS],
             elem_t pe_register[SA_ROWS][SA_COLS],
             const bool active[SA_ROWS][SA_COLS]
         ){
             #pragma HLS INLINE
+            PeWave& output_wave = pe_pipeline[ROW][pipeline_slot];
+            // 控制字段不依赖FMA结果，可在算术流水结束前提交。
+            output_wave.valid = input_wave[ROW].valid;
+            output_wave.op = input_wave[ROW].op;
+            output_wave.direction = input_wave[ROW].direction;
+            output_wave.index = input_wave[ROW].index;
             SpatialPeColumns<ROW, 0>::run(
-                wave[ROW],
+                input_wave[ROW],
+                output_wave,
                 horizontal,
                 pe_register,
                 active
             );
             SpatialPeRowsTick<ROW+1>::run(
-                wave,
+                input_wave,
+                pe_pipeline,
+                pipeline_slot,
                 horizontal,
                 pe_register,
                 active
@@ -335,7 +353,9 @@ namespace streaming_v2_detail{
     template<>
     struct SpatialPeRowsTick<SA_ROWS>{
         static void run(
-            PeWave[SA_ROWS],
+            const PeWave[SA_ROWS],
+            PeWave[SA_ROWS][PE_HOP_CYCLES],
+            const int,
             const elem_t[SA_ROWS],
             elem_t[SA_ROWS][SA_COLS],
             const bool[SA_ROWS][SA_COLS]
@@ -459,9 +479,7 @@ namespace streaming_v2_detail{
                     cmp_pipeline[current_cmp_pipeline_slot];
             }
             PeWave row_input[SA_ROWS]{};
-            PeWave row_result[SA_ROWS]{};
             #pragma HLS ARRAY_PARTITION variable=row_input complete dim=0
-            #pragma HLS ARRAY_PARTITION variable=row_result complete dim=0
 
             PeWave qk_at_cmp{};
             PeWave bottom_result{};
@@ -621,16 +639,12 @@ namespace streaming_v2_detail{
                 }else{
                     horizontal[row] = elemOne();
                 }
-                row_result[row] = row_input[row];
             }
 
             SpatialPeRowsTick<0>::run(
-                row_result, horizontal, pe_register, active
+                row_input, pe_pipeline, current_pipeline_slot,
+                horizontal, pe_register, active
             );
-            for(int row=0; row<SA_ROWS; ++row){
-                #pragma HLS UNROLL
-                pe_pipeline[row][current_pipeline_slot] = row_result[row];
-            }
 
             CmpToPeStage next_cmp_to_pe;
             #pragma HLS ARRAY_PARTITION variable=next_cmp_to_pe.data complete dim=1
