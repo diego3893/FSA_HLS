@@ -700,27 +700,27 @@ namespace streaming_v2_detail{
 
         CMPState cmp_state[SA_COLS]{};
         #pragma HLS ARRAY_PARTITION variable=cmp_state type=complete dim=1
-        // 外层tile流水不得通过复制完整SA来满足吞吐约束。
-        #pragma HLS ALLOCATION \
-            instances=spatialSystolicArrayTileTick limit=1 function
 
         const unsigned tiles = tileCount(length);
-        const unsigned total_tiles = attentionTileCount(tiles, causal);
 
-        // 保留单一tile事务流，但在阶段二验收前按顺序调用唯一TileTick。
-        // 不对完整tile循环施加PIPELINE/II约束，避免HLS跨函数展开整段
-        // 固定周期微程序；TileTick内部逐拍循环及各PE仍保持II=1。
-        for(unsigned tile=0; tile<total_tiles; ++tile){
-            #pragma HLS LOOP_TRIPCOUNT \
-                min=1 \
-                max=DMA_MAX_SEQUENCE_TILES*DMA_MAX_SEQUENCE_TILES
-            const CoreTileControl control = control_stream.read();
-            const TileMeta meta = control.meta;
-
-            spatialSystolicArrayTileTick(
-                meta, cmp_state, cycle_control_stream,
-                delayed_sa_stream, sa_result_stream
+        // 外层按query/key事务顺序复用唯一TileTick，不施加PIPELINE/II。
+        // 该写法避免用tiles*tiles或tiles*(tiles+1)/2计算总事务数，
+        // 从而不为控制索引额外综合两个宽乘法器。
+        for(unsigned query_tile=0; query_tile<tiles; ++query_tile){
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+            const unsigned key_tiles = keyTileCountForQuery(
+                query_tile, tiles, causal
             );
+            for(unsigned key_tile=0; key_tile<key_tiles; ++key_tile){
+                #pragma HLS LOOP_TRIPCOUNT min=1 max=DMA_MAX_SEQUENCE_TILES
+                const CoreTileControl control = control_stream.read();
+                const TileMeta meta = control.meta;
+
+                spatialSystolicArrayTileTick(
+                    meta, cmp_state, cycle_control_stream,
+                    delayed_sa_stream, sa_result_stream
+                );
+            }
         }
     }
 
