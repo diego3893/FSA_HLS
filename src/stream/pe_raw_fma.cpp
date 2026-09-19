@@ -32,15 +32,17 @@ namespace{
     };
 
     struct Exp2Prepared{
-        // 小数部分直接保留为significand*2^lsb_exponent。addFiniteProduct
-        // 本来就接受这种精确整数表示，无需先规格化、打包成FP16，再在
-        // 同一条PE通路中立刻解包。这样可切掉exp2输入到DSP前的优先编码
-        // 与二次解包组合链，同时保持完全相同的数值。
+        // 小数部分以规格化的significand*2^lsb_exponent传递。它仍是
+        // 精确整数表示，不打包成FP16；规格化提到DSP之前后，乘积最高位
+        // 只需检查bit21，避免DSP输出再串联22位优先编码器。
         HalfFields fractional{};
         int integer = 0;
         ap_uint<3> piece = 0;
         bool force_zero = false;
     };
+
+    int highestBit11(const ap_uint<11> value);
+    int highestBit24(const ap_uint<24> value);
 
     HalfFields unpackHalf(const ap_uint<16> bits){
         #pragma HLS INLINE
@@ -55,8 +57,10 @@ namespace{
             return fields;
         }
         if(exponent==0){
-            fields.significand = mantissa;
-            fields.lsb_exponent = -24;
+            const int highest = highestBit11((ap_uint<11>)mantissa);
+            const int left_shift = 10-highest;
+            fields.significand = (ap_uint<11>)mantissa << left_shift;
+            fields.lsb_exponent = -24-left_shift;
         }else{
             fields.significand = ((ap_uint<11>)1 << 10) | mantissa;
             fields.lsb_exponent = (int)exponent-25;
@@ -77,8 +81,10 @@ namespace{
             return fields;
         }
         if(exponent==0){
-            fields.significand = mantissa;
-            fields.lsb_exponent = -149;
+            const int highest = highestBit24((ap_uint<24>)mantissa);
+            const int left_shift = 23-highest;
+            fields.significand = (ap_uint<24>)mantissa << left_shift;
+            fields.lsb_exponent = -149-left_shift;
         }else{
             fields.significand = ((ap_uint<24>)1 << 23) | mantissa;
             fields.lsb_exponent = (int)exponent-150;
@@ -86,10 +92,10 @@ namespace{
         return fields;
     }
 
-    int highestBit22(const ap_uint<22> value){
+    int highestBit11(const ap_uint<11> value){
         #pragma HLS INLINE
         int highest = -1;
-        for(int bit=21; bit>=0; --bit){
+        for(int bit=10; bit>=0; --bit){
             #pragma HLS UNROLL
             if(highest<0 && value[bit]){
                 highest = bit;
@@ -163,7 +169,10 @@ namespace{
             (ap_uint<22>)a.significand*(ap_uint<22>)b.significand;
         #pragma HLS BIND_OP variable=product op=mul impl=dsp latency=1
 
-        const int product_highest = highestBit22(product);
+        // a/b的有限非零尾数已在DSP之前规格化到bit10。因此
+        // 11x11乘积的最高位只可能是bit20或bit21，不再需要
+        // 串在DSP输出后的22位优先编码器。
+        const int product_highest = product[21] ? 21 : 20;
         if(c.zero){
             result.sign = product_sign;
             result.zero = false;
@@ -174,7 +183,7 @@ namespace{
             return result;
         }
 
-        const int c_highest = highestBit24(c.significand);
+        const int c_highest = 23;
         const int product_top =
             a.lsb_exponent+b.lsb_exponent+product_highest;
         const int c_top = c.lsb_exponent+c_highest;
@@ -363,10 +372,12 @@ namespace{
             ? -(int)integer_magnitude : (int)integer_magnitude;
 
         if(remainder!=0){
+            const int highest = highestBit11(remainder);
+            const int left_shift = 10-highest;
             prepared.fractional.sign = sign;
             prepared.fractional.zero = false;
-            prepared.fractional.significand = remainder;
-            prepared.fractional.lsb_exponent = binary_scale;
+            prepared.fractional.significand = remainder << left_shift;
+            prepared.fractional.lsb_exponent = binary_scale-left_shift;
 
             const int piece_shift = binary_scale+3;
             ap_uint<14> piece_value = piece_shift>=0

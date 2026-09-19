@@ -255,8 +255,8 @@ namespace fsa{
 
     PeMacUnitOutput peMacUnit(const elem_t in_a, const elem_t in_b, 
                             const acc_t in_c, const bool in_exp2){
-        // 内联到坐标特化且保持INLINE off的spatialPeCell中，消除
-        // ap_ctrl_hs子函数边界额外的一拍；每个空间PE仍只包含一条
+        // 内联到坐标特化的spatialPeCell并随其进入TileTick，消除
+        // ap_ctrl_hs子函数边界额外拍数；每个空间PE仍只包含一条
         // Raw FMA乘法通路，不会在同一PE内复制算术单元。
         #pragma HLS INLINE
         return peMacUnitImpl(in_a, in_b, in_c, in_exp2);
