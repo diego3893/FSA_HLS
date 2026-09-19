@@ -32,7 +32,11 @@ namespace{
     };
 
     struct Exp2Prepared{
-        ap_uint<16> fractional_bits = 0;
+        // 小数部分直接保留为significand*2^lsb_exponent。addFiniteProduct
+        // 本来就接受这种精确整数表示，无需先规格化、打包成FP16，再在
+        // 同一条PE通路中立刻解包。这样可切掉exp2输入到DSP前的优先编码
+        // 与二次解包组合链，同时保持完全相同的数值。
+        HalfFields fractional{};
         int integer = 0;
         ap_uint<3> piece = 0;
         bool force_zero = false;
@@ -358,30 +362,11 @@ namespace{
         prepared.integer = sign
             ? -(int)integer_magnitude : (int)integer_magnitude;
 
-        int highest = -1;
-        for(int bit=10; bit>=0; --bit){
-            #pragma HLS UNROLL
-            if(highest<0 && remainder[bit]){
-                highest = bit;
-            }
-        }
-        if(highest>=0){
-            ap_uint<16> fractional = 0;
-            fractional[15] = sign;
-            const int unbiased = highest+binary_scale;
-            if(unbiased>=-14){
-                fractional.range(14, 10) =
-                    (ap_uint<5>)(unbiased+15);
-                const ap_uint<11> normalized =
-                    remainder << (10-highest);
-                fractional.range(9, 0) = normalized.range(9, 0);
-            }else{
-                const int subnormal_shift = binary_scale+24;
-                fractional.range(9, 0) = subnormal_shift>=0
-                    ? (ap_uint<10>)(remainder << subnormal_shift)
-                    : (ap_uint<10>)(remainder >> (-subnormal_shift));
-            }
-            prepared.fractional_bits = fractional;
+        if(remainder!=0){
+            prepared.fractional.sign = sign;
+            prepared.fractional.zero = false;
+            prepared.fractional.significand = remainder;
+            prepared.fractional.lsb_exponent = binary_scale;
 
             const int piece_shift = binary_scale+3;
             ap_uint<14> piece_value = piece_shift>=0
@@ -454,14 +439,12 @@ namespace{
     }
 
     ap_uint<32> finiteRawFma(
-        const ap_uint<16> a_bits,
-        const ap_uint<16> b_bits,
+        const HalfFields& a,
+        const HalfFields& b,
+        const FloatFields& c,
         const ap_uint<32> c_bits
     ){
         #pragma HLS INLINE
-        const HalfFields a = unpackHalf(a_bits);
-        const HalfFields b = unpackHalf(b_bits);
-        const FloatFields c = unpackFloat(c_bits);
         const bool product_sign = a.sign^b.sign;
 
         if(a.nan || b.nan || c.nan){
@@ -499,14 +482,18 @@ namespace{
     PeRawFmaOutput peRawFma(const PeRawFmaInput& input){
         #pragma HLS INLINE
         const Exp2Prepared prepared = prepareExp2(input.in_a_bits);
-        const ap_uint<16> operand_a = input.in_exp2
-            ? prepared.fractional_bits : input.in_a_bits;
-        const ap_uint<32> operand_c = input.in_exp2
+        HalfFields operand_a = unpackHalf(input.in_a_bits);
+        if(input.in_exp2){
+            operand_a = prepared.fractional;
+        }
+        const HalfFields operand_b = unpackHalf(input.in_b_bits);
+        const ap_uint<32> operand_c_bits = input.in_exp2
             ? restoreEncodedIntercept(input.in_c_bits)
             : input.in_c_bits;
+        const FloatFields operand_c = unpackFloat(operand_c_bits);
 
         ap_uint<32> result_bits = finiteRawFma(
-            operand_a, input.in_b_bits, operand_c
+            operand_a, operand_b, operand_c, operand_c_bits
         );
         if(input.in_exp2){
             result_bits = scaleFloatByPowerOfTwo(
