@@ -38,14 +38,14 @@
 
 ## 4. Current State
 
-### Latest server build（对齐sticky优化；早于当前exp2下溢舍入候选）
+### Latest server build（exp2下溢舍入优化；RTL通过，时序仅差0.037 ns）
 
-- 构建目录：`build/fsa_stream_build/solution1`；综合2026-09-20 11:03、CoSim 11:07。预处理快照`pe_raw_fma.pp.0.cpp`确认包含54位扩展右移sticky、`highestBit22`和未规格化exp2小数域，与本次修改对应。
+- 构建目录：`build/fsa_stream_build/solution1`；综合2026-09-20 13:08、CoSim 13:12。预处理快照`pe_raw_fma.pp.0.cpp`确认包含48位扩展右移、guard/sticky的exp2下溢舍入，与12:00检查点对应；早于当前前导零计数候选，不能证明本轮时序/II/RTL。
 - CSim 0错误、C综合完成、Verilog RTL CoSim及C post-check通过，无死锁、无数值错误。9x4 non-causal/causal为1785/1317 cycles，非法长度55，三事务总执行3137；与23:55直接小数域检查点相同，相比00:27乘前规格化各增加7拍。
 - SA主循环trip133、iteration latency10、achieved II1；TileTick latency/interval=143/134，`systolicArrayProcess`最小latency148，DATAFLOW最小latency/interval233/149。没有`HLS 200-880/892`。
-- 单TileTick、16条11x11 PE乘法通路（各DSP1）、4 CMP（各3拍/II1/DSP2）、单4-lane Accumulator向量保持。顶层BRAM20、DSP44、FF91418、LUT138625、URAM0；相对23:55减少1384 FF（1.49%）和1408 LUT（1.01%）。
+- 单TileTick、16条11x11 PE乘法通路（各DSP1）、4 CMP（各3拍/II1/DSP2）、单4-lane Accumulator向量保持。顶层BRAM20、DSP44、FF92204、LUT128641、URAM0；相对11:07减少9984 LUT（7.20%），增加786 FF（0.86%），计算单元数量未增加。
 - Q/K/V DMA读循环均II1；Accumulator向量10拍/II1/DSP20；Scratchpad及Input/Output Delayer关键循环仍II1。外围未发现退化。
-- 顶层估算周期7.650 ns：比9.543 ns改善1.893 ns，比此前最佳7.933 ns改善0.283 ns；但仍超过7.300 ns有效预算0.350 ns，`HLS 200-871`仍存在。新的关键路径是`roundPackFloat32`指数打包，经`scaleFloatByPowerOfTwo`指数计算、下溢动态mask/余数比较/舍入到PE结果写回。第二阶段未验收，不进入第三阶段。
+- 顶层估算周期7.337 ns，比11:07的7.650改善0.313 ns（4.09%）；仍超过7.300 ns有效预算0.037 ns（37 ps），`HLS 200-871`仍存在。新关键路径从对齐sticky非零归约，经异号比较/magnitude选择、零判定、`highestBit27`、`26-highest`、27位左移到25位舍入加一。exp2下溢路径不再是所报最长路径。第二阶段仍未验收，不因缺口很小而放宽时钟或进入第三阶段；尚无实现后时序证明。
 
 ### Latest RTL-verified baseline（第二阶段修改前基线）
 
@@ -86,14 +86,14 @@
 - `systolicArrayProcess`已恢复无PIPELINE的query/key顺序嵌套循环，删除被Vitis忽略的`ALLOCATION` pragma；最新build确认不再生成压平控制的两个30位乘法器/6 DSP。
 - 当前候选进一步分离控制与算术结果：`PeWave`只保留控制和非归约操作的旁路partial；无默认初始化的`PeResult`环保存FMA原始输出。QK从下一行、ROW_SUM/PV从上一行的结果槽直接选累加输入；所有旧值在任何PE结果写回之前先捕获。FMA后不再通过reduce/valid旁路mux写回partial。hop=8、单坐标PE调用和真实依赖均保留，没有新增反馈DATAFLOW FIFO。
 - 23:21 RTL检查点已确认坐标PE边界内联版本无死锁、无数值错误；完全展开的ROW/COL模板仍对应16条11x11乘法通路，结果由ST11提前至ST9、SA达到II1，硬件数不增加。
-- 当前源码保留已验证的54位对齐sticky和未规格化exp2小数域，在其上仅修改`scaleFloatByPowerOfTwo`下溢路径：24位有效数拼接低24位零，48位扩展右移，取guard/sticky实现最近偶数舍入，去掉动态mask/halfway/宽余数比较。hop8、唯一11x11乘法及latency=1绑定、SA调度和外围未改。新增4596组缩放边界在修改前后均通过，完整本地回归通过；当前候选尚无新Vitis结果。详见`docs/PE_Raw_FMA时序修复方案.md`。
+- 当前源码保留54位对齐sticky、未规格化exp2小数域和48位下溢舍入；本轮仅将FMA非零27位幅值的`highestBit27`及`26-highest`改为`countLeadingZeros()`，移位量为`ap_uint<5>`。零值、bit27进位、指数与RNE语义不变，hop8/DSP binding/SA/外围不变。63,836组独立算术和4x2/4x4/8x4完整attention、Acc PWL本地回归通过；新Vitis待用户运行，13:12的7.337 ns仅是修改前基线。方案与资料见`docs/PE_Raw_FMA时序修复方案.md`。
 
 ### Main issue
 
 - 当前 `%8` Raw FMA内联构建已把SA主循环从II=2恢复到II=1，并通过RTL CoSim。
 - 第一阶段DMA已经验收：Q/K/V均为II=1，CSim/RTL CoSim通过，端到端周期和计算/存储部件未退化；代价是三个DMA读模块共增加14304 FF，仍仅占器件3.40%。
 - 撤销完整tile循环的PIPELINE/II约束后，编译规模问题已解决；内联把原始结果环写回从ST11提前到ST9，解决了distance8递归并达到II1。
-- 当前唯一已知阻塞项仍是时序：11:07对齐sticky检查点7.650 ns超预算0.350 ns。本轮已按用户要求修改exp2缩放下溢mask/舍入，未增加流水拍或改变调度；需用户新Vitis核验时序、II、资源和RTL，不能用旧build证明当前候选。第二阶段未验收，不进入第三阶段。
+- 当前唯一已知阻塞项仍是时序：13:12检查点7.337 ns超预算0.037 ns。直接前导零计数候选已实现并通过本地功能回归；下一步由用户Vitis确认能否改善时序且保持II/单实例/RTL正确。第二阶段未验收，不进入第三阶段。
 
 ## 5. Architecture / Mental Model
 
@@ -114,7 +114,7 @@ Q/K/V AXI DMA
 - 当前 tile 映射：head dimension `d=R`，query block `Br=C`，key/value block `Bc=R`。
 - non-causal 的 tile 对数量为 `ceil(L/C)^2`；causal 为 `1+...+ceil(L/C)`。
 - Chisel 4x4、PWL=8 的独立指令静态周期：LOAD 5、SCORE 28、VALUE 12、RECIPROCAL 16、NORM 5。
-- 历史Raw FMA HLS PE cell为latency=5、II=1；hop=8环形结果槽的跨迭代提交/读取回路已由PE边界内联解决。当前最佳已测时序候选是sticky优化的7.650 ns；最新SA II1、RTL正确、16 PE乘法通路保持，但PE已内联，不能把历史独立cell的5拍当作新的独立模块报告。
+- 历史Raw FMA HLS PE cell为latency=5、II=1；hop=8环形结果槽的跨迭代提交/读取回路已由PE边界内联解决。当前最佳已测时序是exp2下溢优化的7.337 ns；最新SA II1、RTL正确、16 PE乘法通路保持，但PE已内联，不能把历史独立cell的5拍当作新的独立模块报告。
 - 4x4、PWL=8、3拍CMP流水加一级CMP->PE寄存器时，当前guard=3、hop=8源码 `SA_TILE_CYCLES=133`；已包含输入消费，不再额外等待完整Q/K/V tile。
 
 ## 6. Important Files
@@ -134,7 +134,7 @@ Q/K/V AXI DMA
 | `hls/pe_raw_fma/run_hls.tcl` | 独立Raw FMA综合入口 | `./run_hls.sh pe_raw_fma`，默认CSim+CSynth，不跑CoSim/IP导出 |
 | `src/stream/dataflow.cpp` | 顶层actor连接 | 检查生产/消费与死锁 |
 | `hls/fsa_stream/run_hls.tcl` | HLS入口 | `set_top fsa_stream` |
-| `build/fsa_stream_build/solution1/` | 最新服务器构建 | 11:07对齐sticky检查点，7.650 ns；早于当前exp2下溢舍入修改 |
+| `build/fsa_stream_build/solution1/` | 最新服务器构建 | 13:12 exp2下溢检查点，CSim/RTL通过、SA II1、143/134、7.337 ns，仍缺0.037 ns |
 | `docs/fsa_stream综合报告.md` | 当前综合报告 | 已更新为15:44 build，并加入fsa_dma与FSA-main两组对比 |
 
 ## 7. Decisions
@@ -445,9 +445,17 @@ Q/K/V AXI DMA
 
 **Setup:** 针对11:07关键路径，仅在`scaleFloatByPowerOfTwo`中把动态mask/halfway和宽余数比较换成48位扩展右移后的guard/sticky判定；移位量经1..24边界检查后窄化为5位。保留特殊值、符号零、上溢、非规格化及舍入进位语义，不改hop、DSP binding、SA或外围。
 
-**Result:** 公开Raw FMA顶层新增4596组缩放边界，用独立std::fma/std::ldexp golden，在旧实现和新实现均通过；原有30000随机MAC、24480对齐、16 IEEE、136 exp2均通过。4x2/4x4/8x4完整attention及Acc PWL本地回归通过。未运行新Vitis。
+**Result:** 59,228组公开顶层独立算术及三种阵列规模本地回归通过；13:12新build的CSim/C综合/RTL CoSim均通过。SA II1、Tile143/134、1785/1317 cycles不变，16 PE/4 CMP、DSP44/BRAM20保持。顶层92204 FF、128641 LUT；估算7.337 ns，仍有HLS 200-871。
 
-**Conclusion:** 本地功能与数学等价性成立；实际时序收益和hop8下II/实例数仍待用户Vitis验收。当前build是旧11:07检查点，不能据其声称本轮时序已修复。
+**Conclusion:** 时序改善0.313 ns、LUT减少9984、FF增加786；剩余缺口37 ps。所报关键路径转为FMA加减后规格化及舍入，不再是exp2缩放下溢。第二阶段尚未达到<=7.300 ns门槛。
+
+### E020 — FMA直接前导零计数规格化候选
+
+**Setup:** 根据13:12关键路径，查阅SoftFloat规格化及AMD位宽传播资料，并确认本地HLS头文件的`countLeadingZeros()`综合分支使用`__fpga_ctlz`。只替换27位加减结果规格化移位量生成，删除`highestBit27`及后接减法；不改乘法、加减、舍入、流水约束或hop。
+
+**Result:** 新增4608组公开顶层相消/规格化边界在修改前后均通过；独立Raw FMA共63836组通过，4x2/4x4/8x4完整causal/non-causal attention与Acc PWL全部通过。使用仓库一致的无优化本地编译选项及`-Werror`；另一次`-O2`尝试因第三方`fp_struct<half>`默认构造触发未初始化告警而编译失败，未更改第三方库或关闭警告。当前无新Vitis综合/RTL结果。
+
+**Conclusion:** 对非零27位值，CLZ严格等于26减最高位位置；5位保存0..26，指数运算前转为int以保持负指数。数值回归支持等价性，时序收益待验证，不能把旧路径0.707 ns减法延迟直接当成总周期收益。
 
 ## 9. Failed Attempts / Things Not To Repeat
 
@@ -519,9 +527,9 @@ Q/K/V AXI DMA
 
 ### P006 — PE内联Raw FMA时序仍未达标
 
-**Known facts:** 11:07 sticky优化的7.650 ns为当前最佳，仍超过7.300 ns预算0.350 ns。CSim/RTL正确、SA II1、Tile143/134、16 PE/4 CMP及44 DSP保持。所报关键路径不再经过FMA对齐sticky，而由FP32打包进入`scaleFloatByPowerOfTwo`：指数加减、动态mask、余数比较/舍入、结果写回。
+**Known facts:** 13:12 exp2下溢优化达到7.337 ns，仍超7.300 ns预算37 ps。CSim/RTL、SA II1、Tile143/134、1785/1317 cycles及DSP44通过；LUT128641。关键路径为sticky归约(0.850 ns)、幅值比较/选择和零判定、最高位编码选择(0.784 ns)、`26-highest`(0.707 ns)、27位左移(0.985 ns)、25位舍入加一(0.833 ns)等串联；具体见solution1.log的HLS 200-1016。
 
-**Implementation/Plan:** 用户已授权继续修改，exp2缩放下溢路径已改为48位扩展右移后的guard/sticky提取及5位有效移位量；保留非规格化语义和现有时钟/hop/DSP latency。独立新增4596组边界及原有回归通过；下一步读取用户新Vitis，复核<=7.300 ns、SA II1、Tile interval134、单实例/资源和RTL。
+**Plan:** 已按用户要求实现局部`countLeadingZeros()`规格化候选并通过本地回归，等待新Vitis复验II/资源/RTL及<=7.300 ns。若不收敛，以新关键路径决定下一步；不叠加增加hop/DSP latency。37 ps仍属违反既定门槛，不能自动验收。
 
 ### P003 — Tagged wave仍需K/V operand cache
 
@@ -548,9 +556,9 @@ Q/K/V AXI DMA
 - 第一阶段DMA扁平循环已由2026-09-17 14:09 build验收；保留 `src/stream/dma_process.cpp` 修改。
 - 第二阶段撤销完整tile调用循环的PIPELINE/II约束，并恢复query/key顺序嵌套循环；最新build确认IR规模恢复、无效ALLOCATION警告消失且额外6个控制DSP已删除。
 - PE内部latency优化第二阶段已接入独立验收的 `pe_raw_fma`；最新build确认16条PE乘法通路各DSP1、SA II1；PE内联后的latency不能继续引用为独立函数报告。
-- 当前焦点：`src/stream/pe_raw_fma.cpp`的exp2下溢舍入候选已实现；`tests/stream/test_pe_raw_fma_top.cpp`新增4596组缩放边界；方案文档已更新。本地回归通过，等待新Vitis，不开始第三阶段。
+- 当前焦点：`src/stream/pe_raw_fma.cpp`已改为直接前导零计数规格化；`tests/stream/test_pe_raw_fma_top.cpp`新增4608组边界。修改前基线为13:12的7.337 ns，当前本地功能通过、Vitis待验收，不开始第三阶段。
 - 当前设计边界：顶层 `fsa_stream` 形参、四个AXI bundle、器件和时钟约束保持不变；内部协议可调整。
-- 下一步用户运行`./run_hls.sh fsa_stream`，验收本轮exp2下溢候选：<=7.300 ns、SA II1、hop8、Tile interval134、单16 PE/4 CMP、44 DSP/20 BRAM、DMA II1和RTL正确。全部通过后才开始3A。
+- 下一步由用户运行Vitis验证当前CLZ候选：<=7.300 ns、SA II1、hop8、Tile interval134、单16 PE/4 CMP、44 DSP/20 BRAM、DMA II1和RTL正确。全部通过并验收后才开始3A。
 
 ## 12. Next Actions
 
@@ -601,12 +609,14 @@ Q/K/V AXI DMA
 - [x] 查阅AMD/SoftFloat资料后，优先以扩展移位归约替换sticky动态mask减一链；独立FMA扩展回归及三种阵列完整本地回归通过。
 - [x] 读取11:07 sticky候选Vitis：CSim/C综合/RTL CoSim通过，SA II1、实例数和外围保持，时序改善到7.650 ns但未达标。
 - [x] 优化exp2缩放下溢mask/舍入路径，新增4596组边界并在修改前后对独立golden验证；独立Raw FMA及三配置完整本地回归通过。
-- [ ] 用户运行exp2下溢候选Vitis，确认<=7.300 ns、II/硬件数量/资源及RTL等验收条件。
+- [x] 读取13:12 exp2下溢候选Vitis：功能/II/单实例通过，LUT下降7.20%，时序7.337 ns仍差37 ps。
+- [x] FMA加减后规格化改为直接前导零计数；新增4608边界及原测试共63836组通过，三配置完整本地回归通过。
+- [ ] 用户运行新Vitis后验收CLZ候选的时序、II、latency、资源/实例数量及RTL CoSim；当前build仍为修改前基线。
 - [ ] 第二阶段验收后进入第三阶段3A：保持hop=8，独立实现并验证FP32×FP32+FP32 Raw FMA的位精确性、II、latency、DSP和时序。
 - [ ] 3A验收后进入3B：替换当前顶层实际综合出的剩余FP32 FMA通路，确认四个Accumulator lane不增殖，并完成完整CSim/综合/RTL CoSim。
 - [ ] 3B验收后进入3C：把CMP的`hls::fma(a,1,-b)`改为单FP32减法通路，移除未使用的`out_max`，保留`finiteAccMax`组合位序选择和`old/local max-new max`方向；重新完成完整验证。
 - [ ] 3C验收后进入3D：只把PE hop从8尝试降到4，重新完成完整验证；失败则回退到已验证hop=8版本。
-- [x] 最新Vitis build已确认SA II1、TileTick 143/134且RTL CoSim通过；sticky时序7.650 ns尚缺0.350 ns，第二阶段未验收。
+- [x] 最新Vitis build已确认SA II1、TileTick 143/134且RTL CoSim通过；exp2下溢优化时序7.337 ns尚缺0.037 ns，第二阶段未验收。
 - [ ] 100 MHz时序与RTL CoSim共同验收第二阶段后，才开始第三阶段算术/CMP/hop优化；150/200 MHz评估更后置。
 
 ## 13. Validation Status
@@ -654,7 +664,9 @@ Q/K/V AXI DMA
 - [x] 当前sticky候选的独立Raw FMA（30000随机+24480对齐+16 IEEE+136 exp2）及4x2/4x4/8x4完整attention和Acc PWL本地回归。
 - [x] 当前sticky候选的Vitis CSim、综合、II/资源/时序及RTL CoSim已读取；功能/II/实例数量通过，7.650 ns时序仍未验收。
 - [x] 当前exp2下溢候选：Raw FMA原有54632组及新增4596组缩放边界全部通过；4x2/4x4/8x4完整attention和Acc PWL本地回归通过。
-- [ ] 当前exp2下溢候选的新Vitis综合、时序/II/实例数量及RTL CoSim。
+- [x] 当前exp2下溢候选的新Vitis综合、II/实例数量及RTL CoSim已核验；仅7.337 ns时序未达到7.300 ns预算。
+- [x] 当前CLZ规格化候选63836组独立Raw FMA及4x2/4x4/8x4完整attention、Acc PWL本地回归。
+- [ ] 当前CLZ规格化候选的Vitis CSim/综合/II/实例数量/时序/RTL CoSim。
 - [ ] IP导出。
 - [ ] Vivado实现时序。
 - [ ] FPGA板级验证。
@@ -675,14 +687,14 @@ Q/K/V AXI DMA
 
 1. 正在把完整FSA attention核迁移并优化到HLS，结构目标是Chisel FSA。
 2. 当前坚持单SA、单PE MacUnit、单列Accumulator，通过等价流水重定时降低延迟。
-3. 最新build为2026-09-20 11:07，对应上一轮对齐sticky修改：CSim/C综合/RTL CoSim通过，1785/1317 cycles，SA II1、Tile143/134。当前exp2下溢舍入源码晚于该build，未运行新Vitis。
+3. 最新build为2026-09-20 13:12，包含exp2下溢舍入但不含当前CLZ修改；CSim/C综合/RTL CoSim通过，1785/1317 cycles，SA II1、Tile143/134，仅作当前修改前基线。
 4. `%16` PE slot加仅限PE.reg的调度提示已把SA主循环从II=9恢复为II=1；tile latency/interval为237/222。
 5. 相对13:15基线端到端加速6.75--7.14x；相对9月9日稳定版本也快约6.1%--6.5%，说明2/4/5/7外围改造得到保留并产生净收益。
-6. 最新顶层HLS估算周期7.650 ns，超过7.300 ns有效预算0.350 ns；资源BRAM20/DSP44/FF91418/LUT138625，单16 PE/4 CMP/4 Accumulator lane保持，尚无Vivado实现证明。
+6. 最新顶层HLS估算周期7.337 ns，超过7.300 ns有效预算0.037 ns；资源BRAM20/DSP44/FF92204/LUT128641，单16 PE/4 CMP/4 Accumulator lane保持，尚无Vivado实现证明。
 7. 第一阶段DMA已验收：Q/K/V read均II=1；计算、存储、端到端周期均未退化，代价为DMA流水FF增加。
 8. 外层tile PIPELINE/II回退已解决此前百万级IR问题；当前层次只有一个TileTick，顺序循环保证单实例。
 9. 23:21 build确认内联坐标PE边界把结果写回由ST11提前至ST9，SA由II2降为II1、TileTick由276/268降为142/134，且硬件数量不增加；RTL已通过，代价是时序退化至9.608 ns。
-10. 已在7.650 ns检查点上把`scaleFloatByPowerOfTwo`下溢mask/halfway/余数比较改为48位扩展右移与guard/sticky，保留全部数值语义和调度。新增4596组边界在修改前后均通过，原有FMA及三配置完整回归通过；下一步等待用户新Vitis，不开始第三阶段或150/200 MHz评估。
+10. 本轮只将FMA加减后`highestBit27 -> 26-highest`改为HLS前导零计数，5位移位量；新增4608边界、共63836独立算术及三配置完整本地回归全部通过。等待用户手动Vitis确认能否消除剩余37 ps，不能沿用13:12结果证明新源码时序/II/RTL。不开始第三阶段或150/200 MHz评估。
 11. SRAM/Scratchpad、DMA三请求actor、Delayer、Accumulator和当前CMP寄存器通路全部保留；禁止恢复 `pe_pipeline/cmp_pipeline inter false`。
 
 ## 16. Decision / Progress Log

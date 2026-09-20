@@ -108,18 +108,6 @@ namespace{
         return highest;
     }
 
-    int highestBit27(const ap_uint<27> value){
-        #pragma HLS INLINE
-        int highest = -1;
-        for(int bit=26; bit>=0; --bit){
-            #pragma HLS UNROLL
-            if(highest<0 && value[bit]){
-                highest = bit;
-            }
-        }
-        return highest;
-    }
-
     ap_uint<27> shiftRightJam27(
         const ap_uint<27> value,
         const int shift
@@ -216,9 +204,10 @@ namespace{
                 result.significand[0] || magnitude[0];
         }else{
             const ap_uint<27> low = magnitude.range(26, 0);
-            const int highest = highestBit27(low);
-            const int left_shift = 26-highest;
-            result.top_exponent = common_top-left_shift;
+            // 此分支的low非零，27位前导零数就是规格化所需的0..26位移。
+            // 直接使用HLS的ctlz，避免最高位编码后再串联26-highest减法。
+            const ap_uint<5> left_shift = low.countLeadingZeros();
+            result.top_exponent = common_top-(int)left_shift;
             result.significand = low << left_shift;
         }
         return result;

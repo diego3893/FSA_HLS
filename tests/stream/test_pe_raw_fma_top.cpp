@@ -256,6 +256,44 @@ void testAlignmentBoundaries(){
               << vector << std::endl;
 }
 
+void testNormalizationBoundaries(){
+    // FP16乘积最多22个有效位，在FP32中精确可表示。以其位模式为
+    // 中心扫描累加数，覆盖精确相消、深度相消、异号结果和同号进位。
+    // golden仍为公开顶层之外的std::fma，不调用内部前导零计数逻辑。
+    const std::uint16_t operands[][2] = {
+        {0x3c00U, 0x3c00U}, {0x3c01U, 0x3bffU},
+        {0x0001U, 0x0001U}, {0x03ffU, 0x0401U},
+        {0x7bffU, 0x7bffU}, {0x3555U, 0x3aabU},
+        {0x0400U, 0x0400U}, {0x3fffU, 0x3fffU}
+    };
+    int vector = 0;
+    for(const auto& pair : operands){
+        const std::uint32_t product_bits = floatBits(
+            exactHalfToFloat(pair[0])*exactHalfToFloat(pair[1])
+        );
+        for(int bit=0; bit<24; ++bit){
+            for(int neighbor=-1; neighbor<=1; ++neighbor){
+                const std::uint32_t offset =
+                    (std::uint32_t)((1U<<bit)+neighbor);
+                for(int direction=-1; direction<=1; direction+=2){
+                    const std::uint32_t c_magnitude = direction<0
+                        ? product_bits-offset : product_bits+offset;
+                    for(unsigned signs=0; signs<4; ++signs){
+                        const std::uint16_t a = (std::uint16_t)(
+                            pair[0] | ((signs&1U)<<15)
+                        );
+                        const std::uint32_t c =
+                            c_magnitude | ((signs>>1)<<31);
+                        checkMacVector(a, pair[1], c, vector++);
+                    }
+                }
+            }
+        }
+    }
+    std::cout << "[INFO] normalization boundary MAC vectors: "
+              << vector << std::endl;
+}
+
 const float EXP2_SLOPES[8] = {
     0.664062500F, 0.608886719F, 0.558105469F, 0.512207031F,
     0.469482422F, 0.430419922F, 0.394775391F, 0.362060547F
@@ -396,6 +434,7 @@ int main(){
     testDirectedMac();
     testRandomFiniteMac();
     testAlignmentBoundaries();
+    testNormalizationBoundaries();
     testExp2();
     testExp2ScaleBoundaries();
     if(failures!=0){

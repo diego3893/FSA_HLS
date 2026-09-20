@@ -1,8 +1,25 @@
-# PE Raw FMA 时序修复：对齐 sticky 与 exp2 下溢舍入
+# PE Raw FMA 时序修复：直接前导零计数规格化
 
 日期：2026-09-20。范围：第二阶段、hop=8 的 PE 内联 Raw FMA；不进入第三阶段。
 
-## 当前候选：exp2 缩放下溢舍入
+## 当前候选：直接生成规格化移位量
+
+13:12服务器build已验证exp2下溢舍入优化：CSim/RTL CoSim通过，SA II1、Tile143/134、1785/1317 cycles不变，20 BRAM、44 DSP、92204 FF、128641 LUT。估算周期7.337 ns，仍超7.300 ns预算37 ps。剩余关键路径在FMA加减后的幅值选择、零判定、最高位编码、`26-highest`减法、规格化移位与舍入。
+
+本轮只把非零27位幅值的`highestBit27`加`26-highest`改为`low.countLeadingZeros()`，结果用`ap_uint<5>`保存。保留零值提前返回、bit27进位处理、指数调整、guard/round/sticky和最近偶数舍入；不改变其他两个最高位编码器、乘法器、流水约束、hop或外围。
+
+依据与取舍：
+
+- [SoftFloat规格化实现](https://github.com/ucb-bar/berkeley-softfloat-3/blob/master/source/s_normRoundPackToF32.c)采用前导零计数确定规格化移位及指数修正。这是算法参考，不是FPGA时序收益保证；未复制其源代码。
+- [AMD位宽传播说明](https://docs.amd.com/r/en-US/ug1399-vitis-hls/Bit-Width-Propagation)解释精确位宽如何传播到硬件。本地`third_party/vitis_hls/include/etc/ap_int_base.h`的`countLeadingZeros()`在综合分支直接调用`__fpga_ctlz`；`utils/x_hls_float_utils.h`也用此方法规格化。因此本轮使用已有HLS接口，不新增手写优先编码树或查表资源。在线位宽页面为2026.1通用说明，2024.2实际结果仍由服务器验证。
+- 对非零27位数，最高有效位为`h`时前导零数恰好为`26-h`，范围0..26；5位无符号数可完整表示。转换为`int`后再扣减指数，避免无符号减法改变负指数语义。
+- 报告中旧减法为0.707 ns，但不能从7.337直接减去0.707作为预计结果；工具可能重新调度和映射。当前只确认源码去除了该串联表达。
+
+新增4608组公开顶层MAC规格化边界：8组正常/非规格化FP16乘积，对FP32累加数位模式在乘积附近按二次幂及相邻偏移扫描，覆盖精确/深度相消、正负结果和同号进位。golden使用`std::fma`，修改前后均通过。连同原有测试共63836组全部通过；4x2、4x4、8x4完整causal/non-causal attention与Accumulator PWL本地回归也全部通过。
+
+当前源码晚于13:12 build；该build只作为比较基线，不能证明本轮时序、II、资源或RTL已通过。未运行本轮Vitis，等待用户手动验收。
+
+## 上一轮候选：exp2 缩放下溢舍入（已验证）
 
 11:07 服务器 build 已验证上一轮对齐 sticky 优化：CSim/RTL CoSim通过，SA II1、Tile143/134、1785/1317 cycles；顶层20 BRAM、44 DSP、91418 FF、138625 LUT。估算周期从7.933改善至7.650 ns，但仍超7.300 ns预算0.350 ns。
 
@@ -16,7 +33,7 @@
 
 新增4596组公开顶层缩放边界测试：覆盖全部1..24移位、超过24位、各宽度半值附近与奇偶舍入、正常/非规格化交界、正负号、上溢，以及真实PWL FMA后再缩放。golden使用`std::fma`和`std::ldexp`；修改前与修改后均通过。
 
-本轮独立Raw FMA原有30000随机MAC、24480对齐边界、16 IEEE定向、136 exp2，以及新增4596组测试均通过。4x2、4x4、8x4完整attention/Acc PWL本地回归通过。当前源码晚于11:07 build，尚无新Vitis综合/RTL结果。
+该轮独立Raw FMA原有30000随机MAC、24480对齐边界、16 IEEE定向、136 exp2，以及新增4596组测试均通过。4x2、4x4、8x4完整attention/Acc PWL本地回归通过；后续13:12 build的验收结果见本文开头。
 
 ## 上一轮依据与选择（已完成Vitis检查）
 
@@ -62,7 +79,7 @@
 - 对齐向量覆盖 FP32 全部有限指数、稀疏/稠密尾数、正负号、FP16 非规格化数，以及零、小于 27 和大于等于 27 的对齐位移；golden 使用独立 `std::fma`，不调用内部被测 helper。
 - 4x2、4x4、8x4 完整 causal/non-causal attention 和 Accumulator PWL 本地 C++ 回归：通过。
 
-本地没有 Vitis。上一轮后来由11:07服务器build验证，结果见本文开头；本轮exp2下溢修改不能沿用该build作为性能证明。
+本地没有 Vitis。sticky和exp2下溢修改分别由11:07和13:12服务器build验证；当前前导零计数候选不能沿用这些build作为性能证明。
 
 ## 用户下一次 Vitis 验收
 
