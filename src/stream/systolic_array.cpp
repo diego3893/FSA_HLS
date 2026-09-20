@@ -394,7 +394,8 @@ namespace streaming_v2_detail{
         elem_t pe_register[SA_ROWS][SA_COLS];
         bool active[SA_ROWS][SA_COLS];
         PeWave pe_pipeline[SA_ROWS][PE_HOP_CYCLES];
-        // 与控制波共用slot和8拍逻辑年龄，但不通过控制波聚合/路由部分和。
+        // 与控制波共用slot和PE_HOP_CYCLES拍逻辑年龄，但不通过控制波
+        // 聚合/路由部分和。
         // 每坐标仍只有一次spatialPeCell调用，真实的结果槽RAW/WAR均保留。
         PeResult pe_results[SA_ROWS][PE_HOP_CYCLES][SA_COLS];
         ScoreWave score_pipeline[SA_ROWS];
@@ -408,7 +409,7 @@ namespace streaming_v2_detail{
         #pragma HLS ARRAY_PARTITION variable=score_pipeline complete dim=1
         #pragma HLS ARRAY_PARTITION variable=cmp_pipeline complete dim=0
 
-        // CMP仍用4槽回绕计数器。PE hop固定为8时，直接使用cycle%8
+        // CMP仍用4槽回绕计数器。PE hop为2的幂时直接使用cycle%hop，
         // 延续8b7aab7中的静态低位slot选择，使HLS能够看见环形bank模式。
         int cmp_pipeline_slot = 0;
 
