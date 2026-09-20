@@ -1,8 +1,24 @@
-# PE Raw FMA 时序修复候选：去除 sticky 掩码进位链
+# PE Raw FMA 时序修复：对齐 sticky 与 exp2 下溢舍入
 
 日期：2026-09-20。范围：第二阶段、hop=8 的 PE 内联 Raw FMA；不进入第三阶段。
 
-## 依据与选择
+## 当前候选：exp2 缩放下溢舍入
+
+11:07 服务器 build 已验证上一轮对齐 sticky 优化：CSim/RTL CoSim通过，SA II1、Tile143/134、1785/1317 cycles；顶层20 BRAM、44 DSP、91418 FF、138625 LUT。估算周期从7.933改善至7.650 ns，但仍超7.300 ns预算0.350 ns。
+
+关键路径转至`scaleFloatByPowerOfTwo`：指数加减后串联动态mask、halfway计算、余数比较与舍入。本轮只改此函数的下溢舍入表达，保留上一轮对齐sticky修改及全部流水/调度设置。
+
+- 24位有效数拼接24个低位零，形成48位组合临时值；在确认移位量属于1..24后，将移位量窄化为5位。
+- 右移后，高24位为商，bit23为guard，bit22..0归约非零为sticky；最近偶数舍入条件为`guard && (sticky || quotient[0])`。
+- 对有效数`v = q*2^d+r`，低24位为`r*2^(24-d)`。guard对应余数是否达到半值，sticky区分恰好半值和大于半值，因此与原来的余数/halfway比较逐位等价。
+- 保留正常数快速路径、溢出、零/特殊值旁路、移位超过24时带符号零，以及舍入后进位为最小正常数的处理；没有删掉FP32非规格化语义。
+- 不增加源码流水级，不改hop=8、DSP乘法latency=1、CMP、Accumulator、DMA、SRAM或Delayer；实际II、latency、实例数和资源仍以新综合为准。
+
+新增4596组公开顶层缩放边界测试：覆盖全部1..24移位、超过24位、各宽度半值附近与奇偶舍入、正常/非规格化交界、正负号、上溢，以及真实PWL FMA后再缩放。golden使用`std::fma`和`std::ldexp`；修改前与修改后均通过。
+
+本轮独立Raw FMA原有30000随机MAC、24480对齐边界、16 IEEE定向、136 exp2，以及新增4596组测试均通过。4x2、4x4、8x4完整attention/Acc PWL本地回归通过。当前源码晚于11:07 build，尚无新Vitis综合/RTL结果。
+
+## 上一轮依据与选择（已完成Vitis检查）
 
 最近两个服务器检查点都通过 CSim 和 RTL CoSim，但均未达到 7.300 ns 的有效 HLS 预算：
 
@@ -21,7 +37,7 @@
 - AMD 的 [BIND_OP 文档](https://docs.amd.com/r/2024.2-English/ug1399-vitis-hls/pragma-HLS-bind_op)允许指定单个运算的实现和延迟；它不是对整段组合链任意指定寄存器位置的接口。提高乘法 latency 还需重新验证 hop=8 的反馈调度，因此本次保留 DSP 乘法 latency=1。
 - Berkeley [SoftFloat 的 shift-right-jam 实现](https://raw.githubusercontent.com/ucb-bar/berkeley-softfloat-3/master/source/s_shiftRightJam32.c)通过移位后检测丢弃位非零实现 sticky，不需要构造动态减一掩码。本次采用等价的扩展位向量表达，未移植其 C 实现。
 
-## 修改
+## 上一轮修改
 
 只改 `src/stream/pe_raw_fma.cpp` 中的 PE 算术表达：
 
@@ -40,13 +56,13 @@
 
 未修改 SA 调度、hop=8、PE 乘法调用点、CMP、Accumulator、DMA、SRAM、Delayer、器件或时钟约束。没有新增算术单元或流水级的源码请求，也没有放宽依赖；实际硬件实例数仍需综合核验。
 
-## 本地验证
+## 上一轮本地验证
 
 - 独立 `pe_raw_fma_top`：30,000 组随机 MAC、24,480 组定向指数对齐向量、16 组 IEEE 定向向量、136 组 exp2 向量，全部通过。
 - 对齐向量覆盖 FP32 全部有限指数、稀疏/稠密尾数、正负号、FP16 非规格化数，以及零、小于 27 和大于等于 27 的对齐位移；golden 使用独立 `std::fma`，不调用内部被测 helper。
 - 4x2、4x4、8x4 完整 causal/non-causal attention 和 Accumulator PWL 本地 C++ 回归：通过。
 
-本地没有 Vitis。本次没有新 C 综合或 RTL CoSim 结果，不把历史报告当作当前候选的性能证明。
+本地没有 Vitis。上一轮后来由11:07服务器build验证，结果见本文开头；本轮exp2下溢修改不能沿用该build作为性能证明。
 
 ## 用户下一次 Vitis 验收
 

@@ -410,7 +410,7 @@ namespace{
             return bits;
         }
 
-        ap_uint<25> significand = 0;
+        ap_uint<24> significand = 0;
         significand[23] = 1;
         significand.range(22, 0) = mantissa;
         const int right_shift = 1-new_exponent;
@@ -418,14 +418,17 @@ namespace{
             bits.range(30, 0) = 0;
             return bits;
         }
-        ap_uint<25> shifted = significand >> right_shift;
-        const ap_uint<25> mask =
-            (((ap_uint<25>)1 << right_shift)-(ap_uint<25>)1);
-        const ap_uint<25> remainder = significand & mask;
-        const ap_uint<25> halfway =
-            (ap_uint<25>)1 << (right_shift-1);
-        const bool round_up = remainder>halfway ||
-            (remainder==halfway && shifted[0]);
+        // 此分支的new_exponent<=0；上面的边界检查保证移位量在1..24。
+        // 拼接低24位零后一次右移，同时得到商、guard和其余丢弃位。
+        // 避免动态mask减一、halfway移位及宽余数比较串到输出路径。
+        const ap_uint<5> distance = right_shift;
+        ap_uint<48> extended = 0;
+        extended.range(47, 24) = significand;
+        const ap_uint<48> aligned = extended >> distance;
+        ap_uint<25> shifted = aligned.range(47, 24);
+        const bool guard = aligned[23];
+        const bool sticky = aligned.range(22, 0)!=0;
+        const bool round_up = guard && (sticky || shifted[0]);
         if(round_up){
             shifted = shifted+1;
         }

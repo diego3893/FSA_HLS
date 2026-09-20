@@ -321,6 +321,75 @@ void testExp2(){
     }
 }
 
+void checkExp2ScaleVector(
+    const std::uint16_t x_bits,
+    const std::uint16_t slope_bits,
+    const std::uint32_t encoded_intercept,
+    const int vector
+){
+    const float x = exactHalfToFloat(x_bits);
+    const int integer = (int)std::trunc(x);
+    const float expected = std::ldexp(
+        std::fma(x-(float)integer, exactHalfToFloat(slope_bits),
+                 floatFromBits(restoredInterceptBits(encoded_intercept))),
+        integer
+    );
+    const std::uint32_t expected_bits = floatBits(expected);
+    expectBits(
+        runTop(x_bits, slope_bits, encoded_intercept, true),
+        expected_bits, goldHalfBitsFromFloatBits(expected_bits),
+        (int)((encoded_intercept>>24)&7U)==goldPiece(x),
+        "EXP2 scale", vector
+    );
+}
+
+void testExp2ScaleBoundaries(){
+    int vector = 0;
+    // 整数x令小数乘积为零，从公开顶层独立激励缩放路径。
+    // 覆盖正常数、所有1..24位下溢移位、超过24位、正负零及溢出。
+    for(int integer=-153; integer<=130; ++integer){
+        if(integer>-120 && integer<126){
+            continue;
+        }
+        for(unsigned base_exponent=126; base_exponent<=127;
+                ++base_exponent){
+            const int distance = 1-(int)base_exponent-integer;
+            const unsigned tie_bit = distance>=1 && distance<=24
+                ? (1U<<(distance-1)) : 1U;
+            const unsigned odd_bit = distance>=1 && distance<=24
+                ? (1U<<distance) : 2U;
+            const unsigned mantissas[] = {
+                0U, 1U, 2U, 3U, 0x003fffffU, 0x007ffffeU, 0x007fffffU,
+                tie_bit-1U, tie_bit, tie_bit+1U,
+                odd_bit+tie_bit-1U, odd_bit+tie_bit, odd_bit+tie_bit+1U
+            };
+            for(const auto mantissa : mantissas){
+                for(unsigned sign=0; sign<2; ++sign){
+                    const std::uint32_t encoded = (sign<<31) |
+                        ((base_exponent&1U)<<23) | (mantissa&0x007fffffU);
+                    checkExp2ScaleVector(
+                        halfBits((fsa::elem_t)integer), 0U, encoded,
+                        vector++
+                    );
+                }
+            }
+        }
+    }
+    // 使用真正的PWL斜率/截距，让FMA舍入结果再进入缩放下溢路径。
+    // 此范围的1/8步长可以被FP16精确表示。
+    for(int eighths=-1280; eighths<=-960; ++eighths){
+        const auto x_bits = halfBits((fsa::elem_t)((float)eighths/8.0F));
+        for(int piece=0; piece<8; ++piece){
+            checkExp2ScaleVector(
+                x_bits, halfBits((fsa::elem_t)EXP2_SLOPES[piece]),
+                EXP2_ENCODED_INTERCEPT_BITS[piece], vector++
+            );
+        }
+    }
+    std::cout << "[INFO] exp2 scale boundary vectors: "
+              << vector << std::endl;
+}
+
 }  // namespace
 
 int main(){
@@ -328,6 +397,7 @@ int main(){
     testRandomFiniteMac();
     testAlignmentBoundaries();
     testExp2();
+    testExp2ScaleBoundaries();
     if(failures!=0){
         std::cerr << "[FAIL] test_pe_raw_fma_top: " << failures
                   << " mismatches" << std::endl;
