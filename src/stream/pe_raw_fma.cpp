@@ -84,18 +84,6 @@ namespace{
         return fields;
     }
 
-    int highestBit22(const ap_uint<22> value){
-        #pragma HLS INLINE
-        int highest = -1;
-        for(int bit=21; bit>=0; --bit){
-            #pragma HLS UNROLL
-            if(highest<0 && value[bit]){
-                highest = bit;
-            }
-        }
-        return highest;
-    }
-
     int highestBit24(const ap_uint<24> value){
         #pragma HLS INLINE
         int highest = -1;
@@ -152,25 +140,26 @@ namespace{
             (ap_uint<22>)a.significand*(ap_uint<22>)b.significand;
         #pragma HLS BIND_OP variable=product op=mul impl=dsp latency=1
 
-        const int product_highest = highestBit22(product);
+        // finiteRawFma只在乘积非零时进入这里。直接用前导零数同时生成
+        // 乘积最高位指数和规格化左移量，避免DSP后串联22位优先编码器。
+        const ap_uint<5> product_left_shift = product.countLeadingZeros();
+        const int product_top =
+            a.lsb_exponent+b.lsb_exponent+21-(int)product_left_shift;
+        const ap_uint<27> product_normalized =
+            (ap_uint<27>)product << (5+(int)product_left_shift);
         if(c.zero){
             result.sign = product_sign;
             result.zero = false;
-            result.top_exponent =
-                a.lsb_exponent+b.lsb_exponent+product_highest;
-            result.significand =
-                (ap_uint<27>)product << (26-product_highest);
+            result.top_exponent = product_top;
+            result.significand = product_normalized;
             return result;
         }
 
         const int c_highest = highestBit24(c.significand);
-        const int product_top =
-            a.lsb_exponent+b.lsb_exponent+product_highest;
         const int c_top = c.lsb_exponent+c_highest;
         const int common_top = product_top>c_top ? product_top : c_top;
 
-        ap_uint<27> product_aligned =
-            (ap_uint<27>)product << (26-product_highest);
+        ap_uint<27> product_aligned = product_normalized;
         ap_uint<27> c_aligned =
             (ap_uint<27>)c.significand << (26-c_highest);
         product_aligned = shiftRightJam27(
