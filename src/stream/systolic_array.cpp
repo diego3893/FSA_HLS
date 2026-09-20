@@ -157,8 +157,7 @@ namespace streaming_v2_detail{
 
         const acc_t lhs = op==CmpWaveOp::PROP_MAX
             ? accZero() : old_max;
-        const CmpUnitOutput cmp_output = accCmp(lhs, new_max);
-        return cmp_output.out_diff;
+        return accSub(lhs, new_max);
     }
 
     template<int COL>
@@ -183,7 +182,7 @@ namespace streaming_v2_detail{
             const exp2_counter_t exp2_counter = state[COL].exp2_counter;
 
             // 只有这个组合max位于连续score之间的真实反馈环。它不经过
-            // cvtAtoE或accCmp，因而下一拍可以立即读取更新后的newMax。
+            // cvtAtoE或accSub，因而下一拍可以立即读取更新后的newMax。
             if(valid && op==CmpWaveOp::UPDATE){
                 const acc_t masked_input = enabled
                     ? d_input[COL] : accMinimum();

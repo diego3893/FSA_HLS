@@ -279,12 +279,10 @@ namespace fsa{
         return fp_struct<acc_t>(fp32RawFma(raw_input)).to_ieee();
     }
 
-    CmpUnitOutput accCmp(const acc_t in_a, const acc_t in_b){
-        CmpUnitOutput output{};
-        output.out_diff = hls::fma(in_a, (acc_t)1.0F, -in_b);
-        const fp_struct<acc_t> diff_view(output.out_diff);
-        output.out_max = diff_view.sign[0] ? in_b : in_a;
-        return output;
+    acc_t accSub(const acc_t in_a, const acc_t in_b){
+        // CMP只需要向下发送0-newMax或oldMax-newMax。逐score的max
+        // 已由finiteAccMax组合选择，不应再为未使用的out_max保留FMA。
+        return in_a-in_b;
     }
 
     elem_t cvtAtoE(const acc_t a){

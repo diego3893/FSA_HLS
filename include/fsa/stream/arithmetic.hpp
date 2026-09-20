@@ -56,20 +56,17 @@ namespace fsa{
      */
     acc_t accUnit(acc_t in_a, acc_t in_b, acc_t in_c);
 
-    /// @brief CMP的输出字段
-    struct CmpUnitOutput{
-        acc_t out_max{};
-        acc_t out_diff{};
-    };
-
     /**
-     * @brief CMP计算
+     * @brief CMP的FP32差值通路
      * 
-     * @param in_a 根据CMP控制信号选择
+     * newMax的逐score更新由SA中的组合位序max完成，避免把多拍浮点
+     * 运算放入反馈环。这里仅计算向PE传播的0-newMax或oldMax-newMax。
+     *
+     * @param in_a 0或oldMax
      * @param in_b newMax
-     * @return CmpUnitOutput 最大值、差值
+     * @return acc_t in_a-in_b
      */
-    CmpUnitOutput accCmp(acc_t in_a, acc_t in_b);
+    acc_t accSub(acc_t in_a, acc_t in_b);
 
     /**
      * @brief acc_t转换为elem_t
