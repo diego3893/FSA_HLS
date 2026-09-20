@@ -409,9 +409,9 @@ namespace streaming_v2_detail{
         #pragma HLS ARRAY_PARTITION variable=score_pipeline complete dim=1
         #pragma HLS ARRAY_PARTITION variable=cmp_pipeline complete dim=0
 
-        // CMP仍用4槽回绕计数器。PE hop为2的幂时直接使用cycle%hop，
-        // 延续8b7aab7中的静态低位slot选择，使HLS能够看见环形bank模式。
-        int cmp_pipeline_slot = 0;
+        // PE和CMP的hop均为2的幂，直接使用编译期循环变量的低位选择槽。
+        // 这与从0开始逐拍回绕的计数器完全等价，同时让HLS能够看见
+        // 完全分区数组的静态bank访问模式，避免把不同槽误判为跨迭代依赖。
 
         for(int row=0; row<SA_ROWS; ++row){
             #pragma HLS UNROLL
@@ -470,7 +470,7 @@ namespace streaming_v2_detail{
             }
 
             const int current_pipeline_slot = cycle%PE_HOP_CYCLES;
-            const int current_cmp_pipeline_slot = cmp_pipeline_slot;
+            const int current_cmp_pipeline_slot = cycle%CMP_HOP_CYCLES;
             CmpToPeStage completed_cmp{};
             if(cycle>=CMP_HOP_CYCLES){
                 completed_cmp =
@@ -705,10 +705,6 @@ namespace streaming_v2_detail{
                 next_cmp_to_pe.data[query] = cmp_output[query];
             }
             cmp_pipeline[current_cmp_pipeline_slot] = next_cmp_to_pe;
-
-            cmp_pipeline_slot =
-                current_cmp_pipeline_slot+1==CMP_HOP_CYCLES
-                    ? 0 : current_cmp_pipeline_slot+1;
 
             if(cmp_op==CmpWaveOp::PROP_MAX_DIFF){
                 SaResultToken token{};

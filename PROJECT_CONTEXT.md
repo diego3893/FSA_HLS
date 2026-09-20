@@ -38,14 +38,19 @@
 
 ## 4. Current State
 
-### Latest formal-kernel server build（3C CMP专用减法已验收）
+### Latest formal-kernel server build（3D直接hop4性能失败）
 
-- 构建目录：`build/fsa_stream_build/solution1`；综合2026-09-20 21:35、CoSim 21:39。日志明确将`accSub(float,float)`内联到4个`spatialCmpOutputCell`，预处理源码已无旧`CmpUnitOutput/out_max`调用，确认为3C源码。
-- CSim、C综合、Verilog RTL CoSim及C post-check通过，无死锁、无数值错误。9x4 non-causal/causal为1757/1289 cycles，非法长度55，三事务总执行3081；相对3B前1785/1317各减少28拍。
-- SA主循环trip133、iteration latency10、achieved II1；TileTick latency/interval=143/134，`systolicArrayProcess`最小latency148，DATAFLOW最小latency/interval233/149。没有`HLS 200-880/892`。
-- 单TileTick、16条11x11 PE乘法通路、4 CMP及单4-lane Accumulator向量保持。4个CMP均为3拍/II1，各综合为一个`fsub_32ns_32ns_32_3_full_dsp_1`、DSP2、FF582、LUT436、估算7.120 ns；旧FMA写法原本也已被Vitis化简为同一减法核，因此3C没有资源或周期收益。四个Accumulator lane均为6拍/II1/DSP2，向量为7拍/II1/DSP8。顶层BRAM20、DSP32、FF89266、LUT140104、URAM0，与3B完全相同。
-- Q/K/V DMA读循环、Scratchpad及Input/Output Delayer关键循环仍II1。3B没有退化SA、DMA或存储通路。
-- 顶层估算周期7.300 ns，SA Tile为7.272 ns、Accumulator vector为7.299 ns，`HLS 200-871/880/892`均无，满足<=7.300 ns有效预算。3C已通过全部HLS/RTL门槛；顶层裕量仍为零，没有Vivado实现或板级时序证明。
+- 构建目录：`build/fsa_stream_build/solution1`；综合2026-09-20 22:43、CoSim 22:46。预处理源码确认`PE_HOP_CYCLES=4`且包含3C的`accSub`，是直接hop4版本。
+- CSim、C综合、Verilog RTL CoSim及C post-check通过，无死锁、无数值错误；9x4 non-causal/causal为2898/2038 cycles，非法长度55，三事务总执行4971。功能正确不等于性能验收通过。
+- SA主循环trip89、iteration latency10，但achieved II=3；TileTick latency/interval=275/270，DATAFLOW最小latency/interval=366/281。相比已验收hop8的Tile 143/134及1757/1289 cycles显著退化，3D直接hop4判定失败。
+- `solution1.log`把唯一关键II违例精确定位到完全分区的`cmp_pipeline.data`：动态`cmp_pipeline_slot`使同一局部数组的写/读被保守判为distance=1，工具尝试II1和II2后最终II3；当前证据不是PE结果槽的distance4冲突。
+- 单TileTick、16条11x11 PE乘法通路、4 CMP、单4-lane Accumulator向量和顶层DSP32/BRAM20保持。顶层资源BRAM20、DSP32、FF60174、LUT131258、URAM0；相对hop8 FF减少29092、LUT减少8846，说明失败原因不是实例复制。
+- 顶层估算周期仍7.300 ns，SA Tile为7.272 ns；Q/K/V DMA读循环仍II1，外围没有发现新增退化。该build只因SA II3和端到端性能失败，不能作为3D验收点。
+
+### Latest accepted formal-kernel baseline（3C / hop8）
+
+- 2026-09-20 21:39 build的CSim、C综合、RTL CoSim及C post-check全部通过；SA主循环trip133、II1，TileTick 143/134，端到端1757/1289/55 cycles。
+- 顶层BRAM20、DSP32、FF89266、LUT140104，估算周期7.300 ns；16 PE、4 CMP、4 Accumulator lane以及DMA II1均已验收。若当前3D修复不能恢复II1，应回到该基线。
 
 ### Latest RTL-verified baseline（第二阶段修改前基线）
 
@@ -70,16 +75,16 @@
 ### Current source
 
 - PE latency优化第二阶段已把正式 `peMacUnit` 接到阶段一验收的混合精度Raw FMA；普通MAC与exp2仍共用唯一11x11尾数乘法通路。最新build确认16条各DSP1的乘法通路和SA II1；坐标PE已内联，没有独立PE latency报告，5拍是此前独立模块验收值及当前调度常量。
-- 3C验收后已进入3D单变量实验：`PE_TOKEN_LATENCY`仍记录已测5拍，只把`PE_HOP_CYCLES`由8改为4；默认4x4静态`SA_TILE_CYCLES`由133降到89。FMA、CMP、Accumulator、DMA、SRAM、Delayer和时钟均未改，4x2/4x4/8x4本地完整回归通过；尚无Vitis结果。
+- 3C验收后进入3D：`PE_TOKEN_LATENCY`仍记录已测5拍，`PE_HOP_CYCLES`由8改为4，默认4x4静态`SA_TILE_CYCLES`由133降到89。22:46直接hop4 build虽RTL正确，但因CMP环形槽动态计数器被判distance1而SA只能II3，性能失败。
 - 当前显式建模 `CMP_TOKEN_LATENCY=3`，并保留 Chisel CMP->PE 的一级 Pipe，因此 `CMP_HOP_CYCLES=4`。
 - 4x4、PWL=8 时，最新已验收hop8 build为`SA_TILE_CYCLES=133`、trip133、iteration latency10、主循环II1、TileTick 143/134；当前未综合hop4源码为`SA_TILE_CYCLES=89`。
-- PE slot继续使用commit `8b7aab7bb669a1b781bffb9b67a30897c45b20a7`的 `cycle%PE_HOP_CYCLES`表达；当前hop4是静态低2位bank选择，不使用显式回绕PE计数器。CMP的4槽计数器保持不变。
+- PE slot继续使用commit `8b7aab7bb669a1b781bffb9b67a30897c45b20a7`的 `cycle%PE_HOP_CYCLES`表达；当前hop4是静态低2位bank选择。针对22:46 build暴露的CMP假distance1，当前源码也把逻辑完全等价的4槽回绕计数器改为`cycle%CMP_HOP_CYCLES`，以显式呈现完全分区bank访问；没有添加`cmp_pipeline inter false`。
 - 当前仅恢复该commit已有的 `#pragma HLS DEPENDENCE variable=pe_register inter false`。微程序保证SCALE/PWL/ROW_SUM/PV的读发生在对应写回后；11:49也已证明单独移除这条pragma不会改变48错集合。
 - `pe_pipeline`/`cmp_pipeline` 不恢复全局 `inter false`；其多拍子函数提交顺序必须保留。此前对这两者的覆盖已被RTL证明会造成48个数值错误。
 - 新增4槽 `CmpToPeStage` 环形通道：前三拍容纳当前HLS CMP输出流水，最后一拍对应Chisel `pipe_no_reset(cmp.io.d_output)`；UPDATE score回流以及PROP_MAX/PWL/ROW_SUM经过该通道，SCALE/PV仍直接注入。
 - `spatialCmpOutputCell` 保持独立的 II=1、latency=3 流水函数，避免把CMP与PE组合串联；微程序已为score回流、SUB_MAX依赖、PWL和ROW_SUM/PV入口重新对齐。
 - 每个 KV tile 已恢复 Q/K/V 三个 InputDelayer phase；Q 从原 Scratchpad Q buffer 重放，每个 KV tile 都重新执行逻辑 `LOAD_STATIONARY`。
-- SA已从周期循环第0拍直接消费带phase/tag的Delayer beat：Q直接写唯一 `PE.reg`，不再形成 `q_tile`；K phase结束即启动QK，V phase与QK发射重叠。当前采用8拍hop的tagged wave，K/V仍保留跨hop operand cache，尚不是Scala逐PE mesh的逐线直连。
+- SA已从周期循环第0拍直接消费带phase/tag的Delayer beat：Q直接写唯一 `PE.reg`，不再形成 `q_tile`；K phase结束即启动QK，V phase与QK发射重叠。当前3D候选采用4拍hop的tagged wave，K/V仍保留跨hop operand cache，尚不是Scala逐PE mesh的逐线直连。
 - OutputDelayer保留为独立actor，但当前tagged SA输出本已按列对齐，因此不再将每个完整token重新串行化成 `SA_COLS` 拍；循环目标为token II=1。
 - Scratchpad仍是唯一banked SRAM owner；Q以显式last完成，K/V由同一个II=1循环公平仲裁并以last分别完成。当前tile的行被推入FIFO后，owner即可在SA计算期间装入下一双缓冲区。
 - DMA保留统一内部 `DmaReadRequest` descriptor以及每个写流的 `request_id/kind/transfer_last` 完成语义，但请求由Q/K/V三个单输出actor独立产生，消除了跨通道描述符FIFO的反压耦合；顶层仍保留Q/K/V/O四个专用AXI bundle，O写outstanding为8。
@@ -96,7 +101,7 @@
 - 当前 `%8` Raw FMA内联构建已把SA主循环从II=2恢复到II=1，并通过RTL CoSim。
 - 第一阶段DMA已经验收：Q/K/V均为II=1，CSim/RTL CoSim通过，端到端周期和计算/存储部件未退化；代价是三个DMA读模块共增加14304 FF，仍仅占器件3.40%。
 - 撤销完整tile循环的PIPELINE/II约束后，编译规模问题已解决；内联把原始结果环写回从ST11提前到ST9，解决了distance8递归并达到II1。
-- 第二阶段、3A、3B和3C均已通过HLS/RTL门槛。当前焦点是3D hop4：独立PE仍实测5拍，逻辑hop4小于该latency，存在真实相邻行结果依赖风险；必须由新整核schedule确认主循环II、读写stage和Tile interval，再用RTL CoSim确认数值，失败则恢复已验收hop8。
+- 第二阶段、3A、3B和3C均已通过HLS/RTL门槛。3D直接hop4 build已确认RTL数值正确、实例数和时序正常，但CMP动态槽选择把SA降为II3；当前只把CMP槽号等价改成`cycle%4`，等待新整核schedule确认能否恢复II1。若修复后仍II>1、时序失败或RTL错误，则恢复已验收hop8。
 
 ## 5. Architecture / Mental Model
 
@@ -130,7 +135,7 @@ Q/K/V AXI DMA
 | `src/stream/controller.cpp` | tile 控制和 SA 微程序 | causal、phase 顺序来源 |
 | `src/stream/scratchpad.cpp` | 64-bit banked SRAM 与Q/K/V重放 | Q现在每个KV tile重放 |
 | `src/stream/input_delayer.cpp` | Q/K/V阶梯延迟 | 当前每tile固定3 phase |
-| `src/stream/systolic_array.cpp` | 单SA、PE/CMP与环形token流水 | cycle%8 slot；内联坐标PE边界已把结果写回由ST11提前到ST9并达到II1 |
+| `src/stream/systolic_array.cpp` | 单SA、PE/CMP与环形token流水 | 当前hop4；PE与CMP槽均用`cycle%hop`静态bank表达，等待新Vitis验证II |
 | `src/stream/accumulator_process.cpp` | 单actor微指令 Accumulator | 避免反馈环死锁 |
 | `src/stream/arithmetic.cpp` | PE/Acc FMA、PWL、reciprocal | PE latency优化入口 |
 | `include/fsa/stream/pe_raw_fma.hpp`、`src/stream/pe_raw_fma*.cpp` | PE Raw FMA与独立HLS验证顶层 | 已接入正式PE；当前源码直接传递exp2精确小数域以缩短关键路径，待Vitis复核 |
@@ -286,7 +291,7 @@ Q/K/V AXI DMA
 
 **Implication:** 第一阶段独立算术单元门槛已满足，第二阶段已经把候选接入正式PE并进入hop=8全链路调度修复；必须先完成SA II=1及RTL CoSim验收。第三阶段所谓“全部FMA替换”只覆盖当前`fsa_stream`实际需要乘加的通路：PE沿用混合精度Raw FMA，四个Accumulator lane使用新FP32 Raw FMA。CMP不属于FMA范围，但其源码清理也归入第三阶段独立验收：把`hls::fma(a,1,-b)`改为专用FP32减法接口、移除当前顶层未消费的`out_max`，保留`finiteAccMax`组合位序选择；softmax重标定必须保持`old/local max - new max`的负向差值，不能反转为`new max - old/local max`。未被当前顶层调用的兼容函数不作为硬件实例计数目标。
 
-**Status:** Stage 2, 3A, 3B and 3C accepted; Stage 3D hop4 integrated locally, waiting for formal-kernel Vitis acceptance
+**Status:** Stage 2, 3A, 3B and 3C accepted; direct Stage 3D hop4 failed at II3, static CMP-slot repair integrated locally and waiting for Vitis acceptance
 
 ### D013 — 第二阶段先建立RTL检查点，再修复100 MHz时序（已完成）
 
@@ -486,6 +491,14 @@ Q/K/V AXI DMA
 
 **Conclusion:** 3C功能、逻辑清理、II、时序、资源和外围不退化，验收通过。资源未下降是因为3B中的`hls::fma(a,1,-b)`已被Vitis化简为相同的3拍FP32减法核；3C的收益是消除无效接口和明确算术语义。按门控进入3D hop4。
 
+### E024 — 2026-09-20 22:46 第三阶段3D直接hop4
+
+**Setup:** 在已验收3C源码上只把`PE_HOP_CYCLES`从8降到4，默认4x4微程序trip由133降到89；CMP仍使用运行时四槽回绕计数器。Vitis运行CSim、CSynth和Verilog CoSim。
+
+**Result:** 功能全部通过，无死锁和数值错误；顶层仍7.300 ns、BRAM20/DSP32，16条PE乘法通路和4 CMP未增殖。SA主循环却因`cmp_pipeline.data`的distance1 load/store警告只能达到II3，TileTick为275/270，端到端2898/2038，均显著慢于hop8的143/134和1757/1289。FF/LUT降到60174/131258，排除“硬件实例过多”为性能失败原因。
+
+**Conclusion:** 直接hop4不合格。当前源码不添加危险的全局依赖覆盖，而是把与0..3回绕计数完全等价的CMP槽选择改为`cycle%CMP_HOP_CYCLES`，让完全分区数组的bank关系对HLS静态可见；4x2、4x4、8x4本地完整回归通过，等待新Vitis验证。
+
 ## 9. Failed Attempts / Things Not To Repeat
 
 ### F001 — Accumulator反馈DATAFLOW环
@@ -538,6 +551,16 @@ Q/K/V AXI DMA
 
 **Retry only if:** 将返回值显式前递到下一消费者，或改成HLS可证明的静态stage并读取schedule；不得直接恢复全局false。
 
+### F006 — hop4配合运行时CMP回绕计数器
+
+**Tried:** 将PE hop由8直接降到4，但保留`cmp_pipeline_slot`运行时变量选择已完全分区的四槽CMP环。
+
+**Result:** CSim和RTL CoSim正确，但HLS把`cmp_pipeline.data`读写判为distance1，主循环最终II3、Tile 275/270、端到端2898/2038，慢于已验收hop8。
+
+**Why it failed:** 运行时槽号遮蔽了实际四次迭代后才复用同一bank的关系；不是实例复制、时序或RTL数值问题。
+
+**Retry only if:** 使用逻辑等价且HLS可静态解析的`cycle%4` bank选择。不得用全局`DEPENDENCE inter false`掩盖返回值真实提交顺序。
+
 ## 10. Bugs / Open Problems
 
 ### P001 — SA动态slot主循环II=9（已解决）
@@ -568,9 +591,9 @@ Q/K/V AXI DMA
 
 ### P008 — 3D hop4整核验收
 
-**Known facts:** 当前只把`PE_HOP_CYCLES`从8改为4，默认4x4静态微程序133->89拍，环形slot为`cycle%4`；独立PE仍实测latency5、II1，因此相邻行结果在4拍后消费可能形成真实调度冲突。4x2、4x4、8x4 C++功能回归通过，但C++调用即时返回，不能覆盖RTL流水写回时刻。
+**Known facts:** 22:46直接hop4 build已通过RTL，证明当前微程序在该综合调度下数值正确；实际首个II阻塞不是PE result ring，而是运行时`cmp_pipeline_slot`造成的`cmp_pipeline.data`保守distance1。SA最终II3、Tile 275/270、端到端2898/2038，故仍不合格。
 
-**Plan:** 手动`./run_hls.sh fsa_stream`，重点核对SA主循环achieved II和结果槽读写stage、Tile latency/interval、16条PE乘法通路、顶层资源/时序、DMA/Accumulator/CMP不退化以及RTL CoSim。若II>1、时序失败或RTL错误，则判定直接hop4失败并恢复已验收hop8，不用虚假`DEPENDENCE inter false`掩盖真实依赖。
+**Plan:** 当前已把CMP槽号等价改为`cycle%CMP_HOP_CYCLES`并通过三配置本地回归。手动`./run_hls.sh fsa_stream`后重点核对`HLS 200-880`是否消失、SA achieved II是否恢复1、Tile interval是否接近90、16条PE乘法通路/4 CMP和资源时序是否保持，以及RTL CoSim。若出现下一条真实PE distance4依赖、II仍>1、时序失败或RTL错误，则恢复已验收hop8，不添加虚假全局dependence覆盖。
 
 ### P003 — Tagged wave仍需K/V operand cache
 
@@ -597,9 +620,9 @@ Q/K/V AXI DMA
 - 第一阶段DMA扁平循环已由2026-09-17 14:09 build验收；保留 `src/stream/dma_process.cpp` 修改。
 - 第二阶段撤销完整tile调用循环的PIPELINE/II约束，并恢复query/key顺序嵌套循环；最新build确认IR规模恢复、无效ALLOCATION警告消失且额外6个控制DSP已删除。
 - PE内部latency优化第二阶段已接入独立验收的 `pe_raw_fma`；最新build确认16条PE乘法通路各DSP1、SA II1；PE内联后的latency不能继续引用为独立函数报告。
-- 当前焦点：3C已由21:39整核build验收；3D只把PE hop由8改为4，默认微程序133->89拍，本地三配置通过，等待完整Vitis验证。
+- 当前焦点：3C已由21:39整核build验收；22:46直接hop4 build因CMP动态槽依赖只能II3而性能失败。当前3D修复候选把CMP槽选择等价改为`cycle%4`，本地三配置通过，等待完整Vitis验证。
 - 当前设计边界：顶层 `fsa_stream` 形参、四个AXI bundle、器件和时钟约束保持不变；内部协议可调整。
-- 下一步用户运行`./run_hls.sh fsa_stream`，读取3D整核SA II/结果槽调度、Tile latency/interval、实例数、资源、时序和RTL CoSim。频率修改不混入本轮。
+- 下一步用户运行`./run_hls.sh fsa_stream`，确认CMP distance1警告是否消失，并读取3D整核SA II/下一阻塞依赖、Tile latency/interval、实例数、资源、时序和RTL CoSim。频率修改不混入本轮。
 
 ## 12. Next Actions
 
@@ -657,9 +680,10 @@ Q/K/V AXI DMA
 - [x] 用户手动Vitis验收3A：CSim 248016组零错误、II1、latency5、DSP2、单24x24乘法、时序7.299 ns。
 - [x] 3B完整CSim/综合/RTL CoSim通过：四lane不增殖，6拍/II1，向量7拍/II1，顶层DSP32、1757/1289 cycles、7.300 ns。
 - [x] 3C把CMP的`hls::fma(a,1,-b)`改为单FP32减法通路并移除未使用`out_max`；完整Vitis CSim/综合/RTL CoSim通过，4 CMP均3拍/II1且外围不退化。
-- [ ] 3D已只把PE hop从8尝试降到4，默认静态微程序133->89拍，本地三配置通过；等待完整Vitis验证，失败则回退到已验证hop8版本。
+- [x] 读取3D直接hop4 build：RTL正确、时序和实例数保持，但CMP动态槽distance1导致SA II3、Tile 275/270、端到端2898/2038，性能失败。
+- [ ] 已将CMP四槽选择等价改为`cycle%4`且三配置本地回归通过；等待完整Vitis验证，若仍不能II1则回退到已验证hop8版本。
 - [x] 最新15:23 Vitis确认SA II1、Tile143/134、顶层7.300 ns与RTL CoSim通过；第二阶段验收，第三阶段3A已开始。
-- [ ] 3A/3B/3C已逐个手动验收；3D等待验收，不同时修改频率，150/200 MHz评估更后置。
+- [ ] 3A/3B/3C已逐个手动验收；3D静态CMP槽修复等待验收，不同时修改频率，150/200 MHz评估更后置。
 
 ## 13. Validation Status
 
@@ -715,8 +739,9 @@ Q/K/V AXI DMA
 - [x] 3B正式`fsa_stream`的Vitis CSim/综合/RTL CoSim、四lane实例数、II/latency、资源、时序和端到端周期。
 - [x] 3C专用CMP减法的4x2、4x4、8x4完整attention及Acc PWL本地回归。
 - [x] 3C正式`fsa_stream`的Vitis CSim/综合/RTL CoSim、CMP II/latency/资源、时序和端到端周期。
-- [x] 3D hop4源码的4x2、4x4、8x4完整attention及Acc PWL本地回归。
-- [ ] 3D hop4正式`fsa_stream`的Vitis CSim/综合/RTL CoSim、SA II/结果槽调度、资源、时序和端到端周期。
+- [x] 3D直接hop4正式`fsa_stream`的Vitis CSim/综合/RTL CoSim：功能通过，但SA II3、Tile 275/270及端到端2898/2038导致性能验收失败。
+- [x] 3D静态CMP槽修复源码的4x2、4x4、8x4完整attention及Acc PWL本地回归。
+- [ ] 3D静态CMP槽修复后正式`fsa_stream`的Vitis CSim/综合/RTL CoSim、SA II/下一依赖、资源、时序和端到端周期。
 - [ ] IP导出。
 - [ ] Vivado实现时序。
 - [ ] FPGA板级验证。
@@ -737,14 +762,14 @@ Q/K/V AXI DMA
 
 1. 正在把完整FSA attention核迁移并优化到HLS，结构目标是Chisel FSA。
 2. 当前坚持单SA、单PE MacUnit、单列Accumulator，通过等价流水重定时降低延迟。
-3. 最新build为2026-09-20 21:39，包含3C CMP专用减法；CSim/C综合/RTL CoSim通过，1757/1289 cycles，4 CMP均3拍/II1，SA II1、Tile143/134。
+3. 最新build为2026-09-20 22:46的直接hop4；CSim/C综合/RTL CoSim正确，但CMP动态槽被保守判为distance1，SA II3、Tile275/270、端到端2898/2038，因此性能失败。最新已验收基线仍是21:39的3C hop8。
 4. `%16` PE slot加仅限PE.reg的调度提示已把SA主循环从II=9恢复为II=1；tile latency/interval为237/222。
 5. 相对13:15基线端到端加速6.75--7.14x；相对9月9日稳定版本也快约6.1%--6.5%，说明2/4/5/7外围改造得到保留并产生净收益。
 6. 最新已验收hop8顶层HLS估算7.300 ns、SA7.272 ns、Acc7.299 ns，无时序违例；资源BRAM20/DSP32/FF89266/LUT140104，单16 PE/4 CMP/4 Accumulator lane保持。HLS顶层裕量零，尚无Vivado实现证明。
 7. 第一阶段DMA已验收：Q/K/V read均II=1；计算、存储、端到端周期均未退化，代价为DMA流水FF增加。
 8. 外层tile PIPELINE/II回退已解决此前百万级IR问题；当前层次只有一个TileTick，顺序循环保证单实例。
 9. 23:21 build确认内联坐标PE边界把结果写回由ST11提前至ST9，SA由II2降为II1、TileTick由276/268降为142/134，且硬件数量不增加；RTL已通过，代价是时序退化至9.608 ns。
-10. 3A、3B和3C均已验收；四个Accumulator lane为6拍/II1/DSP2，向量7拍/II1，四个CMP为3拍/II1/DSP2。当前3D只把hop8改为hop4，默认静态微程序133->89拍，本地三配置通过；下一步`./run_hls.sh fsa_stream`验证SA调度和RTL。
+10. 3A、3B和3C均已验收；四个Accumulator lane为6拍/II1/DSP2，向量7拍/II1，四个CMP为3拍/II1/DSP2。当前3D保留hop4并把CMP槽选择从运行时计数器等价改为`cycle%4`；三配置本地回归通过，下一步`./run_hls.sh fsa_stream`验证能否恢复SA II1和RTL正确性。
 11. SRAM/Scratchpad、DMA三请求actor、Delayer、Accumulator和当前CMP寄存器通路全部保留；禁止恢复 `pe_pipeline/cmp_pipeline inter false`。
 
 ## 16. Decision / Progress Log
@@ -796,3 +821,4 @@ Q/K/V AXI DMA
 - 2026-09-19 — 继续修复SA II2：将坐标特化`spatialPeCell`改为内联，删除其独立PIPELINE/LATENCY边界；完全展开模板仍保留16个`peMacUnit`调用点，Raw FMA/hop8及外围不变。目的为把父循环中ST5--ST11的7级调用缩回Raw FMA本身约5级，使结果写回满足distance8。4x2、4x4、8x4 causal/non-causal完整attention及Acc PWL本地回归通过；新Vitis需重点确认II、ST级、16个PE DSP和时序。
 - 2026-09-20 — 再次检查用户所称“新build”时，工作区`build/fsa_stream_build/solution1`仍是20:43的3B产物：`solution1.log`仍明确内联`accCmp`，预处理源码仍含`CmpUnitOutput/out_max`，综合/CoSim时间戳未更新。该目录不能验收当前3C源码；在真正同步3C build前不进入3D，也不把缺少新产物误判为3C失败。
 - 2026-09-20 — 读取21:39真正3C build：日志明确内联`accSub`且旧输出接口消失；CSim、综合、RTL CoSim全部通过。4 CMP均3拍/II1、单fsub/DSP2，顶层20 BRAM/32 DSP/89266 FF/140104 LUT、7.300 ns；SA仍143/134、DMA II1、Accumulator 7/1，端到端仍1757/1289。3C通过但QoR不变，原因是旧FMA写法已被Vitis化简为相同fsub。按门控进入3D：仅将`PE_HOP_CYCLES` 8->4，默认微程序133->89拍，三配置本地回归通过，等待整核Vitis；鉴于PE实测5拍，重点检查真实distance4依赖，不恢复危险的全局dependence覆盖。
+- 2026-09-20 — 读取22:46直接hop4 build：CSim/综合/RTL CoSim和post-check均通过，顶层7.300 ns、20 BRAM/32 DSP、16 PE/4 CMP保持；但日志把主循环违例定位到运行时`cmp_pipeline_slot`选择的`cmp_pipeline.data` distance1，最终II3、Tile 275/270、端到端2898/2038，显著慢于hop8，故3D不合格。查阅AMD PIPELINE、pipeline dependency和ARRAY_PARTITION说明后，没有添加不安全的`DEPENDENCE inter false`，而是将0..3回绕槽号等价改为`cycle%CMP_HOP_CYCLES`，显式暴露完全分区bank访问；4x2、4x4、8x4完整本地回归通过，等待新Vitis。
