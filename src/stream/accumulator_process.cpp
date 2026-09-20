@@ -10,8 +10,8 @@ namespace streaming_v2_detail{
     >;
 
     /**
-     * 每个COL只有这一处FP32 FMA。普通L/O累加、alpha缩放、PWL以及最终
-     * 归一化均通过mode选择输入，避免同一列因多个函数调用点复制运算器。
+     * 每个COL只有这一处手写FP32 Raw FMA。普通L/O累加、alpha缩放、PWL
+     * 以及最终归一化均通过mode选择输入，避免同一列复制运算器。
      */
     template<int COL>
     acc_t accumulatorArithmeticLane(
@@ -24,7 +24,7 @@ namespace streaming_v2_detail{
                       "Accumulator col out of range");
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=1
-        #pragma HLS LATENCY min=9 max=9
+        #pragma HLS LATENCY min=5 max=8
 
         const AccPwlInput pwl = prepareAccPwlInput(in_a);
         const acc_t result = accUnit(

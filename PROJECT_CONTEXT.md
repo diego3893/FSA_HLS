@@ -38,9 +38,9 @@
 
 ## 4. Current State
 
-### Latest server build（CLZ规格化通过；第二阶段验收，进入3A）
+### Latest formal-kernel server build（CLZ规格化通过；3B修改前基线）
 
-- 构建目录：`build/fsa_stream_build/solution1`；综合2026-09-20 15:19、CoSim 15:23。预处理快照确认包含`low.countLeadingZeros()`，RTL/报告新增16个27位ctlz实例。对应当前正式计算路径；不包含独立3A FP32候选。
+- 构建目录：`build/fsa_stream_build/solution1`；综合2026-09-20 15:19、CoSim 15:23。预处理快照确认包含`low.countLeadingZeros()`，RTL/报告新增16个27位ctlz实例。该build早于当前3B Accumulator源码，只能作为3B直接基线。
 - CSim 0错误、C综合完成、Verilog RTL CoSim及C post-check通过，无死锁、无数值错误。9x4 non-causal/causal为1785/1317 cycles，非法长度55，三事务总执行3137；与23:55直接小数域检查点相同，相比00:27乘前规格化各增加7拍。
 - SA主循环trip133、iteration latency10、achieved II1；TileTick latency/interval=143/134，`systolicArrayProcess`最小latency148，DATAFLOW最小latency/interval233/149。没有`HLS 200-880/892`。
 - 单TileTick、16条11x11 PE乘法通路（各DSP1）、4 CMP（各3拍/II1/DSP2）、单4-lane Accumulator向量保持。顶层BRAM20、DSP44、FF91252、LUT125809、URAM0；相对13:12减少952 FF、2832 LUT，计算单元数量未增加。
@@ -87,15 +87,15 @@
 - 当前候选进一步分离控制与算术结果：`PeWave`只保留控制和非归约操作的旁路partial；无默认初始化的`PeResult`环保存FMA原始输出。QK从下一行、ROW_SUM/PV从上一行的结果槽直接选累加输入；所有旧值在任何PE结果写回之前先捕获。FMA后不再通过reduce/valid旁路mux写回partial。hop=8、单坐标PE调用和真实依赖均保留，没有新增反馈DATAFLOW FIFO。
 - 23:21 RTL检查点已确认坐标PE边界内联版本无死锁、无数值错误；完全展开的ROW/COL模板仍对应16条11x11乘法通路，结果由ST11提前至ST9、SA达到II1，硬件数不增加。
 - 正式PE保留54位sticky、48位exp2下溢舍入及27位CLZ；15:23 build已通过第二阶段验收。本轮未修改正式PE/SA/CMP/Accumulator/DMA/SRAM/Delayer/common.hpp/正式Tcl，修改前后10个文件SHA256一致，4x2/4x4/8x4完整本地回归通过。
-- 第三阶段3A新增`fp32_raw_fma`独立候选：一个24x24尾数乘法、48位完整乘积、51位对阶和52位幅值加减、最终一次RNE舍入，支持正常/非规格化数、符号零、Inf和canonical NaN。顶层请求II1、latency5..8、DSP乘法latency2；均为待测目标，不是已测结果。
-- 新入口`./run_hls.sh fp32_raw_fma`默认仅CSim+CSynth；本地`run_fp32_raw_fma_test.ps1`。248016组公开顶层位精确测试通过，使用576位整数精确golden；可选`-CheckHostFma`又与原生FMA指令交叉通过。方案见`docs/FP32_Raw_FMA第三阶段方案.md`。候选未接入正式HLS源清单，不开始3B/CMP/hop4。
+- 第三阶段3A的独立`fp32_raw_fma`已由18:45 Vitis build验收：248016组CSim零错误，latency=5、II=1、估算周期7.299 ns；仅一个24x24乘法器实例、DSP2、FF571、LUT4126，满足II1、<=8拍、<=7.300 ns、DSP<=5门槛。
+- 已进入3B：`accUnit`改为调用该FP32 Raw FMA，四列Accumulator仍通过四个模板lane各自只有一个共享算术调用点；正式Tcl加入`fp32_raw_fma.cpp`，lane探索约束由固定9拍改为5..8拍。PE、CMP、hop8、DMA、SRAM、Delayer均未修改。4x2、4x4、8x4完整attention与Acc PWL本地回归通过；整核II/latency/资源/时序/RTL尚待新`fsa_stream` build。
 
 ### Main issue
 
 - 当前 `%8` Raw FMA内联构建已把SA主循环从II=2恢复到II=1，并通过RTL CoSim。
 - 第一阶段DMA已经验收：Q/K/V均为II=1，CSim/RTL CoSim通过，端到端周期和计算/存储部件未退化；代价是三个DMA读模块共增加14304 FF，仍仅占器件3.40%。
 - 撤销完整tile循环的PIPELINE/II约束后，编译规模问题已解决；内联把原始结果环写回从ST11提前到ST9，解决了distance8递归并达到II1。
-- 第二阶段HLS时序、II、实例数与RTL门槛全部达到。当前等待3A独立FP32 FMA的Vitis CSim、latency、II、时序和DSP/实例数量验收；未取得这些结果前不替换Accumulator。旧lane综合为fmul+fadd，新候选为融合舍入，3B须额外检查数值语义，不能直接假定逐位等价。
+- 第二阶段HLS时序、II、实例数与RTL门槛全部达到，3A独立FP32 FMA也已验收。当前阻塞点是3B正式核尚无新Vitis结果：必须确认四个lane不增殖、lane/vector II1、lane latency<=8、顶层时序<=7.300 ns、完整RTL CoSim数值通过；不能用独立3A报告代替整核证据。
 
 ## 5. Architecture / Mental Model
 
@@ -137,8 +137,8 @@ Q/K/V AXI DMA
 | `src/stream/dataflow.cpp` | 顶层actor连接 | 检查生产/消费与死锁 |
 | `hls/fsa_stream/run_hls.tcl` | HLS入口 | `set_top fsa_stream` |
 | `build/fsa_stream_build/solution1/` | 第二阶段已验收构建 | 15:23 CLZ检查点，CSim/RTL通过、SA II1、143/134、顶层7.300 ns |
-| `src/stream/fp32_raw_fma*.cpp`、`include/fsa/stream/fp32_raw_fma.hpp` | 3A独立FP32 FMA | 尚未接入Accumulator；Vitis待验收 |
-| `hls/fp32_raw_fma/run_hls.tcl`、`tests/stream/test_fp32_raw_fma_top.cpp` | 3A验证入口 | 默认CSim+CSynth；248016向量，独立精确整数golden |
+| `src/stream/fp32_raw_fma*.cpp`、`include/fsa/stream/fp32_raw_fma.hpp` | 3A/3B FP32 Raw FMA | 独立核已验收；3B已由`accUnit`接入四个Accumulator lane，正式整核待Vitis |
+| `hls/fp32_raw_fma/run_hls.tcl`、`tests/stream/test_fp32_raw_fma_top.cpp` | 3A验证入口 | CSim 248016向量通过；5拍/II1/7.299 ns/DSP2/单24x24乘法实例 |
 | `docs/fsa_stream综合报告.md` | 当前综合报告 | 已更新为15:44 build，并加入fsa_dma与FSA-main两组对比 |
 
 ## 7. Decisions
@@ -285,7 +285,7 @@ Q/K/V AXI DMA
 
 **Implication:** 第一阶段独立算术单元门槛已满足，第二阶段已经把候选接入正式PE并进入hop=8全链路调度修复；必须先完成SA II=1及RTL CoSim验收。第三阶段所谓“全部FMA替换”只覆盖当前`fsa_stream`实际需要乘加的通路：PE沿用混合精度Raw FMA，四个Accumulator lane使用新FP32 Raw FMA。CMP不属于FMA范围，但其源码清理也归入第三阶段独立验收：把`hls::fma(a,1,-b)`改为专用FP32减法接口、移除当前顶层未消费的`out_max`，保留`finiteAccMax`组合位序选择；softmax重标定必须保持`old/local max - new max`的负向差值，不能反转为`new max - old/local max`。未被当前顶层调用的兼容函数不作为硬件实例计数目标。
 
-**Status:** Stage 2 accepted at 15:23; Stage 3A independent FP32 candidate implemented, waiting for user Vitis acceptance
+**Status:** Stage 2 and 3A accepted; Stage 3B integrated locally, waiting for formal-kernel Vitis acceptance
 
 ### D013 — 第二阶段先建立RTL检查点，再修复100 MHz时序（已完成）
 
@@ -545,9 +545,9 @@ Q/K/V AXI DMA
 
 ### P007 — 独立FP32候选综合及未来融合语义集成
 
-**Known facts:** 3A本地248016组精确golden与原生FMA交叉通过，尚无Vitis报告。旧Accumulator lane为9拍/II1/DSP5（fmul+fadd），向量10拍；候选独立latency目标5..8，不保证集成后更快或与旧RTL逐位相同。
+**Known facts:** 3A本地248016组精确golden与原生FMA交叉通过，Vitis又确认5拍/II1/7.299 ns/DSP2/单乘法。旧Accumulator lane为9拍/II1/DSP5（fmul+fadd），向量10拍；3B已接入但不保证整核集成后同样为5拍，也不能在CoSim前假定与旧RTL数值完全一致。
 
-**Plan:** 先手动`./run_hls.sh fp32_raw_fma`，验收II1、<=8拍、<=7.300 ns、单尾数乘法/DSP<=5。失败只修改3A；通过后用户验收再3B集成，核对融合舍入及非规格化差异、lane数、全链路周期/RTL。
+**Plan:** 手动`./run_hls.sh fsa_stream`验收3B，核对融合舍入及非规格化差异、四lane实例数、lane/vector II与latency、DSP、全链路周期、时序和RTL；失败只修改3B，通过后再进入3C CMP。
 
 ### P003 — Tagged wave仍需K/V operand cache
 
@@ -574,9 +574,9 @@ Q/K/V AXI DMA
 - 第一阶段DMA扁平循环已由2026-09-17 14:09 build验收；保留 `src/stream/dma_process.cpp` 修改。
 - 第二阶段撤销完整tile调用循环的PIPELINE/II约束，并恢复query/key顺序嵌套循环；最新build确认IR规模恢复、无效ALLOCATION警告消失且额外6个控制DSP已删除。
 - PE内部latency优化第二阶段已接入独立验收的 `pe_raw_fma`；最新build确认16条PE乘法通路各DSP1、SA II1；PE内联后的latency不能继续引用为独立函数报告。
-- 当前焦点：第二阶段CLZ候选已由15:23 build验收。第三阶段3A的`fp32_raw_fma.hpp/.cpp/_top.cpp`、testbench、独立Tcl和本地测试脚本已新增；`run_hls.sh`只新增模块白名单，正式核未改。
+- 当前焦点：3A独立核已由18:45 build验收；3B已把同一FP32 Raw FMA接入正式Accumulator的四个共享lane，正式Tcl也已加入源文件。
 - 当前设计边界：顶层 `fsa_stream` 形参、四个AXI bundle、器件和时钟约束保持不变；内部协议可调整。
-- 下一步用户运行`./run_hls.sh fp32_raw_fma`，读取3A的CSim、II、latency、时序及DSP/乘法实例；验收后才3B。CMP、hop4和频率修改不混入本轮。
+- 下一步用户运行`./run_hls.sh fsa_stream`，读取3B整核CSim/CoSim、Accumulator lane/vector II与latency、四lane实例数、DSP/时序和端到端周期。CMP、hop4和频率修改不混入本轮。
 
 ## 12. Next Actions
 
@@ -631,8 +631,8 @@ Q/K/V AXI DMA
 - [x] FMA加减后规格化改为直接前导零计数；新增4608边界及原测试共63836组通过，三配置完整本地回归通过。
 - [x] 15:23 CLZ build通过第二阶段HLS/RTL全部门槛，用户条件授权进入三阶段。
 - [x] 3A独立FP32×FP32+FP32 Raw FMA已实现；248016精确向量及原生FMA交叉、本地三配置完整回归通过。
-- [ ] 用户手动Vitis验收3A：CSim、II1、latency<=8、DSP<=5及单尾数乘法、时序<=7.300 ns；指标不是已测值。
-- [ ] 3A验收后进入3B：替换当前顶层实际综合出的剩余FP32 FMA通路，确认四个Accumulator lane不增殖，并完成完整CSim/综合/RTL CoSim。
+- [x] 用户手动Vitis验收3A：CSim 248016组零错误、II1、latency5、DSP2、单24x24乘法、时序7.299 ns。
+- [ ] 3B已替换当前顶层实际使用的四条Accumulator FP32 FMA通路，本地三配置通过；等待完整CSim/综合/RTL CoSim确认四lane不增殖及整核性能。
 - [ ] 3B验收后进入3C：把CMP的`hls::fma(a,1,-b)`改为单FP32减法通路，移除未使用的`out_max`，保留`finiteAccMax`组合位序选择和`old/local max-new max`方向；重新完成完整验证。
 - [ ] 3C验收后进入3D：只把PE hop从8尝试降到4，重新完成完整验证；失败则回退到已验证hop=8版本。
 - [x] 最新15:23 Vitis确认SA II1、Tile143/134、顶层7.300 ns与RTL CoSim通过；第二阶段验收，第三阶段3A已开始。
@@ -687,7 +687,9 @@ Q/K/V AXI DMA
 - [x] 当前CLZ规格化候选63836组独立Raw FMA及4x2/4x4/8x4完整attention、Acc PWL本地回归。
 - [x] CLZ规格化候选15:23 Vitis CSim/综合/II/实例数量/时序/RTL CoSim全部达到既定门槛。
 - [x] 3A独立FP32 FMA的248016向量、精确整数golden与原生FMA交叉、4x2/4x4/8x4现有功能回归。
-- [ ] 3A独立FP32 FMA的Vitis CSim/综合/II/latency/资源/时序；CoSim/IP默认关闭。
+- [x] 3A独立FP32 FMA的Vitis CSim/综合：5拍、II1、7.299 ns、DSP2、单24x24乘法实例；CoSim/IP按设计关闭。
+- [x] 3B接入后的4x2、4x4、8x4完整attention及Acc PWL本地回归。
+- [ ] 3B正式`fsa_stream`的Vitis CSim/综合/RTL CoSim、四lane实例数、II/latency、资源、时序和端到端周期。
 - [ ] IP导出。
 - [ ] Vivado实现时序。
 - [ ] FPGA板级验证。
@@ -715,7 +717,7 @@ Q/K/V AXI DMA
 7. 第一阶段DMA已验收：Q/K/V read均II=1；计算、存储、端到端周期均未退化，代价为DMA流水FF增加。
 8. 外层tile PIPELINE/II回退已解决此前百万级IR问题；当前层次只有一个TileTick，顺序循环保证单实例。
 9. 23:21 build确认内联坐标PE边界把结果写回由ST11提前至ST9，SA由II2降为II1、TileTick由276/268降为142/134，且硬件数量不增加；RTL已通过，代价是时序退化至9.608 ns。
-10. 按用户“合格则进入三阶段”授权，新增3A独立FP32 Raw FMA，248016位精确向量与原生FMA交叉、本地三配置回归通过。正式路径文件指纹未变。下一步`./run_hls.sh fp32_raw_fma`验收II1/<=8拍/<=7.300 ns/单乘法与DSP<=5；未验收不接Accumulator、不改CMP/hop4/频率。
+10. 3A独立FP32 Raw FMA已由18:45 Vitis验收：248016组零错误、5拍/II1、7.299 ns、DSP2、单24x24乘法。3B已接入四个Accumulator共享lane并完成三配置本地回归；下一步`./run_hls.sh fsa_stream`做整核验收，未通过前不开始CMP或hop4。
 11. SRAM/Scratchpad、DMA三请求actor、Delayer、Accumulator和当前CMP寄存器通路全部保留；禁止恢复 `pe_pipeline/cmp_pipeline inter false`。
 
 ## 16. Decision / Progress Log
@@ -759,6 +761,7 @@ Q/K/V AXI DMA
 - 2026-09-19 — 读取23:55 exp2直接小数域build：CSim/C综合/RTL CoSim全部通过，9x4 non-causal/causal为1785/1317 cycles，无死锁或数值错误；SA II1、TileTick 143/134、16条PE乘法通路、4 CMP、44 DSP、20 BRAM和DMA II1保持。时序由9.608改善到7.933 ns，但仍超过7.300 ns预算0.633 ns，所以第二阶段未验收，不开始3A。
 - 2026-09-20 — 针对新关键路径继续第二阶段单变量修复：有限非零FP16/FP32尾数在DSP前规格化，11x11乘积最高位由22位优先编码改为bit21检查；不改hop8、乘法表达或调用点。独立Raw FMA 30000随机/定向/exp2和4x2/4x4/8x4完整attention、Acc PWL本地回归全部通过，等待新Vitis。
 - 2026-09-20 — 读取00:27乘前规格化build：CSim/C综合/RTL CoSim全部通过，9x4 non-causal/causal为1778/1310 cycles，SA II1、TileTick 142/134、16条PE乘法通路、4 CMP、44 DSP和DMA II1保持。但估算周期由7.933退化到9.543 ns，LUT由140033增到149057；关键路径是SA输入选择经exp2取余、`highestBit11`和规格化移位后进入DSP。候选判定失败，不进入3A；下一步应先恢复7.933 ns数据通路，再用显式流水分割修时序。
+- 2026-09-20 — 读取18:45 `fp32_raw_fma` build：248016组CSim零错误；latency=5、II=1、估算周期7.299 ns；仅一个24x24乘法实例，占DSP2、FF571、LUT4126，3A全部门槛通过。按用户“合格则开始下一阶段”授权进入3B：正式`accUnit`改用该Raw FMA，四个Accumulator lane仍各一个调用点，lane约束由固定9拍改为5..8拍，正式Tcl加入源文件；4x2/4x4/8x4完整attention与Acc PWL本地回归通过。尚无3B整核Vitis数据，不开始3C。
 - 2026-09-18 — 读取10:41逐字段提交build：CSim/C综合通过，16 PE/4 CMP、PE 5拍/II1/DSP1和外围II保持；顶层20 BRAM/44 DSP/88977 FF/147222 LUT、7.300 ns。`pe_pipeline.partial`的distance8警告仍在，SA iteration latency12、II2、TileTick 277/268完全不变；未运行CoSim。实验仅节省20 FF/796 LUT，性能失败，证明整结构写回不是根因；下一步改独立launch/completion stage。
 - 2026-09-18 — 用户要求修复SA II2。详细schedule定位ST1结果读取、ST4控制选择、ST5 PE调用（父循环跨度7拍）、ST12写回。改为控制/旁路PeWave与无初始化PeResult独立环；MAC从固定相邻行结果选输入，原始结果无条件写回，先捕获所有旧值再更新。保留hop8、唯一FMA/坐标、DMA/SRAM/CMP/Acc与100MHz约束。4x2、4x4、8x4各16次顶层attention相对修改前逐位一致，独立golden与哨兵通过；等待用户Vitis确认II/资源/RTL。仅分FIFO或总iteration latency判断不足以证明II改善。
 - 2026-09-18 — 读取23:25控制/结果分离build：CSim/C综合通过，16 PE保持5拍/II1/DSP1、4 CMP保持3拍/II1/DSP2，DMA/SRAM/Delayer/Acc关键II未退化；顶层20 BRAM/44 DSP/87577 FF/144041 LUT、7.300 ns。SA loop iteration latency 12->11、TileTick latency 277->276，但II2和interval268不变。`HLS 200-880`转移到原始`pe_results.out_accType`，schedule为ST11写、distance8后ST1顶行输出读/ST2归约读，证明控制mux已非根因。CoSim未运行，阶段二仍不通过。

@@ -74,6 +74,7 @@ if($LASTEXITCODE -ne 0){
 Write-Host "[BUILD] stream Acc PWL bit preprocessing" -ForegroundColor Cyan
 & g++ @CompilerOptions `
     (Join-Path $StreamSourceDirectory "arithmetic.cpp") `
+    (Join-Path $StreamSourceDirectory "fp32_raw_fma.cpp") `
     (Join-Path $StreamSourceDirectory "pe_raw_fma.cpp") `
     (Join-Path $StreamSourceDirectory "local_math_stubs.cpp") `
     $PwlTestFile -o $PwlExecutable

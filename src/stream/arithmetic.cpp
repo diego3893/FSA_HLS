@@ -1,4 +1,5 @@
 #include "fsa/stream/arithmetic.hpp"
+#include "fsa/stream/fp32_raw_fma.hpp"
 #include "fsa/stream/pe_raw_fma.hpp"
 
 #include <cmath>
@@ -263,7 +264,19 @@ namespace fsa{
     }
 
     acc_t accUnit(const acc_t in_a, const acc_t in_b, const acc_t in_c){
-        return hls::fma(in_a, in_b, in_c);
+        #pragma HLS INLINE
+
+        const fp_struct<acc_t> a_view(in_a);
+        const fp_struct<acc_t> b_view(in_b);
+        const fp_struct<acc_t> c_view(in_c);
+        Fp32RawFmaInput raw_input{};
+        raw_input.a_bits = a_view.data();
+        raw_input.b_bits = b_view.data();
+        raw_input.c_bits = c_view.data();
+
+        // Accumulator的普通累加、alpha缩放、PWL和最终归一化继续
+        // 时分复用每列唯一调用点；这里只替换该调用点的算术内核。
+        return fp_struct<acc_t>(fp32RawFma(raw_input)).to_ieee();
     }
 
     CmpUnitOutput accCmp(const acc_t in_a, const acc_t in_b){
