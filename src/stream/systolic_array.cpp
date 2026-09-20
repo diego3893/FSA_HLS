@@ -409,9 +409,9 @@ namespace streaming_v2_detail{
         #pragma HLS ARRAY_PARTITION variable=score_pipeline complete dim=1
         #pragma HLS ARRAY_PARTITION variable=cmp_pipeline complete dim=0
 
-        // PE和CMP的hop均为2的幂，直接使用编译期循环变量的低位选择槽。
-        // 这与从0开始逐拍回绕的计数器完全等价，同时让HLS能够看见
-        // 完全分区数组的静态bank访问模式，避免把不同槽误判为跨迭代依赖。
+        // PE使用编译期常量模5选择结果槽；CMP仍以低2位选择4槽。
+        // 两者都由循环变量直接生成，避免运行时回绕状态遮蔽完全分区
+        // 数组的周期bank关系；不得恢复全局inter false依赖覆盖。
 
         for(int row=0; row<SA_ROWS; ++row){
             #pragma HLS UNROLL

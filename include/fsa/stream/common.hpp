@@ -194,11 +194,10 @@ namespace streaming_v2_detail{
 
     // 阶段一独立综合确认手写混合精度Raw FMA为5拍、II=1。
     constexpr int PE_TOKEN_LATENCY = 5;
-    // 第三阶段3D只把逻辑hop从8缩到4，检验内联后的父循环是否能把
-    // 相邻PE依赖调度到4拍。独立核报告的5拍仍保留为事实，不能据此
-    // 预先声称hop4可实现；必须以整核schedule和RTL CoSim决定成败。
-    // 4仍为2的幂，使cycle%4保持静态低位bank选择。
-    constexpr int PE_HOP_CYCLES = 4;
+    // hop4虽达到II=1，但整核把5拍PE结果路径压缩后只能达到11.003 ns。
+    // 第三阶段3D先改用与独立PE实测latency一致的hop5，检验能否同时
+    // 保持II=1和7.300 ns有效时序预算；以整核schedule和RTL CoSim验收。
+    constexpr int PE_HOP_CYCLES = 5;
     // 当前综合中每列CMP输出通路为3拍、II=1；Chisel SystolicArray还在
     // CMP.d_output与首行PE.u_input之间使用一级Pipe。HLS用4拍环形token
     // 通道表达这两个边界，保持单CMP吞吐而不把CMP和PE组合串联。
