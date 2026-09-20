@@ -32,17 +32,13 @@ namespace{
     };
 
     struct Exp2Prepared{
-        // 小数部分以规格化的significand*2^lsb_exponent传递。它仍是
-        // 精确整数表示，不打包成FP16；规格化提到DSP之前后，乘积最高位
-        // 只需检查bit21，避免DSP输出再串联22位优先编码器。
+        // 小数部分直接以精确的significand*2^lsb_exponent传递，
+        // 不重新打包成FP16，也不在DSP输入路径增加规格化移位。
         HalfFields fractional{};
         int integer = 0;
         ap_uint<3> piece = 0;
         bool force_zero = false;
     };
-
-    int highestBit11(const ap_uint<11> value);
-    int highestBit24(const ap_uint<24> value);
 
     HalfFields unpackHalf(const ap_uint<16> bits){
         #pragma HLS INLINE
@@ -57,10 +53,8 @@ namespace{
             return fields;
         }
         if(exponent==0){
-            const int highest = highestBit11((ap_uint<11>)mantissa);
-            const int left_shift = 10-highest;
-            fields.significand = (ap_uint<11>)mantissa << left_shift;
-            fields.lsb_exponent = -24-left_shift;
+            fields.significand = mantissa;
+            fields.lsb_exponent = -24;
         }else{
             fields.significand = ((ap_uint<11>)1 << 10) | mantissa;
             fields.lsb_exponent = (int)exponent-25;
@@ -81,10 +75,8 @@ namespace{
             return fields;
         }
         if(exponent==0){
-            const int highest = highestBit24((ap_uint<24>)mantissa);
-            const int left_shift = 23-highest;
-            fields.significand = (ap_uint<24>)mantissa << left_shift;
-            fields.lsb_exponent = -149-left_shift;
+            fields.significand = mantissa;
+            fields.lsb_exponent = -149;
         }else{
             fields.significand = ((ap_uint<24>)1 << 23) | mantissa;
             fields.lsb_exponent = (int)exponent-150;
@@ -92,10 +84,10 @@ namespace{
         return fields;
     }
 
-    int highestBit11(const ap_uint<11> value){
+    int highestBit22(const ap_uint<22> value){
         #pragma HLS INLINE
         int highest = -1;
-        for(int bit=10; bit>=0; --bit){
+        for(int bit=21; bit>=0; --bit){
             #pragma HLS UNROLL
             if(highest<0 && value[bit]){
                 highest = bit;
@@ -139,13 +131,16 @@ namespace{
         if(shift>=27){
             return value!=0 ? (ap_uint<27>)1 : (ap_uint<27>)0;
         }
-        ap_uint<27> shifted = value >> shift;
-        const ap_uint<27> mask =
-            (((ap_uint<27>)1 << shift)-(ap_uint<27>)1);
-        if((value & mask)!=0){
-            shifted[0] = 1;
-        }
-        return shifted;
+        // {value, 27'b0}右移后，高27位是商，低27位保存所有丢弃位。
+        // 用丢弃位归约生成sticky，去掉动态掩码减一的进位链。
+        // 上面的边界判断保证distance在1..26内，窄化不会截断有效移位量。
+        ap_uint<54> extended = 0;
+        extended.range(53, 27) = value;
+        const ap_uint<5> distance = shift;
+        const ap_uint<54> shifted = extended >> distance;
+        ap_uint<27> result = shifted.range(53, 27);
+        result[0] = result[0] || (shifted.range(26, 0)!=0);
+        return result;
     }
 
     ap_uint<32> makeInfinity32(const bool sign){
@@ -169,10 +164,7 @@ namespace{
             (ap_uint<22>)a.significand*(ap_uint<22>)b.significand;
         #pragma HLS BIND_OP variable=product op=mul impl=dsp latency=1
 
-        // a/b的有限非零尾数已在DSP之前规格化到bit10。因此
-        // 11x11乘积的最高位只可能是bit20或bit21，不再需要
-        // 串在DSP输出后的22位优先编码器。
-        const int product_highest = product[21] ? 21 : 20;
+        const int product_highest = highestBit22(product);
         if(c.zero){
             result.sign = product_sign;
             result.zero = false;
@@ -183,7 +175,7 @@ namespace{
             return result;
         }
 
-        const int c_highest = 23;
+        const int c_highest = highestBit24(c.significand);
         const int product_top =
             a.lsb_exponent+b.lsb_exponent+product_highest;
         const int c_top = c.lsb_exponent+c_highest;
@@ -372,12 +364,10 @@ namespace{
             ? -(int)integer_magnitude : (int)integer_magnitude;
 
         if(remainder!=0){
-            const int highest = highestBit11(remainder);
-            const int left_shift = 10-highest;
             prepared.fractional.sign = sign;
             prepared.fractional.zero = false;
-            prepared.fractional.significand = remainder << left_shift;
-            prepared.fractional.lsb_exponent = binary_scale-left_shift;
+            prepared.fractional.significand = remainder;
+            prepared.fractional.lsb_exponent = binary_scale;
 
             const int piece_shift = binary_scale+3;
             ap_uint<14> piece_value = piece_shift>=0

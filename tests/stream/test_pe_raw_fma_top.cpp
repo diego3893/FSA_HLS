@@ -225,6 +225,37 @@ void testRandomFiniteMac(){
     }
 }
 
+void testAlignmentBoundaries(){
+    // 从公开顶层验证对齐和sticky逻辑，不复制被测实现作为golden。
+    // 扫过FP32全部有限指数及稀疏/稠密尾数，覆盖移位0、1..26、>=27，
+    // 同时覆盖FP16非规格化乘积、异号相减和两种sticky取值。
+    const std::uint16_t operands[][2] = {
+        {0x3c00U, 0x3c00U}, {0x3c01U, 0x3bffU},
+        {0x0001U, 0x0001U}, {0x03ffU, 0x0401U},
+        {0x7bffU, 0x7bffU}, {0x3555U, 0x3aabU}
+    };
+    const std::uint32_t mantissas[] = {
+        0U, 1U, 0x00400000U, 0x007fffffU
+    };
+    int vector = 0;
+    for(const auto& pair : operands){
+        for(unsigned exponent=0; exponent<255; ++exponent){
+            for(const auto mantissa : mantissas){
+                for(unsigned signs=0; signs<4; ++signs){
+                    const std::uint16_t a = (std::uint16_t)(
+                        pair[0] | ((signs&1U)<<15)
+                    );
+                    const std::uint32_t c = (exponent<<23) |
+                        mantissa | ((signs>>1)<<31);
+                    checkMacVector(a, pair[1], c, vector++);
+                }
+            }
+        }
+    }
+    std::cout << "[INFO] alignment boundary MAC vectors: "
+              << vector << std::endl;
+}
+
 const float EXP2_SLOPES[8] = {
     0.664062500F, 0.608886719F, 0.558105469F, 0.512207031F,
     0.469482422F, 0.430419922F, 0.394775391F, 0.362060547F
@@ -253,7 +284,8 @@ void testExp2(){
     const std::uint16_t x_bits[] = {
         0x0000U, 0xac00U, 0xb200U, 0xb500U,
         0xb880U, 0xba00U, 0xbb00U, 0xbc00U,
-        0xbc40U, 0xbe00U, 0xc100U
+        0xbc40U, 0xbe00U, 0xc100U,
+        0x8001U, 0x83ffU, 0x8400U, 0xbbffU, 0xbc01U, 0xc4ffU
     };
     const int x_count = (int)(sizeof(x_bits)/sizeof(x_bits[0]));
     int vector = 0;
@@ -294,6 +326,7 @@ void testExp2(){
 int main(){
     testDirectedMac();
     testRandomFiniteMac();
+    testAlignmentBoundaries();
     testExp2();
     if(failures!=0){
         std::cerr << "[FAIL] test_pe_raw_fma_top: " << failures
@@ -301,6 +334,7 @@ int main(){
         return 1;
     }
     std::cout << "[PASS] test_pe_raw_fma_top: 30000 random MAC vectors, "
-                 "directed IEEE cases and exp2 mode" << std::endl;
+                 "alignment sweep, directed IEEE cases and exp2 mode"
+              << std::endl;
     return 0;
 }
