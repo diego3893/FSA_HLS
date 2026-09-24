@@ -1,0 +1,294 @@
+{
+  "review_date": "2026-09-23",
+  "repo": "D:\\03_Learning\\UCAS\\2026summer\\WEEK 10 evol\\FSA_HLS",
+  "old_plan": "D:\\03_Learning\\UCAS\\2026summer\\WEEK 10 evol\\split_d_implementation_plan_20260921",
+  "method": "SHA-256 local filesystem; no Git operations",
+  "caveat": "Inventory coverage does not imply every file received equal-depth review.",
+  "files": [
+    {
+      "path": "8FSA.md",
+      "bytes": 6653,
+      "sha256": "f339afae069c37e24918cfc871dfb5b2b93b697d1ea3592d97dfb7896384dc82"
+    },
+    {
+      "path": "FSA_HLS/AGENTS.md",
+      "bytes": 9174,
+      "sha256": "4ece3f0a464481854c96e60ad35f0647e9d81f96bf443debc6dd46b8d8114b23"
+    },
+    {
+      "path": "FSA_HLS/PROJECT_CONTEXT.md",
+      "bytes": 101727,
+      "sha256": "c6fda327f2457329aa756ff6376e3889ef22d6acd0c2ada85dfb8553f3e6b561"
+    },
+    {
+      "path": "FSA_HLS/docs/综合报告/fsa_stream_request综合报告.md",
+      "bytes": 12905,
+      "sha256": "2dbf1e4060d7da5c254c8e7271691ff388dee9e3fc0358130e4d1c5035b26b62"
+    },
+    {
+      "path": "FSA_HLS/docs/综合报告/fsa_streaming_v2综合报告.md",
+      "bytes": 15698,
+      "sha256": "d3e522a81e927ccfb031cab61d4b48b0044d9f956a88bd70a207735f3eb70820"
+    },
+    {
+      "path": "FSA_HLS/docs/综合报告/fsa_stream当前build综合对比报告.md",
+      "bytes": 14248,
+      "sha256": "ed8bf3db7a6980aa0c12c58d06e2bc62f4875eff8b5fe12840f7cd13e67a1780"
+    },
+    {
+      "path": "FSA_HLS/docs/综合报告/fsa_stream综合报告.md",
+      "bytes": 19287,
+      "sha256": "4e1c9f0a56df2c88f8f4b1cd43283c181dde13b60a31ec5b631be909e23a47e6"
+    },
+    {
+      "path": "FSA_HLS/hls/fsa_stream/run_hls.tcl",
+      "bytes": 1891,
+      "sha256": "964dae0ae3dcb41d226b1f3e62eb4fca41889e2218d5b3a801e3dad04543b817"
+    },
+    {
+      "path": "FSA_HLS/include/fsa/stream/accumulator.hpp",
+      "bytes": 1616,
+      "sha256": "da3c367a085c7e3fb8306779815cc92e94856751dc164156fd91b2a33a32666d"
+    },
+    {
+      "path": "FSA_HLS/include/fsa/stream/arithmetic.hpp",
+      "bytes": 4147,
+      "sha256": "e7bce029d85b4d6478acc32fb8ac34f6d1e73ef781a71bafa332bf031a29306f"
+    },
+    {
+      "path": "FSA_HLS/include/fsa/stream/banked_sram.hpp",
+      "bytes": 5503,
+      "sha256": "ea9f4a3bdd098b6a2bee7314111544284b3196fae1da1f7586b24c0b94a2fecf"
+    },
+    {
+      "path": "FSA_HLS/include/fsa/stream/common.hpp",
+      "bytes": 11560,
+      "sha256": "5a4da7c3e2d868b6407848b1ee5144b8dee68876e4a87f4739fcf12fb2c17509"
+    },
+    {
+      "path": "FSA_HLS/include/fsa/stream/config.hpp",
+      "bytes": 7130,
+      "sha256": "f8d652f598e6504944dcc3cb2cbbf6ab26e4aeb75bb69a5fddcf5aa0fb2249d6"
+    },
+    {
+      "path": "FSA_HLS/include/fsa/stream/control.hpp",
+      "bytes": 2594,
+      "sha256": "a55983db82544bf19bcd1feb900769d05b182a83ff74bb788de125194c0f70fe"
+    },
+    {
+      "path": "FSA_HLS/include/fsa/stream/delayer.hpp",
+      "bytes": 2412,
+      "sha256": "7a7fd6e282caed181b284503c67937b6def06eefabce913a026b40bb33d848ed"
+    },
+    {
+      "path": "FSA_HLS/include/fsa/stream/dma.hpp",
+      "bytes": 3161,
+      "sha256": "4c4512c688e8e77b1bd957f1d983f68ee3c7a0ebf2ccdf7edaef73c3be1d4921"
+    },
+    {
+      "path": "FSA_HLS/include/fsa/stream/fp32_raw_fma.hpp",
+      "bytes": 966,
+      "sha256": "6de8920a2cee518fabbfa8788a9ce333577aa007f40fa79f3ecb27ae5a6f23cc"
+    },
+    {
+      "path": "FSA_HLS/include/fsa/stream/fsa_stream.hpp",
+      "bytes": 536,
+      "sha256": "a29bd47fb33ce23eaeabc2c7818a8234f5ae85356a49c75a38d46ac1457eded5"
+    },
+    {
+      "path": "FSA_HLS/include/fsa/stream/fsa_streaming_v2.hpp",
+      "bytes": 981,
+      "sha256": "c491f65d78467349d659606a58d306e2d8e04fae76a7d92e2c38efa0647c455b"
+    },
+    {
+      "path": "FSA_HLS/include/fsa/stream/pe_raw_fma.hpp",
+      "bytes": 1277,
+      "sha256": "5469aa721d175919b390fdbea7c5b12383ab0cfa3e45a423e96cfdcd7f5bbc43"
+    },
+    {
+      "path": "FSA_HLS/include/fsa/stream/state.hpp",
+      "bytes": 7939,
+      "sha256": "03cfac9ca989836ec45f07219195a83b1283e227d1ad1ef7793b5d8df733935d"
+    },
+    {
+      "path": "FSA_HLS/include/fsa/stream/types.hpp",
+      "bytes": 3593,
+      "sha256": "5c59f62f813d0dcb25e6c5b80752402a31d187e9768d0a669f89a0f3d9452d55"
+    },
+    {
+      "path": "FSA_HLS/run_stream_test.ps1",
+      "bytes": 2933,
+      "sha256": "10c828475d8578091441801eedd400fcd013c8e27ab732102eadc1daac3dfcc8"
+    },
+    {
+      "path": "FSA_HLS/skills/maintaining-project-context/SKILL.md",
+      "bytes": 5358,
+      "sha256": "1ebbf9f17beed77b69088605a21c8a78f278d2337cd585877458b7c503e84e4b"
+    },
+    {
+      "path": "FSA_HLS/skills/maintaining-project-context/assets/PROJECT_CONTEXT.template.md",
+      "bytes": 3802,
+      "sha256": "4f4fe9db7f71502219a8e3522eddbb98fcf8f41b80b93b2feb6b0497d1c07852"
+    },
+    {
+      "path": "FSA_HLS/src/stream/accumulator.cpp",
+      "bytes": 15991,
+      "sha256": "bf527fe1e9b5c9c9594ffa9b4435149669da1c59dc0a106195e20d72d73831e2"
+    },
+    {
+      "path": "FSA_HLS/src/stream/accumulator_process.cpp",
+      "bytes": 12229,
+      "sha256": "d055f8fb2a94d95923ffa569ba02e8663a564de7f89abc4a040c0832b8a99937"
+    },
+    {
+      "path": "FSA_HLS/src/stream/arithmetic.cpp",
+      "bytes": 16349,
+      "sha256": "af8873f9a52a1957cc07c87b36e0ea5058535b67d43c68191b89012284c9d413"
+    },
+    {
+      "path": "FSA_HLS/src/stream/controller.cpp",
+      "bytes": 6084,
+      "sha256": "250169e09c840ceb57ebb5727bdcb9bc23f712f941096d5b46fda7a27272cd6c"
+    },
+    {
+      "path": "FSA_HLS/src/stream/dataflow.cpp",
+      "bytes": 5469,
+      "sha256": "ed71d49d8815bcde74cc2d6baf7e231cb6f6fd3c3d80ff49d440a8fcf19dbbf1"
+    },
+    {
+      "path": "FSA_HLS/src/stream/delayer.cpp",
+      "bytes": 4867,
+      "sha256": "9be554f9c8fa2cc9cd13ece887f25a80230d6726727fe6560a856b0825a6a2b2"
+    },
+    {
+      "path": "FSA_HLS/src/stream/dma.cpp",
+      "bytes": 3072,
+      "sha256": "512aa80ee56b5296f09290097b4aee0abdfa5dd4299259b65e57daa806609d2d"
+    },
+    {
+      "path": "FSA_HLS/src/stream/dma_process.cpp",
+      "bytes": 11853,
+      "sha256": "337aa3bee397871637bde5a0e89c891db82a17f8b72abe7238f43c17ebee902c"
+    },
+    {
+      "path": "FSA_HLS/src/stream/fp32_raw_fma.cpp",
+      "bytes": 6732,
+      "sha256": "463b5e5daa2056fe07a95b00ca0df6da0332f7f16471731442258bca1244350b"
+    },
+    {
+      "path": "FSA_HLS/src/stream/fp32_raw_fma_top.cpp",
+      "bytes": 422,
+      "sha256": "c12571f61e1c1457bfd1da3b00db7786f7c95559f7cb9e5e739d64d3e3dd59ac"
+    },
+    {
+      "path": "FSA_HLS/src/stream/fsa_stream.cpp",
+      "bytes": 1937,
+      "sha256": "650d662f162faf929b197b17bf9ff1f04739345e26787b79759f439484856ef8"
+    },
+    {
+      "path": "FSA_HLS/src/stream/input_delayer.cpp",
+      "bytes": 3729,
+      "sha256": "4acd20e4a1a9cbc004d0e5990e073b3386fc2f4517831a025a30fcf4dcf5bec3"
+    },
+    {
+      "path": "FSA_HLS/src/stream/local_math_stubs.cpp",
+      "bytes": 632,
+      "sha256": "647c287e2548ab86aa2a629ea9339e5816db9fd6a346ec93c9114c7c68d79256"
+    },
+    {
+      "path": "FSA_HLS/src/stream/output_delayer.cpp",
+      "bytes": 1566,
+      "sha256": "7e9de0951e71b0746bc8d84fa52e5af77ee12e70d383cbffd3cd6ee87a62a410"
+    },
+    {
+      "path": "FSA_HLS/src/stream/pe_raw_fma.cpp",
+      "bytes": 16400,
+      "sha256": "702d4040ec09bbff34d47472cbe37b3be4148f05f081372e89ae2680bc7399b6"
+    },
+    {
+      "path": "FSA_HLS/src/stream/pe_raw_fma_top.cpp",
+      "bytes": 482,
+      "sha256": "3b08bada686f506595c4ed3d5d84f8715cae972aeb7bedb0b200878b9d17351f"
+    },
+    {
+      "path": "FSA_HLS/src/stream/scratchpad.cpp",
+      "bytes": 7222,
+      "sha256": "8e83b8c3388b85c6976f351421990d696977a2978c30133f1111f029dea3f760"
+    },
+    {
+      "path": "FSA_HLS/src/stream/systolic_array.cpp",
+      "bytes": 32614,
+      "sha256": "1a42cb6bf08b2968f761b72e0e9a3d5922d4ad8301b46d504b160a2c01f24585"
+    },
+    {
+      "path": "FSA_HLS/tests/stream/test_acc_pwl_bits.cpp",
+      "bytes": 1622,
+      "sha256": "d0fdf5edf77ffdac76b17b1e62e4e84d23c1ed679a88f96865bfe74391856845"
+    },
+    {
+      "path": "FSA_HLS/tests/stream/test_fp32_raw_fma_top.cpp",
+      "bytes": 9777,
+      "sha256": "551d3dfd738c933ee59295e35d45e83d680313726f2c3f8914f7e289aaed2099"
+    },
+    {
+      "path": "FSA_HLS/tests/stream/test_fsa_streaming_v2.cpp",
+      "bytes": 8405,
+      "sha256": "54bd5e5f4b65570e5ce21da156b31ff611fb0e235aad3b48c7928b48905bbd4f"
+    },
+    {
+      "path": "FSA_HLS/tests/stream/test_fsa_streaming_v2_top.cpp",
+      "bytes": 123,
+      "sha256": "11fc8fb8d3b4cf77ef317e47be1474a16f5c1e780946c312883a33eda0950c57"
+    },
+    {
+      "path": "FSA_HLS/tests/stream/test_pe_raw_fma_top.cpp",
+      "bytes": 15322,
+      "sha256": "fbf34291d89a893d662ef03f9caa645eceecdba9a64c46bcff342d8b294a35be"
+    },
+    {
+      "path": "split_d_implementation_plan_20260921/00_阅读入口.md",
+      "bytes": 4257,
+      "sha256": "afb15388d74b1d95dba46473a29f46f37009a84958e4cf614ee2966dce22d9e3"
+    },
+    {
+      "path": "split_d_implementation_plan_20260921/01_当前实现审计.md",
+      "bytes": 7510,
+      "sha256": "ee6d1ffd2ae6ddda8e8a666133fa7ceab629e90a552e141f5b30e91c13b2b2cb"
+    },
+    {
+      "path": "split_d_implementation_plan_20260921/02_SplitD详细架构规格.md",
+      "bytes": 26806,
+      "sha256": "f38fb1aec1dfdbef000ab7a2d1c9d9bf2279e0a0c65c25d03bd9f3d7e93772b9"
+    },
+    {
+      "path": "split_d_implementation_plan_20260921/03_Agent实施步骤与验收.md",
+      "bytes": 16146,
+      "sha256": "5656d34876a2488b3e85f672f3345bed4249ddcfe6c198d5ba9e8f2b3e189124"
+    },
+    {
+      "path": "split_d_implementation_plan_20260921/04_论文优化映射与实验矩阵.md",
+      "bytes": 10997,
+      "sha256": "425e3a090928bf81d4da6dd68ca97ed2783acafe7de107822b5837e3d2ee6539"
+    },
+    {
+      "path": "split_d_implementation_plan_20260921/05_本次交付验证记录.md",
+      "bytes": 1444,
+      "sha256": "b4edeb5518b5afd6f80e2daa652ea86ad260fb0874d57be3f3a2cef870426981"
+    },
+    {
+      "path": "split_d_implementation_plan_20260921/reference_results.json",
+      "bytes": 15127,
+      "sha256": "32c54e6d029187d74eef7b25d117b6f1da377dbb16394d287996847642fd7c03"
+    },
+    {
+      "path": "split_d_implementation_plan_20260921/reference_split_d.py",
+      "bytes": 15240,
+      "sha256": "e359117d4390d0436c85eaccebdd9f8a290a169c835c4901adf10f07aaf69aee"
+    },
+    {
+      "path": "split_d_implementation_plan_20260921/source_manifest.json",
+      "bytes": 8514,
+      "sha256": "af80e6ec420897780c11d561eced0b5cd425c6cf966ee0622d8b513ed0d143e8"
+    }
+  ]
+}

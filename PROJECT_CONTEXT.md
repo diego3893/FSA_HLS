@@ -8,16 +8,19 @@
 - 顶层一次调用完成一次完整 attention；例如 `L=9, D=4` 的 Q/K/V 只能调用一次 `fsa_stream`。
 - 顶层接收 Q/K/V/O 地址、序列长度和 causal 模式，核内 DMA 自动搬运。
 - 当前最高优先级：在保持单套 SA 和原 FSA 数据流的条件下降低 KV tile 间隔与 PE 多周期流水带来的放大延迟。
+- 2026-09-24新增独立研究目标：实现参数化`D×D`Split-D阵列。首版`D=4、dim=16`，后续只改参数得到`D=16、dim=128`；QK先执行`dim/D`轮FP32 score累加，完整S得到后做softmax，再执行`dim/D`轮PV。
 
 ## 2. Hard Constraints
 
 - Chisel `FSA-main/src/main/scala/fsa/` 是功能、结构和时序语义的主要参考，不修改该目录。
 - 只维护新路径：`src/stream/`、`include/fsa/stream/`、`tests/stream/`、`hls/fsa_stream/`；独立验证目录为`hls/pe_raw_fma/`及第三阶段3A的`hls/fp32_raw_fma/`。FP32候选在3A验收前不得接入正式Accumulator。
 - 顶层固定为 `fsa_stream`；不改器件、100 MHz 时钟约束、2.7 ns uncertainty、AXI 位宽或顶层协议。
+- 上一条只约束已验收生产基线。Split-D使用独立顶层`fsa_stream_split_d`，不得改变现有`fsa_stream`的接口、行为或构建结果。
 - `SA_ROWS`、`SA_COLS` 必须参数化，不能写死 4x4。
 - 只有一套 `R x C` SA；QK 与 PV 顺序复用；每个 PE 只有一个 MacUnit 和一个元素精度 `PE.reg`。
 - 每列一个 CMP；每列一个 Accumulator MAC/exp2/reciprocal 通道。不得用复制 SA、PE 算术阵列或 Accumulator 向量换吞吐。
 - S/P 继续驻留在 `PE.reg`；不得新增完整 score/probability 数组。
+- Split-D研究顶层按用户要求为每个PE新增一个FP32`score_acc`；P仍驻留在原FP16工作寄存器中，禁止在阵列外增加完整S/P副本。
 - 保持 Scratchpad/AccRAM 的 bank/sub-bank、64-bit 物理字、full/narrow 访问与单写端口语义。
 - 保持 InputDelayer/OutputDelayer、CMP causal counter、在线 softmax、PWL 段顺序和 `PROP_MAX_DIFF -> EXP_S1 -> EXP_S2 -> L/O` 顺序。
 - 不使用 `accumulator_pipeline` 架构。
@@ -38,16 +41,16 @@
 
 ## 4. Current State
 
-### Latest formal-kernel server build（3D hop5：功能/吞吐通过、时序差0.180 ns）
+### Latest accepted formal-kernel server build（3D hop5 + 22位CLZ）
 
-- 构建目录：`build/fsa_stream_build/solution1`；综合2026-09-21 00:37、CoSim 00:41。Autopilot预处理源码确认`PE_HOP_CYCLES=5`、PE `cycle%5`及CMP `cycle%4`，对应当前hop5源码。
-- CSim、C综合、Verilog RTL CoSim及C post-check通过，无死锁、无数值错误；9x4 non-causal/causal为1498/1142 cycles，interval为1488/1132，非法长度55，三事务总执行2675。
-- SA主循环trip100、iteration latency6、achieved II1；TileTick latency/interval=106/101，达到预期约101拍间隔。相对已验收hop8的143/134，Tile latency/interval减少37/33拍；相对hop4的94/90增加12/11拍。
-- SA和顶层估算周期为7.480 ns，触发`HLS 200-871`；估算Fmax 133.69 MHz，距离7.300 ns有效预算仍差0.180 ns。关键路径为PE Raw FMA的11x11乘法、乘积最高位选择、指数/对阶及54位右移/sticky判断，不再是hop4的11.003 ns长链。
-- 单TileTick、16条11x11 PE乘法通路、4 CMP、单4-lane Accumulator向量保持。顶层资源BRAM20、DSP32、FF72193、LUT135638、URAM0；相对hop4增加14749 FF和5910 LUT，相对已验收hop8减少17073 FF和4466 LUT。
-- Q/K/V DMA关键读循环仍achieved II1；4个CMP均3拍/II1，Accumulator vector仍7拍/II1、DSP8、7.299 ns；Input/Output Delayer内部主循环仍II1。3D只剩0.180 ns HLS时序缺口，尚未正式验收。
+- 构建目录：`build/fsa_stream_build/solution1`；综合2026-09-21 01:13、CoSim 01:16。Autopilot预处理源码确认`PE_HOP_CYCLES=5`和`product.countLeadingZeros()`，对应当前CLZ候选源码。
+- CSim、C综合、Verilog RTL CoSim及C post-check通过，无死锁、无数值错误；9x4 non-causal/causal仍为1498/1142 cycles，interval为1488/1132，非法长度55，三事务总执行2675。
+- SA主循环trip100、iteration latency6、achieved II1；TileTick latency/interval仍为106/101。CLZ修改没有增加周期或破坏反馈调度。
+- SA估算周期由7.480 ns降至7.120 ns；顶层为7.300 ns，未出现`HLS 200-871`，达到10 ns目标扣除2.7 ns uncertainty后的有效预算。估算Fmax 136.99 MHz；顶层瓶颈现为其他7.300 ns模块而非SA。
+- 单TileTick、16条11x11 PE乘法通路、4 CMP、单4-lane Accumulator向量保持。顶层资源BRAM20、DSP32、FF71336、LUT132486、URAM0；相对修改前减少857 FF和3152 LUT。
+- Q/K/V DMA关键读循环仍achieved II1；4个CMP均3拍/II1，Accumulator vector仍7拍/II1、DSP8、7.299 ns；Input/Output Delayer内部主循环仍II1。3D全部HLS/RTL门槛通过并验收，但尚无Vivado实现后时序和板级证明。
 
-### Latest accepted formal-kernel baseline（3C / hop8）
+### Previous accepted formal-kernel baseline（3C / hop8）
 
 - 2026-09-20 21:39 build的CSim、C综合、RTL CoSim及C post-check全部通过；SA主循环trip133、II1，TileTick 143/134，端到端1757/1289/55 cycles。
 - 顶层BRAM20、DSP32、FF89266、LUT140104，估算周期7.300 ns；16 PE、4 CMP、4 Accumulator lane以及DMA II1均已验收。若当前3D修复不能恢复II1，应回到该基线。
@@ -75,9 +78,9 @@
 ### Current source
 
 - PE latency优化第二阶段已把正式 `peMacUnit` 接到阶段一验收的混合精度Raw FMA；普通MAC与exp2仍共用唯一11x11尾数乘法通路。最新build确认16条各DSP1的乘法通路和SA II1；坐标PE已内联，没有独立PE latency报告，5拍是此前独立模块验收值及当前调度常量。
-- 3C验收后进入3D。当前hop5 build已确认SA II1、Tile 106/101且RTL正确，但整核估算周期7.480 ns，仍比7.300 ns预算慢0.180 ns；默认4x4静态`SA_TILE_CYCLES=100`。
+- 3C验收后进入3D。最新hop5+CLZ build已确认SA II1、Tile 106/101且RTL正确；SA估算7.120 ns、顶层7.300 ns，默认4x4静态`SA_TILE_CYCLES=100`。
 - 当前显式建模 `CMP_TOKEN_LATENCY=3`，并保留 Chisel CMP->PE 的一级 Pipe，因此 `CMP_HOP_CYCLES=4`。
-- 4x4、PWL=8 时，已验收hop8 build为`SA_TILE_CYCLES=133`、TileTick 143/134；hop4为89、Tile 94/90但11.003 ns时序失败；当前hop5为100、Tile 106/101、7.480 ns。
+- 4x4、PWL=8 时，已验收hop8 build为`SA_TILE_CYCLES=133`、TileTick 143/134；hop4为89、Tile 94/90但11.003 ns时序失败；当前hop5+CLZ为100、Tile 106/101、SA7.120 ns。
 - PE slot继续使用commit `8b7aab7bb669a1b781bffb9b67a30897c45b20a7`的 `cycle%PE_HOP_CYCLES`表达；当前PE为编译期常量模5选择，不再是低位bank选择，需由Vitis确认是否仍能证明distance5且不产生昂贵取模路径。CMP保持已验证的`cycle%CMP_HOP_CYCLES`四槽低位选择；没有添加`cmp_pipeline inter false`。
 - 当前仅恢复该commit已有的 `#pragma HLS DEPENDENCE variable=pe_register inter false`。微程序保证SCALE/PWL/ROW_SUM/PV的读发生在对应写回后；11:49也已证明单独移除这条pragma不会改变48错集合。
 - `pe_pipeline`/`cmp_pipeline` 不恢复全局 `inter false`；其多拍子函数提交顺序必须保留。此前对这两者的覆盖已被RTL证明会造成48个数值错误。
@@ -91,7 +94,7 @@
 - `systolicArrayProcess`已恢复无PIPELINE的query/key顺序嵌套循环，删除被Vitis忽略的`ALLOCATION` pragma；最新build确认不再生成压平控制的两个30位乘法器/6 DSP。
 - 当前候选进一步分离控制与算术结果：`PeWave`只保留控制和非归约操作的旁路partial；无默认初始化的`PeResult`环保存FMA原始输出。QK从下一行、ROW_SUM/PV从上一行的结果槽直接选累加输入；所有旧值在任何PE结果写回之前先捕获。FMA后不再通过reduce/valid旁路mux写回partial。当前hop=5，单坐标PE调用和真实依赖均保留，没有新增反馈DATAFLOW FIFO。
 - 23:21 RTL检查点已确认坐标PE边界内联版本无死锁、无数值错误；完全展开的ROW/COL模板仍对应16条11x11乘法通路，结果由ST11提前至ST9、SA达到II1，硬件数不增加。
-- 正式PE保留54位sticky、48位exp2下溢舍入及27位CLZ；当前候选进一步把DSP后22位乘积最高位手写优先编码器改为`countLeadingZeros()`，直接生成最高位指数和规格化左移量。hop5、乘法latency=1、CMP/Accumulator/DMA/SRAM/Delayer和正式Tcl不变；独立Raw FMA及4x2、4x4、8x4本地完整回归通过，等待Vitis。
+- 正式PE保留54位sticky、48位exp2下溢舍入及27位CLZ；DSP后22位乘积最高位也已改为`countLeadingZeros()`，直接生成最高位指数和规格化左移量。01:16 build确认hop5、乘法latency=1、II1、实例数和RTL正确性保持，SA时序达到7.120 ns。
 - 第三阶段3A的独立`fp32_raw_fma`已由18:45 Vitis build验收：248016组CSim零错误，latency=5、II=1、估算周期7.299 ns；仅一个24x24乘法器实例、DSP2、FF571、LUT4126，满足II1、<=8拍、<=7.300 ns、DSP<=5门槛。
 - 3B已验收：`accUnit`调用FP32 Raw FMA，四列Accumulator各自只有一个共享算术调用点；正式Tcl包含`fp32_raw_fma.cpp`，整核结果见上节。
 - 3C已验收：正式stream接口删除未消费的`CmpUnitOutput.out_max`，`accCmp`改为只返回`in_a-in_b`的`accSub`；逐score `newMax`继续由`finiteAccMax`组合位序选择，差值方向保持0/oldMax-newMax。Vitis确认4个CMP均3拍/II1且RTL数值正确，无资源、时序或外围退化。
@@ -101,7 +104,8 @@
 - 当前 `%8` Raw FMA内联构建已把SA主循环从II=2恢复到II=1，并通过RTL CoSim。
 - 第一阶段DMA已经验收：Q/K/V均为II=1，CSim/RTL CoSim通过，端到端周期和计算/存储部件未退化；代价是三个DMA读模块共增加14304 FF，仍仅占器件3.40%。
 - 撤销完整tile循环的PIPELINE/II约束后，编译规模问题已解决；内联把原始结果环写回从ST11提前到ST9，解决了distance8递归并达到II1。
-- 第二阶段、3A、3B和3C均已通过HLS/RTL门槛。hop5已确认RTL数值、SA II1、Tile 106/101、实例数和外围正常，并把hop4的11.003 ns改善到7.480 ns；当前只剩0.180 ns时序缺口，应保持hop5单变量修PE关键路径，不再评估静态5槽表达。
+- 第二阶段以及3A、3B、3C、3D均已通过HLS/RTL门槛。hop5+CLZ确认RTL数值、SA II1、Tile 106/101、实例数和外围正常，SA7.120 ns、顶层7.300 ns；下一项未验证内容是Vivado实现后时序。
+- Split-D独立顶层已完成首个本地功能版本：默认`4×4/dim16`和参数化`16×16/dim128`均通过同一端到端C++测试；旧`fsa_stream`4×4回归继续通过。尚未运行Vitis CSim/CSynth，因而`D×D`RawFMA实例数、每PE FP32寄存器落点、资源、II和时序都未验证。
 
 ## 5. Architecture / Mental Model
 
@@ -135,14 +139,14 @@ Q/K/V AXI DMA
 | `src/stream/controller.cpp` | tile 控制和 SA 微程序 | causal、phase 顺序来源 |
 | `src/stream/scratchpad.cpp` | 64-bit banked SRAM 与Q/K/V重放 | Q现在每个KV tile重放 |
 | `src/stream/input_delayer.cpp` | Q/K/V阶梯延迟 | 当前每tile固定3 phase |
-| `src/stream/systolic_array.cpp` | 单SA、PE/CMP与环形token流水 | 当前PE使用`cycle%5`、CMP使用已验收`cycle%4`；Vitis确认II1和RTL正确，时序7.480 ns |
+| `src/stream/systolic_array.cpp` | 单SA、PE/CMP与环形token流水 | 当前PE使用`cycle%5`、CMP使用已验收`cycle%4`；Vitis确认II1和RTL正确，SA时序7.120 ns |
 | `src/stream/accumulator_process.cpp` | 单actor微指令 Accumulator | 避免反馈环死锁 |
 | `src/stream/arithmetic.cpp` | PE/Acc FMA、PWL、reciprocal | PE latency优化入口 |
 | `include/fsa/stream/pe_raw_fma.hpp`、`src/stream/pe_raw_fma*.cpp` | PE Raw FMA与独立HLS验证顶层 | 已接入正式PE；当前源码直接传递exp2精确小数域以缩短关键路径，待Vitis复核 |
 | `hls/pe_raw_fma/run_hls.tcl` | 独立Raw FMA综合入口 | `./run_hls.sh pe_raw_fma`，默认CSim+CSynth，不跑CoSim/IP导出 |
 | `src/stream/dataflow.cpp` | 顶层actor连接 | 检查生产/消费与死锁 |
 | `hls/fsa_stream/run_hls.tcl` | HLS入口 | `set_top fsa_stream` |
-| `build/fsa_stream_build/solution1/` | 最新3D hop5构建 | 00:41 CSim/RTL通过、SA II1、Tile 106/101、1498/1142、DSP32；整核7.480 ns，时序仍差0.180 ns |
+| `build/fsa_stream_build/solution1/` | 最新3D hop5+CLZ构建 | 01:16 CSim/RTL通过、SA II1、Tile 106/101、1498/1142、DSP32；SA7.120 ns、顶层7.300 ns，验收通过 |
 | `src/stream/fp32_raw_fma*.cpp`、`include/fsa/stream/fp32_raw_fma.hpp` | 3A/3B FP32 Raw FMA | 独立核及四个正式Accumulator lane均已验收 |
 | `hls/fp32_raw_fma/run_hls.tcl`、`tests/stream/test_fp32_raw_fma_top.cpp` | 3A验证入口 | CSim 248016向量通过；5拍/II1/7.299 ns/DSP2/单24x24乘法实例 |
 | `docs/fsa_stream综合报告.md` | 当前综合报告 | 已更新为15:44 build，并加入fsa_dma与FSA-main两组对比 |
@@ -535,9 +539,9 @@ Q/K/V AXI DMA
 
 **Setup:** 根据00:41 build的7.480 ns关键路径和AMD UG1399的运算符流水建议，评估将11x11乘法latency从1增到2；因hop5真实反馈距离已贴住五拍，该方案可能增加结果提交拍并破坏II1，故本轮不采用。改为只删除DSP后手写22位最高位优先编码器，使用与已验收27位规格化相同的`ap_uint::countLeadingZeros()`，由前导零数直接生成`product_top`和规格化左移量；不改乘法latency、hop、II约束或硬件调用点。
 
-**Result:** 独立Raw FMA通过30000随机MAC、24480对齐边界、4608规格化边界、4596 exp2缩放边界及定向IEEE测试。4x2、4x4、8x4完整causal/non-causal attention与Accumulator PWL全部通过，编译启用`-Wall -Wextra -Wpedantic -Werror`。
+**Result:** 独立Raw FMA通过30000随机MAC、24480对齐边界、4608规格化边界、4596 exp2缩放边界及定向IEEE测试。4x2、4x4、8x4完整causal/non-causal attention与Accumulator PWL全部通过。01:16 Vitis build进一步确认CSim/RTL CoSim通过；SA时序7.480->7.120 ns，顶层7.300 ns且无时序警告；II1、Tile 106/101、1498/1142 cycles、16 PE/4 CMP、20 BRAM/32 DSP保持，FF/LUT降至71336/132486。
 
-**Conclusion:** C++位精确功能通过，修改范围可归因且不改变算法语义。尚无Vitis结果，不能声称7.480 ns缺口、II1、DSP32或RTL已保持；下一步用户运行`./run_hls.sh fsa_stream`，重点检查关键路径是否移除`highestBit22`的0.705 ns mux、估算周期是否<=7.300 ns及SA II/Tile/实例/CoSim。
+**Conclusion:** 22位CLZ修改消除0.180 ns缺口且带来0.360 ns SA裕量，同时降低资源并保持周期、II、实例和RTL正确性。第三阶段3D验收完成；仍需Vivado实现验证才能证明布局布线后100 MHz时序。
 
 ## 9. Failed Attempts / Things Not To Repeat
 
@@ -631,9 +635,9 @@ Q/K/V AXI DMA
 
 ### P008 — 3D最小hop整核验收
 
-**Known facts:** 00:41 hop5 build已通过CSim和RTL CoSim；SA达到II1、Tile 106/101、端到端1498/1142，单SA、16 PE、4 CMP和DSP32保持。估算周期7.480 ns，距离7.300 ns预算差0.180 ns。
+**Known facts:** 01:16 hop5+CLZ build已通过CSim和RTL CoSim；SA达到II1、Tile 106/101、端到端1498/1142，单SA、16 PE、4 CMP和DSP32保持。SA估算7.120 ns、顶层7.300 ns，无时序警告。
 
-**Plan:** 保持hop5及外围不变，只对PE乘法后的最高位选择、指数/对阶和54位shift/sticky关键路径做小幅逻辑化简或重定时，再跑完整Vitis。不得添加虚假全局dependence覆盖。
+**Result:** 22位乘积最高位改用CLZ后消除0.180 ns缺口，资源同时下降，3D验收完成。不得恢复虚假全局dependence覆盖；下一步是Vivado实现时序。
 
 ### P003 — Tagged wave仍需K/V operand cache
 
@@ -657,15 +661,23 @@ Q/K/V AXI DMA
 
 ## 11. Current Working Set
 
+- Split-D新增文件：`include/fsa/stream/split_d/`、`src/stream/split_d/fsa_stream_split_d.cpp`、`tests/stream/test_fsa_stream_split_d.cpp`、`hls/fsa_stream_split_d/run_hls.tcl`。
+- 当前Split-D默认参数为`FSA_SPLIT_D_PE_DIM=4`、`FSA_SPLIT_D_HEAD_DIM=16`；已验证只改为`16/128`可以本地编译并运行。
 - 第一阶段DMA扁平循环已由2026-09-17 14:09 build验收；保留 `src/stream/dma_process.cpp` 修改。
 - 第二阶段撤销完整tile调用循环的PIPELINE/II约束，并恢复query/key顺序嵌套循环；最新build确认IR规模恢复、无效ALLOCATION警告消失且额外6个控制DSP已删除。
 - PE内部latency优化第二阶段已接入独立验收的 `pe_raw_fma`；最新build确认16条PE乘法通路各DSP1、SA II1；PE内联后的latency不能继续引用为独立函数报告。
-- 当前焦点：00:41 hop5整核build已通过CSim/RTL、SA II1、Tile 106/101及实例数量检查，但估算周期7.480 ns仍比7.300 ns预算慢0.180 ns。当前源码已把DSP后22位手写最高位优先编码器替换为CLZ并通过本地回归，等待Vitis确认时序；3D尚未验收。
+- 当前焦点：01:16 hop5+CLZ整核build已通过CSim/RTL、SA II1、Tile 106/101、实例数量和时序检查；SA7.120 ns、顶层7.300 ns，第三阶段3D验收完成。
 - 当前设计边界：顶层 `fsa_stream` 形参、四个AXI bundle、器件和时钟约束保持不变；内部协议可调整。
-- 下一步用户重跑`./run_hls.sh fsa_stream`验收当前CLZ候选：检查<=7.300 ns、SA II1、Tile约106/101、16 PE/4 CMP/DSP32、外围II和RTL CoSim；频率约束和外围不混入本轮。
+- 下一步如继续推进，应进行IP导出和Vivado实现时序验证；在此之前不能把HLS估算等同于布局布线后100 MHz通过。
 
 ## 12. Next Actions
 
+- [x] 新建独立`fsa_stream_split_d`，保持现有`fsa_stream`源码不变。
+- [x] 实现`D×D`PE状态，每PE包含一个FP16`reg`和新增FP32`score_acc`。
+- [x] 实现`dim/D`轮QK累加、完整S后的softmax以及`dim/D`轮PV。
+- [x] 本地验证`4×4/dim16`和仅改参数后的`16×16/dim128`，并复跑旧`fsa_stream`4×4回归。
+- [ ] 在Vitis运行`./run_hls.sh fsa_stream_split_d`对应入口，核对只有一套`D×D`RawFMA阵列、每PE一个FP32 score寄存器、四AXI bundle、资源、II和10ns/2.7ns时序。
+- [ ] 根据首轮CSynth报告修正可能的函数复制、外部score存储或非预期浮点算术实例；未通过结构验收前不做多engine或物理消融。
 - [x] 当前源码server build、CSim和9x4 causal/non-causal RTL CoSim完成且无死锁。
 - [x] 顶层/RTL名为 `fsa_stream`；DSP/BRAM未增加；仍为单SA/单Accumulator向量。
 - [x] 用 `%16`静态PE slot和仅限 `pe_register` 的提示解决动态slot调度，SA主循环恢复II=1且RTL正确；全局 `pe_pipeline/cmp_pipeline inter false` 方案继续拒绝。
@@ -723,12 +735,17 @@ Q/K/V AXI DMA
 - [x] 读取3D直接hop4 build：RTL正确、时序和实例数保持，但CMP动态槽distance1导致SA II3、Tile 275/270、端到端2898/2038，性能失败。
 - [x] CMP四槽选择等价改为`cycle%4`后的完整Vitis验证：SA恢复II1、Tile 94/90、RTL通过且硬件不增加；但11.003 ns时序不合格。
 - [x] 按用户决定将PE hop从4单变量改为5，保持CMP `cycle%4`和全部算术/外围不变；4x2、4x4、8x4本地回归通过。
-- [x] 用户构建hop5完整Vitis结果：SA II1、Tile 106/101、单16 PE/4 CMP/DSP32及RTL正确性通过；7.480 ns时序差0.180 ns，3D未最终验收。
+- [x] 用户构建hop5完整Vitis并以CLZ修复时序：SA II1、Tile 106/101、单16 PE/4 CMP/DSP32、RTL正确性及顶层7.300 ns全部通过，3D最终验收。
 - [x] 最新15:23 Vitis确认SA II1、Tile143/134、顶层7.300 ns与RTL CoSim通过；第二阶段验收，第三阶段3A已开始。
-- [ ] 3A/3B/3C已逐个手动验收；3D hop5功能/吞吐已验证，仍需修复0.180 ns时序缺口后最终验收；不同时修改频率，150/200 MHz评估更后置。
+- [x] 3A/3B/3C/3D均已逐个手动验收；3D hop5+CLZ达到功能、II、时序、资源和RTL门槛。150/200 MHz评估继续后置。
 
 ## 13. Validation Status
 
+- [x] Split-D本地`4×4/dim16`：目标`L=16`的causal/non-causal、跨tile`L=7`、`L=1`和非法L canary通过。
+- [x] Split-D本地`16×16/dim128`：同一源码仅改编译参数，端到端测试通过。
+- [x] 新增Split-D后，旧`fsa_stream`4×4完整attention及Acc PWL回归通过。
+- [ ] Split-D Vitis CSim和CSynth。
+- [ ] Split-D RTL CoSim、IP导出、Vivado实现和板测；这些步骤尚未获本轮授权执行。
 - [x] 旧基线4x4 CSim通过（旧build）。
 - [x] 旧基线4x4 RTL CoSim通过且无死锁（旧build）。
 - [x] 旧基线结构为单SA/单Accumulator向量（旧build）。
@@ -786,8 +803,8 @@ Q/K/V AXI DMA
 - [x] 3D静态CMP槽修复后正式`fsa_stream`的Vitis CSim/综合/RTL CoSim、SA II、资源和端到端周期；功能/II通过，时序11.003 ns失败。
 - [x] 3D hop5候选的4x2、4x4、8x4完整attention及Acc PWL本地回归。
 - [x] hop5乘积规格化CLZ候选的独立Raw FMA全量位精确回归，以及4x2、4x4、8x4完整attention和Acc PWL本地回归。
-- [ ] hop5乘积规格化CLZ候选的正式Vitis CSim/综合/RTL CoSim、<=7.300 ns、SA II1和实例数量验收。
-- [x] 3D hop5正式`fsa_stream`的Vitis CSim/综合/RTL CoSim、SA II、资源和端到端周期；功能与吞吐通过，7.480 ns时序未达7.300 ns。
+- [x] hop5乘积规格化CLZ候选的正式Vitis CSim/综合/RTL CoSim、<=7.300 ns、SA II1和实例数量验收。
+- [x] 3D hop5+CLZ正式`fsa_stream`的Vitis CSim/综合/RTL CoSim、SA II、时序、资源和端到端周期全部通过。
 - [ ] IP导出。
 - [ ] Vivado实现时序。
 - [ ] FPGA板级验证。
@@ -806,17 +823,18 @@ Q/K/V AXI DMA
 
 ## 15. Context Handoff Summary
 
-1. 正在把完整FSA attention核迁移并优化到HLS，结构目标是Chisel FSA。
+1. 当前新增主任务是独立`D×D`Split-D顶层：首版`4×4/dim16`，后续参数化为`16×16/dim128`；现有生产`fsa_stream`保持不变。
 2. 当前坚持单SA、单PE MacUnit、单列Accumulator，通过等价流水重定时降低延迟。
-3. 最新build是2026-09-21 00:41的hop5：功能/RTL、SA II1、Tile 106/101和实例数通过，估算周期7.480 ns，仍差7.300 ns门槛0.180 ns。当前源码已单变量把乘积22位最高位编码改为CLZ并通过本地回归，尚无对应Vitis结果；最新完整验收基线仍是21:39的3C hop8。
+3. 最新build是2026-09-21 01:16的hop5+CLZ：功能/RTL、SA II1、Tile 106/101和实例数通过；SA7.120 ns、顶层7.300 ns，无时序警告，已成为最新完整验收基线。
 4. `%16` PE slot加仅限PE.reg的调度提示已把SA主循环从II=9恢复为II=1；tile latency/interval为237/222。
 5. 相对13:15基线端到端加速6.75--7.14x；相对9月9日稳定版本也快约6.1%--6.5%，说明2/4/5/7外围改造得到保留并产生净收益。
-6. 最新已验收hop8顶层HLS估算7.300 ns、SA7.272 ns、Acc7.299 ns，无时序违例；资源BRAM20/DSP32/FF89266/LUT140104，单16 PE/4 CMP/4 Accumulator lane保持。HLS顶层裕量零，尚无Vivado实现证明。
+6. 最新已验收hop5+CLZ顶层HLS估算7.300 ns、SA7.120 ns、Acc7.299 ns，无时序违例；资源BRAM20/DSP32/FF71336/LUT132486，单16 PE/4 CMP/4 Accumulator lane保持。HLS顶层裕量零，尚无Vivado实现证明。
 7. 第一阶段DMA已验收：Q/K/V read均II=1；计算、存储、端到端周期均未退化，代价为DMA流水FF增加。
 8. 外层tile PIPELINE/II回退已解决此前百万级IR问题；当前层次只有一个TileTick，顺序循环保证单实例。
 9. 23:21 build确认内联坐标PE边界把结果写回由ST11提前至ST9，SA由II2降为II1、TileTick由276/268降为142/134，且硬件数量不增加；RTL已通过，代价是时序退化至9.608 ns。
-10. 3A、3B和3C均已验收；四个Accumulator lane为6拍/II1/DSP2，向量7拍/II1，四个CMP为3拍/II1/DSP2。3D的CMP `cycle%4`和PE `cycle%5`已通过功能/II检查；当前CLZ候选目标是在保持SA II1和约101拍Tile interval时消除剩余0.180 ns时序缺口。
+10. 3A、3B、3C和3D均已验收；四个Accumulator lane为6拍/II1/DSP2，向量7拍/II1，四个CMP为3拍/II1/DSP2。CMP `cycle%4`、PE `cycle%5`及22位CLZ均通过功能、II、时序和RTL检查。
 11. SRAM/Scratchpad、DMA三请求actor、Delayer、Accumulator和当前CMP寄存器通路全部保留；禁止恢复 `pe_pipeline/cmp_pipeline inter false`。
+12. Split-D本地功能已通过两个目标参数；下一步必须先做Vitis CSim/CSynth，确认源代码中的单一`runPeArray`确实综合成一套`D×D`PE算术，而不是被不同阶段复制。
 
 ## 16. Decision / Progress Log
 
@@ -873,3 +891,6 @@ Q/K/V AXI DMA
 - 2026-09-21 — 再次读取所谓“新build”时确认目录未刷新：`solution1.log`仍为9月20日23:55，Autopilot预处理源码仍是`PE_HOP_CYCLES=4`，与00:13已改为5的工作区源码不一致。现有94/90、11.003 ns、1449/1107和CoSim Pass均为hop4旧结果，不能验收hop5；本轮未修改源码。
 - 2026-09-21 — 读取00:41真正hop5 build：预处理快照确认`PE_HOP_CYCLES=5`；CSim/综合/RTL CoSim及post-check通过。SA主循环trip100、iteration latency6、II1，Tile 106/101；9x4 non-causal/causal为1498/1142，总执行2675。16 PE/4 CMP、20 BRAM/32 DSP、DMA II1与Accumulator 7/1保持，FF/LUT为72193/135638。时序从hop4的11.003 ns改善到7.480 ns、Fmax133.69 MHz，但仍超过7.300 ns预算0.180 ns，3D暂不验收；本轮只读build并更新上下文，未修改源码。
 - 2026-09-21 — 查阅AMD UG1399后启动hop5时序修复。直接把11x11乘法从latency1改为2虽可插寄存器，但可能越过五拍反馈距离，暂不采用；单变量删除DSP后22位手写最高位优先编码器，改用`countLeadingZeros()`同时生成`product_top`与规格化移位量。独立Raw FMA的随机/对齐/规格化/exp2/IEEE测试及4x2、4x4、8x4完整attention和Acc PWL均通过；等待服务器Vitis确认是否消除7.480 ns缺口并保持II1/DSP32/RTL正确。
+- 2026-09-21 — 读取01:16 hop5+CLZ build：预处理快照确认22位`countLeadingZeros()`与hop5；CSim/综合/RTL CoSim及post-check全部通过。SA时序7.480->7.120 ns，顶层7.300 ns且无`HLS 200-871`；SA II1、Tile 106/101、1498/1142 cycles、16 PE/4 CMP、20 BRAM/32 DSP和外围II保持。FF/LUT由72193/135638降至71336/132486。第三阶段3D全部门槛通过并验收，尚待Vivado实现后时序。
+- 2026-09-21 — 新建 `docs/综合报告/fsa_stream当前build综合对比报告.md`：以01:16 hop5+CLZ当前产物为主证据，加入与2026-09-17 14:09“DMA II1、手写FMA前”基线及留存`fsa_dma`报告的两组对比。报告明确当前1498/1142 cycles、32 DSP、71336 FF、132486 LUT、7.300 ns零裕量，以及历史build不可直接重读、跨架构18.402x仅适用于L9/D4 non-causal CoSim事务等证据限制；未覆盖旧报告、未重跑HLS。
+- 2026-09-24 — 用户明确Split-D最终结构：当前`R×C`的研究变体改为参数化`D×D`，每PE新增FP32`score_acc`，先执行`dim/D`轮S累加，再softmax，再执行`dim/D`轮PV。新增独立`fsa_stream_split_d`及默认`4×4/dim16`实现；同一代码的`4×4/dim16`和`16×16/dim128`本地端到端测试、旧顶层4×4回归均通过。尚无Vitis结构、资源、II或时序结果。

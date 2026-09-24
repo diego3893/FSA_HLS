@@ -1,0 +1,84 @@
+{
+  "result": "PASS",
+  "python": "3.13.5",
+  "source_files_snapshotted": 57,
+  "markdown_files": 8,
+  "local_links_checked": 14,
+  "standard_cases": 72,
+  "detected_mutations": 8,
+  "max_ideal_abs_error": 2.220446049250313e-16,
+  "p16_ftz_sample_error": 0.00016583798733887933,
+  "missing_repo_vendor_header": true,
+  "repo_build_present": false,
+  "not_run": [
+    "repository C++ regression",
+    "HLS Csim",
+    "HLS synthesis",
+    "RTL cosim",
+    "IP export",
+    "Vivado implementation",
+    "board test"
+  ],
+  "generated_files": [
+    {
+      "name": "00_阅读入口.md",
+      "bytes": 4655,
+      "sha256": "0290eb68d17d318292b63d9a7d5c2fa3b197678fc25b2c62eb0f04035da85e7c"
+    },
+    {
+      "name": "01_当前实现审计.md",
+      "bytes": 8056,
+      "sha256": "4344ccb50f2363b1da6309f52124bec1c10683ebea79f90ad457e6774b1d6766"
+    },
+    {
+      "name": "02_SplitD详细架构规格.md",
+      "bytes": 23098,
+      "sha256": "f93c49a1fa41383dce60c7103fc7cd657188a1e7046fe84ccb203a01a0c7fe1a"
+    },
+    {
+      "name": "03_Agent实施步骤与验收.md",
+      "bytes": 11472,
+      "sha256": "dd5f7aa7f2f9db9d8ba8375cb8983c6173f82ccab3ce78ce0f9812d91ded6d8d"
+    },
+    {
+      "name": "04_论文优化映射与实验矩阵.md",
+      "bytes": 8045,
+      "sha256": "3c4918b2045a4b226cea326f51b11b68bc19651c2d0a2cca78ec316394a6961e"
+    },
+    {
+      "name": "05_本次交付验证记录.md",
+      "bytes": 3059,
+      "sha256": "42b0e35d002110875defbfaf91798d8ff57509ee9b104fde91d643676b77582c"
+    },
+    {
+      "name": "06_相对0921修订清单.md",
+      "bytes": 2845,
+      "sha256": "9324bd0ebfaf83ea6da6085c7966e7ffd03109cb9cfbe3a8083013d229808dba"
+    },
+    {
+      "name": "PROJECT_CONTEXT.md",
+      "bytes": 5414,
+      "sha256": "49ad3bfdb24a65362a0e40bfaf59324435d6f32d18726a8ef2aa2a2058a96d50"
+    },
+    {
+      "name": "reference_results.json",
+      "bytes": 46490,
+      "sha256": "7753cb16f46bf726fe747e1536472cf7bd1805a2c034c80192f909f82502925a"
+    },
+    {
+      "name": "reference_split_d.py",
+      "bytes": 20618,
+      "sha256": "4403d13e02ab01d634406d88498457b6b56fb133fb0b3bb749dea4e4195cc5cb"
+    },
+    {
+      "name": "source_manifest.json",
+      "bytes": 10818,
+      "sha256": "92606db5937c1a3bfc690132aab234f09a807d486a5e0699122d02db97aaec4a"
+    },
+    {
+      "name": "validate_delivery.py",
+      "bytes": 4312,
+      "sha256": "3efa9eb783021c9bd09b8c8fde4eb8be31283b15dc558ca18ba1c24c097c0ead"
+    }
+  ]
+}
