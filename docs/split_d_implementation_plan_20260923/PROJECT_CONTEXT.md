@@ -16,9 +16,9 @@
 
 **Confirmed:** 当前环境已有Vitis headers和历史build，但本地没有Vitis/Vivado。新增独立`fsa_stream_split_d`、参数/PE状态、端到端testbench和HLS Tcl。默认`4×4/dim16`已通过目标`L=16`及边界配置，只改参数后的`16×16/dim128`也通过本地端到端C++测试；旧`fsa_stream`4×4回归继续通过。
 
-**Assessment:** 2026-09-25首轮CSynth已否定“函数定义唯一就会物理复用”的假设：`runPeArray`单模块为16 DSP，但不同阶段共生成4份；`runAccumulatorColumns`生成2份且每份内部普通/exp2静态分支又复制FMA，顶层达到96 DSP。当前源码已限制PE阵列和Accumulator各1份，并合并每列FMA调用点，等待下一轮CSynth证明物理复用。
+**Assessment:** 2026-09-25首轮CSynth已否定“函数定义唯一就会物理复用”的假设：`runPeArray`单模块为16 DSP，但不同阶段共生成4份；`runAccumulatorColumns`生成2份且每份内部普通/exp2静态分支又复制FMA，顶层达到96 DSP。当前源码已限制PE阵列和Accumulator各1份，并合并每列FMA调用点。首次修复重跑因`ALLOCATION`函数名缺少`detail::`限定而在CSynth前端失败，现已修正，等待下一轮CSynth证明物理复用。
 
-**Main issue:** 首轮CSim和CSynth完成，但单阵列结构不合格。修复后的两种参数本地功能通过；实际实例数、资源、II、时序和score物理局部性仍需重跑Vitis确认。
+**Main issue:** 首轮CSim和CSynth完成，但单阵列结构不合格。`ALLOCATION`命名空间编译错误已修正，默认配置本地功能再次通过；实际实例数、资源、II、时序和score物理局部性仍需重跑Vitis确认。
 
 **Historical artifacts:** `source_manifest.json`和`delivery_validation.json`保留方案交付时的历史快照，不随实施静默刷新；当前源码和本上下文已变化，旧hash不再表示当前实现状态。
 
@@ -79,6 +79,7 @@
 - [x] `4×4/dim16`与参数化`16×16/dim128`功能测试。
 - [x] 新顶层首轮Vitis CSim/CSynth；功能通过但4份PE阵列、2份Accumulator，结构验收失败。
 - [x] PE/Accumulator共享修复及`4×4/dim16`、`16×16/dim128`本地回归。
+- [x] 修正共享限制pragma中缺少`detail::`限定导致的`HLS 207-3777`；默认配置本地回归通过。
 - [ ] 修复后的Vitis CSim/CSynth和结构验收。
 - [ ] 新CSynth/RTL/Vivado/板测。
 
@@ -88,4 +89,4 @@ Windows PowerShell；Python版本见delivery_validation.json。源根为上级FS
 
 ## 12. Context Handoff Summary
 
-用户最终将研究结构收敛为参数化`D×D`阵列：默认`D=4、dim=16`，目标`D=16、dim=128`。首轮CSynth的功能、接口和7.300 ns顶层时序通过，但综合出4套PE阵列和2套Accumulator，结构失败。当前源码已限制两类算术模块各1份并合并Accumulator内部FMA调用点，两种参数本地回归通过。下一步重跑Vitis确认单阵列资源收敛，再优化QK/ROW_SUM的II4。
+用户最终将研究结构收敛为参数化`D×D`阵列：默认`D=4、dim=16`，目标`D=16、dim=128`。首轮CSynth的功能、接口和7.300 ns顶层时序通过，但综合出4套PE阵列和2套Accumulator，结构失败。当前源码已限制两类算术模块各1份并合并Accumulator内部FMA调用点；首次修复重跑的`ALLOCATION`命名空间错误已修正，默认配置本地回归通过。下一步重跑Vitis确认单阵列资源收敛，再优化QK/ROW_SUM的II4。

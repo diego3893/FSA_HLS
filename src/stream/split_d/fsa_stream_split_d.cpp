@@ -208,9 +208,9 @@ namespace detail{
         const bool causal
     ){
         #pragma HLS INLINE off
-        #pragma HLS ALLOCATION function instances=runPeArray limit=1
-        #pragma HLS ALLOCATION \
-            function instances=runAccumulatorColumns limit=1
+#pragma HLS ALLOCATION function instances=detail::runPeArray limit=1
+#pragma HLS ALLOCATION \
+    function instances=detail::runAccumulatorColumns limit=1
 
         const unsigned query_tiles =
             (length+(unsigned)PE_DIM-1U)/(unsigned)PE_DIM;
