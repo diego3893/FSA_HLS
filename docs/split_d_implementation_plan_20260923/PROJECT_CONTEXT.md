@@ -16,9 +16,9 @@
 
 **Confirmed:** 当前环境已有Vitis headers和历史build，但本地没有Vitis/Vivado。新增独立`fsa_stream_split_d`、参数/PE状态、端到端testbench和HLS Tcl。默认`4×4/dim16`已通过目标`L=16`及边界配置，只改参数后的`16×16/dim128`也通过本地端到端C++测试；旧`fsa_stream`4×4回归继续通过。
 
-**Assessment:** 当前功能代码通过单一`runPeArray`复用PE算术，并在每个`PeState`中跨全部特征块保存`score_acc`。是否真正综合为一套`D×D`RawFMA、score是否为局部寄存器，仍需CSynth层次和资源证明。
+**Assessment:** 2026-09-25首轮CSynth已否定“函数定义唯一就会物理复用”的假设：`runPeArray`单模块为16 DSP，但不同阶段共生成4份；`runAccumulatorColumns`生成2份且每份内部普通/exp2静态分支又复制FMA，顶层达到96 DSP。当前源码已限制PE阵列和Accumulator各1份，并合并每列FMA调用点，等待下一轮CSynth证明物理复用。
 
-**Main issue:** 本地功能实现已完成首轮，但未运行Vitis CSim/CSynth。不得据本地通过声称PE实例数、资源、II、时序或物理局部性已验收。
+**Main issue:** 首轮CSim和CSynth完成，但单阵列结构不合格。修复后的两种参数本地功能通过；实际实例数、资源、II、时序和score物理局部性仍需重跑Vitis确认。
 
 **Historical artifacts:** `source_manifest.json`和`delivery_validation.json`保留方案交付时的历史快照，不随实施静默刷新；当前源码和本上下文已变化，旧hash不再表示当前实现状态。
 
@@ -62,13 +62,13 @@
 
 ## 8. Current Working Set
 
-实施文件位于`include/fsa/stream/split_d/`、`src/stream/split_d/fsa_stream_split_d.cpp`、`tests/stream/test_fsa_stream_split_d.cpp`和`hls/fsa_stream_split_d/run_hls.tcl`。根目录`run_hls.sh`已加入`fsa_stream_split_d`模块入口。本目录继续保存规范、模型和交接上下文。
+实施文件位于`include/fsa/stream/split_d/`、`src/stream/split_d/fsa_stream_split_d.cpp`、`tests/stream/test_fsa_stream_split_d.cpp`和`hls/fsa_stream_split_d/run_hls.tcl`。根目录`run_hls.sh`已加入`fsa_stream_split_d`模块入口。当前源码还包含首轮CSynth后的PE/Accumulator单实例修复。本目录继续保存规范、模型和交接上下文。
 
 ## 9. Next Actions
 
-1. 在Vitis运行新顶层的CSim/CSynth，保持10ns、2.7ns uncertainty和当前VU37P。
-2. 核对`D×D`RawFMA实例数、每PE FP32 score寄存器、没有阵列外S/P RAM、四AXI接口、资源、II和时序。
-3. 若工具复制`runPeArray`或生成额外浮点阵列，先修正共享结构；E1验收前不扩engine和不做布局实验。
+1. 在Vitis重跑新顶层的CSim/CSynth，保持10ns、2.7ns uncertainty和当前VU37P。
+2. 核对`runPeArray`只有1份且含`D×D`个RawFMA、`runAccumulatorColumns`只有1份且每列1个FP32 RawFMA，同时检查score寄存器、四AXI接口、资源、II和时序。
+3. 单阵列结构通过后，再处理首轮QK/ROW_SUM实际II4；E1验收前不扩engine和不做布局实验。
 
 ## 10. Validation Status
 
@@ -77,7 +77,9 @@
 - [x] UTF-8、Markdown相对链接、输入SHA-256与交付清单检查（见delivery_validation.json）。
 - [x] 仓库旧顶层4×4回归及新Split-D本地C++端到端测试。
 - [x] `4×4/dim16`与参数化`16×16/dim128`功能测试。
-- [ ] 新顶层Vitis CSim/CSynth和结构验收。
+- [x] 新顶层首轮Vitis CSim/CSynth；功能通过但4份PE阵列、2份Accumulator，结构验收失败。
+- [x] PE/Accumulator共享修复及`4×4/dim16`、`16×16/dim128`本地回归。
+- [ ] 修复后的Vitis CSim/CSynth和结构验收。
 - [ ] 新CSynth/RTL/Vivado/板测。
 
 ## 11. Environment
@@ -86,4 +88,4 @@ Windows PowerShell；Python版本见delivery_validation.json。源根为上级FS
 
 ## 12. Context Handoff Summary
 
-用户最终将研究结构收敛为参数化`D×D`阵列：默认`D=4、dim=16`，目标`D=16、dim=128`。本地功能代码和两种参数测试已完成，旧顶层回归未受影响。下一步不是继续扩功能，而是用Vitis证明只有一套`D×D`PE阵列、每PE一个FP32 score寄存器，并读取资源、II和时序。
+用户最终将研究结构收敛为参数化`D×D`阵列：默认`D=4、dim=16`，目标`D=16、dim=128`。首轮CSynth的功能、接口和7.300 ns顶层时序通过，但综合出4套PE阵列和2套Accumulator，结构失败。当前源码已限制两类算术模块各1份并合并Accumulator内部FMA调用点，两种参数本地回归通过。下一步重跑Vitis确认单阵列资源收敛，再优化QK/ROW_SUM的II4。

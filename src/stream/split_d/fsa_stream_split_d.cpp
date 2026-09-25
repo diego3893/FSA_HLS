@@ -93,16 +93,20 @@ namespace detail{
 
         for(int col=0; col<PE_DIM; ++col){
             #pragma HLS UNROLL
-            if(exp2_mode){
-                const AccPwlInput pwl = prepareAccPwlInput(in_a[col]);
-                const acc_t fractional_result = accUnit(
-                    pwl.fractional, pwl.slope, pwl.intercept
-                );
-                result[col] = pwl.force_zero ? accZero()
-                    : finishAccPwl(fractional_result, pwl.integer);
-            }else{
-                result[col] = accUnit(in_a[col], in_b[col], in_c[col]);
-            }
+            const AccPwlInput pwl = prepareAccPwlInput(in_a[col]);
+            const acc_t operand_a = exp2_mode
+                ? pwl.fractional : in_a[col];
+            const acc_t operand_b = exp2_mode
+                ? pwl.slope : in_b[col];
+            const acc_t operand_c = exp2_mode
+                ? pwl.intercept : in_c[col];
+            const acc_t operation_result = accUnit(
+                operand_a, operand_b, operand_c
+            );
+            result[col] = exp2_mode
+                ? (pwl.force_zero ? accZero()
+                    : finishAccPwl(operation_result, pwl.integer))
+                : operation_result;
         }
     }
 
@@ -204,6 +208,9 @@ namespace detail{
         const bool causal
     ){
         #pragma HLS INLINE off
+        #pragma HLS ALLOCATION function instances=runPeArray limit=1
+        #pragma HLS ALLOCATION \
+            function instances=runAccumulatorColumns limit=1
 
         const unsigned query_tiles =
             (length+(unsigned)PE_DIM-1U)/(unsigned)PE_DIM;

@@ -41,6 +41,15 @@
 
 ## 4. Current State
 
+### Split-D首轮服务器build（结构不合格，已修改源码待重跑）
+
+- 构建目录：`build/fsa_stream_split_d_build/solution1`；产物时间2026-09-25 10:35--10:37，对应默认`4×4/dim16`和顶层`fsa_stream_split_d`。
+- CSim通过，测试覆盖`L=7` causal/non-causal、`L=1`、`L=16` causal/non-causal及非法长度哨兵；未运行RTL CoSim和IP导出。
+- 四个64-bit AXI master bundle及AXI-Lite控制接口正确；目标10 ns、uncertainty 2.7 ns，顶层估算7.300 ns，HLS有效裕量为0。
+- 顶层资源为BRAM8、DSP96、FF63432、LUT326586、URAM0；单SLR LUT估算占75%。`runPeArray`单模块为16 DSP，但RTL和子模块报告确认共生成4份PE阵列；`runAccumulatorColumns`也生成2份，并且每份因普通/exp2两个静态FMA分支占16 DSP。该build违反单套`D×D`阵列和每列单Accumulator约束，不验收。
+- QK特征循环和ROW_SUM循环目标II1、实际II4；PV循环通过3份PE阵列达到II1，因此该II不能作为单阵列吞吐结果。
+- 当前源码已在`run`中限制`runPeArray`和`runAccumulatorColumns`各1份，并将Accumulator改为先选择普通/exp2操作数、再走每列唯一`accUnit`调用点。修改后的`4×4/dim16`与`16×16/dim128`本地端到端回归通过；实际实例数、II、资源和时序必须由下一轮Vitis重新确认。
+
 ### Latest accepted formal-kernel server build（3D hop5 + 22位CLZ）
 
 - 构建目录：`build/fsa_stream_build/solution1`；综合2026-09-21 01:13、CoSim 01:16。Autopilot预处理源码确认`PE_HOP_CYCLES=5`和`product.countLeadingZeros()`，对应当前CLZ候选源码。
@@ -662,7 +671,8 @@ Q/K/V AXI DMA
 ## 11. Current Working Set
 
 - Split-D新增文件：`include/fsa/stream/split_d/`、`src/stream/split_d/fsa_stream_split_d.cpp`、`tests/stream/test_fsa_stream_split_d.cpp`、`hls/fsa_stream_split_d/run_hls.tcl`；根目录`run_hls.sh`已加入`fsa_stream_split_d`入口。
-- 当前Split-D默认参数为`FSA_SPLIT_D_PE_DIM=4`、`FSA_SPLIT_D_HEAD_DIM=16`；已验证只改为`16/128`可以本地编译并运行。
+- 当前Split-D默认参数为`FSA_SPLIT_D_PE_DIM=4`、`FSA_SPLIT_D_HEAD_DIM=16`；共享实例修复后已验证只改为`16/128`可以本地编译并运行。
+- Split-D首轮CSynth已证明未加资源限制时会生成4份PE阵列和2份Accumulator；当前工作焦点是重跑共享实例修复，先过单阵列结构门槛，再优化II。
 - 第一阶段DMA扁平循环已由2026-09-17 14:09 build验收；保留 `src/stream/dma_process.cpp` 修改。
 - 第二阶段撤销完整tile调用循环的PIPELINE/II约束，并恢复query/key顺序嵌套循环；最新build确认IR规模恢复、无效ALLOCATION警告消失且额外6个控制DSP已删除。
 - PE内部latency优化第二阶段已接入独立验收的 `pe_raw_fma`；最新build确认16条PE乘法通路各DSP1、SA II1；PE内联后的latency不能继续引用为独立函数报告。
@@ -676,8 +686,10 @@ Q/K/V AXI DMA
 - [x] 实现`D×D`PE状态，每PE包含一个FP16`reg`和新增FP32`score_acc`。
 - [x] 实现`dim/D`轮QK累加、完整S后的softmax以及`dim/D`轮PV。
 - [x] 本地验证`4×4/dim16`和仅改参数后的`16×16/dim128`，并复跑旧`fsa_stream`4×4回归。
-- [ ] 在Vitis运行`./run_hls.sh fsa_stream_split_d`对应入口，核对只有一套`D×D`RawFMA阵列、每PE一个FP32 score寄存器、四AXI bundle、资源、II和10ns/2.7ns时序。
-- [ ] 根据首轮CSynth报告修正可能的函数复制、外部score存储或非预期浮点算术实例；未通过结构验收前不做多engine或物理消融。
+- [x] 读取首轮Vitis CSim/CSynth：功能与接口通过，但确认4份PE阵列、2份Accumulator、DSP96，结构验收失败。
+- [x] 限制PE阵列/Accumulator各1份，并把每列普通/exp2路径合并到唯一`accUnit`调用点；两种目标参数本地回归通过。
+- [ ] 在Vitis重跑`./run_hls.sh fsa_stream_split_d`，核对一套`D×D`RawFMA、每列一个Accumulator FMA、每PE FP32 score寄存器、资源、II和10ns/2.7ns时序。
+- [ ] 单阵列结构通过后，再针对QK与ROW_SUM的实际II4做调度优化；结构验收前不做多engine或物理消融。
 - [x] 当前源码server build、CSim和9x4 causal/non-causal RTL CoSim完成且无死锁。
 - [x] 顶层/RTL名为 `fsa_stream`；DSP/BRAM未增加；仍为单SA/单Accumulator向量。
 - [x] 用 `%16`静态PE slot和仅限 `pe_register` 的提示解决动态slot调度，SA主循环恢复II=1且RTL正确；全局 `pe_pipeline/cmp_pipeline inter false` 方案继续拒绝。
@@ -834,7 +846,7 @@ Q/K/V AXI DMA
 9. 23:21 build确认内联坐标PE边界把结果写回由ST11提前至ST9，SA由II2降为II1、TileTick由276/268降为142/134，且硬件数量不增加；RTL已通过，代价是时序退化至9.608 ns。
 10. 3A、3B、3C和3D均已验收；四个Accumulator lane为6拍/II1/DSP2，向量7拍/II1，四个CMP为3拍/II1/DSP2。CMP `cycle%4`、PE `cycle%5`及22位CLZ均通过功能、II、时序和RTL检查。
 11. SRAM/Scratchpad、DMA三请求actor、Delayer、Accumulator和当前CMP寄存器通路全部保留；禁止恢复 `pe_pipeline/cmp_pipeline inter false`。
-12. Split-D本地功能已通过两个目标参数；下一步必须先做Vitis CSim/CSynth，确认源代码中的单一`runPeArray`确实综合成一套`D×D`PE算术，而不是被不同阶段复制。
+12. Split-D首轮CSynth确认源代码的多个调用阶段被综合成4套PE阵列和2套Accumulator，结构不合格；已增加单实例限制并合并Accumulator内部FMA调用点，两种目标参数本地回归通过。下一步必须重跑Vitis确认资源真正收敛，再处理QK/ROW_SUM的II4。
 
 ## 16. Decision / Progress Log
 
@@ -845,6 +857,7 @@ Q/K/V AXI DMA
 - 2026-09-14 — 直接修复SA调度：用4槽环形通道表达3拍HLS CMP流水和一级Chisel CMP->PE Pipe，对10拍PE环形slot解除错误distance=1依赖，并将4x4微程序对齐到145拍；按用户要求未运行任何测试或综合。
 - 2026-09-14 — 按用户优先级完成2/4/5/7：SA周期内直接消费Delayer（4x4总微程序155拍）、OutputDelayer去除逐token重串行化、Scratchpad K/V公平仲裁、DMA descriptor/last协议及O outstanding=8；4x2、4x4、8x4本地回归全部通过，Vitis待验证。
 - 2026-09-25 — 修复Split-D服务器入口遗漏：根目录`run_hls.sh`的交互提示、模块白名单和用法提示均加入`fsa_stream_split_d`；服务器同步该脚本后可执行`./run_hls.sh fsa_stream_split_d`。
+- 2026-09-25 — 读取Split-D首轮10:37 build：CSim通过、四AXI接口和7.300 ns顶层时序成立，但顶层DSP96/LUT326586；层次与RTL确认4份16-DSP `runPeArray`和2份16-DSP `runAccumulatorColumns`，PV的II1依赖3份PE阵列，QK/ROW_SUM实际II4，故结构不验收。当前源码限制两类函数各1份，并把Accumulator普通/exp2分支合并为每列唯一FMA调用点；`4×4/dim16`、`16×16/dim128`本地回归通过，等待重跑。
 - 2026-09-14 — 用户提供11:02服务器CoSim：RTL于38995 ns正常结束、无死锁，但post-check有48个O不匹配。重新读取本地修改后，撤销 `pe_register inter false`；该pragma错误隐藏SCALE/PWL/ROW_SUM/PV之间的真实状态RAW，修复尚待服务器验证。
 - 2026-09-14 — 用户提供11:29服务器CoSim：第一个事务0%处DMA DATAFLOW死锁。完整审计确认单个request actor被满V FIFO阻塞，无法产生Scratchpad等待的Q descriptor；改为Q/K/V三个独立单输出请求actor，4x2、4x4、8x4本地回归通过，RTL待验证。
 - 2026-09-14 — 用户提供11:49服务器CoSim：DMA死锁消失，但与11:02相同的48个输出仍不匹配，否定“只由pe_register override造成”的过强判断；撤销pe/cmp token环形槽的全部全局dependence override，4x4本地回归通过，RTL待验证。
