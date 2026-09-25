@@ -62,7 +62,7 @@
 
 ## 8. Current Working Set
 
-实施文件位于`include/fsa/stream/split_d/`、`src/stream/split_d/fsa_stream_split_d.cpp`、`tests/stream/test_fsa_stream_split_d.cpp`和`hls/fsa_stream_split_d/run_hls.tcl`。本目录继续保存规范、模型和交接上下文。
+实施文件位于`include/fsa/stream/split_d/`、`src/stream/split_d/fsa_stream_split_d.cpp`、`tests/stream/test_fsa_stream_split_d.cpp`和`hls/fsa_stream_split_d/run_hls.tcl`。根目录`run_hls.sh`已加入`fsa_stream_split_d`模块入口。本目录继续保存规范、模型和交接上下文。
 
 ## 9. Next Actions
 
