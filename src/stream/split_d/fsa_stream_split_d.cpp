@@ -488,6 +488,7 @@ namespace detail{
                 acc_t row_sum[PE_DIM]{};
                 #pragma HLS ARRAY_PARTITION variable=row_sum complete dim=1
                 for(int row=0; row<PE_DIM; ++row){
+                    #pragma HLS PIPELINE off
                     detail::clearOperands(operand_b, operand_c);
                     for(int r=0; r<PE_DIM; ++r){
                         #pragma HLS UNROLL

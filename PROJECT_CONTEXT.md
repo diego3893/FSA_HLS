@@ -22,29 +22,31 @@
 - 不更改时钟、器件、接口或阵列参数来掩盖综合失败。
 - 不进行Git操作。Vitis由用户在服务器运行；本地只做源码检查和C++回归。
 - 没有读取对应新build前，不得声称实例数、DSP、II、时序、CoSim或死锁问题已经解决。
+- 只维护仓库根目录的`PROJECT_CONTEXT.md`；`docs/`目录中的同名文件为历史快照，停止更新。
 
 ## 3 当前状态
 
 ### 3.1 Split-D当前候选
 
-**最近一次已读取build：**`build/fsa_stream_split_d_build/solution1`，产物时间2026-09-28 00:55--00:58。
+**最近一次已读取build：**`build/fsa_stream_split_d_build/solution1`，产物时间2026-09-28 01:35--01:37；综合输入已确认包含PV三级循环的3条`#pragma HLS PIPELINE off`。
 
 - CSim、CSynth通过；未运行RTL CoSim、IP导出、Vivado实现或板测。
 - 测试覆盖`L=7` causal/non-causal、`L=1`、`L=16` causal/non-causal及非法长度哨兵。
 - 顶层估算周期7.300ns，等于7.300ns有效预算，HLS裕量为0。
-- 顶层资源：BRAM8、DSP88、FF55987、LUT308699、URAM0；单SLR LUT估算71%。
+- 顶层资源：BRAM8、DSP56、FF37923、LUT183329、URAM0。
 - `runAccumulatorColumns`已收敛为唯一实例：6拍、II1、8 DSP，即4列各一个2-DSP FP32 RawFMA。
-- PE结构仍失败：共享`runPeArray`为3拍、II1、16 DSP；Vitis自动流水化PV的`block×lane`循环并完全展开4次`row`，在PV模块内额外生成3套16-DSP阵列。全设计仍有4套`4×4` PE阵列，共64 DSP。
-- 另有8个FP32减法器占16 DSP，合计顶层88 DSP。
-- QK特征循环和ROW_SUM仍为II4；PV的II1来自阵列复制，不能作为单阵列结果验收。
-- 本轮build时间戳虽新，但综合预处理源码中PV循环没有当前源码的3条`#pragma HLS PIPELINE off`；循环仍被标为`VITIS_LOOP_519_38_VITIS_LOOP_520_39`并自动流水。资源、时序和层次与2026-09-25 build完全相同，因此本轮实际重跑的是旧源码，不能用于验收当前候选。
+- PV结构改善成立：`block/lane/row`均不流水，PV层次只调用共享`runPeArray`，不再额外占DSP；PV三级循环延迟分别为584/144/24拍。
+- PE结构仍未最终通过：ROW_SUM的`row`循环在源码第490行被自动流水为II4，并单独生成一套16-DSP `runPeArray`。全设计现有2套`4×4` PE阵列，共32 DSP。
+- 另有8个FP32减法器占16 DSP，合计顶层56 DSP。
+- QK特征循环和ROW_SUM仍为II4；本轮先只消除ROW_SUM的阵列复制。
 
 **当前源码修改：**
 
-- 在PV的`block`、`lane`、`row`三级循环添加`#pragma HLS PIPELINE off`，阻止自动流水完全展开行累加。
+- 在PV的`block`、`lane`、`row`三级循环添加`#pragma HLS PIPELINE off`，已证明能消除PV额外3套PE阵列。
+- 在ROW_SUM的`row`循环新增`#pragma HLS PIPELINE off`，目标是消除最后一套额外PE阵列。
 - 保留`runPeArray`自身II1及全局单实例限制；算法、接口、参数和时钟不变。
-- 本地`4×4/dim16`与`16×16/dim128`端到端测试均通过。
-- **待验证：**当前`PIPELINE off`候选仍无对应Vitis build，不能声称PE阵列已收敛。
+- 之前本地`4×4/dim16`与`16×16/dim128`端到端测试均通过；新增ROW_SUM pragma后两种参数的完整语法编译通过。当前Windows缺少Xilinx浮点仿真链接库，普通本地可执行文件未能链接，功能需由下一次Vitis CSim复核。
+- **待验证：**新增ROW_SUM `PIPELINE off`候选尚无对应Vitis build，不能声称PE阵列已收敛。
 
 ### 3.2 已验收生产基线
 
@@ -99,7 +101,8 @@ Q/K/V AXI
 | 单DMA actor顺序写Q/K/V有限FIFO | 跨通道head-of-line死锁 | 固定为三路独立请求actor |
 | 全局屏蔽PE/CMP ring依赖 | C++通过但RTL稳定产生48个错误 | 禁止恢复`pe_pipeline/cmp_pipeline inter false` |
 | Split-D只靠函数唯一或ALLOCATION | 首轮4套PE+2套Acc；第二轮仍4套PE | 必须控制调用循环的自动流水/展开并查RTL |
-| PV外层自动II1 | 完全展开4次row，复制为4套PE | 当前显式关闭PV三级循环自动PIPELINE |
+| PV外层自动II1 | 完全展开4次row，复制为4套PE | 显式关闭PV三级循环自动PIPELINE，01:37 build已证明PV不再复制 |
+| ROW_SUM自动II4 | 单独生成第2套16-DSP PE阵列 | 当前显式关闭ROW_SUM的row循环自动PIPELINE |
 | 生产基线hop4 | II1但11.003ns时序失败 | 当前保留已验收hop5+CLZ |
 
 ## 7 当前工作集
@@ -109,15 +112,15 @@ Q/K/V AXI
 - Split-D测试：`tests/stream/test_fsa_stream_split_d.cpp`
 - Split-D HLS入口：`hls/fsa_stream_split_d/run_hls.tcl`
 - 根运行入口：`run_hls.sh`
-- Split-D详细交接：`docs/split_d_implementation_plan_20260923/PROJECT_CONTEXT.md`
+- Split-D历史交接：`docs/split_d_implementation_plan_20260923/PROJECT_CONTEXT.md`（停止维护，不作为当前状态来源）
 - 当前build：`build/fsa_stream_split_d_build/solution1/`
 
 默认参数为`FSA_SPLIT_D_PE_DIM=4`、`FSA_SPLIT_D_HEAD_DIM=16`；目标参数为`16/128`。
 
 ## 8 下一步
 
-1. 用户先确认服务器`src/stream/split_d/fsa_stream_split_d.cpp`的PV三级循环确实包含3条`#pragma HLS PIPELINE off`，再运行`./run_hls.sh fsa_stream_split_d`。
-2. 读取新build时先检查综合预处理源码也包含这3条pragma，再确认PV模块内不再出现3个额外`runPeArray`，全设计只有一套`D×D` RawFMA阵列。
+1. 用户同步当前源码，确认服务器ROW_SUM的`row`循环也包含`#pragma HLS PIPELINE off`，再运行`./run_hls.sh fsa_stream_split_d`。
+2. 读取新build时先检查综合预处理源码带入新增pragma，再确认`run_Pipeline_VITIS_LOOP_490_33`消失或不再拥有独立`runPeArray`，全设计只有一套`D×D` RawFMA阵列。
 3. 同时核对唯一Accumulator、每PE FP32 `score_acc`、四AXI接口、CSim、资源、II和7.300ns有效时序预算。
 4. 若单阵列仍未成立，继续只修资源共享；若成立，再优化QK和ROW_SUM的II4。
 5. 结构和CSynth通过后再决定是否运行RTL CoSim；IP导出、Vivado实现和板测均未开始。
@@ -132,7 +135,9 @@ Q/K/V AXI
 - Split-D首轮Vitis：功能通过，4套PE、2套Accumulator、DSP96，结构失败。
 - Split-D第二轮Vitis：功能通过，Accumulator收敛为1套，但PV仍复制PE，DSP88，结构失败。
 - 当前关闭PV自动流水后的两种参数本地回归。
-- 2026-09-28 build：CSim/CSynth通过，但综合输入仍是未含`PIPELINE off`的旧源码；结果仍为4套PE、DSP88，不能验收当前候选。
+- 2026-09-28 00:58 build：CSim/CSynth通过，但综合输入仍是未含PV `PIPELINE off`的旧源码；结果仍为4套PE、DSP88。
+- 2026-09-28 01:37 build：确认PV pragma生效，PV不再复制PE；CSim/CSynth通过，DSP由88降至56，但ROW_SUM自动流水仍生成第2套PE阵列。
+- 新增ROW_SUM `PIPELINE off`后的`4×4/dim16`及`16×16/dim128`完整语法编译通过。
 
 ### 未完成
 
@@ -151,4 +156,4 @@ Q/K/V AXI
 
 ## 11 交接摘要
 
-当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。2026-09-28 00:58 build虽然是新生成的，但综合预处理源码不含当前候选的3条`PIPELINE off`，实际仍在重跑旧源码；结果保持4套PE、唯一8-DSP Accumulator、顶层DSP88，因此不能验收当前候选。当前本地源码的两种参数功能均通过。下一步必须先把当前源码正确同步到服务器，确认综合输入含3条pragma后重跑，再证明全设计只有一套PE阵列；通过后才处理QK/ROW_SUM的II4。
+当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。2026-09-28 01:37 build已确认PV三级`PIPELINE off`生效，PV额外3套PE被消除，DSP从88降至56；但ROW_SUM循环自动流水仍单独生成第2套16-DSP PE阵列。当前源码已在ROW_SUM的`row`循环再加一条`PIPELINE off`，两种参数语法编译通过。下一步重跑Vitis，目标是顶层只剩一套PE阵列，预计DSP进一步降至40左右；通过后才优化QK/ROW_SUM性能。
