@@ -742,6 +742,7 @@ namespace detail{
         const bool causal
     ){
         #pragma HLS INLINE off
+        #pragma HLS DATAFLOW
 
         hls_thread_local detail::PeCommandStream pe_command_stream(
             "split_d_pe_command"

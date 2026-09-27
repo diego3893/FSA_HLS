@@ -44,6 +44,7 @@
 
 - 已删除Split-D实现中的全部`PIPELINE off`和`runPeArray ALLOCATION`试验。
 - 新增唯一常驻`hls::task` actor `peArrayTask`；整个Split-D源码只有该actor中的一个`peMacUnit`调用点，内部完全展开`D×D`并声明II1。
+- 首次综合该task候选时，Vitis已确认PE内部按4×4及RawFMA内部24轮完全展开，但在pre-synthesis以`HLS 214-389`失败：`hls::task`不在显式DATAFLOW区域。现已在顶层`run()`补充`#pragma HLS DATAFLOW`；修复后的Vitis build尚未运行。
 - QK和ROW_SUM通过命令/结果流阻塞使用PE，并显式接受II4真实反馈；不使用虚假的`DEPENDENCE false`。
 - PWL一次连续发射8个分段再顺序收回，命中结果直接写回PE.reg，删除了阵列外`D×D` probability副本。
 - PV每组交错4个独立feature：每个feature内部仍按key row原顺序累加，只增加`4×D`个FP32临时partial，不改变FMA顺序；命令和结果循环目标II1。
@@ -125,7 +126,7 @@ Q/K/V AXI
 
 ## 8 下一步
 
-1. 用户在服务器运行`./run_hls.sh fsa_stream_split_d`，先确认Vitis 2024.2接受`hls::task`及聚合命令/结果stream并通过CSim。
+1. 用户在服务器重新运行`./run_hls.sh fsa_stream_split_d`，先确认`HLS 214-389`消失，并确认Vitis 2024.2接受DATAFLOW区域中的`hls::task`及聚合命令/结果stream。
 2. CSynth必须确认`peArrayTask`只有一个实例、内部只有16个PE RawFMA/DSP；全设计目标约40 DSP，但stream引入的FF/BRAM/LUT变化必须以新报告为准。
 3. 检查QK与ROW_SUM实际II是否为4、`peArrayTask`是否II1，并检查PV命令发射/结果回收循环是否II1及每tile总延迟是否优于`PIPELINE off`版本。
 4. 同时核对唯一8-DSP Accumulator、四AXI接口、数值结果和7.300ns有效时序预算；如果CSim或综合因task/宽stream失败，保留同一命令协议，改为显式控制驱动DATAFLOW actor并重新验证死锁。
@@ -147,6 +148,7 @@ Q/K/V AXI
 - 2026-09-28 02:16 build：ROW_SUM已改为外部共享PE，但PV outline改为拥有本地PE；总数仍为2套、DSP56，结构仍不合格。
 - 曾完成key-tile局部`ALLOCATION`候选的两种参数语法检查；随后因架构上仍依赖`PIPELINE off`而放弃。
 - 单`hls::task` PE执行器候选完成；无`PIPELINE off`，源码仅一个`peMacUnit`调用点，两种参数及Vitis CSim宏环境语法检查通过。
+- task候选首次Vitis综合已进入csynth并确认4×4 PE展开，随后因顶层缺少显式DATAFLOW区域触发`HLS 214-389`；源码已补充该pragma，本地重新完成两种参数和Vitis CSim宏环境语法检查。
 
 ### 未完成
 
@@ -165,4 +167,4 @@ Q/K/V AXI
 
 ## 11 交接摘要
 
-当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。旧02:16 build为2套PE、DSP56且依赖`PIPELINE off`，已经判定不是最终结构。当前源码改为唯一常驻`hls::task` PE actor：只有一个`peMacUnit`调用点，QK/ROW_SUM接受II4，PWL批量II1，PV按4个独立feature交错发射并保持原FMA次序；全部`PIPELINE off`已删除。两种参数语法检查通过，但尚无对应Vitis build。下一步运行`./run_hls.sh fsa_stream_split_d`，优先验证CSim、task/stream综合、唯一16-DSP PE阵列、PV II1、约40 DSP目标和7.300ns有效时序。
+当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。旧02:16 build为2套PE、DSP56且依赖`PIPELINE off`，已经判定不是最终结构。当前源码改为唯一常驻`hls::task` PE actor：只有一个`peMacUnit`调用点，QK/ROW_SUM接受II4，PWL批量II1，PV按4个独立feature交错发射并保持原FMA次序；全部`PIPELINE off`已删除。首次Vitis csynth因task不在DATAFLOW区域而失败，现已在`run()`补齐`#pragma HLS DATAFLOW`并通过两种参数的本地语法检查。下一步重新运行`./run_hls.sh fsa_stream_split_d`，优先验证CSim、task/stream综合、唯一16-DSP PE阵列、PV II1、约40 DSP目标和7.300ns有效时序。
