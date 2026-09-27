@@ -1,92 +1,98 @@
-# Project Context — Split-D 方案修订交接
+# Project Context — Split-D实施交接
 
-## 1. Mission / User Requirements
+## 1 任务边界
 
-在现有`fsa_stream`之外实现独立`D×D`Split-D研究顶层。用户最终确认：首版物理阵列`4×4`、逻辑`dim=16`；每PE新增一个FP32 score寄存器，执行`dim/D`轮S累加，完整S后做softmax，再执行`dim/D`轮PV。后续只修改参数得到`16×16/dim128`。
+- 在现有`fsa_stream`之外实现独立`fsa_stream_split_d`，不改变生产顶层接口和行为。
+- 默认物理阵列`4×4`处理`dim=16`；后续只改参数得到`16×16/dim128`。
+- 每PE包含一个FP16工作`reg`和一个FP32 `score_acc`。
+- 计算顺序固定为：`dim/D`轮QK累加→完整S后的softmax→`dim/D`轮PV。
+- 综合目标是一套参数化`D×D` RawFMA阵列和一套每列Accumulator；不允许用复制阵列换II。
 
-## 2. Hard Constraints
+## 2 硬约束
 
-- 方案阶段已结束，当前进入独立HLS实现；现有`fsa_stream`作为回归基线，不修改其接口和行为。
-- 当前仓库主路径为stream，四bundle64位、Q cache、独立DMA请求、唯一Acc actor、RawFMA、compact SRAM均保留。
-- 新variant每个PE包含一个FP16工作`reg`和一个FP32`score_acc`；目标综合结构为一套参数化`D×D`RawFMA阵列，不允许不同阶段复制阵列。
-- 原时钟10ns、uncertainty2.7ns、part不变；cosim/export默认关闭并遵循AGENTS的执行约束。
-- 按仓库AGENTS同时维护根`PROJECT_CONTEXT.md`和本实施上下文；不进行Git操作。
+- 保持Q/K/V/O四个64-bit AXI master、AXI-Lite控制、VU37P、10ns时钟和2.7ns uncertainty。
+- P驻留PE的FP16 `reg`；禁止阵列外增加完整S/P副本。
+- 保留现有RawFMA、PWL和舍入合同；算法、接口与硬件结构问题分开验证。
+- CoSim和IP导出默认关闭；本地无Vitis，只运行C++回归。
+- 不进行Git操作；同时维护根`PROJECT_CONTEXT.md`。
 
-## 3. Current State
+## 3 当前状态
 
-**Confirmed:** 当前环境已有Vitis headers和历史build，但本地没有Vitis/Vivado。新增独立`fsa_stream_split_d`、参数/PE状态、端到端testbench和HLS Tcl。默认`4×4/dim16`已通过目标`L=16`及边界配置，只改参数后的`16×16/dim128`也通过本地端到端C++测试；旧`fsa_stream`4×4回归继续通过。
+### 最近build
 
-**Assessment:** 2026-09-25首轮CSynth已否定“函数定义唯一就会物理复用”的假设：`runPeArray`单模块为16 DSP，但不同阶段共生成4份；`runAccumulatorColumns`生成2份且每份内部普通/exp2静态分支又复制FMA，顶层达到96 DSP。当前源码已限制PE阵列和Accumulator各1份，并合并每列FMA调用点。首次修复重跑因`ALLOCATION`函数名缺少`detail::`限定而在CSynth前端失败，现已修正，等待下一轮CSynth证明物理复用。
+`build/fsa_stream_split_d_build/solution1`，2026-09-28 00:55--00:58：
 
-**Main issue:** 首轮CSim和CSynth完成，但单阵列结构不合格。`ALLOCATION`命名空间编译错误已修正，默认配置本地功能再次通过；实际实例数、资源、II、时序和score物理局部性仍需重跑Vitis确认。
+- CSim、CSynth通过；未运行RTL CoSim或IP导出。
+- 顶层7.300ns；BRAM8、DSP88、FF55987、LUT308699、URAM0。
+- `runAccumulatorColumns`已收敛为唯一实例：6拍、II1、8 DSP。
+- PE仍为4套：共享`runPeArray`占16 DSP；PV的`block×lane`被自动流水，内部4次`row`完全展开，又生成3套16-DSP阵列。
+- 另有8个FP32减法器占16 DSP，顶层合计88 DSP。
+- QK和ROW_SUM为II4；PV的II1依赖阵列复制，结构不验收。
+- 本轮产物时间戳是新的，但综合预处理源码仍没有PV三级循环的3条`#pragma HLS PIPELINE off`；结果和2026-09-25 build完全相同，说明服务器实际重跑了旧源码，不能用来验收当前候选。
 
-**Historical artifacts:** `source_manifest.json`和`delivery_validation.json`保留方案交付时的历史快照，不随实施静默刷新；当前源码和本上下文已变化，旧hash不再表示当前实现状态。
+### 当前源码
 
-## 4. Architecture / Important Files
+- PV的`block`、`lane`、`row`三级循环已添加`PIPELINE off`，目标是让四次行累加顺序复用唯一PE阵列。
+- `runPeArray`自身II1、Accumulator唯一实例限制、算法、接口和时钟均未改变。
+- 本地`4×4/dim16`及`16×16/dim128`端到端回归通过。
+- **待验证：**当前候选仍无对应Vitis结果，不能声称PE实例数、资源、II或时序已经收敛。
 
-02为规范性架构，03为逐阶段任务，04为实验设计，06列出被替换的旧结论，01给源码依据，05给本次验证范围。
+## 4 核心映射
 
-核心：D独立于R；ND个d块递减走，seed旧score进底部FMA，顶部结果赋回key-owner PE；全部d完成才CMP/softmax；P保持跨NV；每KV D+2 token；Acc拥有D+1行。BQ与BK独立，causal按全局索引。Q/K/V仍完整D缓存但用R宽packed行。
+```text
+Q/K/V tile
+  -> 唯一D×D PE阵列
+       QK: score_acc跨dim/D轮保留
+       softmax: S转FP16并把P写回reg
+       PV: reg中的P与V执行dim/D轮
+  -> 唯一D列Accumulator
+  -> normalize/write O
+```
 
-## 5. Decisions
+- QK/PV必须调用同一`runPeArray`硬件实例。
+- 默认4×4阵列应只有16个11×11 PE乘法器。
+- 默认4列Accumulator应只有4个24×24乘法器，共8 DSP。
+- causal按全局query/key索引判断。
 
-### D001 — 以当前stream为基线（Active）
+## 5 关键经验
 
-理由/证据：当前调用链已经具备四bundle、Q跨KV缓存、共享RawFMA。旧legacy审计不能继续作为新增优化依据。含义：515MiB是示例当前基线，770MiB为历史。
+- 函数定义唯一、源码`UNROLL`或ALLOCATION pragma都不能单独证明硬件唯一；必须检查综合层次、RTL实例、运算符和DSP核算。
+- 首轮build：4套PE+2套Accumulator，DSP96。
+- 第二轮build：Accumulator收敛为1套，但PV自动流水仍复制PE，DSP88。
+- 不调用旧tile函数`dim/D`次，否则会丢失跨d状态或提前softmax。
+- 不把带seed的score再次加旧score；不提前用Q覆盖P；不每个V tile更新完整O。
+- 不恢复全局虚假dependence覆盖、Accumulator反馈DATAFLOW或多输出DMA请求actor。
 
-### D002 — Seeded QK与单elem reg（Active，待硬件验证）
+## 6 当前工作集
 
-理由/证据：peMacUnit已有FP32 c输入，可直接延续部分score；Q与P时间上互斥。含义：无需默认新增每PE float加法器或独立P寄存器，需新增带tag的本地seed/return链并等待完成。
+- 配置与类型：`include/fsa/stream/split_d/`
+- 实现：`src/stream/split_d/fsa_stream_split_d.cpp`
+- 测试：`tests/stream/test_fsa_stream_split_d.cpp`
+- HLS入口：`hls/fsa_stream_split_d/run_hls.tcl`
+- 根入口：`run_hls.sh`
+- 当前build：`build/fsa_stream_split_d_build/solution1/`
 
-### D003 — 保留当前精度合同（Active）
+## 7 下一步与验收
 
-理由：改变score/SCALE/P精度会污染资源和精度对照。含义：数学模型与位精确RawFMA/PWL oracle必须分开；FTZ和HLS half cast不可混同。
+1. 先确认服务器实现文件的PV三级循环包含3条`#pragma HLS PIPELINE off`，再运行`./run_hls.sh fsa_stream_split_d`。
+2. 新build先检查综合预处理源码确实带入3条pragma，再确认PV模块内不再有3套额外`runPeArray`，全设计只有一套`D×D` PE阵列。
+3. 确认Accumulator仍为唯一8-DSP实例、每PE `score_acc`存在、四AXI接口保持。
+4. 读取CSim、总资源、关键循环II和7.300ns有效时序预算。
+5. 单阵列结构通过后再处理QK/ROW_SUM的II4；结构通过前不扩engine、不做布局实验。
 
-### D004 — 优先物理消融（Active）
+## 8 验证状态
 
-理由：split-d本身只是时间/空间交换。含义：B0/B1/B2/B3固定同一计算配置，分别验证布局与跨区pipeline；HBM共享另做消融。
+- [x] 数学、地址、causal、token计数和故障注入参考模型。
+- [x] 默认`4×4/dim16`本地端到端测试。
+- [x] 仅改参数的`16×16/dim128`本地端到端测试。
+- [x] 新增Split-D后的生产`fsa_stream`回归。
+- [x] 首轮CSim/CSynth：功能通过，结构失败。
+- [x] 第二轮CSim/CSynth：Accumulator唯一化成功，PE仍复制。
+- [x] 关闭PV自动流水后的两种参数本地回归。
+- [x] 2026-09-28 build审计：产物虽新，但输入仍是旧源码，结构仍为4套PE、DSP88。
+- [ ] 当前候选Vitis CSim/CSynth和单阵列验收。
+- [ ] RTL CoSim、IP导出、Vivado实现、板测。
 
-## 6. Experiments / Results
+## 9 交接摘要
 
-运行 `python reference_split_d.py`：72标准配置，8种故障全部检出，mask/history、alpha、打包、pending-mask广播抽象、片上布局和causal流量检查通过。详见reference_results.json。不是HLS/FP32/PWL/周期模型。
-
-交付结构/hash验证见delivery_validation.json，复现脚本validate_delivery.py不会静默覆盖已有输入hash快照。
-
-## 7. Things Not To Repeat / Open Problems
-
-- 不调用旧tile函数ND次，避免每d丢状态/提前softmax。
-- 不把带seed结果再次加oldscore；不每VT更新整个O；不提前装Q覆盖P。
-- 不把pe_register旧false dependence直接移植；不恢复Acc请求/响应DATAFLOW环。
-- 不用旧17.5DSP/PE外推，或只看DSP宣称E8能装下。
-- 仍待验证：PE源代码所有权是否落实物理局部性，seed/return链代价、PWL精度、有限FIFO死锁、LUT扩展、真实HBM绑定。
-
-## 8. Current Working Set
-
-实施文件位于`include/fsa/stream/split_d/`、`src/stream/split_d/fsa_stream_split_d.cpp`、`tests/stream/test_fsa_stream_split_d.cpp`和`hls/fsa_stream_split_d/run_hls.tcl`。根目录`run_hls.sh`已加入`fsa_stream_split_d`模块入口。当前源码还包含首轮CSynth后的PE/Accumulator单实例修复。本目录继续保存规范、模型和交接上下文。
-
-## 9. Next Actions
-
-1. 在Vitis重跑新顶层的CSim/CSynth，保持10ns、2.7ns uncertainty和当前VU37P。
-2. 核对`runPeArray`只有1份且含`D×D`个RawFMA、`runAccumulatorColumns`只有1份且每列1个FP32 RawFMA，同时检查score寄存器、四AXI接口、资源、II和时序。
-3. 单阵列结构通过后，再处理首轮QK/ROW_SUM实际II4；E1验收前不扩engine和不做布局实验。
-
-## 10. Validation Status
-
-- [x] 当前stream源码/旧方案/8FSA/论文相关章节审阅。
-- [x] 数学/地址/token计数/故障注入自检。
-- [x] UTF-8、Markdown相对链接、输入SHA-256与交付清单检查（见delivery_validation.json）。
-- [x] 仓库旧顶层4×4回归及新Split-D本地C++端到端测试。
-- [x] `4×4/dim16`与参数化`16×16/dim128`功能测试。
-- [x] 新顶层首轮Vitis CSim/CSynth；功能通过但4份PE阵列、2份Accumulator，结构验收失败。
-- [x] PE/Accumulator共享修复及`4×4/dim16`、`16×16/dim128`本地回归。
-- [x] 修正共享限制pragma中缺少`detail::`限定导致的`HLS 207-3777`；默认配置本地回归通过。
-- [ ] 修复后的Vitis CSim/CSynth和结构验收。
-- [ ] 新CSynth/RTL/Vivado/板测。
-
-## 11. Environment
-
-Windows PowerShell；Python版本见delivery_validation.json。源根为上级FSA_HLS；不使用Git标识，以SHA-256追踪。目标工具/器件沿用现有Vitis2024.2/VU37P，不表示本地可执行这些工具。
-
-## 12. Context Handoff Summary
-
-用户最终将研究结构收敛为参数化`D×D`阵列：默认`D=4、dim=16`，目标`D=16、dim=128`。首轮CSynth的功能、接口和7.300 ns顶层时序通过，但综合出4套PE阵列和2套Accumulator，结构失败。当前源码已限制两类算术模块各1份并合并Accumulator内部FMA调用点；首次修复重跑的`ALLOCATION`命名空间错误已修正，默认配置本地回归通过。下一步重跑Vitis确认单阵列资源收敛，再优化QK/ROW_SUM的II4。
+Split-D功能路径已经完成，当前只解决物理实例唯一性。2026-09-28 00:58 build虽为新产物，但综合输入仍是没有3条`PIPELINE off`的旧源码，故仍生成4套PE阵列、DSP88；它不能验收当前候选。本地源码已关闭PV三级循环自动PIPELINE且两种目标参数通过。下一步先正确同步源码并确认pragma进入综合，再重跑Vitis证明只剩一套PE阵列，之后才优化II4。

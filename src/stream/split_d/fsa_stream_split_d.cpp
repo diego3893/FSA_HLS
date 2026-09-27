@@ -515,13 +515,16 @@ namespace detail{
                     running_sum[col] = acc_result[col];
                 }
 
-                // P保持在PE.reg中，执行dim/D轮PV，每轮产生D个输出维度。
+                // P保持在PE.reg中；PV顺序复用唯一D×D阵列，禁止自动展开row复制阵列。
                 for(int block=0; block<DIM_BLOCKS; ++block){
+                    #pragma HLS PIPELINE off
                     for(int lane=0; lane<PE_DIM; ++lane){
+                        #pragma HLS PIPELINE off
                         const int feature = block*PE_DIM+lane;
                         acc_t pv_sum[PE_DIM]{};
                         #pragma HLS ARRAY_PARTITION variable=pv_sum complete dim=1
                         for(int row=0; row<PE_DIM; ++row){
+                            #pragma HLS PIPELINE off
                             detail::clearOperands(operand_b, operand_c);
                             for(int r=0; r<PE_DIM; ++r){
                                 #pragma HLS UNROLL
