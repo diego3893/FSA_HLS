@@ -131,10 +131,10 @@ Q/K/V AXI
 
 ## 8 下一步
 
-1. 第2轮独立V加载器仍让第2笔及以后事务使用前一笔V；第3轮将V加载强制内联到控制器，消除独立子模块的跨事务完成状态。
-2. 第3轮重新检查单key、全1-V和basis-V；这是本次限定的最后一轮，若仍失败则停止并保留证据。
-3. 修复后重新运行4×4/16完整CoSim；必须全部事务完成、无deadlock、无`Bad TV file`且C post-check通过，同时保持DSP40、PV II1和7.300ns结构。
-4. 4×4/16的CoSim通过后，再用环境参数运行16×16/128，检查256个PE、16列Accumulator、资源、II、时序和参数化RTL行为。
+1. 本次3轮已结束。第3轮V加载内联消除了跨事务V错位，单key和全1-V通过；保留该修复。
+2. 若开始新一轮，使用basis-V检查QK score、缩放值和PWL输入的RTL时序。当前实际权重为0.5/0.5，期望为0.562177/0.437823。
+3. 4×4/16必须先让全部CoSim事务在0.03容差内通过，同时保持DSP40、QK/ROW_SUM II5、PWL/PV II1和7.300ns。
+4. 只有4×4/16数据通过后，再运行16×16/128的Vitis CSim、CSynth与CoSim验收。
 
 ## 9 验证状态
 
@@ -170,6 +170,7 @@ Q/K/V AXI
 - 2026-09-29 01:15 build（commit `b0ab080`）：PV交错由8改16后，本地4×4/16和16×16/128通过；远端4×4/16 CSim/CSynth通过，DSP40、BRAM8、FF30467、LUT124857、QK/ROW_SUM II5、PWL/PV II1、7.300ns。RTL CoSim仍在192845ns完成6/6，但首事务仍`max_error=0.199228`，证明增加PV反馈距离无效。TV分析还显示独立`L=1`事务整片RTL输出内存全0，`L=7`因果仅单key的query0精确通过，多key查询均有误差。
 - 2026-09-29 01:43 build（commit `58eecaa`）：恢复8路PV并加入诊断用例；CSim/CSynth通过，DSP40、BRAM8、FF29415、LUT123434、7.300ns，QK/ROW_SUM II5、PWL/PV II1。CoSim 8/8于208505ns完成，无deadlock，但7个有效事务均失败。TV输入正确；输出证明V tile滞后一事务，综合层次显示K/V在key-loop outline中共用一个`loadElemTile`子模块。
 - 2026-09-29 02:04 build（commit `6c80d49`）：K/V拆成独立加载子模块后，CSim/CSynth与目标II、7.300ns继续通过，CoSim 8/8于205005ns完成且无deadlock；首个单key事务通过，但其余6个数值用例失败。全1-V事务输出0，随后basis-V事务输出约0.5，证明独立V子模块仍在后续顶层事务使用前一笔V。
+- 2026-09-29 02:14 build（commit `842ef77`）：V加载强制内联后，独立`loadValueTile` RTL模块消失；CSim/CSynth通过，DSP40、BRAM8、FF29745、LUT124445、QK/ROW_SUM II5、PWL/PV II1、7.300ns。CoSim 8/8于225795ns完成，无deadlock；单key和全1-V通过，证明V事务错位已修复。basis-V仍输出均匀0.5/0.5而非0.562177/0.437823，随机用例最大误差0.054至0.075，数据仍未验收。本次达到3轮上限并停止。
 - 当前源码的`4×4/dim16`和`16×16/dim128`端到端本地回归通过；4×4/16 RTL CoSim已完成6/6但数值失败，16×16/128尚待Vitis综合和CoSim。
 
 ### 未完成
@@ -189,4 +190,4 @@ Q/K/V AXI
 
 ## 11 交接摘要
 
-当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。硬件基线保持单PE、单Accumulator、DSP40，QK/ROW_SUM II5，PWL/PV II1和7.300ns；CoSim无deadlock但RTL数据失败。第2轮把V拆为独立加载子模块后，首事务通过但后续事务仍滞后一笔。当前第3轮把V加载强制内联到调用控制器，消除独立完成握手；这是本次限定的最后一轮。
+当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。本次3轮已结束。最终commit `842ef77`保持单PE、单Accumulator、DSP40，QK/ROW_SUM II5、PWL/PV II1和7.300ns，CoSim无deadlock；V跨事务错位已修复，但basis-V显示QK/缩放/PWL输入路径仍有RTL时序错误，数据未通过0.03容差。16×16/128未做远端Vitis验收。若继续，应从score与PWL输入的确定性诊断开始。

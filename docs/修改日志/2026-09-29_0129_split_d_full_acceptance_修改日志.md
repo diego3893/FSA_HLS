@@ -3,7 +3,7 @@
 ## 1. 本次调用信息
 
 - 开始时间：2026-09-29 01:29 +08:00
-- 当前状态：进行中
+- 当前状态：已结束，达到3轮上限但未完全验收
 - 本地仓库：`C:\Users\30130\Desktop\workstation\FlashAttention\FSA_HLS`
 - 远端仓库：`FSA-FPGA-NM37-tailBox:~/FSA_HLS`
 - 分支：`fsa_split_D`
@@ -22,10 +22,10 @@
 
 ### 可验证标准
 
-- [ ] 默认`4×4/dim16`为单一`D×D` PE阵列、每列唯一Accumulator、总DSP约40，无阵列复制。
-- [ ] QK先执行`dim/D`轮并在PE内FP32寄存器累加S，softmax后PV再执行`dim/D`轮；不使用`PIPELINE off`或虚假依赖换取结果。
-- [ ] VU37P、10ns时钟、2.7ns uncertainty保持不变，估算周期不超过7.300ns。
-- [ ] QK和ROW_SUM接受真实反馈II5，PWL和PV达到II1；CoSim无deadlock并在有限时间完成。
+- [x] 默认`4×4/dim16`为单一`D×D` PE阵列、每列唯一Accumulator、总DSP约40，无阵列复制。
+- [x] QK先执行`dim/D`轮并在PE内FP32寄存器累加S，softmax后PV再执行`dim/D`轮；不使用`PIPELINE off`或虚假依赖换取结果。
+- [x] VU37P、10ns时钟、2.7ns uncertainty保持不变，估算周期不超过7.300ns。
+- [x] QK和ROW_SUM接受真实反馈II5，PWL和PV达到II1；CoSim无deadlock并在有限时间完成。
 - [ ] CSim和RTL CoSim全部数据用例通过现有0.03容差，不放宽精度合同；覆盖因果/非因果、单key、多key、短序列和完整tile。
 - [ ] 仅改参数得到`16×16/dim128`，并完成对应本地测试、Vitis CSim、CSynth、资源、II、时序和RTL CoSim验证。
 
@@ -42,7 +42,7 @@
 |---:|---|---|---|---|---|
 | 1 | `58eecaad3b1530dfa22c28daded59311927dbfa9` | 增加单key、全1-V和basis-V诊断用例并恢复8路PV交错 | 4×4/16、16×16/128通过 | CSim/CSynth通过，CoSim数据失败 | 未通过 |
 | 2 | `6c80d49346fb47139cfc21be93dac63889626a73` | 分离V专用非内联加载器 | 4×4/16、16×16/128通过 | CSim/CSynth通过，CoSim数据失败 | 未通过 |
-| 3 | 待定 | 将V加载内联到控制器，消除跨事务`ap_done`状态 | 待执行 | 待执行 | 进行中 |
+| 3 | `842ef7787ca4edc24326878779ef67e4b444a98a` | 将V加载内联到控制器，消除跨事务`ap_done`状态 | Windows缺Vitis头文件；由远端CSim替代 | CSim/CSynth通过，CoSim数据失败 | 未通过，达到上限 |
 
 ## 5. 逐轮记录
 
@@ -153,15 +153,39 @@
 - `git diff --check`通过。
 - Windows本地`g++`缺少Vitis的`ap_int.h`，两种参数编译均在头文件解析阶段退出，未进入本次修改代码；本轮以服务器Vitis CSim作为编译和功能检查。
 
+#### 修改后远端测试
+
+- 被测commit：`842ef7787ca4edc24326878779ef67e4b444a98a`
+- `.bashrc`加载：使用`bash -ic`并显式加载成功，Vitis HLS 2024.2正常启动。
+- 拉取冲突处理：无。远端tracked工作树干净，从`6c80d49`快进到精确被测commit；既有未跟踪文件未触碰。
+- 环境与参数：VU37P、4×4 PE、HEAD_DIM=16、10ns时钟、2.7ns uncertainty
+- 命令：`./run_hls.sh fsa_stream_split_d`
+- 开始/结束时间：2026-09-29 02:08:27+08:00至02:14:23+08:00；Vitis总elapsed 356.42s。
+- 结果与退出码：FAIL，code 1。CSim和CSynth通过；RTL仿真8/8事务完成且无deadlock。单key和全1-V通过，basis-V及4个随机用例超过0.03容差。
+- 时序与资源：估算周期7.300ns，Estimated Fmax 136.99MHz；BRAM8、DSP40、FF29745、LUT124445。QK/ROW_SUM II5、PWL/PV II1。
+- 结构：控制器层次只有一套8-DSP`runAccumulatorColumns`和一套32-DSP key-tile outline；后者由16个PE与16个减法器组成。独立`loadValueTile` RTL文件消失，V加载已内联。
+- 延迟：顶层最大估算492176387 cycles；CoSim 8/8于225795ns结束。
+- 数据：basis-V首输出实际0.5、期望0.562177，最大误差0.096066；其余失败用例最大误差分别为0.0641532、0.0718321、0.0542624、0.0752103。
+- 证据路径：`hls/fsa_stream_split_d/build/solution1/csim/report/`、`syn/report/fsa_stream_split_d_csynth.rpt`、`syn/report/runController_csynth.rpt`、`syn/verilog/`、`sim/tv/`和`sim/verilog/xsim.log`。
+
+#### 本轮结论与下一步
+
+- 已解决的问题：V跨顶层事务滞后已消除；首个单key和第二个全1-V事务均通过，独立V加载RTL模块也已消失。
+- 仍存在的问题：basis-V得到均匀0.5/0.5而非0.562177/0.437823，说明当前RTL的QK分数差没有正确进入softmax；随机用例仍有0.054至0.075最大误差。16×16/128未做Vitis验证。
+- 验收标准状态：4×4/16硬件结构、DSP、II、时序、CSim和CoSim控制流程通过；RTL数据失败。由于基础参数数据未通过，不启动成本更高且无法形成最终验收的16×16/128 HLS运行。
+- 失败分析：本轮已经把V路径从“整笔事务错位”修到正确。basis-V使用确定的Q/K分数和正交V，实际输出精确为0.5，直接把剩余故障定位到QK分数、缩放或进入PWL前的数据时序，而不是V加载或PV分子。
+- 下一轮建议：若允许新一轮，给basis-V增加RTL可判别的score/PWL中间检查，优先检查QK最后一轮结果写入`score`以及scale进入PWL的调度边界；保持当前已通过的V内联修复。
+- 本轮闭环状态：已完成；达到用户限定的3轮上限，停止继续修改。
+
 ## 6. 调用结束总结
 
-- 结束时间：待填写
-- 结束原因：待填写
-- 已完成闭环迭代：1/3
-- 未完成迭代：第2轮进行中
-- 最终被测代码commit：待定
-- 最终日志commit：待定
-- 验收结果：待填写
-- 仍未解决：待填写
-- 建议下一步：待填写
+- 结束时间：2026-09-29 02:14:23+08:00
+- 结束原因：完成用户限定的3轮；第3轮仍未满足RTL数据验收，因此按上限停止。
+- 已完成闭环迭代：3/3
+- 未完成迭代：无
+- 最终被测代码commit：`842ef7787ca4edc24326878779ef67e4b444a98a`
+- 最终日志commit：由本节所在提交承载，以Git历史为准。
+- 验收结果：未通过。硬件结构、40 DSP、II和7.300ns时序合格；4×4/16 RTL数据仍超过0.03容差；16×16/128未做远端Vitis验收。
+- 仍未解决：QK分数差或其缩放/PWL输入在RTL中的时序错误；basis-V被错误计算为均匀权重。
+- 建议下一步：新一轮从basis-V的score与PWL输入做定点诊断，不再改V加载和PV交错结构。
 - 独立最终报告：未要求
