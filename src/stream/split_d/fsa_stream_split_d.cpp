@@ -9,7 +9,7 @@ namespace fsa{
 namespace split_d{
 namespace detail{
 
-    constexpr int PV_INTERLEAVE = 4;
+    constexpr int PV_INTERLEAVE = 8;
 
     static_assert(PV_INTERLEAVE<=HEAD_DIM,
                   "PV交错上下文不能超过head dimension");
@@ -70,7 +70,8 @@ namespace detail{
         PeMacUnitOutput result[PE_DIM][PE_DIM]
     ){
         #pragma HLS INLINE off
-        #pragma HLS PIPELINE II=1 style=flp
+        #pragma HLS PIPELINE II=1 style=stp
+        #pragma HLS LATENCY min=4 max=4
         #pragma HLS ARRAY_PARTITION variable=pe complete dim=0
         #pragma HLS ARRAY_PARTITION variable=operand_b complete dim=0
         #pragma HLS ARRAY_PARTITION variable=operand_c complete dim=0
@@ -101,7 +102,8 @@ namespace detail{
         acc_t result[PE_DIM]
     ){
         #pragma HLS INLINE off
-        #pragma HLS PIPELINE II=1 style=flp
+        #pragma HLS PIPELINE II=1 style=stp
+        #pragma HLS LATENCY min=7 max=7
         #pragma HLS ARRAY_PARTITION variable=in_a complete dim=1
         #pragma HLS ARRAY_PARTITION variable=in_b complete dim=1
         #pragma HLS ARRAY_PARTITION variable=in_c complete dim=1
@@ -311,7 +313,7 @@ namespace detail{
                 // 外层明确保留dim/D轮；每轮依次消费D个特征。
                 for(int block=0; block<DIM_BLOCKS; ++block){
                     for(int lane=0; lane<PE_DIM; ++lane){
-                        #pragma HLS PIPELINE II=4
+                        #pragma HLS PIPELINE II=5
                         const int feature = block*PE_DIM+lane;
                         for(int row=0; row<PE_DIM; ++row){
                             #pragma HLS UNROLL
@@ -506,7 +508,7 @@ namespace detail{
                 acc_t row_sum[PE_DIM]{};
                 #pragma HLS ARRAY_PARTITION variable=row_sum complete dim=1
                 for(int row=0; row<PE_DIM; ++row){
-                    #pragma HLS PIPELINE II=4
+                    #pragma HLS PIPELINE II=5
                     detail::clearOperands(operand_b, operand_c);
                     for(int r=0; r<PE_DIM; ++r){
                         #pragma HLS UNROLL
@@ -534,7 +536,7 @@ namespace detail{
                     running_sum[col] = acc_result[col];
                 }
 
-                // PV每组保留4个独立feature上下文。单一扁平调度循环先
+                // PV每组保留8个独立feature上下文。单一扁平调度循环先
                 // 交错发射D轮PE，再用同一循环的尾部操作更新output_acc。
                 // 这避免工具为外层feature-group另建outline层级并复制PE。
                 constexpr int pv_pe_operations =
@@ -553,6 +555,7 @@ namespace detail{
                         operation<pv_groups*pv_group_operations;
                         ++operation){
                     #pragma HLS PIPELINE II=1
+                    #pragma HLS DEPENDENCE variable=output_acc inter false
                     const int feature_base =
                         pv_group*detail::PV_INTERLEAVE;
                     const int remaining_features = HEAD_DIM-feature_base;
