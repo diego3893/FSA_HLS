@@ -102,7 +102,7 @@ namespace detail{
         PeResultStream& result_stream
     ){
         #pragma HLS INLINE off
-        #pragma HLS PIPELINE II=1 style=frp
+        #pragma HLS PIPELINE II=1 style=flp
 
         const PeArrayCommand command = command_stream.read();
         PeArrayResult result{};
@@ -185,7 +185,7 @@ namespace detail{
         AccumulatorResultStream& result_stream
     ){
         #pragma HLS INLINE off
-        #pragma HLS PIPELINE II=1 style=frp
+        #pragma HLS PIPELINE II=1 style=flp
 
         const AccumulatorCommand command = command_stream.read();
         AccumulatorResult response{};
