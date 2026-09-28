@@ -534,23 +534,38 @@ namespace detail{
                     running_sum[col] = acc_result[col];
                 }
 
-                // PV按4个独立feature为一组交错发射。每个feature仍严格按
-                // key row顺序累加，因此数值次序不变；同一partial再次使用
-                // 前，其余feature已占满PE流水延迟。
-                for(int feature_base=0;
-                        feature_base<HEAD_DIM;
-                        feature_base+=detail::PV_INTERLEAVE){
-                    acc_t pv_sum[detail::PV_INTERLEAVE][PE_DIM]{};
-                    #pragma HLS ARRAY_PARTITION variable=pv_sum complete dim=0
+                // PV每组保留4个独立feature上下文。单一扁平调度循环先
+                // 交错发射D轮PE，再用同一循环的尾部操作更新output_acc。
+                // 这避免工具为外层feature-group另建outline层级并复制PE。
+                constexpr int pv_pe_operations =
+                    PE_DIM*detail::PV_INTERLEAVE;
+                constexpr int pv_group_operations =
+                    pv_pe_operations+detail::PV_INTERLEAVE;
+                constexpr int pv_groups =
+                    (HEAD_DIM+detail::PV_INTERLEAVE-1)/
+                    detail::PV_INTERLEAVE;
+                acc_t pv_sum[detail::PV_INTERLEAVE][PE_DIM]{};
+                #pragma HLS ARRAY_PARTITION variable=pv_sum complete dim=0
+                int pv_group = 0;
+                int pv_group_operation = 0;
+
+                for(int operation=0;
+                        operation<pv_groups*pv_group_operations;
+                        ++operation){
+                    #pragma HLS PIPELINE II=1
+                    const int feature_base =
+                        pv_group*detail::PV_INTERLEAVE;
                     const int remaining_features = HEAD_DIM-feature_base;
                     const int active_contexts =
                         remaining_features<detail::PV_INTERLEAVE
                             ? remaining_features : detail::PV_INTERLEAVE;
 
-                    for(int row=0; row<PE_DIM; ++row){
-                        for(int context=0;
-                                context<active_contexts; ++context){
-                            #pragma HLS PIPELINE II=1
+                    if(pv_group_operation<pv_pe_operations){
+                        const int row =
+                            pv_group_operation/detail::PV_INTERLEAVE;
+                        const int context =
+                            pv_group_operation%detail::PV_INTERLEAVE;
+                        if(context<active_contexts){
                             const int feature = feature_base+context;
                             detail::clearOperands(operand_b, operand_c);
                             for(int r=0; r<PE_DIM; ++r){
@@ -572,25 +587,31 @@ namespace detail{
                                     pe_result[row][col].out_accType;
                             }
                         }
+                    }else{
+                        const int context =
+                            pv_group_operation-pv_pe_operations;
+                        if(context<active_contexts){
+                            const int feature = feature_base+context;
+                            for(int col=0; col<PE_DIM; ++col){
+                                #pragma HLS UNROLL
+                                acc_a[col] = alpha[col];
+                                acc_b[col] = output_acc[col][feature];
+                                acc_c[col] = pv_sum[context][col];
+                            }
+                            detail::runAccumulatorColumns(
+                                false, acc_a, acc_b, acc_c, acc_result
+                            );
+                            for(int col=0; col<PE_DIM; ++col){
+                                #pragma HLS UNROLL
+                                output_acc[col][feature] = acc_result[col];
+                                pv_sum[context][col] = accZero();
+                            }
+                        }
                     }
-
-                    for(int context=0;
-                            context<active_contexts; ++context){
-                        #pragma HLS PIPELINE II=1
-                        const int feature = feature_base+context;
-                        for(int col=0; col<PE_DIM; ++col){
-                            #pragma HLS UNROLL
-                            acc_a[col] = alpha[col];
-                            acc_b[col] = output_acc[col][feature];
-                            acc_c[col] = pv_sum[context][col];
-                        }
-                        detail::runAccumulatorColumns(
-                            false, acc_a, acc_b, acc_c, acc_result
-                        );
-                        for(int col=0; col<PE_DIM; ++col){
-                            #pragma HLS UNROLL
-                            output_acc[col][feature] = acc_result[col];
-                        }
+                    ++pv_group_operation;
+                    if(pv_group_operation==pv_group_operations){
+                        pv_group_operation = 0;
+                        ++pv_group;
                     }
                 }
 
