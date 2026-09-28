@@ -18,6 +18,12 @@ namespace{
     static dma_word_t v_memory[MAX_QKV_WORDS];
     static dma_word_t o_memory[MAX_O_WORDS];
 
+    enum class InputPattern{
+        Random,
+        OnesV,
+        BasisV
+    };
+
     void packInput(
         const std::vector<std::vector<elem_t>>& input,
         dma_word_t memory[MAX_QKV_WORDS]
@@ -93,7 +99,13 @@ namespace{
         return output;
     }
 
-    bool runCase(const unsigned length, const bool causal, const int seed){
+    bool runCase(
+        const char* name,
+        const unsigned length,
+        const bool causal,
+        const int seed,
+        const InputPattern pattern
+    ){
         std::mt19937 generator(seed);
         std::uniform_real_distribution<float> qk_distribution(-0.5F, 0.5F);
         std::uniform_real_distribution<float> v_distribution(-1.0F, 1.0F);
@@ -108,6 +120,26 @@ namespace{
                 k[token][feature] = (elem_t)qk_distribution(generator);
                 v[token][feature] = (elem_t)v_distribution(generator);
             }
+        }
+        if(pattern == InputPattern::OnesV){
+            for(unsigned token=0; token<length; ++token){
+                for(int feature=0; feature<HEAD_DIM; ++feature){
+                    v[token][feature] = (elem_t)1.0F;
+                }
+            }
+        }else if(pattern == InputPattern::BasisV){
+            for(unsigned token=0; token<length; ++token){
+                for(int feature=0; feature<HEAD_DIM; ++feature){
+                    q[token][feature] = (elem_t)0.0F;
+                    k[token][feature] = (elem_t)0.0F;
+                    v[token][feature] = (elem_t)0.0F;
+                }
+                q[token][0] = (elem_t)1.0F;
+            }
+            k[0][0] = (elem_t)0.5F;
+            k[1][0] = (elem_t)-0.5F;
+            v[0][0] = (elem_t)1.0F;
+            v[1][1] = (elem_t)1.0F;
         }
 
         std::fill(q_memory, q_memory+MAX_QKV_WORDS, (dma_word_t)0);
@@ -133,19 +165,43 @@ namespace{
         const std::vector<std::vector<double>> expected =
             reference(q, k, v, causal);
         double maximum_error = 0.0;
+        unsigned maximum_token = 0;
+        int maximum_feature = 0;
+        unsigned first_token = 0;
+        int first_feature = 0;
+        bool first_error_found = false;
         for(unsigned token=0; token<length; ++token){
             for(int feature=0; feature<HEAD_DIM; ++feature){
-                maximum_error = std::max(
-                    maximum_error,
-                    std::abs((double)actual[token][feature]-
-                        expected[token][feature])
+                const double error = std::abs(
+                    (double)actual[token][feature]-
+                    expected[token][feature]
                 );
+                if(error > maximum_error){
+                    maximum_error = error;
+                    maximum_token = token;
+                    maximum_feature = feature;
+                }
+                if(!first_error_found && error>0.03){
+                    first_token = token;
+                    first_feature = feature;
+                    first_error_found = true;
+                }
             }
         }
         if(maximum_error > 0.03){
-            std::cerr << "numerical failure: L=" << length
+            std::cerr << "numerical failure: case=" << name
+                << " L=" << length
                 << " causal=" << causal
-                << " max_error=" << maximum_error << "\n";
+                << " max_error=" << maximum_error
+                << " max_at=[" << maximum_token << "]["
+                << maximum_feature << "]"
+                << " actual=" << actual[maximum_token][maximum_feature]
+                << " expected=" << expected[maximum_token][maximum_feature]
+                << " first_at=[" << first_token << "]["
+                << first_feature << "]"
+                << " first_actual=" << actual[first_token][first_feature]
+                << " first_expected=" << expected[first_token][first_feature]
+                << "\n";
             return false;
         }
         return true;
@@ -155,22 +211,33 @@ namespace{
 
 int main(){
     const unsigned primary_length = PE_DIM==4 ? 7U : 5U;
-    if(!runCase(primary_length, false, 1604)){
-        return 1;
-    }
-    if(!runCase(primary_length, true, 1605)){
-        return 1;
-    }
-    if(!runCase(1U, false, 1606)){
-        return 1;
-    }
+    bool passed = true;
+    passed = runCase(
+        "single-key-first", 1U, false, 1606, InputPattern::Random
+    ) && passed;
+    passed = runCase(
+        "two-key-ones-v", 2U, false, 1607, InputPattern::OnesV
+    ) && passed;
+    passed = runCase(
+        "two-key-basis-v", 2U, false, 1608, InputPattern::BasisV
+    ) && passed;
+    passed = runCase(
+        "primary-noncausal", primary_length, false, 1604,
+        InputPattern::Random
+    ) && passed;
+    passed = runCase(
+        "primary-causal", primary_length, true, 1605,
+        InputPattern::Random
+    ) && passed;
     if(PE_DIM==4 && HEAD_DIM==16){
-        if(!runCase(16U, false, 1616)){
-            return 1;
-        }
-        if(!runCase(16U, true, 1617)){
-            return 1;
-        }
+        passed = runCase(
+            "full-tile-noncausal", 16U, false, 1616,
+            InputPattern::Random
+        ) && passed;
+        passed = runCase(
+            "full-tile-causal", 16U, true, 1617,
+            InputPattern::Random
+        ) && passed;
     }
 
     std::fill(o_memory, o_memory+MAX_O_WORDS, (dma_word_t)0);
@@ -182,6 +249,9 @@ int main(){
     );
     if(status!=1 || o_memory[0]!=(dma_word_t)0x12345678U){
         std::cerr << "invalid-length canary failure\n";
+        passed = false;
+    }
+    if(!passed){
         return 1;
     }
 

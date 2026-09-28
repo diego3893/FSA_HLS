@@ -20,7 +20,7 @@
 - 保持现有RawFMA、PWL精度、特殊值及舍入合同；不得用放宽误差掩盖问题。
 - 不恢复已造成RTL错误的`pe_pipeline/cmp_pipeline inter false`；不恢复Accumulator反馈DATAFLOW环或单actor写多个有限DMA请求FIFO。
 - 不更改时钟、器件、接口或阵列参数来掩盖综合失败。
-- Git和远端Vitis仅在用户明确授权的单轮远程迭代中执行；每轮使用本地提交/推送、NM37 fast-forward pull和精确commit测试，完成一轮后暂停汇报。
+- 用户已授权持续Git和远端Vitis闭环，直到硬件、时序、II和RTL数据全部验收；每轮仍使用本地提交/推送、NM37 fast-forward pull和精确commit测试，读取并分析远端数据后才进入下一轮。
 - 没有读取对应新build前，不得声称实例数、DSP、II、时序、CoSim或死锁问题已经解决。
 - 只维护仓库根目录的`PROJECT_CONTEXT.md`；`docs/`目录中的同名文件为历史快照，停止更新。
 
@@ -32,7 +32,7 @@
 
 - 顶层为DSP40、FF30467、LUT124857、BRAM8；共享`runPeArray`为16 DSP，共享`runAccumulatorColumns`为8 DSP，减法器共16 DSP，资源结构符合目标。相对8路交错版增加约1052 FF和1423 LUT，因此若16路不能提供功能收益应恢复8路。
 - QK和ROW_SUM达到目标II5，PWL和PV扁平循环均达到II1；`stagePeArrayResult`和`stageAccumulatorResult`均为latency1/II1且DSP0。
-- 当前`pv_sum RAW distance=16 true`被工具识别为真实反馈，没有把相关错误声明为false；`output_acc inter false`继续只处理已确认安全的假相关。16路没有改变RTL数值错误，下一有效候选应评估恢复8路。
+- 最新已测build中的`pv_sum RAW distance=16 true`被工具识别为真实反馈，没有把相关错误声明为false；`output_acc inter false`继续只处理已确认安全的假相关。16路没有改变RTL数值错误，当前未测候选已恢复8路。
 - 顶层估算周期为7.300ns，正好满足7.300ns有效预算；最新顶层最坏延迟为439747587 cycles。
 
 **当前源码修改：**
@@ -41,7 +41,7 @@
 - `runPeArray`是唯一包含`peMacUnit`调用的位置，内部完全展开`D×D`；`runAccumulatorColumns`是唯一包含`accUnit`调用的位置，按列完全展开。两者保持STP II1，分别在函数内部调用独立STP II1/latency1结果级；16:33 CSynth已确认分级切断调用返回写回路径，使顶层回到7.300ns。
 - `runController`对上述两个非内联函数各设置`ALLOCATION function ... limit=1`；13:50 build已确认两个模块都只有一个物理实例。
 - QK和ROW_SUM循环保留真实反馈并把目标II改为5，以接受共享PE新增的返回延迟，不使用虚假的PE反馈依赖声明。
-- PV当前为16个feature上下文交错的单一固定边界II1操作循环：每组先发射`D×16`个PE操作，再发射16个Accumulator更新；`output_acc`只在每个feature唯一一次的更新阶段访问，因此对该变量声明`inter false`；`pv_sum`是真反馈，当前声明`RAW distance=16 true`。没有外层feature-group outline，也没有`PIPELINE off`。该改动未改变CoSim错误，暂不视为修复。
+- 当前未测候选已把PV恢复为8个feature上下文交错的单一固定边界II1操作循环：每组先发射`D×8`个PE操作，再发射8个Accumulator更新；`output_acc`只在每个feature唯一一次的更新阶段访问，因此对该变量声明`inter false`；`pv_sum`是真反馈，声明`RAW distance=8 true`。没有外层feature-group outline，也没有`PIPELINE off`。
 - PWL从task批量请求/回收改为有限流水调用：8段扫描期间保持`PE.reg`中的X不变，命中结果暂存到此时已不再保存S的`PE.score_acc`，结束后写回`PE.reg`；没有阵列外P副本和额外PE状态，两种参数本地端到端回归通过。
 - 11:03的FRP源码候选仍在相同14160ns死锁；本地没有同步该次`csynth.rpt`和`sim/verilog`，无法确认工具是否真正采用FRP，因此不能把它当作有效硬件修复。
 - AMD Vitis HLS文档明确要求含dataflow task和M_AXI的CoSim启用`-enable_tasks_with_m_axi`；该开关在11:17复验中仍死锁，证明原问题是结构闭环。当前已无task，因此Tcl不再使用该开关。
@@ -49,7 +49,7 @@
 - 当前`runController`同时是task命令生产者和结果消费者，跨`ap_ctrl_chain`控制区与`ap_ctrl_none` KPN形成闭环。AMD混合task/dataflow模型要求task输入由先于task的普通进程产生、task输出由后于task的普通进程消费；同一个控制器承担两端不满足该前向拓扑。
 - QK和ROW_SUM直接调用共享PE模块，并显式接受II5真实反馈；不使用虚假的PE反馈`DEPENDENCE false`。
 - PWL一次连续发射8个分段再顺序收回，命中结果直接写回PE.reg，删除了阵列外`D×D` probability副本。
-- PV当前每组交错16个独立feature：每个feature内部仍按key row原顺序累加，只使用`16×D`个FP32临时partial，不改变FMA顺序；16维和128维都能整除16，不增加目标配置的空上下文操作。
+- 当前未测候选每组交错8个独立feature：每个feature内部仍按key row原顺序累加，只使用`8×D`个FP32临时partial，不改变FMA顺序；16维和128维都能整除8，不增加目标配置的空上下文操作。
 - 当前源码的`4×4/dim16`和`16×16/dim128`均通过端到端本地测试；4×4/16已在Vitis HLS 2024.2完成CSim、CSynth和失败但完整结束的RTL CoSim。
 - 本地使用math stubs完成功能回归；真实Vitis调度、实例共享、时序和RTL行为仍需服务器CSynth/CoSim验证。
 
@@ -131,8 +131,8 @@ Q/K/V AXI
 
 ## 8 下一步
 
-1. 下一轮先增强testbench诊断：把单key用例放到首事务；增加`V=全1`的双key用例检查softmax分母与PV分子是否一致；增加basis-V双key用例直接读出attention权重；post-check打印首个错误token/feature及C/RTL值。
-2. 用这些CoSim结果区分：短事务未产生AXI写、softmax/PWL/ROW_SUM错误，或PV分子错误；只修改证据指向的单一阶段。若16路交错仍无收益，恢复8路以收回FF/LUT。
+1. 当前第1轮候选已恢复8路PV交错并增强testbench：单key为首事务，新增`V=全1`和basis-V双key用例，post-check会打印首个及最大错误位置和值；两种参数本地测试通过，下一步提交后运行4×4/16远端完整HLS。
+2. 用新的CoSim结果区分：短事务未产生AXI写、softmax/PWL/ROW_SUM错误，或PV分子错误；只修改证据指向的单一阶段。
 3. 修复后重新运行4×4/16完整CoSim；必须全部事务完成、无deadlock、无`Bad TV file`且C post-check通过，同时保持DSP40、PV II1和7.300ns结构。
 4. 4×4/16的CoSim通过后，再用环境参数运行16×16/128，检查256个PE、16列Accumulator、资源、II、时序和参数化RTL行为。
 
@@ -187,4 +187,4 @@ Q/K/V AXI
 
 ## 11 交接摘要
 
-当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。最新commit `b0ab080`保持单PE、单Accumulator、DSP40，QK/ROW_SUM II5，PWL/PV II1和7.300ns；CoSim在192845ns完成6/6，无deadlock，但首事务仍`max_error=0.199228`。把PV交错从8路增至16路没有改变任何数值错误，已经排除该假设；独立`L=1`事务RTL输出全0，因果单key query0却精确通过。下一步用首事务单key、全1-V双key和basis-V双key用例区分短写、softmax分母与PV分子错误，不能放宽容差或改变已验收资源/II/时序结构。
+当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。已验收硬件基线保持单PE、单Accumulator、DSP40，QK/ROW_SUM II5，PWL/PV II1和7.300ns；CoSim无deadlock但RTL数值错误。16路PV交错无效，当前未测候选已恢复8路并加入首事务单key、全1-V双key和basis-V双key诊断，两种参数本地测试通过。下一步远端CoSim区分短写、softmax分母与PV分子错误，再按证据继续迭代，不能放宽容差或改变已验收结构。
