@@ -8,7 +8,7 @@
 - 当前研究任务：独立实现参数化`D×D` Split-D顶层`fsa_stream_split_d`。
 - 默认配置：物理阵列`4×4`、`dim=16`；目标配置仅改参数得到`16×16/dim128`。
 - 算法顺序：每个PE含FP16工作寄存器`reg`和FP32 `score_acc`；先执行`dim/D`轮QK累加，完整S后softmax，再执行`dim/D`轮PV。
-- 当前第一优先级：单PE和单Accumulator结构已在CSynth收敛；下一步用RTL CoSim验证双FLP task不会死锁且数值一致，再考虑16×16/128参数综合。
+- 当前第一优先级：10:42 RTL CoSim已证实双FLP task死锁；当前最小候选把两个actor改为FRP，下一步重新综合并CoSim验证，16×16/128继续后置。
 
 ## 2 硬约束
 
@@ -30,7 +30,7 @@
 
 **最近一次已读取build：**`build/fsa_stream_split_d_build/solution1`，产物时间2026-09-28 10:25；综合输入为双task候选。
 
-- CSim通过且报告`PE=4x4 HEAD_DIM=16 DIM_BLOCKS=4`；CSynth通过；未运行RTL CoSim、IP导出、Vivado实现或板测。
+- CSim通过且报告`PE=4x4 HEAD_DIM=16 DIM_BLOCKS=4`；CSynth通过；10:42 Verilog RTL CoSim在14160ns触发deadlock detector并失败，随后C post-check报告`Bad TV file`；未运行IP导出、Vivado实现或板测。
 - 测试覆盖`L=7` causal/non-causal、`L=1`、`L=16` causal/non-causal及非法长度哨兵。
 - 顶层估算周期7.300ns，等于7.300ns有效预算；估算Fmax为136.99MHz，HLS裕量仍为0。
 - 顶层资源：BRAM8、DSP40、FF45146、LUT118716、URAM0；达到`PE16+Accumulator8+减法器16`目标。
@@ -38,7 +38,7 @@
 - Accumulator结构已收敛：唯一`accumulatorTask_U0`，8 DSP，函数流水深度9、II1；active hierarchy中不再出现第二套Accumulator。
 - QK和ROW_SUM命令循环目标II4、实际II2；PWL发射/接收、PV发射/接收及PV输出更新均达到II1。
 - CSim观测到所有stream的最大占用深度为7，当前FIFO深度8可容纳该测试负载，但连续事务和RTL反压仍需CoSim验证。
-- 日志有4条`HLS 200-656`：两个task为无start propagation的auto-rewind流水，RTL可能死锁。AMD文档要求task使用FLP/FRP，当前继续保留FLP；必须以RTL CoSim验证该风险。
+- 日志中的`HLS 200-656`已被RTL CoSim证实：双FLP task在命令/结果环路中发生死锁，因此10:25 build整体不合格；`Bad TV file`是死锁后没有完整输出的后续错误，不是独立数值根因。
 
 **当前源码修改：**
 
@@ -46,6 +46,7 @@
 - 新增唯一常驻`hls::task` actor `peArrayTask`；整个Split-D源码只有该actor中的一个`peMacUnit`调用点，内部完全展开`D×D`并声明II1。
 - 顶层`run()`的显式DATAFLOW已通过Vitis CSim/CSynth；上轮`HLS 214-389`已解决。
 - 针对08:03 build中的第二套Accumulator，已新增唯一常驻`accumulatorTask`及命令/结果stream；10:25 build确认源码中的唯一`accUnit`调用点综合为唯一8-DSP actor，所有softmax、PV更新和最终归一化顺序复用。
+- 当前源码已将`peArrayTask`和`accumulatorTask`的流水风格从FLP改为FRP；算法、FIFO深度、调用协议和资源调用点不变。AMD 2024.2文档说明FRP适用于DATAFLOW中的阻塞流并可用于避免死锁，但该pragma只是hint，必须检查新综合是否真实生成`yes(frp)`且没有回退告警。
 - QK和ROW_SUM通过命令/结果流阻塞使用PE，并显式接受II4真实反馈；不使用虚假的`DEPENDENCE false`。
 - PWL一次连续发射8个分段再顺序收回，命中结果直接写回PE.reg，删除了阵列外`D×D` probability副本。
 - PV每组交错4个独立feature：每个feature内部仍按key row原顺序累加，只增加`4×D`个FP32临时partial，不改变FMA顺序；命令和结果循环目标II1。
@@ -104,7 +105,8 @@ Q/K/V AXI
 
 | 方案 | 失败结果 | 约束 |
 |---|---|---|
-| Accumulator请求/响应反馈DATAFLOW | RTL CoSim死锁/Bad TV | 不恢复反馈环 |
+| Accumulator请求/响应反馈DATAFLOW | RTL CoSim死锁/Bad TV | 不恢复旧反馈环 |
+| 双FLP task命令/结果环路 | 10:42 RTL CoSim在14160ns死锁，C post-check Bad TV | 不再保留FLP；当前试验FRP |
 | 单DMA actor顺序写Q/K/V有限FIFO | 跨通道head-of-line死锁 | 固定为三路独立请求actor |
 | 全局屏蔽PE/CMP ring依赖 | C++通过但RTL稳定产生48个错误 | 禁止恢复`pe_pipeline/cmp_pipeline inter false` |
 | Split-D只靠函数唯一或ALLOCATION | 首轮4套PE+2套Acc；第二轮仍4套PE | 必须控制调用循环的自动流水/展开并查RTL |
@@ -127,10 +129,11 @@ Q/K/V AXI
 
 ## 8 下一步
 
-1. 将`hls/fsa_stream_split_d/run_hls.tcl`中的`RUN_COSIM`设为1并运行RTL CoSim，重点验证两个FLP task的`HLS 200-656`潜在死锁及数值一致性。
-2. CoSim至少保留当前5组功能用例；如可接受运行时间，再增加同一仿真进程内连续两次顶层调用，验证thread-local task/FIFO跨事务安全性。
-3. 4×4/16 CoSim通过后，仅修改环境参数运行`FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 ./run_hls.sh fsa_stream_split_d`，检查256个PE、16列Accumulator、资源及时序是否按参数扩展。
-4. 16×16/128综合通过后再决定是否IP导出和Vivado实现；板测仍不在当前阶段。
+1. 保持`RUN_COSIM=1`重新运行`./run_hls.sh fsa_stream_split_d`，验证双FRP候选。
+2. 新CSynth必须确认两个actor都显示`yes(frp)`、无`HLS 200-1970`等FRP回退告警，同时保持单PE、单Accumulator、DSP40、II1和7.300ns预算。
+3. 新RTL CoSim必须完成当前全部功能用例、无deadlock且C post-check通过；如果仍死锁，先同步`sim/verilog`中的deadlock report确定满/空stream，不继续盲目增大FIFO。
+4. 4×4/16 CoSim通过后，再增加同一仿真进程内连续两次顶层调用，验证thread-local task/FIFO跨事务安全性。
+5. 之后仅修改环境参数运行`FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 ./run_hls.sh fsa_stream_split_d`，检查256个PE、16列Accumulator、资源及时序是否按参数扩展。
 
 ## 9 验证状态
 
@@ -152,6 +155,8 @@ Q/K/V AXI
 - 2026-09-28 08:03 build：CSim/CSynth通过，唯一PE task为16 DSP且II1，QK/ROW_SUM实际II2，PWL/PV实际II1；但PV outline复制出第二套Accumulator，总DSP48，结构仍不合格；另有`HLS 200-656`潜在RTL死锁告警。
 - 当前双task候选已把Accumulator也改为唯一常驻actor；无`PIPELINE off`和ALLOCATION pragma，源码只有一个`peMacUnit`及一个`accUnit`调用点，两种参数和Vitis CSim宏环境语法检查通过。
 - 2026-09-28 10:25 build：CSim/CSynth通过；唯一PE task为16 DSP/II1，唯一Accumulator task为8 DSP/II1，减法器16 DSP，总DSP40；QK/ROW_SUM II2，PWL/PV II1，周期7.300ns。结构和HLS吞吐目标通过，尚需RTL CoSim排除双task潜在死锁。
+- 2026-09-28 10:42 CoSim：在14160ns由`AESL_deadlock_report_unit.v`终止，报`HLS 200-742` deadlock，C post-check因输出不完整报两次`Bad TV file`；双FLP候选失败。
+- 当前FRP最小修复已完成：两个actor的`PIPELINE II=1 style=flp`改为`style=frp`，4×4/16、16×16/128及Vitis CSim宏环境语法检查通过；尚无新Vitis build。
 
 ### 未完成
 
@@ -170,4 +175,4 @@ Q/K/V AXI
 
 ## 11 交接摘要
 
-当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。10:25 build已通过4×4/16的CSim和CSynth：唯一PE task为16 DSP/II1，唯一Accumulator task为8 DSP/II1，加16-DSP减法器后总DSP40；QK/ROW_SUM II2，PWL/PV II1，周期7.300ns。当前无需继续改算法；第一下一步是启用RTL CoSim，验证两个FLP task不会因`HLS 200-656`告警发生死锁且输出数值一致。通过后再仅改参数综合16×16/128配置。
+当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。10:25 build的结构和CSynth指标达到目标：单PE16 DSP/II1、单Accumulator8 DSP/II1、总DSP40、QK/ROW_SUM II2、PWL/PV II1、周期7.300ns；但10:42 RTL CoSim在14160ns确认双FLP task死锁，因此整体不合格。当前源码只把两个actor改为FRP，其他结构不动，并通过两种参数的本地语法检查。下一步重新运行含CoSim的完整流程，先确认工具实际采用FRP且结构/时序不退化，再判断RTL死锁是否消失；16×16/128继续后置。
