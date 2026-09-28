@@ -131,8 +131,8 @@ Q/K/V AXI
 
 ## 8 下一步
 
-1. 第1轮诊断已确认V tile跨事务滞后；当前第2轮计划给V建立独立非内联加载器，使K/V不再共享key-loop outline中的唯一`loadElemTile`子模块。
-2. 修复V加载后重新检查单key、全1-V和basis-V，若仍有误差再区分softmax/PWL/ROW_SUM与PV分子。
+1. 第2轮独立V加载器仍让第2笔及以后事务使用前一笔V；第3轮将V加载强制内联到控制器，消除独立子模块的跨事务完成状态。
+2. 第3轮重新检查单key、全1-V和basis-V；这是本次限定的最后一轮，若仍失败则停止并保留证据。
 3. 修复后重新运行4×4/16完整CoSim；必须全部事务完成、无deadlock、无`Bad TV file`且C post-check通过，同时保持DSP40、PV II1和7.300ns结构。
 4. 4×4/16的CoSim通过后，再用环境参数运行16×16/128，检查256个PE、16列Accumulator、资源、II、时序和参数化RTL行为。
 
@@ -169,6 +169,7 @@ Q/K/V AXI
 - 2026-09-29 00:42 build：输出写回展平后，CSim/CSynth通过并保持DSP40、QK/ROW_SUM II5、PWL/PV II1、7.300ns；RTL CoSim从此前7小时20分仍0/6改善为192845ns完成6/6，确认AXI写响应卡死已解决，但C post-check在首个`L=7, causal=0`用例出现`max_error=0.199228`并报`Bad TV file`，数值验收仍失败。
 - 2026-09-29 01:15 build（commit `b0ab080`）：PV交错由8改16后，本地4×4/16和16×16/128通过；远端4×4/16 CSim/CSynth通过，DSP40、BRAM8、FF30467、LUT124857、QK/ROW_SUM II5、PWL/PV II1、7.300ns。RTL CoSim仍在192845ns完成6/6，但首事务仍`max_error=0.199228`，证明增加PV反馈距离无效。TV分析还显示独立`L=1`事务整片RTL输出内存全0，`L=7`因果仅单key的query0精确通过，多key查询均有误差。
 - 2026-09-29 01:43 build（commit `58eecaa`）：恢复8路PV并加入诊断用例；CSim/CSynth通过，DSP40、BRAM8、FF29415、LUT123434、7.300ns，QK/ROW_SUM II5、PWL/PV II1。CoSim 8/8于208505ns完成，无deadlock，但7个有效事务均失败。TV输入正确；输出证明V tile滞后一事务，综合层次显示K/V在key-loop outline中共用一个`loadElemTile`子模块。
+- 2026-09-29 02:04 build（commit `6c80d49`）：K/V拆成独立加载子模块后，CSim/CSynth与目标II、7.300ns继续通过，CoSim 8/8于205005ns完成且无deadlock；首个单key事务通过，但其余6个数值用例失败。全1-V事务输出0，随后basis-V事务输出约0.5，证明独立V子模块仍在后续顶层事务使用前一笔V。
 - 当前源码的`4×4/dim16`和`16×16/dim128`端到端本地回归通过；4×4/16 RTL CoSim已完成6/6但数值失败，16×16/128尚待Vitis综合和CoSim。
 
 ### 未完成
@@ -188,4 +189,4 @@ Q/K/V AXI
 
 ## 11 交接摘要
 
-当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。硬件基线保持单PE、单Accumulator、DSP40，QK/ROW_SUM II5，PWL/PV II1和7.300ns；CoSim无deadlock但RTL数据失败。第1轮诊断已证明输入TV正确而V tile滞后一事务，且K/V在key-loop outline中共用唯一加载子模块。第2轮先分离V专用加载器，保持PE、Accumulator、时钟、接口和数值合同不变；修复后继续完整CoSim并按证据迭代。
+当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。硬件基线保持单PE、单Accumulator、DSP40，QK/ROW_SUM II5，PWL/PV II1和7.300ns；CoSim无deadlock但RTL数据失败。第2轮把V拆为独立加载子模块后，首事务通过但后续事务仍滞后一笔。当前第3轮把V加载强制内联到调用控制器，消除独立完成握手；这是本次限定的最后一轮。

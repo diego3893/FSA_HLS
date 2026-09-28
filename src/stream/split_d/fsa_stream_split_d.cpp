@@ -215,8 +215,8 @@ namespace detail{
     /**
      * @brief V专用DMA加载器。
      *
-     * K和V来自独立AXI bundle。使用不同的非内联入口，防止HLS在key
-     * 循环outline中让两次连续DMA调用共享同一个带状态的子模块。
+     * K和V来自独立AXI bundle。V加载必须内联到调用控制器中，避免
+     * 独立子模块的ap_done跨顶层事务保持后让下一事务提前读取旧tile。
      */
     void loadValueTile(
         const dma_word_t memory[MAX_QKV_WORDS],
@@ -224,7 +224,7 @@ namespace detail{
         const unsigned active_tokens,
         elem_t tile[PE_DIM][HEAD_DIM]
     ){
-        #pragma HLS INLINE off
+        #pragma HLS INLINE
         #pragma HLS ARRAY_PARTITION variable=tile complete dim=1
 
         for(int token=0; token<PE_DIM; ++token){
