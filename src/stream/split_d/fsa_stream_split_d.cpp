@@ -9,7 +9,7 @@ namespace fsa{
 namespace split_d{
 namespace detail{
 
-    constexpr int PV_INTERLEAVE = 8;
+    constexpr int PV_INTERLEAVE = 16;
 
     static_assert(PV_INTERLEAVE<=HEAD_DIM,
                   "PV交错上下文不能超过head dimension");
@@ -598,7 +598,7 @@ namespace detail{
                         ++operation){
                     #pragma HLS PIPELINE II=1
                     #pragma HLS DEPENDENCE variable=output_acc inter false
-                    #pragma HLS DEPENDENCE variable=pv_sum inter RAW distance=8 true
+                    #pragma HLS DEPENDENCE variable=pv_sum inter RAW distance=16 true
                     const int feature_base =
                         pv_group*detail::PV_INTERLEAVE;
                     const int remaining_features = HEAD_DIM-feature_base;
