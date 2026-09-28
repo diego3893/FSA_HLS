@@ -10,7 +10,7 @@
 - 起始commit：`d098e17c2105de3646188badc6e38440410d6532`
 - 目标模块：`fsa_stream_split_d`
 - 工具链：远端Vitis HLS 2024.2；每条SSH命令使用Bash并显式加载`~/.bashrc`
-- 最大迭代次数：未设置；持续到全部验收条件通过或出现技能定义的阻塞
+- 最大迭代次数：3；若提前全部验收则提前结束
 - 调用授权范围：本地修改与测试、普通commit/push、SSH、fast-forward pull、远端Vitis测试、证据读取、日志和根目录`PROJECT_CONTEXT.md`更新
 - 额外授权记录：无
 
@@ -40,7 +40,8 @@
 
 | 轮次 | 被测commit | 修改摘要 | 本地测试 | 远端测试 | 验收状态 |
 |---:|---|---|---|---|---|
-| 1 | 待定 | 增加单key、全1-V和basis-V诊断用例并恢复8路PV交错 | 4×4/16、16×16/128通过 | 待执行 | 进行中 |
+| 1 | `58eecaad3b1530dfa22c28daded59311927dbfa9` | 增加单key、全1-V和basis-V诊断用例并恢复8路PV交错 | 4×4/16、16×16/128通过 | CSim/CSynth通过，CoSim数据失败 | 未通过 |
+| 2 | 待定 | 分离V专用加载器 | 4×4/16、16×16/128通过 | 待执行 | 进行中 |
 
 ## 5. 逐轮记录
 
@@ -70,6 +71,48 @@
 
 #### 修改后远端测试
 
+- 被测commit：`58eecaad3b1530dfa22c28daded59311927dbfa9`
+- `.bashrc`加载：使用`bash -ic`并显式加载成功，Vitis HLS 2024.2正常启动。
+- 拉取冲突处理：无。远端tracked工作树干净，从`b0ab080`快进到精确被测commit；既有未跟踪文件未触碰。
+- 环境与参数：VU37P、4×4 PE、HEAD_DIM=16、10ns时钟、2.7ns uncertainty
+- 命令：`./run_hls.sh fsa_stream_split_d`
+- 开始/结束时间：2026-09-29 01:37:46+08:00至01:43:43+08:00；Vitis总elapsed 357.85s。
+- 结果与退出码：FAIL，code 1。CSim和CSynth通过；RTL仿真8/8事务完成且无deadlock，C post-check的7个有效长度事务全部数值失败。
+- 关键指标：估算周期7.300ns；DSP40、BRAM8、FF29415、LUT123434；QK/ROW_SUM II5、PWL/PV II1；顶层最大延迟439747587 cycles。CoSim在208505ns结束。单keyRTL全0；全1-V用例首值为-0.113159而非1；basis-V用例RTL整行为1，精确等于前一个全1-V事务的期望结果。
+- 证据路径：`hls/fsa_stream_split_d/build/solution1/csim/report/`、`syn/report/fsa_stream_split_d_csynth.rpt`、`syn/report/runController_csynth.rpt`、`syn/report/runController_Outline_VITIS_LOOP_309_3_csynth.rpt`、`sim/tv/cdatafile/`、`sim/tv/rtldatafile/`和`sim/verilog/xsim.log`。
+
+#### 本轮结论与下一步
+
+- 已解决的问题：诊断用例把随机误差收敛为跨事务V数据滞后的可复现现象；恢复8路PV交错后资源回到FF29415/LUT123434，DSP、II和时序不变。
+- 仍存在的问题：RTL使用的V tile不是当前事务数据，导致全部有效事务失败；尚不能在修复V加载前判断是否还有独立的softmax/PV数值问题。
+- 验收标准状态：本地两种参数、远端CSim、CSynth、硬件结构、DSP、II、时序和CoSim控制流程通过；RTL数据失败，整体未验收。
+- 失败分析：输入TV逐事务解析确认当前Q/K/V文件正确；输出解析显示事务1使用事务0的稀疏V、事务2输出精确等于事务1全1-V结果。综合层次显示key循环outline中的K/V共用一个`loadElemTile`子模块和内部状态，当前证据指向V加载调用的跨事务/跨调用调度错误，而不是PV反馈距离。
+- 下一轮修改：给V建立独立的非内联加载函数，使K和V不再共享同一个有状态HLS子模块；保持数组布局、AXI bundle、计算结构和数值合同不变。
+- 本轮闭环状态：已完成。
+
+### 第2轮
+
+#### 修改前判断与计划
+
+- 当前问题：V tile在RTL中滞后一事务，而输入TV数据正确。
+- 证据：basis-V事务的RTL输出精确复现前一全1-V事务；`runController_Outline_VITIS_LOOP_309_3`中K/V共用唯一`grp_loadElemTile`。
+- 原因假设：同一非内联加载子模块在K、V连续调用和外层outline间产生了错误的状态/调度复用。
+- 本轮计划：新增V专用加载函数，确保K和V拥有不同HLS子模块；先跑两种参数本地测试，再提交远端完整HLS。
+
+#### 实际修改
+
+- `src/stream/split_d/fsa_stream_split_d.cpp`：新增非内联`loadValueTile`，仅连接V AXI bundle；K继续使用`loadElemTile`。两者保持相同数据布局和II1加载循环，但综合时成为不同子模块，不再共享调用状态。
+- 与计划的偏差：无。
+
+#### 修改后本地测试
+
+| 命令 | 结果/退出码 | 关键证据 |
+|---|---|---|
+| `g++ ... FSA_SPLIT_D_PE_DIM=4 FSA_SPLIT_D_HEAD_DIM=16`并运行 | PASS，code 0 | `[PASS] fsa_stream_split_d: PE=4x4 HEAD_DIM=16 DIM_BLOCKS=4` |
+| `g++ ... FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128`并运行 | PASS，code 0 | `[PASS] fsa_stream_split_d: PE=16x16 HEAD_DIM=128 DIM_BLOCKS=8` |
+
+#### 修改后远端测试
+
 - 被测commit：待定
 - `.bashrc`加载：待验证
 - 拉取冲突处理：待验证
@@ -93,8 +136,8 @@
 
 - 结束时间：待填写
 - 结束原因：待填写
-- 已完成闭环迭代：0/未设置
-- 未完成迭代：第1轮进行中
+- 已完成闭环迭代：1/3
+- 未完成迭代：第2轮进行中
 - 最终被测代码commit：待定
 - 最终日志commit：待定
 - 验收结果：待填写

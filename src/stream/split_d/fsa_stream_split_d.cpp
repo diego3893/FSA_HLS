@@ -212,6 +212,40 @@ namespace detail{
         }
     }
 
+    /**
+     * @brief V专用DMA加载器。
+     *
+     * K和V来自独立AXI bundle。使用不同的非内联入口，防止HLS在key
+     * 循环outline中让两次连续DMA调用共享同一个带状态的子模块。
+     */
+    void loadValueTile(
+        const dma_word_t memory[MAX_QKV_WORDS],
+        const unsigned token_base,
+        const unsigned active_tokens,
+        elem_t tile[PE_DIM][HEAD_DIM]
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS ARRAY_PARTITION variable=tile complete dim=1
+
+        for(int token=0; token<PE_DIM; ++token){
+            for(int word=0; word<QKV_WORDS_PER_TOKEN; ++word){
+                #pragma HLS PIPELINE II=1
+                const bool token_valid =
+                    (unsigned)token<active_tokens;
+                const dma_word_t packed = token_valid
+                    ? memory[(token_base+(unsigned)token)*
+                        (unsigned)QKV_WORDS_PER_TOKEN+(unsigned)word]
+                    : (dma_word_t)0;
+                for(int lane=0; lane<QKV_ELEMS_PER_WORD; ++lane){
+                    #pragma HLS UNROLL
+                    tile[token][word*QKV_ELEMS_PER_WORD+lane] =
+                        token_valid ? dma_unpack_elem(packed, lane)
+                                    : elemZero();
+                }
+            }
+        }
+    }
+
     void storeOutputTile(
         dma_word_t memory[MAX_O_WORDS],
         const unsigned token_base,
@@ -332,7 +366,7 @@ namespace detail{
                 detail::loadElemTile(
                     k_address, key_base, active_keys, k_tile
                 );
-                detail::loadElemTile(
+                detail::loadValueTile(
                     v_address, key_base, active_keys, v_tile
                 );
 

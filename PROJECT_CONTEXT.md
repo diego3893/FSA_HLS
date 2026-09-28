@@ -8,7 +8,7 @@
 - 当前研究任务：独立实现参数化`D×D` Split-D顶层`fsa_stream_split_d`。
 - 默认配置：物理阵列`4×4`、`dim=16`；目标配置仅改参数得到`16×16/dim128`。
 - 算法顺序：每个PE含FP16工作寄存器`reg`和FP32 `score_acc`；先执行`dim/D`轮QK累加，完整S后softmax，再执行`dim/D`轮PV。
-- 当前第一优先级：4×4/16已稳定保持DSP40、PV II1、估算周期7.300ns和单PE/单Accumulator，CoSim也能在约193us完成6/6事务；唯一未通过项是RTL数值。2026-09-29 01:15的16路PV交错build仍得到首事务`max_error=0.199228`，已排除8路PV反馈距离不足这一假设。下一步用单key、全1-V和basis-V诊断用例定位softmax分母、PV分子或短事务写回中的具体错误阶段。
+- 当前第一优先级：4×4/16保持DSP40、QK/ROW_SUM II5、PWL/PV II1、7.300ns和单PE/单Accumulator；8事务CoSim在208505ns完成且无deadlock，但数据失败。诊断已确认RTL的V tile至少滞后一事务：basis-V事务输出精确复现前一个全1-V事务。第2轮将分离K/V加载子模块，修复V加载后再判断剩余数值问题。
 
 ## 2 硬约束
 
@@ -20,7 +20,7 @@
 - 保持现有RawFMA、PWL精度、特殊值及舍入合同；不得用放宽误差掩盖问题。
 - 不恢复已造成RTL错误的`pe_pipeline/cmp_pipeline inter false`；不恢复Accumulator反馈DATAFLOW环或单actor写多个有限DMA请求FIFO。
 - 不更改时钟、器件、接口或阵列参数来掩盖综合失败。
-- 用户已授权持续Git和远端Vitis闭环，直到硬件、时序、II和RTL数据全部验收；每轮仍使用本地提交/推送、NM37 fast-forward pull和精确commit测试，读取并分析远端数据后才进入下一轮。
+- 用户已授权本次最多3轮Git和远端Vitis闭环，若提前全部验收则提前结束；每轮使用本地提交/推送、NM37 fast-forward pull和精确commit测试，读取并分析远端数据后才进入下一轮。
 - 没有读取对应新build前，不得声称实例数、DSP、II、时序、CoSim或死锁问题已经解决。
 - 只维护仓库根目录的`PROJECT_CONTEXT.md`；`docs/`目录中的同名文件为历史快照，停止更新。
 
@@ -131,8 +131,8 @@ Q/K/V AXI
 
 ## 8 下一步
 
-1. 当前第1轮候选已恢复8路PV交错并增强testbench：单key为首事务，新增`V=全1`和basis-V双key用例，post-check会打印首个及最大错误位置和值；两种参数本地测试通过，下一步提交后运行4×4/16远端完整HLS。
-2. 用新的CoSim结果区分：短事务未产生AXI写、softmax/PWL/ROW_SUM错误，或PV分子错误；只修改证据指向的单一阶段。
+1. 第1轮诊断已确认V tile跨事务滞后；当前第2轮计划给V建立独立非内联加载器，使K/V不再共享key-loop outline中的唯一`loadElemTile`子模块。
+2. 修复V加载后重新检查单key、全1-V和basis-V，若仍有误差再区分softmax/PWL/ROW_SUM与PV分子。
 3. 修复后重新运行4×4/16完整CoSim；必须全部事务完成、无deadlock、无`Bad TV file`且C post-check通过，同时保持DSP40、PV II1和7.300ns结构。
 4. 4×4/16的CoSim通过后，再用环境参数运行16×16/128，检查256个PE、16列Accumulator、资源、II、时序和参数化RTL行为。
 
@@ -168,6 +168,7 @@ Q/K/V AXI
 - 2026-09-28 16:33 build：4×4/16的CSim和CSynth通过；单PE/单Accumulator、DSP40，QK/ROW_SUM II5，PWL/PV II1，周期7.300ns，无II/时序错误诊断。显式结果级和真实distance 8方案通过CSynth验收。
 - 2026-09-29 00:42 build：输出写回展平后，CSim/CSynth通过并保持DSP40、QK/ROW_SUM II5、PWL/PV II1、7.300ns；RTL CoSim从此前7小时20分仍0/6改善为192845ns完成6/6，确认AXI写响应卡死已解决，但C post-check在首个`L=7, causal=0`用例出现`max_error=0.199228`并报`Bad TV file`，数值验收仍失败。
 - 2026-09-29 01:15 build（commit `b0ab080`）：PV交错由8改16后，本地4×4/16和16×16/128通过；远端4×4/16 CSim/CSynth通过，DSP40、BRAM8、FF30467、LUT124857、QK/ROW_SUM II5、PWL/PV II1、7.300ns。RTL CoSim仍在192845ns完成6/6，但首事务仍`max_error=0.199228`，证明增加PV反馈距离无效。TV分析还显示独立`L=1`事务整片RTL输出内存全0，`L=7`因果仅单key的query0精确通过，多key查询均有误差。
+- 2026-09-29 01:43 build（commit `58eecaa`）：恢复8路PV并加入诊断用例；CSim/CSynth通过，DSP40、BRAM8、FF29415、LUT123434、7.300ns，QK/ROW_SUM II5、PWL/PV II1。CoSim 8/8于208505ns完成，无deadlock，但7个有效事务均失败。TV输入正确；输出证明V tile滞后一事务，综合层次显示K/V在key-loop outline中共用一个`loadElemTile`子模块。
 - 当前源码的`4×4/dim16`和`16×16/dim128`端到端本地回归通过；4×4/16 RTL CoSim已完成6/6但数值失败，16×16/128尚待Vitis综合和CoSim。
 
 ### 未完成
@@ -187,4 +188,4 @@ Q/K/V AXI
 
 ## 11 交接摘要
 
-当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。已验收硬件基线保持单PE、单Accumulator、DSP40，QK/ROW_SUM II5，PWL/PV II1和7.300ns；CoSim无deadlock但RTL数值错误。16路PV交错无效，当前未测候选已恢复8路并加入首事务单key、全1-V双key和basis-V双key诊断，两种参数本地测试通过。下一步远端CoSim区分短写、softmax分母与PV分子错误，再按证据继续迭代，不能放宽容差或改变已验收结构。
+当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。硬件基线保持单PE、单Accumulator、DSP40，QK/ROW_SUM II5，PWL/PV II1和7.300ns；CoSim无deadlock但RTL数据失败。第1轮诊断已证明输入TV正确而V tile滞后一事务，且K/V在key-loop outline中共用唯一加载子模块。第2轮先分离V专用加载器，保持PE、Accumulator、时钟、接口和数值合同不变；修复后继续完整CoSim并按证据迭代。
