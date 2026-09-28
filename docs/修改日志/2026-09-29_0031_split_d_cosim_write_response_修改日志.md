@@ -34,4 +34,14 @@
 
 ## 验收结果
 
-待完成。
+- 测试提交：`ac44a2b86bd13810953dd62a7892376123e3f6ea`。
+- CSim通过：`PE=4x4 HEAD_DIM=16 DIM_BLOCKS=4`。
+- CSynth保持原结构目标：DSP40、BRAM8、FF29415、LUT123434，估算周期7.300ns。
+- 关键循环保持：QK II5、PWL II1、ROW_SUM II5、PV II1。
+- 新`storeOutputTile`循环II1，延迟73至106周期，DSP0。
+- RTL CoSim不再卡死，6个事务在192845ns全部执行完成。
+- C post-check失败：首个`L=7, causal=0`用例`max_error=0.199228`，随后报`Bad TV file`。
+
+## 本轮结论
+
+输出写响应重复等待已经解决，但RTL数值仍不一致，因此本轮不合格。按每轮完成后暂停的约定，不在本轮继续修改；下一轮应先比对首个事务的RTL输出与参考输出，判断错误是连续写回地址/数据选择问题，还是更早的计算流水问题。

@@ -130,8 +130,8 @@ Q/K/V AXI
 
 ## 8 下一步
 
-1. 运行`./run_hls.sh fsa_stream_split_d`；Tcl已经设置`RUN_COSIM 1`，会在CSim和CSynth后执行Verilog RTL CoSim。
-2. CoSim必须完成全部功能用例、无deadlock、无Bad TV且C post-check通过；若失败，优先读取deadlock report或数值失配，不改变已经验收的DSP40/II1/7.300ns结构来掩盖问题。
+1. 比对2026-09-29 00:42 CoSim首个`L=7, causal=0`事务的RTL输出与参考输出，定位`max_error=0.199228`来自写回映射还是计算流水。
+2. 修复后重新运行4×4/16完整CoSim；必须保持全部6个事务完成、无deadlock、无Bad TV且C post-check通过，同时保持DSP40、PV II1和7.300ns结构。
 3. 4×4/16的CoSim通过后，再用环境参数运行16×16/128，检查256个PE、16列Accumulator、资源、II、时序和参数化RTL行为。
 
 ## 9 验证状态
@@ -164,7 +164,8 @@ Q/K/V AXI
 - 2026-09-28 13:50扁平PV build：CSim/CSynth通过，旧PV outline消失，PE/Accumulator收敛为各一套，DSP40；但PV实际II9且顶层7.932ns，性能和时序不合格。
 - 2026-09-28 16:15 build：CSim/CSynth通过，DSP40；QK/ROW_SUM达到II5，PV由II9改善到II4，但`pv_sum`仍被按distance 1分析，顶层仍为7.932ns。固定LATENCY没有切断组合返回路径，因此该版不合格。
 - 2026-09-28 16:33 build：4×4/16的CSim和CSynth通过；单PE/单Accumulator、DSP40，QK/ROW_SUM II5，PWL/PV II1，周期7.300ns，无II/时序错误诊断。显式结果级和真实distance 8方案通过CSynth验收。
-- 当前源码的`4×4/dim16`和`16×16/dim128`端到端本地回归及Vitis宏环境C++14语法检查均通过；4×4/16尚待RTL CoSim，16×16/128尚待Vitis综合和CoSim。
+- 2026-09-29 00:42 build：输出写回展平后，CSim/CSynth通过并保持DSP40、QK/ROW_SUM II5、PWL/PV II1、7.300ns；RTL CoSim从此前7小时20分仍0/6改善为192845ns完成6/6，确认AXI写响应卡死已解决，但C post-check在首个`L=7, causal=0`用例出现`max_error=0.199228`并报`Bad TV file`，数值验收仍失败。
+- 当前源码的`4×4/dim16`和`16×16/dim128`端到端本地回归及Vitis宏环境C++14语法检查均通过；4×4/16 RTL CoSim已完成6/6但数值失败，16×16/128尚待Vitis综合和CoSim。
 
 ### 未完成
 
@@ -183,4 +184,4 @@ Q/K/V AXI
 
 ## 11 交接摘要
 
-当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。16:33 build已通过4×4/16的CSim和CSynth：单PE、单Accumulator、DSP40，QK/ROW_SUM II5，PWL/PV II1，周期7.300ns。显式一拍结果级成功切断返回写回路径，`pv_sum RAW distance=8 true`正确表达8路交错真反馈；不使用`PIPELINE off`，不屏蔽PE真实反馈。两种参数的本地端到端回归和Vitis宏语法检查已通过。HLS脚本已恢复`RUN_COSIM 1`，下一步重跑Vitis完成4×4/16 Verilog RTL CoSim；通过后再综合和仿真16×16/128配置。
+当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。2026-09-29 00:42 build保持单PE、单Accumulator、DSP40，QK/ROW_SUM II5，PWL/PV II1，周期7.300ns。展平输出写回后，RTL CoSim已能在192845ns完成6/6事务，此前AXI写响应卡死已解决；但首个`L=7, causal=0`事务出现`max_error=0.199228`，C post-check失败。下一步先比对该事务的RTL输出与参考输出，定位数值错误，不能以放宽容差或改变已验收资源/II/时序结构掩盖。
