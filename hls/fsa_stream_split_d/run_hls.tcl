@@ -57,7 +57,7 @@ if {$RUN_CSIM} {
 csynth_design
 
 if {$RUN_COSIM} {
-    cosim_design -rtl verilog -enable_tasks_with_m_axi
+    cosim_design -rtl verilog
 }
 
 if {$EXPORT_IP} {

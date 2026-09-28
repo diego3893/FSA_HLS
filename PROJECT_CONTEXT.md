@@ -8,7 +8,7 @@
 - 当前研究任务：独立实现参数化`D×D` Split-D顶层`fsa_stream_split_d`。
 - 默认配置：物理阵列`4×4`、`dim=16`；目标配置仅改参数得到`16×16/dim128`。
 - 算法顺序：每个PE含FP16工作寄存器`reg`和FP32 `score_acc`；先执行`dim/D`轮QK累加，完整S后softmax，再执行`dim/D`轮PV。
-- 当前第一优先级：10:42和11:03两次CoSim均在14160ns死锁；已发现CoSim缺少task+M_AXI所需的`-enable_tasks_with_m_axi`，当前先验证修正后的仿真配置，16×16/128继续后置。
+- 当前第一优先级：已删除混合task反馈环并改为有限调用共享模块；下一步运行4×4/16 Vitis全流程，确认单PE/单Accumulator、II、时序及RTL CoSim，16×16/128的Vitis验收继续后置。
 
 ## 2 硬约束
 
@@ -28,7 +28,7 @@
 
 ### 3.1 Split-D当前候选
 
-**最近一次已读取build：**`build/fsa_stream_split_d_build/solution1`，产物时间2026-09-28 10:25；综合输入为双task候选。
+**最近一次有结果的build：**双task候选；11:17启用task+M_AXI CoSim开关后仍在13.76ms死锁。当前有限调用候选尚无Vitis build。
 
 - CSim通过且报告`PE=4x4 HEAD_DIM=16 DIM_BLOCKS=4`；CSynth通过；10:42 Verilog RTL CoSim在14160ns触发deadlock detector并失败，随后C post-check报告`Bad TV file`；未运行IP导出、Vivado实现或板测。
 - 测试覆盖`L=7` causal/non-causal、`L=1`、`L=16` causal/non-causal及非法长度哨兵。
@@ -42,17 +42,19 @@
 
 **当前源码修改：**
 
-- 已删除Split-D实现中的全部`PIPELINE off`和`runPeArray ALLOCATION`试验。
-- 新增唯一常驻`hls::task` actor `peArrayTask`；整个Split-D源码只有该actor中的一个`peMacUnit`调用点，内部完全展开`D×D`并声明II1。
-- 顶层`run()`的显式DATAFLOW已通过Vitis CSim/CSynth；上轮`HLS 214-389`已解决。
-- 针对08:03 build中的第二套Accumulator，已新增唯一常驻`accumulatorTask`及命令/结果stream；10:25 build确认源码中的唯一`accUnit`调用点综合为唯一8-DSP actor，所有softmax、PV更新和最终归一化顺序复用。
+- 已删除`hls::task`、`hls_thread_local`、四条命令/结果stream和`run()`层DATAFLOW；Tcl恢复普通`cosim_design -rtl verilog`。
+- `runPeArray`是唯一包含`peMacUnit`调用的位置，内部完全展开`D×D`并保持FLP II1；`runAccumulatorColumns`是唯一包含`accUnit`调用的位置，按列完全展开并保持FLP II1。
+- `runController`对上述两个非内联函数各设置`ALLOCATION function ... limit=1`，使QK、softmax、ROW_SUM、PV、running-sum和normalize顺序复用同一硬件模块；必须由新CSynth确认约束没有被自动outline绕过。
+- QK和ROW_SUM循环保留真实反馈目标II4；PV仍按4个feature上下文交错且循环目标II1；没有`PIPELINE off`。
+- PWL从task批量请求/回收改为有限流水调用：8段扫描期间保持`PE.reg`中的X不变，命中结果暂存到此时已不再保存S的`PE.score_acc`，结束后写回`PE.reg`；没有阵列外P副本和额外PE状态，两种参数本地端到端回归通过。
 - 11:03的FRP源码候选仍在相同14160ns死锁；本地没有同步该次`csynth.rpt`和`sim/verilog`，无法确认工具是否真正采用FRP，因此不能把它当作有效硬件修复。
-- AMD Vitis HLS文档明确要求含dataflow task和M_AXI的CoSim启用`-enable_tasks_with_m_axi`。此前Tcl只执行普通`cosim_design -rtl verilog`，当前已改为`cosim_design -rtl verilog -enable_tasks_with_m_axi`，并将两个actor恢复为Vitis对task默认选择的FLP。
-- QK和ROW_SUM通过命令/结果流阻塞使用PE，并显式接受II4真实反馈；不使用虚假的`DEPENDENCE false`。
+- AMD Vitis HLS文档明确要求含dataflow task和M_AXI的CoSim启用`-enable_tasks_with_m_axi`；该开关在11:17复验中仍死锁，证明原问题是结构闭环。当前已无task，因此Tcl不再使用该开关。
+- 11:17 deadlock report确认控制器阻塞于空`pe_result_stream`，KPN阻塞于空PE/Accumulator命令流，没有任何写端因FIFO满而阻塞。按AMD官方判据，这不是FIFO深度不足，而是设计结构问题。
+- 当前`runController`同时是task命令生产者和结果消费者，跨`ap_ctrl_chain`控制区与`ap_ctrl_none` KPN形成闭环。AMD混合task/dataflow模型要求task输入由先于task的普通进程产生、task输出由后于task的普通进程消费；同一个控制器承担两端不满足该前向拓扑。
+- QK和ROW_SUM直接调用共享PE模块，并显式接受II4真实反馈；不使用虚假的`DEPENDENCE false`。
 - PWL一次连续发射8个分段再顺序收回，命中结果直接写回PE.reg，删除了阵列外`D×D` probability副本。
 - PV每组交错4个独立feature：每个feature内部仍按key row原顺序累加，只增加`4×D`个FP32临时partial，不改变FMA顺序；命令和结果循环目标II1。
-- 命令/结果stream深度均为8，足以容纳完整PWL批次及4路PV批次；这是静态task的一进一出协议，不是此前已失败的Accumulator DATAFLOW反馈环。
-- 最新双task源码的`4×4/dim16`和`16×16/dim128`均已通过全部相关源文件的C++14语法检查，也通过带`__VITIS_HLS__`/`__HLS_COSIM__`/`__HLS_CSIM__`宏的入口语法检查。
+- 当前有限调用源码的`4×4/dim16`和`16×16/dim128`均通过端到端本地测试及带`__VITIS_HLS__`/`__HLS_CSIM__`宏的全部相关源文件C++14语法检查。
 - 当前Windows仍缺少Xilinx浮点仿真链接库，普通本地可执行文件无法链接；双task的RTL行为和连续事务安全性尚需Vitis RTL CoSim验证。
 
 ### 3.2 已验收生产基线
@@ -107,8 +109,9 @@ Q/K/V AXI
 | 方案 | 失败结果 | 约束 |
 |---|---|---|
 | Accumulator请求/响应反馈DATAFLOW | RTL CoSim死锁/Bad TV | 不恢复旧反馈环 |
-| 未启用task+M_AXI CoSim支持 | 10:42 FLP与11:03 FRP候选均在14160ns死锁，C post-check Bad TV | 当前先加`-enable_tasks_with_m_axi`复验 |
+| 未启用task+M_AXI CoSim支持 | 加开关后11:17仍死锁，证明它只修正CoSim接口支持，不修复控制闭环 | 保留官方开关，但不再视为架构修复 |
 | 仅切换FRP流水风格 | 11:03仍在相同14160ns死锁；且新报告未同步，无法确认FRP是否被采用 | 不作为独立解决方案，已恢复FLP |
+| 同一普通控制器同步请求/响应`hls::task` | 11:17报告确认`runController -> peArrayTask -> runController`闭环，只有读空、没有写满 | 删除task反馈环；不用加FIFO或关闭deadlock detector掩盖 |
 | 单DMA actor顺序写Q/K/V有限FIFO | 跨通道head-of-line死锁 | 固定为三路独立请求actor |
 | 全局屏蔽PE/CMP ring依赖 | C++通过但RTL稳定产生48个错误 | 禁止恢复`pe_pipeline/cmp_pipeline inter false` |
 | Split-D只靠函数唯一或ALLOCATION | 首轮4套PE+2套Acc；第二轮仍4套PE | 必须控制调用循环的自动流水/展开并查RTL |
@@ -131,11 +134,10 @@ Q/K/V AXI
 
 ## 8 下一步
 
-1. 保持`RUN_COSIM=1`重新运行`./run_hls.sh fsa_stream_split_d`；Tcl现在会给CoSim传入`-enable_tasks_with_m_axi`。
-2. 新RTL CoSim必须完成当前全部功能用例、无deadlock且C post-check通过；同时复查单PE、单Accumulator、DSP40、II1和7.300ns预算没有变化。
-3. 如果启用该官方选项后仍在14160ns死锁，必须同步`sim/verilog/AESL_deadlock_report_unit.v`附近报告和xsim完整日志，确定具体满/空stream；届时放弃task反馈环并改用生产核的有限周期token调度，不继续切换流水风格或盲目增大FIFO。
-4. 4×4/16 CoSim通过后，再增加同一仿真进程内连续两次顶层调用，验证thread-local task/FIFO跨事务安全性。
-5. 之后仅修改环境参数运行`FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 ./run_hls.sh fsa_stream_split_d`，检查256个PE、16列Accumulator、资源及时序是否按参数扩展。
+1. 运行`./run_hls.sh fsa_stream_split_d`，检查有限调用候选的CSim、CSynth和RTL CoSim。
+2. 新CSynth必须确认`runPeArray`和`runAccumulatorColumns`各只有一个RTL实例、DSP约40、两模块II1、PV调度II1且有效周期不超过7.300ns；若ALLOCATION被自动outline绕过，必须根据新层次重构，不能接受资源复制。
+3. 新RTL CoSim必须完成全部功能用例、无deadlock且C post-check通过。
+4. 4×4/16通过后，再用环境参数运行16×16/128，检查256个PE、16列Accumulator、资源及时序按参数扩展。
 
 ## 9 验证状态
 
@@ -159,7 +161,8 @@ Q/K/V AXI
 - 2026-09-28 10:25 build：CSim/CSynth通过；唯一PE task为16 DSP/II1，唯一Accumulator task为8 DSP/II1，减法器16 DSP，总DSP40；QK/ROW_SUM II2，PWL/PV II1，周期7.300ns。结构和HLS吞吐目标通过，尚需RTL CoSim排除双task潜在死锁。
 - 2026-09-28 10:42 CoSim：在14160ns由`AESL_deadlock_report_unit.v`终止，报`HLS 200-742` deadlock，C post-check因输出不完整报两次`Bad TV file`；双FLP候选失败。
 - 2026-09-28 11:03 CoSim：FRP源码候选仍在相同14160ns死锁并报相同Bad TV；本地未同步该次综合/仿真生成物，无法确认FRP是否实际生效。
-- 当前CoSim配置修复：两个actor恢复FLP；`run_hls.tcl`启用`RUN_COSIM=1`并使用`cosim_design -rtl verilog -enable_tasks_with_m_axi`；4×4/16与16×16/128语法检查通过，尚无对应新CoSim结果。
+- 2026-09-28 11:17 CoSim：启用`-enable_tasks_with_m_axi`后仍在13.76ms检测到死锁；控制器等空`pe_result_stream`，KPN等空PE/Accumulator命令流，无写满阻塞。已确认是混合控制区闭环，不是FIFO容量问题。
+- 当前有限调用候选已删除双task闭环；4×4/16与16×16/128本地端到端测试通过，两种参数的普通及Vitis宏语法检查通过，尚无Vitis CSynth/CoSim结果。
 
 ### 未完成
 
@@ -178,4 +181,4 @@ Q/K/V AXI
 
 ## 11 交接摘要
 
-当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。10:25 build的结构和CSynth指标达到目标：单PE16 DSP/II1、单Accumulator8 DSP/II1、总DSP40、QK/ROW_SUM II2、PWL/PV II1、周期7.300ns；但10:42 FLP和11:03 FRP源码候选的RTL CoSim都在14160ns死锁。现已发现两次Tcl均缺少AMD规定的task+M_AXI CoSim开关，当前恢复FLP并把命令改为`cosim_design -rtl verilog -enable_tasks_with_m_axi`。下一步用该配置完整复验；若仍死锁，必须读取完整deadlock report并放弃task反馈环，改为有限周期token调度。16×16/128继续后置。
+当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。双task版本虽在10:25 CSynth达到DSP40和目标II，但11:17已确认RTL控制闭环死锁。当前源码已删除全部task/FIFO反馈，改为两个非内联II1共享模块：唯一`peMacUnit`调用位置组成D×D PE阵列，唯一`accUnit`调用位置组成D列Accumulator，并在`runController`限制各一实例；QK/ROW_SUM保留真实反馈间隔，PV保留4上下文II1交错，无`PIPELINE off`。4×4/16和16×16/128本地端到端测试已通过。下一步运行4×4/16 Vitis全流程，重点验证ALLOCATION在自动outline后仍保持单实例、DSP约40、PV II1、7.300ns和RTL CoSim通过，再验证16×16/128。
