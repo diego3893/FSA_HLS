@@ -221,23 +221,24 @@ namespace detail{
         #pragma HLS INLINE off
         #pragma HLS ARRAY_PARTITION variable=output complete dim=1
 
-        for(int token=0; token<PE_DIM; ++token){
-            if((unsigned)token >= active_tokens){
-                continue;
+        const unsigned output_base =
+            token_base*(unsigned)O_WORDS_PER_TOKEN;
+        const unsigned total_words =
+            active_tokens*(unsigned)O_WORDS_PER_TOKEN;
+        for(unsigned index=0; index<total_words; ++index){
+            #pragma HLS PIPELINE II=1
+            const unsigned token =
+                index/(unsigned)O_WORDS_PER_TOKEN;
+            const unsigned word =
+                index%(unsigned)O_WORDS_PER_TOKEN;
+            acc_t values[O_ACCS_PER_WORD]{};
+            #pragma HLS ARRAY_PARTITION variable=values complete dim=1
+            for(int lane=0; lane<O_ACCS_PER_WORD; ++lane){
+                #pragma HLS UNROLL
+                values[lane] =
+                    output[token][word*O_ACCS_PER_WORD+lane];
             }
-            for(int word=0; word<O_WORDS_PER_TOKEN; ++word){
-                #pragma HLS PIPELINE II=1
-                acc_t values[O_ACCS_PER_WORD]{};
-                #pragma HLS ARRAY_PARTITION variable=values complete dim=1
-                for(int lane=0; lane<O_ACCS_PER_WORD; ++lane){
-                    #pragma HLS UNROLL
-                    values[lane] =
-                        output[token][word*O_ACCS_PER_WORD+lane];
-                }
-                memory[(token_base+(unsigned)token)*
-                    (unsigned)O_WORDS_PER_TOKEN+(unsigned)word] =
-                    dma_pack_acc_word(values);
-            }
+            memory[output_base+index] = dma_pack_acc_word(values);
         }
     }
 
