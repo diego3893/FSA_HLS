@@ -56,6 +56,41 @@ namespace detail{
         return a_bits>b_bits ? a : b;
     }
 
+    void stagePeArrayResult(
+        const PeMacUnitOutput input[PE_DIM][PE_DIM],
+        PeMacUnitOutput result[PE_DIM][PE_DIM]
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1 style=stp
+        #pragma HLS LATENCY min=1 max=1
+        #pragma HLS ARRAY_PARTITION variable=input complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=result complete dim=0
+
+        for(int row=0; row<PE_DIM; ++row){
+            #pragma HLS UNROLL
+            for(int col=0; col<PE_DIM; ++col){
+                #pragma HLS UNROLL
+                result[row][col] = input[row][col];
+            }
+        }
+    }
+
+    void stageAccumulatorResult(
+        const acc_t input[PE_DIM],
+        acc_t result[PE_DIM]
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1 style=stp
+        #pragma HLS LATENCY min=1 max=1
+        #pragma HLS ARRAY_PARTITION variable=input complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=result complete dim=1
+
+        for(int col=0; col<PE_DIM; ++col){
+            #pragma HLS UNROLL
+            result[col] = input[col];
+        }
+    }
+
     /**
      * @brief 有限调用的D×D PE执行入口。
      *
@@ -71,17 +106,19 @@ namespace detail{
     ){
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=1 style=stp
-        #pragma HLS LATENCY min=4 max=4
         #pragma HLS ARRAY_PARTITION variable=pe complete dim=0
         #pragma HLS ARRAY_PARTITION variable=operand_b complete dim=0
         #pragma HLS ARRAY_PARTITION variable=operand_c complete dim=0
         #pragma HLS ARRAY_PARTITION variable=result complete dim=0
 
+        PeMacUnitOutput computed[PE_DIM][PE_DIM];
+        #pragma HLS ARRAY_PARTITION variable=computed complete dim=0
+
         for(int row=0; row<PE_DIM; ++row){
             #pragma HLS UNROLL
             for(int col=0; col<PE_DIM; ++col){
                 #pragma HLS UNROLL
-                result[row][col] = peMacUnit(
+                computed[row][col] = peMacUnit(
                     pe[row][col].reg,
                     operand_b[row][col],
                     operand_c[row][col],
@@ -89,6 +126,7 @@ namespace detail{
                 );
             }
         }
+        stagePeArrayResult(computed, result);
     }
 
     /**
@@ -103,11 +141,13 @@ namespace detail{
     ){
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=1 style=stp
-        #pragma HLS LATENCY min=7 max=7
         #pragma HLS ARRAY_PARTITION variable=in_a complete dim=1
         #pragma HLS ARRAY_PARTITION variable=in_b complete dim=1
         #pragma HLS ARRAY_PARTITION variable=in_c complete dim=1
         #pragma HLS ARRAY_PARTITION variable=result complete dim=1
+
+        acc_t computed[PE_DIM];
+        #pragma HLS ARRAY_PARTITION variable=computed complete dim=1
 
         for(int col=0; col<PE_DIM; ++col){
             #pragma HLS UNROLL
@@ -121,11 +161,12 @@ namespace detail{
             const acc_t operation_result = accUnit(
                 operand_a, operand_b, operand_c
             );
-            result[col] = exp2_mode
+            computed[col] = exp2_mode
                 ? (pwl.force_zero ? accZero()
                     : finishAccPwl(operation_result, pwl.integer))
                 : operation_result;
         }
+        stageAccumulatorResult(computed, result);
     }
 
     void reciprocalColumns(
@@ -556,6 +597,7 @@ namespace detail{
                         ++operation){
                     #pragma HLS PIPELINE II=1
                     #pragma HLS DEPENDENCE variable=output_acc inter false
+                    #pragma HLS DEPENDENCE variable=pv_sum inter RAW distance=8 true
                     const int feature_base =
                         pv_group*detail::PV_INTERLEAVE;
                     const int remaining_features = HEAD_DIM-feature_base;

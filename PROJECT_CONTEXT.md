@@ -8,7 +8,7 @@
 - 当前研究任务：独立实现参数化`D×D` Split-D顶层`fsa_stream_split_d`。
 - 默认配置：物理阵列`4×4`、`dim=16`；目标配置仅改参数得到`16×16/dim128`。
 - 算法顺序：每个PE含FP16工作寄存器`reg`和FP32 `score_acc`；先执行`dim/D`轮QK累加，完整S后softmax，再执行`dim/D`轮PV。
-- 当前第一优先级：2026-09-28 13:50的新build已确认PV outline和第2套PE消失，DSP收敛到40；但PV因`output_acc`假相关只能达到II9，且顶层估算周期7.932ns。当前候选已声明该确定安全的假相关、增加共享函数返回延迟，并把PV交错上下文增至8；下一步用新CSynth验证II和时序。
+- 当前第一优先级：2026-09-28 16:15的新build保持DSP40，PV由II9改善到II4，但固定LATENCY只增加等待拍，没有切断调用返回到写回的组合路径，顶层仍为7.932ns。当前候选已改为PE/Accumulator内部显式一拍结果级，并把PV真实反馈距离标为8；下一步用新CSynth验证II和时序。
 
 ## 2 硬约束
 
@@ -28,26 +28,26 @@
 
 ### 3.1 Split-D当前候选
 
-**最近一次有结果的build：**2026-09-28 13:50的扁平PV候选；CSim和CSynth通过，结构收敛，但吞吐和时序不验收；该轮按Tcl设置未运行CoSim。
+**最近一次有结果的build：**2026-09-28 16:15的8路PV交错候选；CSim和CSynth通过，资源结构保持收敛，但吞吐和时序仍不验收；该轮按Tcl设置未运行CoSim。
 
-- 顶层为DSP40、FF29387、LUT122491、BRAM8；旧PV outline消失，唯一16-DSP `runPeArray`、唯一8-DSP `runAccumulatorColumns`和16-DSP减法器的资源结构符合目标。
-- QK和ROW_SUM实际II4，PWL实际II1；PV扁平循环目标II1但实际II9。
-- PV的`HLS 200-880`明确指出`output_acc`在循环内读写形成携带相关：Accumulator调用及写回要求9拍后才能进入下一迭代。该相关对当前固定调度是假相关，因为一个key tile内每个feature只更新一次，且下一个key tile不会与本循环重叠。
-- 顶层估算周期7.932ns，超过7.300ns有效预算；PV关键路径为Accumulator调用7.233ns加写回0.699ns，QK为PE调用7.054ns加反馈写回，ROW_SUM最差为7.893ns。
+- 顶层为DSP40、FF37377、LUT127065、BRAM8；唯一16-DSP `runPeArray`、唯一8-DSP `runAccumulatorColumns`和16-DSP减法器的资源结构仍符合目标。
+- QK和ROW_SUM达到目标II5，PWL实际II1；PV扁平循环由II9改善到II4，但仍未达到II1。
+- `output_acc inter false`已经消除上一轮的9拍假相关；剩余`HLS 200-880`全部指向`pv_sum`。真实数据流中，同一context只会每8个循环迭代访问一次，因此工具按distance 1保守分析不准确，但该反馈不能直接声明为false。
+- 顶层估算周期仍为7.932ns；PV关键路径仍为Accumulator调用7.233ns加写回0.699ns，QK仍为7.441ns，ROW_SUM仍为7.893ns。`runPeArray`深度从3增至5、`runAccumulatorColumns`深度从6增至8，但调用到写回的组合路径没有变化，证明固定LATENCY只加入了等待拍。
 
 **当前源码修改：**
 
 - 已删除`hls::task`、`hls_thread_local`、四条命令/结果stream和`run()`层DATAFLOW；Tcl恢复普通`cosim_design -rtl verilog`。
-- `runPeArray`是唯一包含`peMacUnit`调用的位置，内部完全展开`D×D`；`runAccumulatorColumns`是唯一包含`accUnit`调用的位置，按列完全展开。两者改为STP II1，并分别设置固定最小/最大延迟4和7，意图在调用返回处增加一级寄存器隔离；实际时序效果必须由新CSynth确认。
+- `runPeArray`是唯一包含`peMacUnit`调用的位置，内部完全展开`D×D`；`runAccumulatorColumns`是唯一包含`accUnit`调用的位置，按列完全展开。两者保持STP II1，已删除无效的固定LATENCY填充；当前分别在函数内部调用独立STP II1/latency1结果级，将RawFMA结果先进入显式分级模块，再返回控制器。是否真正切断组合路径必须由新CSynth确认。
 - `runController`对上述两个非内联函数各设置`ALLOCATION function ... limit=1`；13:50 build已确认两个模块都只有一个物理实例。
 - QK和ROW_SUM循环保留真实反馈并把目标II改为5，以接受共享PE新增的返回延迟，不使用虚假的PE反馈依赖声明。
-- PV改为8个feature上下文交错的单一固定边界II1操作循环：每组先发射`D×8`个PE操作，再发射8个Accumulator更新；`output_acc`只在每个feature唯一一次的更新阶段访问，因此仅对该变量声明`inter false`。没有外层feature-group outline，也没有`PIPELINE off`。
+- PV保持8个feature上下文交错的单一固定边界II1操作循环：每组先发射`D×8`个PE操作，再发射8个Accumulator更新；`output_acc`只在每个feature唯一一次的更新阶段访问，因此对该变量声明`inter false`；`pv_sum`是真反馈，明确声明`RAW distance=8 true`，不把真相关错误屏蔽。没有外层feature-group outline，也没有`PIPELINE off`。
 - PWL从task批量请求/回收改为有限流水调用：8段扫描期间保持`PE.reg`中的X不变，命中结果暂存到此时已不再保存S的`PE.score_acc`，结束后写回`PE.reg`；没有阵列外P副本和额外PE状态，两种参数本地端到端回归通过。
 - 11:03的FRP源码候选仍在相同14160ns死锁；本地没有同步该次`csynth.rpt`和`sim/verilog`，无法确认工具是否真正采用FRP，因此不能把它当作有效硬件修复。
 - AMD Vitis HLS文档明确要求含dataflow task和M_AXI的CoSim启用`-enable_tasks_with_m_axi`；该开关在11:17复验中仍死锁，证明原问题是结构闭环。当前已无task，因此Tcl不再使用该开关。
 - 11:17 deadlock report确认控制器阻塞于空`pe_result_stream`，KPN阻塞于空PE/Accumulator命令流，没有任何写端因FIFO满而阻塞。按AMD官方判据，这不是FIFO深度不足，而是设计结构问题。
 - 当前`runController`同时是task命令生产者和结果消费者，跨`ap_ctrl_chain`控制区与`ap_ctrl_none` KPN形成闭环。AMD混合task/dataflow模型要求task输入由先于task的普通进程产生、task输出由后于task的普通进程消费；同一个控制器承担两端不满足该前向拓扑。
-- QK和ROW_SUM直接调用共享PE模块，并显式接受II4真实反馈；不使用虚假的`DEPENDENCE false`。
+- QK和ROW_SUM直接调用共享PE模块，并显式接受II5真实反馈；不使用虚假的PE反馈`DEPENDENCE false`。
 - PWL一次连续发射8个分段再顺序收回，命中结果直接写回PE.reg，删除了阵列外`D×D` probability副本。
 - PV每组交错8个独立feature：每个feature内部仍按key row原顺序累加，只使用`8×D`个FP32临时partial，不改变FMA顺序；16维和128维都能整除8，不增加目标配置的空上下文操作。
 - 当前有限调用源码的`4×4/dim16`和`16×16/dim128`均通过端到端本地测试及带`__VITIS_HLS__`/`__HLS_CSIM__`宏的全部相关源文件C++14语法检查。
@@ -93,7 +93,7 @@ Q/K/V AXI
 ## 5 关键决策
 
 1. **单阵列优先。**任何II改善必须在一套PE阵列和一套Accumulator条件下成立；资源复制获得的II1不验收。
-2. **先结构后性能。**13:50 build已确认单PE/单Accumulator和DSP40；当前只处理PV II9及7.932ns时序，不再改动已经收敛的实例结构。
+2. **先结构后性能。**13:50和16:15 build均确认单PE/单Accumulator和DSP40；当前只处理PV II4及7.932ns时序，不再改动已经收敛的算术实例结构。
 3. **保留精度合同。**PE使用FP16×FP16+FP32 RawFMA；Accumulator使用FP32×FP32+FP32 RawFMA；softmax/PWL与现有位精确参考一致。
 4. **以生成物为证据。**函数定义唯一、源码`UNROLL`、ALLOCATION pragma或总DSP任一单项都不足以证明单阵列；必须交叉检查层次、RTL实例、运算符和循环调度。
 5. **本地测试与HLS验收分开。**C++通过只证明功能，不证明综合结构、II、时序或RTL正确性。
@@ -130,9 +130,9 @@ Q/K/V AXI
 
 ## 8 下一步
 
-1. 运行`./run_hls.sh fsa_stream_split_d`，先检查当前返回分级和8路PV交错候选的CSim、CSynth；Tcl暂时设为`RUN_COSIM 0`，避免在性能未验收前耗时跑RTL。
-2. 新CSynth必须确认`runPeArray`和`runAccumulatorColumns`仍各只有一个物理实例、DSP保持约40、两模块II1、PV扁平循环达到II1、QK/ROW_SUM接受真实反馈II且有效周期不超过7.300ns。重点确认`HLS 200-880 output_acc`消失，以及新增LATENCY是否真正切断调用到写回的组合路径。
-3. 若LATENCY没有改善时序，不继续堆pragma，改为显式输出寄存器/分级调度结构。CSynth通过资源、吞吐和时序验收后，再把`RUN_COSIM`改回1；RTL CoSim必须完成全部功能用例、无deadlock且C post-check通过。
+1. 运行`./run_hls.sh fsa_stream_split_d`，先检查当前显式结果级和`pv_sum distance=8`候选的CSim、CSynth；Tcl暂时设为`RUN_COSIM 0`，避免在性能未验收前耗时跑RTL。
+2. 新CSynth必须确认`runPeArray`和`runAccumulatorColumns`仍各只有一个物理实例、DSP保持约40、两模块及两个结果级II1、PV扁平循环达到II1、QK/ROW_SUM接受真实反馈II且有效周期不超过7.300ns。重点确认`pv_sum`的II违例消失，以及调用关键路径是否终于止于结果级寄存器。
+3. 若结果级仍被工具优化成组合返回，则改为控制器显式issue/commit调度，而不是继续增加LATENCY。CSynth通过资源、吞吐和时序验收后，再把`RUN_COSIM`改回1；RTL CoSim必须完成全部功能用例、无deadlock且C post-check通过。
 4. 4×4/16通过后，再用环境参数运行16×16/128，检查256个PE、16列Accumulator、资源及时序按参数扩展。
 
 ## 9 验证状态
@@ -163,7 +163,8 @@ Q/K/V AXI
 - 2026-09-28 11:57/13:12有限调用build：CSim/CSynth完成，但PV外层生成单独outline并复制PE，结果DSP56、LUT183989、7.893ns；CoSim长时间0/6后中断，该版不验收。
 - 当前扁平PV候选的`4×4/dim16`和`16×16/dim128`端到端本地回归均通过，两种参数的Vitis宏环境C++14语法检查均通过。
 - 2026-09-28 13:50扁平PV build：CSim/CSynth通过，旧PV outline消失，PE/Accumulator收敛为各一套，DSP40；但PV实际II9且顶层7.932ns，性能和时序不合格。
-- 当前返回分级/8路PV交错候选已完成`4×4/dim16`和`16×16/dim128`端到端本地回归，两种参数的Vitis宏环境C++14语法检查均通过；尚待服务器CSynth验证pragma语义和调度结果。
+- 2026-09-28 16:15 build：CSim/CSynth通过，DSP40；QK/ROW_SUM达到II5，PV由II9改善到II4，但`pv_sum`仍被按distance 1分析，顶层仍为7.932ns。固定LATENCY没有切断组合返回路径，因此该版不合格。
+- 当前显式结果级/真实distance 8候选已完成`4×4/dim16`和`16×16/dim128`端到端本地回归，两种参数的Vitis宏环境C++14语法检查均通过；尚待服务器CSynth验证分级模块和DEPENDENCE调度语义。
 
 ### 未完成
 
@@ -182,4 +183,4 @@ Q/K/V AXI
 
 ## 11 交接摘要
 
-当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。13:50 build已经证明有限调用加扁平PV能保持单PE、单Accumulator和DSP40，但PV因`output_acc`假相关只有II9，顶层周期7.932ns。当前候选只对这个确定安全的变量相关声明`inter false`，把共享PE/Accumulator入口改为STP并尝试增加一级返回延迟，QK/ROW_SUM接受真实II5，PV扩为8个feature上下文以覆盖更长反馈延迟；不使用`PIPELINE off`，不屏蔽PE真实反馈。两种参数的本地端到端回归和Vitis宏语法检查已通过。下一步重跑Vitis，验收DSP40、PV II1和周期不超过7.300ns；若LATENCY没有切断组合路径，则改为显式输出寄存器结构，之后才恢复RTL CoSim。
+当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。16:15 build保持单PE、单Accumulator和DSP40，QK/ROW_SUM达到II5，但PV仍为II4，顶层仍为7.932ns；固定LATENCY已经证实不会切断调用返回路径。当前候选删除无效填充，在PE/Accumulator内部增加独立一拍结果级，并把`pv_sum`真反馈明确为`RAW distance=8 true`；只对确定无跨迭代冲突的`output_acc`保留`inter false`，不使用`PIPELINE off`，不屏蔽PE真实反馈。两种参数的本地端到端回归和Vitis宏语法检查已通过。下一步重跑Vitis，验收DSP40、PV II1和周期不超过7.300ns；若结果级仍被优化成组合返回，则进入显式issue/commit调度，之后才恢复RTL CoSim。
