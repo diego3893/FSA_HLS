@@ -32,6 +32,22 @@ namespace detail{
     using PeResultStream =
         hls::stream<PeArrayResult, PE_STREAM_DEPTH>;
 
+    struct AccumulatorCommand{
+        acc_t in_a[PE_DIM]{};
+        acc_t in_b[PE_DIM]{};
+        acc_t in_c[PE_DIM]{};
+        bool exp2_mode = false;
+    };
+
+    struct AccumulatorResult{
+        acc_t value[PE_DIM]{};
+    };
+
+    using AccumulatorCommandStream =
+        hls::stream<AccumulatorCommand, PE_STREAM_DEPTH>;
+    using AccumulatorResultStream =
+        hls::stream<AccumulatorResult, PE_STREAM_DEPTH>;
+
     const elem_t EXP2_SLOPES[exp2PWLPieces] = {
         (elem_t)0.664062500F,
         (elem_t)0.608886719F,
@@ -158,35 +174,72 @@ namespace detail{
         }
     }
 
+    /**
+     * @brief 唯一常驻的按列Accumulator执行器。
+     *
+     * 与PE执行器相同，所有调用点只发送命令，避免循环outline后复制
+     * 4-lane FP32 RawFMA资源。
+     */
+    void accumulatorTask(
+        AccumulatorCommandStream& command_stream,
+        AccumulatorResultStream& result_stream
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1 style=flp
+
+        const AccumulatorCommand command = command_stream.read();
+        AccumulatorResult response{};
+        #pragma HLS ARRAY_PARTITION variable=command.in_a complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=command.in_b complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=command.in_c complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=response.value complete dim=1
+
+        for(int col=0; col<PE_DIM; ++col){
+            #pragma HLS UNROLL
+            const AccPwlInput pwl = prepareAccPwlInput(command.in_a[col]);
+            const acc_t operand_a = command.exp2_mode
+                ? pwl.fractional : command.in_a[col];
+            const acc_t operand_b = command.exp2_mode
+                ? pwl.slope : command.in_b[col];
+            const acc_t operand_c = command.exp2_mode
+                ? pwl.intercept : command.in_c[col];
+            const acc_t operation_result = accUnit(
+                operand_a, operand_b, operand_c
+            );
+            response.value[col] = command.exp2_mode
+                ? (pwl.force_zero ? accZero()
+                    : finishAccPwl(operation_result, pwl.integer))
+                : operation_result;
+        }
+        result_stream.write(response);
+    }
+
     void runAccumulatorColumns(
+        AccumulatorCommandStream& command_stream,
+        AccumulatorResultStream& result_stream,
         const bool exp2_mode,
         const acc_t in_a[PE_DIM],
         const acc_t in_b[PE_DIM],
         const acc_t in_c[PE_DIM],
         acc_t result[PE_DIM]
     ){
-        #pragma HLS INLINE off
-        #pragma HLS ARRAY_PARTITION variable=in_a complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=in_b complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=in_c complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=result complete dim=1
-
+        #pragma HLS INLINE
+        AccumulatorCommand command{};
+        #pragma HLS ARRAY_PARTITION variable=command.in_a complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=command.in_b complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=command.in_c complete dim=1
         for(int col=0; col<PE_DIM; ++col){
             #pragma HLS UNROLL
-            const AccPwlInput pwl = prepareAccPwlInput(in_a[col]);
-            const acc_t operand_a = exp2_mode
-                ? pwl.fractional : in_a[col];
-            const acc_t operand_b = exp2_mode
-                ? pwl.slope : in_b[col];
-            const acc_t operand_c = exp2_mode
-                ? pwl.intercept : in_c[col];
-            const acc_t operation_result = accUnit(
-                operand_a, operand_b, operand_c
-            );
-            result[col] = exp2_mode
-                ? (pwl.force_zero ? accZero()
-                    : finishAccPwl(operation_result, pwl.integer))
-                : operation_result;
+            command.in_a[col] = in_a[col];
+            command.in_b[col] = in_b[col];
+            command.in_c[col] = in_c[col];
+        }
+        command.exp2_mode = exp2_mode;
+        command_stream.write(command);
+        const AccumulatorResult response = result_stream.read();
+        for(int col=0; col<PE_DIM; ++col){
+            #pragma HLS UNROLL
+            result[col] = response.value[col];
         }
     }
 
@@ -287,11 +340,11 @@ namespace detail{
         const unsigned length,
         const bool causal,
         detail::PeCommandStream& pe_command_stream,
-        detail::PeResultStream& pe_result_stream
+        detail::PeResultStream& pe_result_stream,
+        detail::AccumulatorCommandStream& accumulator_command_stream,
+        detail::AccumulatorResultStream& accumulator_result_stream
     ){
         #pragma HLS INLINE off
-#pragma HLS ALLOCATION \
-    function instances=detail::runAccumulatorColumns limit=1
 
         const unsigned query_tiles =
             (length+(unsigned)PE_DIM-1U)/(unsigned)PE_DIM;
@@ -455,9 +508,11 @@ namespace detail{
                         : accZero();
                 }
                 detail::runAccumulatorColumns(
+                    accumulator_command_stream, accumulator_result_stream,
                     false, acc_a, acc_b, acc_c, acc_result
                 );
                 detail::runAccumulatorColumns(
+                    accumulator_command_stream, accumulator_result_stream,
                     true, acc_result, acc_b, acc_c, alpha
                 );
                 for(int col=0; col<PE_DIM; ++col){
@@ -610,6 +665,7 @@ namespace detail{
                     }
                 }
                 detail::runAccumulatorColumns(
+                    accumulator_command_stream, accumulator_result_stream,
                     false, alpha, running_sum, row_sum, acc_result
                 );
                 for(int col=0; col<PE_DIM; ++col){
@@ -682,6 +738,8 @@ namespace detail{
                             acc_c[col] = pv_sum[context][col];
                         }
                         detail::runAccumulatorColumns(
+                            accumulator_command_stream,
+                            accumulator_result_stream,
                             false, acc_a, acc_b, acc_c, acc_result
                         );
                         for(int col=0; col<PE_DIM; ++col){
@@ -720,6 +778,7 @@ namespace detail{
                     acc_b[col] = output_acc[col][feature];
                 }
                 detail::runAccumulatorColumns(
+                    accumulator_command_stream, accumulator_result_stream,
                     false, acc_a, acc_b, acc_c, acc_result
                 );
                 for(int col=0; col<PE_DIM; ++col){
@@ -750,15 +809,25 @@ namespace detail{
         hls_thread_local detail::PeResultStream pe_result_stream(
             "split_d_pe_result"
         );
+        hls_thread_local detail::AccumulatorCommandStream
+            accumulator_command_stream("split_d_accumulator_command");
+        hls_thread_local detail::AccumulatorResultStream
+            accumulator_result_stream("split_d_accumulator_result");
         hls_thread_local hls::task pe_task(
             detail::peArrayTask,
             pe_command_stream,
             pe_result_stream
         );
+        hls_thread_local hls::task accumulator_task(
+            detail::accumulatorTask,
+            accumulator_command_stream,
+            accumulator_result_stream
+        );
 
         runController(
             q_address, k_address, v_address, o_address,
-            length, causal, pe_command_stream, pe_result_stream
+            length, causal, pe_command_stream, pe_result_stream,
+            accumulator_command_stream, accumulator_result_stream
         );
     }
 
