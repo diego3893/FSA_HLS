@@ -9,27 +9,21 @@ Use this reference only for work in the `FSA_HLS` repository. Re-read the reposi
 - Host tests: `tests/`; HLS-top testbenches: `tests/hls/`.
 - HLS flows: `hls/<module>/run_hls.tcl`, launched through repository-root `run_hls.sh`.
 - Reports: `docs/`; generated `build/` and `hls/*/*_build/` directories are normally ignored.
-- The current target is `xcvu37p_CIV-fsvh2892-2-e` at 100 MHz unless the user explicitly changes it.
+- The current target is `xcvu37p_CIV-fsvh2892-2-e` at 100 MHz with `set_clock_uncertainty 2.7` unless the user explicitly changes it. The active module is `fsa_stream_split_d` with the parameterized `D×D` PE array; its default configuration is `PE_DIM=4`, `HEAD_DIM=16`, and the target configuration is `PE_DIM=16`, `HEAD_DIM=128`.
 
 Do not modify the reference Chisel/FSA projects, array size, device, clock, uncertainty, external protocol, or numeric width merely to satisfy a test.
 
 ## Local checks
 
-On Windows, use the repository entry point:
+On Windows the repository entry point is `.\run_test.ps1 <test-name>` (it delegates to `run_stream_test.ps1`); there is also `.\run_stream_test.ps1` and `.\run_fp32_raw_fma_test.ps1`. Use a focused test first and `.\run_test.ps1 all` when the change has broad impact. Confirm the currently accepted test names from those scripts before relying on any name written here.
 
-```powershell
-.\run_test.ps1 <test-name>
-```
+Before trusting any local result, check whether the affected sources can compile locally at all:
 
-Use a focused test first. For stream-path changes, the usual upper-level regression includes:
+- The `stream` and `split_d` sources need Vitis headers such as `ap_int.h` that a Windows host normally lacks.
+- If no working Linux environment is available (for example WSL refuses to start), local compilation is **not possible** and only structural checks remain: `git diff --check`, symbol uniqueness (`runPeArray`, `runAccumulatorColumns`, `loadElemTile`, `loadValueTile` and the result stages must each have exactly one definition), interface and Tcl review.
+- State this limitation explicitly in the round log instead of implying a local pass. The remote Vitis C simulation then carries the compile check.
 
-```powershell
-.\run_test.ps1 test_fsa_stream_request_top
-.\run_test.ps1 test_fsa_stream_vs_legacy
-.\run_test.ps1 test_fsa_dma_top
-```
-
-Use `.\run_test.ps1 all` when the change has broad impact. The default fast configuration is 4x4. Parameterized changes also require at least one compile or run at the requested target configuration, normally 128x4 when that remains the project target.
+Parameterized changes must also be validated at the target configuration, for the current module `FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128`.
 
 ## Remote HLS entry points
 
@@ -39,22 +33,24 @@ From the remote repository root, run:
 ./run_hls.sh <module>
 ```
 
-Supported names are currently `pe`, `cmp`, `input_delayer`, `output_delayer`, `sa`, `delayer_sa`, `accumulator`, `accumulator_pipeline`, `fsa_core`, `fsa_core_execute`, `fsa_core_request`, `fsa_stream_request`, `fsa_dma`, `fsa_core_full`, and `sram`. `sram` maps to the `banked_sram` directory. Confirm this list from the live script before use.
+Supported names in the current `run_hls.sh` are `pe`, `pe_raw_fma`, `fp32_raw_fma`, `cmp`, `input_delayer`, `output_delayer`, `sa`, `delayer_sa`, `accumulator`, `accumulator_pipeline`, `fsa_core`, `fsa_core_execute`, `fsa_core_request`, `fsa_dma`, `fsa_stream`, `fsa_stream_split_d`, `fsa_streaming_v2`, `fsa_core_full`, and `sram` (`sram` maps to the `banked_sram` directory; `banked_sram` is accepted as an alias). `fsa_stream_request` and `fsa_streaming_dataflow` are **not** supported names. Re-read the live script before use, because this list has changed before.
 
-`fsa_stream_request` and `fsa_dma` currently accept these environment overrides through Tcl:
+The current split-D module takes its parameters only through Tcl environment checks:
 
 ```bash
-RUN_CSIM=1 RUN_COSIM=0 EXPORT_IP=0 \
-FSA_SA_ROWS=4 FSA_SA_COLS=4 ./run_hls.sh fsa_stream_request
+FSA_SPLIT_D_PE_DIM=4 FSA_SPLIT_D_HEAD_DIM=16 ./run_hls.sh fsa_stream_split_d
 
-RUN_CSIM=1 RUN_COSIM=0 EXPORT_IP=0 \
-FSA_SA_ROWS=4 FSA_SA_COLS=4 FSA_MAX_SEQUENCE_LENGTH=4096 \
-./run_hls.sh fsa_dma
+FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 \
+./run_hls.sh fsa_stream_split_d
 ```
 
-Do not assume other modules honor these variables; inspect their current Tcl first. Some older flows enable co-simulation and IP export directly in Tcl. Changing those switches changes test scope and must be included in the reviewed task diff.
+`FSA_MAX_SEQUENCE_LENGTH` is the third honored variable. `RUN_CSIM`, `RUN_COSIM`, and `EXPORT_IP` are **not** environment-overridable in this module: `hls/fsa_stream_split_d/run_hls.tcl` sets them directly (`RUN_CSIM 1`, `RUN_COSIM 1`, `EXPORT_IP 0`). The same is true of `fsa_stream`. Only inspect a module's Tcl to decide what it honors; never pass a variable that its Tcl ignores and then treat that as a scoped test.
 
-The wrapper replaces that module's prior generated `*_build` directory and ZIP after a successful run. Run it only in the designated remote test clone, never in a directory containing the sole copy of valuable uncommitted build evidence.
+Because co-simulation is on by default for this module, a round that should stop after C simulation and C synthesis must change the stage switches in the Tcl. That changes the tested artifact and must be included in the reviewed task diff and reported as part of the round's test scope. Scope the change to an environment-guarded temporary Tcl so that the repository default stays `RUN_COSIM 1`, and remove the temporary files after the run.
+
+Regenerating a Vitis CSim testbench also needs Vitis's `ap_int.h` and `ap_fixed.h` for the testbench's include path. If those are not already present in the repository, extract them from the installed Vitis headers into a temporary path and remove that path afterwards; never commit a copy of vendor headers.
+
+A run of `run_hls.sh` removes that module's previous `hls/<module>/<module>_build` directory and ZIP and replaces them with the new results, and fails with "HLS完成后没有找到构建目录" when `hls/<module>/build` does not exist. Only run it in the designated remote test clone, never in a directory holding the sole copy of valuable uncommitted build evidence.
 
 ## Safe Git and SSH sequence
 
@@ -120,3 +116,14 @@ Inspect, when present:
 - Vivado utilization/timing reports for implementation claims.
 
 For a synthesis report, follow the repository's `vitis-hls-build-report` skill when available. Mark a build as potentially stale unless its tested commit and source/Tcl/testbench correspondence can be established.
+
+## Co-simulation wall-clock contract
+
+The repository-root `PROJECT_CONTEXT.md` holds the currently effective one; follow it when it is stricter. As recorded there for the `PE_DIM=16`, `HEAD_DIM=128` configuration on the NM37 server with Vitis HLS 2024.2 and the current 7-transaction testbench:
+
+- measure from `## run all` until all transactions finish, RTL simulation exits, and the C post-check completes; exclude C simulation, C synthesis, Verilog compile, and `xelab`;
+- 15 to 45 minutes is the normal window, 45 to 60 minutes is a warning window, and past 60 minutes the round is a co-simulation timeout and fails performance/verifiability; do not keep waiting merely because some transactions finished;
+- no transaction or intra-transaction progress for 20 minutes is an early timeout: save the last progress and logs, then stop;
+- a timeout is not a numerical failure or a deadlock. Report completed transactions, last progress, whether a deadlock report exists, whether the C post-check ran, and mark the data as unverified.
+
+The 4×4 configuration completes the same flow in minutes, so this contract does not gate it. Recalibrate and get user confirmation before changing the threshold for a different server, tool version, or testbench.
