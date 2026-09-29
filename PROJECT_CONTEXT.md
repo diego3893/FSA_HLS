@@ -8,7 +8,7 @@
 - 当前研究任务：独立实现参数化`D×D` Split-D顶层`fsa_stream_split_d`。
 - 默认配置：物理阵列`4×4`、`dim=16`；目标配置仅改参数得到`16×16/dim128`。
 - 算法顺序：每个PE含FP16工作寄存器`reg`和FP32 `score_acc`；先执行`dim/D`轮QK累加，完整S后softmax，再执行`dim/D`轮PV。
-- 当前第一优先级：4×4/16保持DSP40、QK/ROW_SUM II5、PWL/PV II1、7.300ns和单PE/单Accumulator；8事务CoSim在208505ns完成且无deadlock，但数据失败。诊断已确认RTL的V tile至少滞后一事务：basis-V事务输出精确复现前一个全1-V事务。第2轮将分离K/V加载子模块，修复V加载后再判断剩余数值问题。
+- 当前第一优先级：4×4/16保持DSP40、QK/ROW_SUM II5、PWL/PV II1、7.300ns和单PE/单Accumulator，同时修复RTL数值。V内联已消除跨事务V错位；剩余basis-V结果符合Q/K tile在row/col方向错位的特征。当前本地候选已把共享的非内联Q/K加载器改为内联，并增加最后一个feature的basis-V诊断；尚未提交、推送或运行Vitis。用户要求下次迭代直接从SSH服务器测试开始。
 
 ## 2 硬约束
 
@@ -20,7 +20,7 @@
 - 保持现有RawFMA、PWL精度、特殊值及舍入合同；不得用放宽误差掩盖问题。
 - 不恢复已造成RTL错误的`pe_pipeline/cmp_pipeline inter false`；不恢复Accumulator反馈DATAFLOW环或单actor写多个有限DMA请求FIFO。
 - 不更改时钟、器件、接口或阵列参数来掩盖综合失败。
-- 用户已授权本次最多3轮Git和远端Vitis闭环，若提前全部验收则提前结束；每轮使用本地提交/推送、NM37 fast-forward pull和精确commit测试，读取并分析远端数据后才进入下一轮。
+- 当前新一轮远端闭环已获授权，最多3轮；从当前Q/K内联候选的NM37服务器测试开始，若提前全部验收则提前结束。
 - 没有读取对应新build前，不得声称实例数、DSP、II、时序、CoSim或死锁问题已经解决。
 - 只维护仓库根目录的`PROJECT_CONTEXT.md`；`docs/`目录中的同名文件为历史快照，停止更新。
 
@@ -28,12 +28,12 @@
 
 ### 3.1 Split-D当前候选
 
-**最近一次有结果的build：**2026-09-29 01:15的显式结果级/16路PV交错候选，被测commit为`b0ab08039c8148552df828a58a497b19fca92b66`。4×4/16的CSim和CSynth通过；CoSim完成6/6且无deadlock，但C post-check数值失败。
+**最近一次有结果的build：**2026-09-29 02:14的V内联候选，被测commit为`842ef7787ca4edc24326878779ef67e4b444a98a`。4×4/16的CSim和CSynth通过；CoSim完成8/8且无deadlock，但C post-check仍有5个数值用例失败。
 
-- 顶层为DSP40、FF30467、LUT124857、BRAM8；共享`runPeArray`为16 DSP，共享`runAccumulatorColumns`为8 DSP，减法器共16 DSP，资源结构符合目标。相对8路交错版增加约1052 FF和1423 LUT，因此若16路不能提供功能收益应恢复8路。
+- 顶层为DSP40、FF29745、LUT124445、BRAM8；共享PE/Accumulator及16个减法器的资源结构符合目标。
 - QK和ROW_SUM达到目标II5，PWL和PV扁平循环均达到II1；`stagePeArrayResult`和`stageAccumulatorResult`均为latency1/II1且DSP0。
-- 最新已测build中的`pv_sum RAW distance=16 true`被工具识别为真实反馈，没有把相关错误声明为false；`output_acc inter false`继续只处理已确认安全的假相关。16路没有改变RTL数值错误，当前未测候选已恢复8路。
-- 顶层估算周期为7.300ns，正好满足7.300ns有效预算；最新顶层最坏延迟为439747587 cycles。
+- 最新已测build使用8路PV交错；`pv_sum RAW distance=8 true`为真实反馈，`output_acc inter false`只处理已确认安全的假相关。
+- 顶层估算周期为7.300ns，正好满足7.300ns有效预算；最新顶层最坏延迟为492176387 cycles。
 
 **当前源码修改：**
 
@@ -41,7 +41,9 @@
 - `runPeArray`是唯一包含`peMacUnit`调用的位置，内部完全展开`D×D`；`runAccumulatorColumns`是唯一包含`accUnit`调用的位置，按列完全展开。两者保持STP II1，分别在函数内部调用独立STP II1/latency1结果级；16:33 CSynth已确认分级切断调用返回写回路径，使顶层回到7.300ns。
 - `runController`对上述两个非内联函数各设置`ALLOCATION function ... limit=1`；13:50 build已确认两个模块都只有一个物理实例。
 - QK和ROW_SUM循环保留真实反馈并把目标II改为5，以接受共享PE新增的返回延迟，不使用虚假的PE反馈依赖声明。
-- 当前未测候选已把PV恢复为8个feature上下文交错的单一固定边界II1操作循环：每组先发射`D×8`个PE操作，再发射8个Accumulator更新；`output_acc`只在每个feature唯一一次的更新阶段访问，因此对该变量声明`inter false`；`pv_sum`是真反馈，声明`RAW distance=8 true`。没有外层feature-group outline，也没有`PIPELINE off`。
+- 当前PV为8个feature上下文交错的单一固定边界II1操作循环：每组先发射`D×8`个PE操作，再发射8个Accumulator更新；`output_acc`只在每个feature唯一一次的更新阶段访问，因此对该变量声明`inter false`；`pv_sum`是真反馈，声明`RAW distance=8 true`。没有外层feature-group outline，也没有`PIPELINE off`。
+- **当前未测本地候选：**把Q/K共用的`loadElemTile`由`INLINE off`改为强制`INLINE`，使Q和K的AXI加载循环进入各自调用点，消除共享加载子模块的完成握手和tile写端口错位。V继续保持内联。新增`two-key-basis-v-last-feature`，与feature0 basis用例共同区分tile加载错位和QK首轮结果丢失；失败时打印两行basis输出。
+- 当前候选修改`src/stream/split_d/fsa_stream_split_d.cpp`和`tests/stream/test_fsa_stream_split_d.cpp`，外加本根上下文和本次调用日志；尚未完成Vitis测试。Windows缺少`ap_int.h`，WSL启动被系统拒绝，因此本地只完成`git diff --check`，功能编译由本轮服务器CSim承担。
 - PWL从task批量请求/回收改为有限流水调用：8段扫描期间保持`PE.reg`中的X不变，命中结果暂存到此时已不再保存S的`PE.score_acc`，结束后写回`PE.reg`；没有阵列外P副本和额外PE状态，两种参数本地端到端回归通过。
 - 11:03的FRP源码候选仍在相同14160ns死锁；本地没有同步该次`csynth.rpt`和`sim/verilog`，无法确认工具是否真正采用FRP，因此不能把它当作有效硬件修复。
 - AMD Vitis HLS文档明确要求含dataflow task和M_AXI的CoSim启用`-enable_tasks_with_m_axi`；该开关在11:17复验中仍死锁，证明原问题是结构闭环。当前已无task，因此Tcl不再使用该开关。
@@ -50,7 +52,7 @@
 - QK和ROW_SUM直接调用共享PE模块，并显式接受II5真实反馈；不使用虚假的PE反馈`DEPENDENCE false`。
 - PWL一次连续发射8个分段再顺序收回，命中结果直接写回PE.reg，删除了阵列外`D×D` probability副本。
 - 当前未测候选每组交错8个独立feature：每个feature内部仍按key row原顺序累加，只使用`8×D`个FP32临时partial，不改变FMA顺序；16维和128维都能整除8，不增加目标配置的空上下文操作。
-- 当前源码的`4×4/dim16`和`16×16/dim128`均通过端到端本地测试；4×4/16已在Vitis HLS 2024.2完成CSim、CSynth和失败但完整结束的RTL CoSim。
+- 被测commit `842ef77`的`4×4/dim16`和`16×16/dim128`曾通过端到端本地测试；当前未提交Q/K内联候选尚未完成编译或Vitis验证。
 - 本地使用math stubs完成功能回归；真实Vitis调度、实例共享、时序和RTL行为仍需服务器CSynth/CoSim验证。
 
 ### 3.2 已验收生产基线
@@ -131,10 +133,10 @@ Q/K/V AXI
 
 ## 8 下一步
 
-1. 本次3轮已结束。第3轮V加载内联消除了跨事务V错位，单key和全1-V通过；保留该修复。
-2. 若开始新一轮，使用basis-V检查QK score、缩放值和PWL输入的RTL时序。当前实际权重为0.5/0.5，期望为0.562177/0.437823。
-3. 4×4/16必须先让全部CoSim事务在0.03容差内通过，同时保持DSP40、QK/ROW_SUM II5、PWL/PV II1和7.300ns。
-4. 只有4×4/16数据通过后，再运行16×16/128的Vitis CSim、CSynth与CoSim验收。
+1. 下次迭代开始时先检查当前本地diff，然后提交并推送当前Q/K内联候选；NM37 fast-forward拉取精确commit。
+2. 从SSH服务器运行`./run_hls.sh fsa_stream_split_d`。先看CSim能否编译新增诊断，再检查CSynth中独立`loadElemTile` RTL实例是否消失，并复核DSP40、QK/ROW_SUM II5、PWL/PV II1和7.300ns。
+3. CoSim重点比较feature0和last-feature两个basis-V用例：两者都通过说明Q/K加载边界是主因；仅feature0失败则转查QK首轮反馈；两者仍以相同row/col模式失败则检查PE结果矩阵对齐。
+4. 4×4/16全部CoSim事务通过0.03容差后，再运行16×16/128的Vitis CSim、CSynth与CoSim验收。
 
 ## 9 验证状态
 
@@ -171,7 +173,7 @@ Q/K/V AXI
 - 2026-09-29 01:43 build（commit `58eecaa`）：恢复8路PV并加入诊断用例；CSim/CSynth通过，DSP40、BRAM8、FF29415、LUT123434、7.300ns，QK/ROW_SUM II5、PWL/PV II1。CoSim 8/8于208505ns完成，无deadlock，但7个有效事务均失败。TV输入正确；输出证明V tile滞后一事务，综合层次显示K/V在key-loop outline中共用一个`loadElemTile`子模块。
 - 2026-09-29 02:04 build（commit `6c80d49`）：K/V拆成独立加载子模块后，CSim/CSynth与目标II、7.300ns继续通过，CoSim 8/8于205005ns完成且无deadlock；首个单key事务通过，但其余6个数值用例失败。全1-V事务输出0，随后basis-V事务输出约0.5，证明独立V子模块仍在后续顶层事务使用前一笔V。
 - 2026-09-29 02:14 build（commit `842ef77`）：V加载强制内联后，独立`loadValueTile` RTL模块消失；CSim/CSynth通过，DSP40、BRAM8、FF29745、LUT124445、QK/ROW_SUM II5、PWL/PV II1、7.300ns。CoSim 8/8于225795ns完成，无deadlock；单key和全1-V通过，证明V事务错位已修复。basis-V仍输出均匀0.5/0.5而非0.562177/0.437823，随机用例最大误差0.054至0.075，数据仍未验收。本次达到3轮上限并停止。
-- 当前源码的`4×4/dim16`和`16×16/dim128`端到端本地回归通过；4×4/16 RTL CoSim已完成6/6但数值失败，16×16/128尚待Vitis综合和CoSim。
+- 被测commit `842ef77`的`4×4/dim16`和`16×16/dim128`端到端本地回归通过；其4×4/16 RTL CoSim已完成8/8但数值失败。当前Q/K内联候选尚未编译；16×16/128仍待Vitis综合和CoSim。
 
 ### 未完成
 
@@ -190,4 +192,4 @@ Q/K/V AXI
 
 ## 11 交接摘要
 
-当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。本次3轮已结束。最终commit `842ef77`保持单PE、单Accumulator、DSP40，QK/ROW_SUM II5、PWL/PV II1和7.300ns，CoSim无deadlock；V跨事务错位已修复，但basis-V显示QK/缩放/PWL输入路径仍有RTL时序错误，数据未通过0.03容差。16×16/128未做远端Vitis验收。若继续，应从score与PWL输入的确定性诊断开始。
+当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。最近被测commit `842ef77`保持单PE、单Accumulator、DSP40，QK/ROW_SUM II5、PWL/PV II1和7.300ns，CoSim无deadlock；V跨事务错位已修复。剩余basis-V输出模式更符合共享非内联Q/K加载器造成的tile row/col错位。当前候选已将Q/K加载强制内联，并新增last-feature basis诊断；新调用最多3轮远端闭环，首先提交/推送该候选并在NM37运行完整HLS。

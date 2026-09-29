@@ -21,7 +21,8 @@ namespace{
     enum class InputPattern{
         Random,
         OnesV,
-        BasisV
+        BasisV,
+        BasisVLastFeature
     };
 
     void packInput(
@@ -127,17 +128,20 @@ namespace{
                     v[token][feature] = (elem_t)1.0F;
                 }
             }
-        }else if(pattern == InputPattern::BasisV){
+        }else if(pattern==InputPattern::BasisV ||
+                pattern==InputPattern::BasisVLastFeature){
+            const int probe_feature =
+                pattern==InputPattern::BasisV ? 0 : HEAD_DIM-1;
             for(unsigned token=0; token<length; ++token){
                 for(int feature=0; feature<HEAD_DIM; ++feature){
                     q[token][feature] = (elem_t)0.0F;
                     k[token][feature] = (elem_t)0.0F;
                     v[token][feature] = (elem_t)0.0F;
                 }
-                q[token][0] = (elem_t)1.0F;
+                q[token][probe_feature] = (elem_t)1.0F;
             }
-            k[0][0] = (elem_t)0.5F;
-            k[1][0] = (elem_t)-0.5F;
+            k[0][probe_feature] = (elem_t)0.5F;
+            k[1][probe_feature] = (elem_t)-0.5F;
             v[0][0] = (elem_t)1.0F;
             v[1][1] = (elem_t)1.0F;
         }
@@ -202,6 +206,14 @@ namespace{
                 << " first_actual=" << actual[first_token][first_feature]
                 << " first_expected=" << expected[first_token][first_feature]
                 << "\n";
+            if((pattern==InputPattern::BasisV ||
+                    pattern==InputPattern::BasisVLastFeature) && length>=2U){
+                std::cerr << "basis output: q0=[" << actual[0][0]
+                    << ", " << actual[0][1] << "] q1=["
+                    << actual[1][0] << ", " << actual[1][1]
+                    << "] expected=[" << expected[0][0]
+                    << ", " << expected[0][1] << "]\n";
+            }
             return false;
         }
         return true;
@@ -220,6 +232,10 @@ int main(){
     ) && passed;
     passed = runCase(
         "two-key-basis-v", 2U, false, 1608, InputPattern::BasisV
+    ) && passed;
+    passed = runCase(
+        "two-key-basis-v-last-feature", 2U, false, 1609,
+        InputPattern::BasisVLastFeature
     ) && passed;
     passed = runCase(
         "primary-noncausal", primary_length, false, 1604,

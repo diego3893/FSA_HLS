@@ -190,7 +190,9 @@ namespace detail{
         const unsigned active_tokens,
         elem_t tile[PE_DIM][HEAD_DIM]
     ){
-        #pragma HLS INLINE off
+        // Q和K来自不同AXI bundle，加载循环必须进入各自调用点，避免
+        // 共享子模块的完成握手或tile写端口在两次调用间发生错位。
+        #pragma HLS INLINE
         #pragma HLS ARRAY_PARTITION variable=tile complete dim=1
 
         for(int token=0; token<PE_DIM; ++token){
