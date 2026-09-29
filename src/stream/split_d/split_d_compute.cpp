@@ -42,11 +42,43 @@ namespace detail{
     }
 
     /**
-     * @brief 层次化调度整套PE阵列：按行bank分组，组内完全展开。
+     * @brief 一个PE bank：固定PE_BANK_NODES个PE并行完成同一拍RawFMA。
      *
-     * PE_BANK_ROWS行构成一个bank，bank内PE_BANK_DIM个PE在同一个bank循环体里
-     * 原地完全展开；行基址只作为该bank的起始行号，因此单个bank的控制流和
-     * 操作数规模固定为PE_BANK_DIM，不随PE_DIM增长。bank数量由PE_DIM决定：
+     * 数组形参是固定规模的一维节点数组，函数内部完全展开、自身保持单拍
+     * 流水；因此调用它的循环不会把整个PE_DIM×PE_DIM阵列的控制流和数据
+     * 端口带进自己的流水边界，跨边界传递的数组尺寸也不随PE_DIM增长。
+     */
+    void peBankMacUnit(
+        const PeState node_pe[PE_BANK_NODES],
+        const elem_t node_b[PE_BANK_NODES],
+        const acc_t node_c[PE_BANK_NODES],
+        bool exp2_mode,
+        PeMacUnitOutput node_result[PE_BANK_NODES]
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1 style=stp
+        #pragma HLS ARRAY_PARTITION variable=node_pe complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=node_b complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=node_c complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=node_result complete dim=1
+
+        for(int node=0; node<PE_BANK_NODES; ++node){
+            #pragma HLS UNROLL
+            node_result[node] = peMacUnit(
+                node_pe[node].reg,
+                node_b[node],
+                node_c[node],
+                exp2_mode
+            );
+        }
+    }
+
+    /**
+     * @brief 层次化调度整套PE阵列：按bank分组，bank内完全展开。
+     *
+     * PE_BANK_ROWS行构成一个bank，bank内PE_BANK_NODES个PE原地完全展开；
+     * 每个bank只以固定规模的一维节点数组调用peBankMacUnit，因此单个bank的
+     * 控制流和端口规模固定，不随PE_DIM增长。bank数量由PE_DIM决定：
      * 4×4时为1个bank（16个PE），16×16时为16个bank（256个PE），物理PE总数
      * 始终是PE_DIM×PE_DIM，且不为任何阶段复制bank。
      *
@@ -72,18 +104,30 @@ namespace detail{
         PeMacUnitOutput computed[PE_DIM][PE_DIM];
         #pragma HLS ARRAY_PARTITION variable=computed complete dim=0
 
-        for(int bank=0; bank<PE_DIM; bank+=PE_BANK_DIM){
+        for(int bank=0; bank<PE_DIM; bank+=PE_BANK_ROWS){
             #pragma HLS UNROLL
-            for(int offset=0; offset<PE_BANK_DIM; ++offset){
+            PeState node_pe[PE_BANK_NODES];
+            elem_t node_b[PE_BANK_NODES];
+            acc_t node_c[PE_BANK_NODES];
+            PeMacUnitOutput node_result[PE_BANK_NODES];
+            #pragma HLS ARRAY_PARTITION variable=node_pe complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=node_b complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=node_c complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=node_result complete dim=1
+
+            for(int offset=0; offset<PE_BANK_NODES; ++offset){
                 #pragma HLS UNROLL
-                const int row = bank+offset;
-                for(int col=0; col<PE_DIM; ++col){
-                    #pragma HLS UNROLL
-                    computed[row][col] = peMacUnit(
-                        pe[row][col].reg, operand_b[row][col],
-                        operand_c[row][col], exp2_mode
-                    );
-                }
+                const int row = bank+offset/PE_DIM;
+                const int col = offset%PE_DIM;
+                node_pe[offset] = pe[row][col];
+                node_b[offset] = operand_b[row][col];
+                node_c[offset] = operand_c[row][col];
+            }
+            peBankMacUnit(node_pe, node_b, node_c, exp2_mode, node_result);
+            for(int offset=0; offset<PE_BANK_NODES; ++offset){
+                #pragma HLS UNROLL
+                computed[bank+offset/PE_DIM][offset%PE_DIM] =
+                    node_result[offset];
             }
         }
         stagePeArrayResult(computed, result);

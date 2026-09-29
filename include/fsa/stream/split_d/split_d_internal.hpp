@@ -15,17 +15,24 @@ namespace detail{
     constexpr int PV_INTERLEAVE = 8;
 
     /**
-     * @brief 一个PE bank包含的阵列行数。
+     * @brief 一个PE bank包含的阵列行数与节点个数。
      *
-     * 该常数只改变同一套PE阵列的RTL层次分组，不改变物理PE总数：
-     * 4×4时整阵列是一个bank；16×16时按该值切成PE_DIM/PE_BANK_ROWS个bank。
-     * 可用-DFSA_SPLIT_D_PE_BANK_ROWS=<n>在综合时试验不同bank粒度。
+     * bank是同一套PE阵列的RTL层次分组，不改变物理PE总数。每个bank以固定
+     * 规模的一维节点数组作为函数实参，因此跨函数边界传递的数组尺寸不随
+     * PE_DIM增长，避免大阵列把流水函数的控制流撑到无法调度。
+     *
+     * 小阵列（PE_DIM<=4）整阵列就是一个bank，保持已验证的单bank结构；
+     * 大阵列按行分bank，把跨函数传递的数组规模压到PE_DIM个节点。
+     * 可用-DFSA_SPLIT_D_PE_BANK_ROWS=<n>覆盖该选择。
      */
-#ifndef FSA_SPLIT_D_PE_BANK_ROWS
-#define FSA_SPLIT_D_PE_BANK_ROWS 4
+    constexpr int PE_BANK_ROWS =
+#ifdef FSA_SPLIT_D_PE_BANK_ROWS
+        FSA_SPLIT_D_PE_BANK_ROWS;
+#else
+        PE_DIM <= 4 ? PE_DIM : 1;
 #endif
-    constexpr int PE_BANK_ROWS = FSA_SPLIT_D_PE_BANK_ROWS;
-    constexpr int PE_BANK_DIM = PE_DIM < PE_BANK_ROWS ? PE_DIM : PE_BANK_ROWS;
+    constexpr int PE_BANK_NODES =
+        (PE_DIM < PE_BANK_ROWS ? PE_DIM : PE_BANK_ROWS) * PE_DIM;
 
     /**
      * @brief 一次PE阵列求值占用的拍数（即runPeArray的流水间隔）。
@@ -40,6 +47,14 @@ namespace detail{
 #else
     constexpr int PE_ARRAY_II = PE_DIM <= 4 ? 1 : 5;
 #endif
+
+    void peBankMacUnit(
+        const PeState node_pe[PE_BANK_NODES],
+        const elem_t node_b[PE_BANK_NODES],
+        const acc_t node_c[PE_BANK_NODES],
+        bool exp2_mode,
+        PeMacUnitOutput node_result[PE_BANK_NODES]
+    );
 
     void runPeArray(
         const PeState pe[PE_DIM][PE_DIM],
