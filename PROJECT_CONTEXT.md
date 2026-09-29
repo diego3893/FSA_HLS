@@ -8,7 +8,7 @@
 - 当前研究任务：独立实现参数化`D×D` Split-D顶层`fsa_stream_split_d`。
 - 默认配置：物理阵列`4×4`、`dim=16`；目标配置仅改参数得到`16×16/dim128`。
 - 算法顺序：每个PE含FP16工作寄存器`reg`和FP32 `score_acc`；先执行`dim/D`轮QK累加，完整S后softmax，再执行`dim/D`轮PV。
-- 当前第一优先级：4×4/16保持DSP40、QK/ROW_SUM II5、PWL/PV II1、7.300ns和单PE/单Accumulator，同时修复RTL数值。V内联已消除跨事务V错位；剩余basis-V结果符合Q/K tile在row/col方向错位的特征。当前本地候选已把共享的非内联Q/K加载器改为内联，并增加最后一个feature的basis-V诊断；尚未提交、推送或运行Vitis。用户要求下次迭代直接从SSH服务器测试开始。
+- 当前第一优先级：commit`83b9b515`已使4×4/16同时满足DSP40、QK/ROW_SUM II5、PWL/PV II1、7.300ns、单PE/单Accumulator和RTL数据9/9通过；下一步仅改参数验证16×16/128的完整Vitis流程。
 
 ## 2 硬约束
 
@@ -28,12 +28,12 @@
 
 ### 3.1 Split-D当前候选
 
-**最近一次有结果的build：**2026-09-29 02:14的V内联候选，被测commit为`842ef7787ca4edc24326878779ef67e4b444a98a`。4×4/16的CSim和CSynth通过；CoSim完成8/8且无deadlock，但C post-check仍有5个数值用例失败。
+**最近一次有结果的build：**2026-09-29 10:44的Q/K内联候选，被测commit为`83b9b51585cbc3ed4002f596b2c437a8afae8523`。4×4/16的CSim、CSynth和RTL CoSim全部通过；CoSim完成9/9且C post-check通过。
 
-- 顶层为DSP40、FF29745、LUT124445、BRAM8；共享PE/Accumulator及16个减法器的资源结构符合目标。
+- 顶层为DSP40、FF29732、LUT124651、BRAM8；共享PE/Accumulator及16个减法器的资源结构符合目标。
 - QK和ROW_SUM达到目标II5，PWL和PV扁平循环均达到II1；`stagePeArrayResult`和`stageAccumulatorResult`均为latency1/II1且DSP0。
 - 最新已测build使用8路PV交错；`pv_sum RAW distance=8 true`为真实反馈，`output_acc inter false`只处理已确认安全的假相关。
-- 顶层估算周期为7.300ns，正好满足7.300ns有效预算；最新顶层最坏延迟为492176387 cycles。
+- 顶层估算周期为7.300ns，正好满足7.300ns有效预算；最新顶层最坏延迟为427162627 cycles。
 
 **当前源码修改：**
 
@@ -42,8 +42,8 @@
 - `runController`对上述两个非内联函数各设置`ALLOCATION function ... limit=1`；13:50 build已确认两个模块都只有一个物理实例。
 - QK和ROW_SUM循环保留真实反馈并把目标II改为5，以接受共享PE新增的返回延迟，不使用虚假的PE反馈依赖声明。
 - 当前PV为8个feature上下文交错的单一固定边界II1操作循环：每组先发射`D×8`个PE操作，再发射8个Accumulator更新；`output_acc`只在每个feature唯一一次的更新阶段访问，因此对该变量声明`inter false`；`pv_sum`是真反馈，声明`RAW distance=8 true`。没有外层feature-group outline，也没有`PIPELINE off`。
-- **当前未测本地候选：**把Q/K共用的`loadElemTile`由`INLINE off`改为强制`INLINE`，使Q和K的AXI加载循环进入各自调用点，消除共享加载子模块的完成握手和tile写端口错位。V继续保持内联。新增`two-key-basis-v-last-feature`，与feature0 basis用例共同区分tile加载错位和QK首轮结果丢失；失败时打印两行basis输出。
-- 当前候选修改`src/stream/split_d/fsa_stream_split_d.cpp`和`tests/stream/test_fsa_stream_split_d.cpp`，外加本根上下文和本次调用日志；尚未完成Vitis测试。Windows缺少`ap_int.h`，WSL启动被系统拒绝，因此本地只完成`git diff --check`，功能编译由本轮服务器CSim承担。
+- Q/K共用的`loadElemTile`已由`INLINE off`改为强制`INLINE`，Q和K加载循环分别进入调用控制层级；V继续保持内联。新增的feature0和last-feature basis诊断均在RTL中通过，确认Q/K加载错位已修复。
+- 当前代码的4×4/16完整Vitis测试已通过；16×16/128的服务器Vitis验收仍待执行。
 - PWL从task批量请求/回收改为有限流水调用：8段扫描期间保持`PE.reg`中的X不变，命中结果暂存到此时已不再保存S的`PE.score_acc`，结束后写回`PE.reg`；没有阵列外P副本和额外PE状态，两种参数本地端到端回归通过。
 - 11:03的FRP源码候选仍在相同14160ns死锁；本地没有同步该次`csynth.rpt`和`sim/verilog`，无法确认工具是否真正采用FRP，因此不能把它当作有效硬件修复。
 - AMD Vitis HLS文档明确要求含dataflow task和M_AXI的CoSim启用`-enable_tasks_with_m_axi`；该开关在11:17复验中仍死锁，证明原问题是结构闭环。当前已无task，因此Tcl不再使用该开关。
@@ -133,10 +133,9 @@ Q/K/V AXI
 
 ## 8 下一步
 
-1. 下次迭代开始时先检查当前本地diff，然后提交并推送当前Q/K内联候选；NM37 fast-forward拉取精确commit。
-2. 从SSH服务器运行`./run_hls.sh fsa_stream_split_d`。先看CSim能否编译新增诊断，再检查CSynth中独立`loadElemTile` RTL实例是否消失，并复核DSP40、QK/ROW_SUM II5、PWL/PV II1和7.300ns。
-3. CoSim重点比较feature0和last-feature两个basis-V用例：两者都通过说明Q/K加载边界是主因；仅feature0失败则转查QK首轮反馈；两者仍以相同row/col模式失败则检查PE结果矩阵对齐。
-4. 4×4/16全部CoSim事务通过0.03容差后，再运行16×16/128的Vitis CSim、CSynth与CoSim验收。
+1. 提交第1轮结果日志和根上下文，不修改算法源码。
+2. NM37拉取精确commit后，以`FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 ./run_hls.sh fsa_stream_split_d`运行完整CSim、CSynth和RTL CoSim。
+3. 核对16×16/128的单一256-PE阵列、16列Accumulator、256个减法器、II、7.300ns时序预算及全部RTL数据用例。
 
 ## 9 验证状态
 
