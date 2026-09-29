@@ -8,7 +8,7 @@
 - 当前研究任务：独立实现参数化`D×D` Split-D顶层`fsa_stream_split_d`。
 - 默认配置：物理阵列`4×4`、`dim=16`；目标配置仅改参数得到`16×16/dim128`。
 - 算法顺序：每个PE含FP16工作寄存器`reg`和FP32 `score_acc`；先执行`dim/D`轮QK累加，完整S后softmax，再执行`dim/D`轮PV。
-- 当前第一优先级：commit`83b9b515`已使4×4/16同时满足DSP40、QK/ROW_SUM II5、PWL/PV II1、7.300ns、单PE/单Accumulator和RTL数据9/9通过；下一步仅改参数验证16×16/128的完整Vitis流程。
+- 当前第一优先级：commit`83b9b515`已使4×4/16同时满足DSP40、QK/ROW_SUM II5、PWL/PV II1、7.300ns、单PE/单Accumulator和RTL数据9/9通过；16×16/128的CSim和CSynth已完成，但`runPeArray`控制流过于复杂而无法流水化，必须先验证交接前文件拆分，再重构层次化PE执行入口。
 
 ## 2 硬约束
 
@@ -20,9 +20,12 @@
 - 保持现有RawFMA、PWL精度、特殊值及舍入合同；不得用放宽误差掩盖问题。
 - 不恢复已造成RTL错误的`pe_pipeline/cmp_pipeline inter false`；不恢复Accumulator反馈DATAFLOW环或单actor写多个有限DMA请求FIFO。
 - 不更改时钟、器件、接口或阵列参数来掩盖综合失败。
-- 当前新一轮远端闭环已获授权，最多3轮；从当前Q/K内联候选的NM37服务器测试开始，若提前全部验收则提前结束。
+- 当前NM37/Vitis HLS 2024.2/7事务testbench下，16×16 RTL CoSim从`## run all`开始的正常墙钟区间为15至45分钟，60分钟为硬超时；超过60分钟未完成7/7和C post-check即停止并判性能/可验证性不合格。连续20分钟无任何进度变化可提前超时。
+- 上一轮远端闭环已结束。后续智能体不得沿用旧授权继续推送或测试；开始新一轮前以用户最新授权的轮数和范围为准，每轮结束必须暂停汇报，提前全部合格则提前结束。
 - 没有读取对应新build前，不得声称实例数、DSP、II、时序、CoSim或死锁问题已经解决。
 - 只维护仓库根目录的`PROJECT_CONTEXT.md`；`docs/`目录中的同名文件为历史快照，停止更新。
+- 用户已把本文件的外部上下文维护长期委派给智能体：发现过期、缺失或矛盾内容时直接原地修订，不必每次征询；但只能写入可验证证据，不得凭推测写入结论，也不得为了产生更新而空改。
+- 远端授权边界：上述闭环已用满2轮并结束，**当前没有有效的远端授权**；SSH、推送和占用服务器都需要用户在新会话中重新明确授权轮数与范围。
 
 ## 3 当前状态
 
@@ -37,23 +40,17 @@
 
 **当前源码修改：**
 
-- 已删除`hls::task`、`hls_thread_local`、四条命令/结果stream和`run()`层DATAFLOW；Tcl恢复普通`cosim_design -rtl verilog`。
-- `runPeArray`是唯一包含`peMacUnit`调用的位置，内部完全展开`D×D`；`runAccumulatorColumns`是唯一包含`accUnit`调用的位置，按列完全展开。两者保持STP II1，分别在函数内部调用独立STP II1/latency1结果级；16:33 CSynth已确认分级切断调用返回写回路径，使顶层回到7.300ns。
-- `runController`对上述两个非内联函数各设置`ALLOCATION function ... limit=1`；13:50 build已确认两个模块都只有一个物理实例。
-- QK和ROW_SUM循环保留真实反馈并把目标II改为5，以接受共享PE新增的返回延迟，不使用虚假的PE反馈依赖声明。
-- 当前PV为8个feature上下文交错的单一固定边界II1操作循环：每组先发射`D×8`个PE操作，再发射8个Accumulator更新；`output_acc`只在每个feature唯一一次的更新阶段访问，因此对该变量声明`inter false`；`pv_sum`是真反馈，声明`RAW distance=8 true`。没有外层feature-group outline，也没有`PIPELINE off`。
-- Q/K共用的`loadElemTile`已由`INLINE off`改为强制`INLINE`，Q和K加载循环分别进入调用控制层级；V继续保持内联。新增的feature0和last-feature basis诊断均在RTL中通过，确认Q/K加载错位已修复。
-- 当前代码的4×4/16完整Vitis测试已通过；16×16/128的服务器Vitis验收仍待执行。
-- PWL从task批量请求/回收改为有限流水调用：8段扫描期间保持`PE.reg`中的X不变，命中结果暂存到此时已不再保存S的`PE.score_acc`，结束后写回`PE.reg`；没有阵列外P副本和额外PE状态，两种参数本地端到端回归通过。
+- **拆分后待验证状态（Confirmed）：**拆分只做了代码搬家，未主动改变算法、pragma、循环顺序或函数签名；8个关键函数各只有1处定义（`runPeArray`、`runAccumulatorColumns`在`split_d_compute.cpp`，`loadElemTile`、`loadValueTile`在`split_d_dma.cpp`），`run_hls.tcl`已列入全部5个实现文件。但Q/K/V加载虽仍保留`#pragma HLS INLINE`，其定义已移入独立翻译单元，**是否仍被内联必须由4×4 CSynth确认**，不能视为已完成HLS回归。
+- commit`83b9b515`的4×4/16完整Vitis测试已通过；当前未提交的文件拆分尚未Vitis回归。
+- 16×16/128已完成CSim和CSynth：CSim通过，估算周期7.300ns，生成一套256PE和一套16列Accumulator；但`runPeArray`及其QK、ROW_SUM、PWL、PV调用循环流水失败，CSynth约耗时2小时41分。RTL CoSim运行到4/7后按用户要求停止，未完成C post-check，数据状态为未验收。
+- 以下条目是**拆分前**候选的历史过程记录（对应当前`PROJECT_CONTEXT.md`里已不存在的单文件源码），保留用于避免重走已排除的路线：已删除`hls::task`、`hls_thread_local`、四条命令/结果stream和`run()`层DATAFLOW，Tcl恢复普通`cosim_design -rtl verilog`；`runPeArray`/`runAccumulatorColumns`保持STP II1并在内部调用独立STP II1/latency1结果级，16:33 CSynth确认分级切断调用返回写回路径使顶层回到7.300ns；`runController`对两者各设`ALLOCATION function ... limit=1`，13:50 build确认各只有一个物理实例；QK和ROW_SUM保留真实反馈并把目标II改为5，不使用虚假依赖声明；PV为8个feature上下文交错的单一固定边界II1循环，`output_acc`声明`inter false`、`pv_sum`声明`RAW distance=8 true`，无外层outline也无`PIPELINE off`；`loadElemTile`由`INLINE off`改为强制`INLINE`，feature0与last-feature basis诊断在RTL中通过，确认Q/K加载错位已修复；PWL由task批量请求/回收改为有限流水调用，8段扫描期间保持`PE.reg`中的X、命中结果暂存到已不再保存S的`PE.score_acc`，无阵列外P副本。
 - 11:03的FRP源码候选仍在相同14160ns死锁；本地没有同步该次`csynth.rpt`和`sim/verilog`，无法确认工具是否真正采用FRP，因此不能把它当作有效硬件修复。
 - AMD Vitis HLS文档明确要求含dataflow task和M_AXI的CoSim启用`-enable_tasks_with_m_axi`；该开关在11:17复验中仍死锁，证明原问题是结构闭环。当前已无task，因此Tcl不再使用该开关。
 - 11:17 deadlock report确认控制器阻塞于空`pe_result_stream`，KPN阻塞于空PE/Accumulator命令流，没有任何写端因FIFO满而阻塞。按AMD官方判据，这不是FIFO深度不足，而是设计结构问题。
 - 当前`runController`同时是task命令生产者和结果消费者，跨`ap_ctrl_chain`控制区与`ap_ctrl_none` KPN形成闭环。AMD混合task/dataflow模型要求task输入由先于task的普通进程产生、task输出由后于task的普通进程消费；同一个控制器承担两端不满足该前向拓扑。
 - QK和ROW_SUM直接调用共享PE模块，并显式接受II5真实反馈；不使用虚假的PE反馈`DEPENDENCE false`。
-- PWL一次连续发射8个分段再顺序收回，命中结果直接写回PE.reg，删除了阵列外`D×D` probability副本。
 - 当前未测候选每组交错8个独立feature：每个feature内部仍按key row原顺序累加，只使用`8×D`个FP32临时partial，不改变FMA顺序；16维和128维都能整除8，不增加目标配置的空上下文操作。
-- 被测commit `842ef77`的`4×4/dim16`和`16×16/dim128`曾通过端到端本地测试；当前未提交Q/K内联候选尚未完成编译或Vitis验证。
-- 本地使用math stubs完成功能回归；真实Vitis调度、实例共享、时序和RTL行为仍需服务器CSynth/CoSim验证。
+- 本地使用math stubs完成功能回归；真实Vitis调度、实例共享、时序和RTL行为仍需服务器CSynth/CoSim验证。**注意：拆分后连本地编译检查也不可行**（见第10节）。
 
 ### 3.2 已验收生产基线
 
@@ -122,20 +119,25 @@ Q/K/V AXI
 ## 7 当前工作集
 
 - Split-D配置与类型：`include/fsa/stream/split_d/`
-- Split-D实现：`src/stream/split_d/fsa_stream_split_d.cpp`
+- Split-D顶层：`src/stream/split_d/fsa_stream_split_d.cpp`
+- Split-D主控制器：`src/stream/split_d/split_d_controller.cpp`
+- Split-D计算模块：`src/stream/split_d/split_d_compute.cpp`
+- Split-D DMA模块：`src/stream/split_d/split_d_dma.cpp`
+- Split-D内部接口：`include/fsa/stream/split_d/split_d_internal.hpp`
 - Split-D测试：`tests/stream/test_fsa_stream_split_d.cpp`
 - Split-D HLS入口：`hls/fsa_stream_split_d/run_hls.tcl`
 - 根运行入口：`run_hls.sh`
 - Split-D历史交接：`docs/split_d_implementation_plan_20260923/PROJECT_CONTEXT.md`（停止维护，不作为当前状态来源）
-- 当前build：`build/fsa_stream_split_d_build/solution1/`
+- Split-D迁移交接：`docs/Split-D_FSA_DeepSeek迁移交接_20260929.md`（当前任务的第2优先级来源）
+- 本地`build/fsa_stream_split_d_build/solution1/`是**拆分前**的旧生成物（最新`csynth.rpt`为2026-09-28 16:51，仍含已删除的`peArrayTask`/`accumulatorTask`/`KPN`模块），只能作为历史基线，**不得**用于描述当前源码；当前有效证据在NM37服务器的`hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1/`，本地`hls/fsa_stream_split_d/`下没有build目录。
 
 默认参数为`FSA_SPLIT_D_PE_DIM=4`、`FSA_SPLIT_D_HEAD_DIM=16`；目标参数为`16/128`。
 
 ## 8 下一步
 
-1. 提交第1轮结果日志和根上下文，不修改算法源码。
-2. NM37拉取精确commit后，以`FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 ./run_hls.sh fsa_stream_split_d`运行完整CSim、CSynth和RTL CoSim。
-3. 核对16×16/128的单一256-PE阵列、16列Accumulator、256个减法器、II、7.300ns时序预算及全部RTL数据用例。
+1. 先对拆分后的源码运行默认4×4/16 CSim和CSynth，确认加载内联层次、单阵列、DSP40、II和7.300ns均未回退。
+2. 拆分回归通过后，把单个巨大`runPeArray`重构为层次化row bank或小tile bank；bank必须共同构成唯一物理阵列，不能按阶段复制。
+3. 先用16×16/128 CSynth确认PE入口和QK、ROW_SUM、PWL、PV循环恢复目标II，再运行长时间RTL CoSim。
 
 ## 9 验证状态
 
@@ -172,23 +174,49 @@ Q/K/V AXI
 - 2026-09-29 01:43 build（commit `58eecaa`）：恢复8路PV并加入诊断用例；CSim/CSynth通过，DSP40、BRAM8、FF29415、LUT123434、7.300ns，QK/ROW_SUM II5、PWL/PV II1。CoSim 8/8于208505ns完成，无deadlock，但7个有效事务均失败。TV输入正确；输出证明V tile滞后一事务，综合层次显示K/V在key-loop outline中共用一个`loadElemTile`子模块。
 - 2026-09-29 02:04 build（commit `6c80d49`）：K/V拆成独立加载子模块后，CSim/CSynth与目标II、7.300ns继续通过，CoSim 8/8于205005ns完成且无deadlock；首个单key事务通过，但其余6个数值用例失败。全1-V事务输出0，随后basis-V事务输出约0.5，证明独立V子模块仍在后续顶层事务使用前一笔V。
 - 2026-09-29 02:14 build（commit `842ef77`）：V加载强制内联后，独立`loadValueTile` RTL模块消失；CSim/CSynth通过，DSP40、BRAM8、FF29745、LUT124445、QK/ROW_SUM II5、PWL/PV II1、7.300ns。CoSim 8/8于225795ns完成，无deadlock；单key和全1-V通过，证明V事务错位已修复。basis-V仍输出均匀0.5/0.5而非0.562177/0.437823，随机用例最大误差0.054至0.075，数据仍未验收。本次达到3轮上限并停止。
-- 被测commit `842ef77`的`4×4/dim16`和`16×16/dim128`端到端本地回归通过；其4×4/16 RTL CoSim已完成8/8但数值失败。当前Q/K内联候选尚未编译；16×16/128仍待Vitis综合和CoSim。
+- 历史commit`842ef77`的4×4/16 RTL CoSim曾完成8/8但数值失败；后续commit`83b9b515`内联Q/K加载后，4×4/16已完成9/9全验收。16×16/128已完成CSim和CSynth，但流水失败且CoSim只完成4/7。
 
 ### 未完成
 
 - Split-D RTL CoSim、IP导出、Vivado实现和板测。
-- Split-D `16×16/dim128`参数下的Vitis CSim/CSynth与资源、时序验收。
+- 拆分后源码的4×4/16 Vitis回归。
+- Split-D `16×16/dim128`的目标II和完整RTL数据验收。
 - 生产基线IP导出、Vivado实现后时序和板测。
 
 ## 10 环境与复现
 
-- 本地：Windows PowerShell；无Vitis/Vivado，只做C++检查。
+- 本地：Windows PowerShell；无Vitis/Vivado，且Windows缺Vitis `ap_int.h`、WSL启动被系统拒绝，因此**当前连C++编译检查也无法在本地执行**；拆分后源码的编译与综合结论只能来自服务器，本地仅能做`git diff --check`、文件结构和符号唯一性检查。
 - 服务器：Vitis HLS 2024.2，器件`xcvu37p_CIV-fsvh2892-2-e`。
 - 时钟：10.0ns，uncertainty 2.7ns；不得放宽。
 - Split-D服务器命令：`./run_hls.sh fsa_stream_split_d`。
 - 生产基线命令：`./run_hls.sh fsa_stream`。
-- 不使用Git标识当前状态；旧`source_manifest.json`和`delivery_validation.json`是历史快照，不代表当前源码。
+- 分支`fsa_split_D`，代码基线`83b9b515`，仓库HEAD`8216f04`只在该基线上补充4×4验收文档。工作树**不等于**HEAD：交接前完成的源码拆分（`split_d_controller.cpp`、`split_d_compute.cpp`、`split_d_dma.cpp`、`split_d_internal.hpp`四个未跟踪文件，加上`fsa_stream_split_d.cpp`、`run_hls.tcl`、本文件和修改日志的未提交改动）尚未提交、尚未Vitis回归，不得把HEAD当作当前工作树内容。
+- 旧`source_manifest.json`和`delivery_validation.json`是历史快照，不代表当前源码。
 
 ## 11 交接摘要
 
-当前任务是把Split-D做成真正的一套参数化`D×D`阵列：默认4×4处理16维，未来16×16处理128维。最近被测commit `842ef77`保持单PE、单Accumulator、DSP40，QK/ROW_SUM II5、PWL/PV II1和7.300ns，CoSim无deadlock；V跨事务错位已修复。剩余basis-V输出模式更符合共享非内联Q/K加载器造成的tile row/col错位。当前候选已将Q/K加载强制内联，并新增last-feature basis诊断；新调用最多3轮远端闭环，首先提交/推送该候选并在NM37运行完整HLS。
+当前任务是参数化`D×D` Split-D阵列。4×4/16已在commit`83b9b515`完成CSim、CSynth和RTL CoSim 9/9全验收；Q/K/V加载错位均已修复。16×16/128的CSim和CSynth完成，单一256PE结构和7.300ns估计成立，但巨大`runPeArray`控制流无法pipeline，相关循环II失败，CoSim只完成4/7后停止。交接前源码已拆为顶层、控制器、计算和DMA模块但尚未Vitis回归。接手后先验证拆分不回退4×4指标，再做层次化PE bank重构；详见`docs/Split-D_FSA_DeepSeek迁移交接_20260929.md`。
+
+## 12 本项目可用的DSH skill
+
+本项目的流程已作为DSH skill安装在用户级`C:\Users\30130\.dsh\skills\`，源件保存在`skills/`（源件不随会话变化，安装副本由源件改写得到）：
+
+- `fsa-hls-remote-iteration`：远端Vitis闭环迭代（第10节单轮闭环的操作化版本），调用后可获得该轮的远端测试与日志维护流程。
+- `vitis-hls-build-report`：读取build目录生成中文综合报告（第9节报告约定的操作化版本）。
+- `vivado-hls-ip-board-test`：由HLS IP生成NM37上板测试包。
+- `maintaining-project-context`：维护本文件。
+- `rewrite-scientific-workflow`：论文/研究叙事组织。
+
+调用方式：在输入框键入`/`并从建议中选择，或直接键入`/skill-name`。用户侧候选来自宿主`skills/list`（按`user-invocable`过滤）；模型侧则靠会话skill目录按任务自动匹配。远端迭代、综合报告等流程优先直接调用对应skill，不要凭记忆重述其规则。
+
+维护提示：源件在`skills/`，安装副本是**改写后的拷贝**，改动源件不会自动生效；更新源件后必须重新执行"拷贝→按DSH约定改写→安装到`~\.dsh\skills`→删除临时副本"。已做的改写只有两处：`fsa-hls-remote-iteration`的宿主名`Codex`→`DSH`，`vivado-hls-ip-board-test`的描述由742字压缩到470字（DSH目录描述上限500字，超出会被截断并丢失触发词）；其余3个skill的正文与源件逐字节相同。所有安装副本都已丢弃`agents/openai.yaml`（ChatGPT/Codex专用界面元数据）。`fsa-hls-remote-iteration`的`SKILL.md`和`references/fsa-hls-workflow.md`已在2026-09-29按用户要求改写，两份（源件与安装副本）逐字节一致。
+
+## 13 远端迭代的一轮怎么走
+
+2026-09-29用户重定了`fsa-hls-remote-iteration`的一轮结构，之后按此执行：一轮 = **一次"push → 远端测一次"**，从本地提交推送开始，到读完该commit的远端数据并给出结论为止。
+
+1. 推送本地commit（含本轮日志与`PROJECT_CONTEXT.md`更新）；2. 远端SSH+显式加载`~/.bashrc`、`git pull --ff-only`、核对远端HEAD等于该commit；3. 远端Vitis测试；4. 读结果（报告、日志、RTL、资源）；5. 判断是否合格；6. 不合格则**先联网搜索解决方案**并记录来源与结论；7. 本地更改并做本地验证；8. 回到第1步，该修改成为下一轮被测commit。
+
+- 终止条件：验收全部通过、达到用户设定最大轮数、出现阻塞、或需要用户作出新的设计决定；每轮结束都暂停并向用户汇报。
+- 第6步的联网搜索已纳入该skill的站立授权，不必每轮单独询问。
+- 与本文件第2节一致：未授权轮数时不得自行无限重测；上一轮闭环已结束，**当前仍未获得新的远端授权**。

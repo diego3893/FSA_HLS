@@ -30,6 +30,9 @@ set_top fsa_stream_split_d
 
 foreach SOURCE {
     split_d/fsa_stream_split_d.cpp
+    split_d/split_d_controller.cpp
+    split_d/split_d_compute.cpp
+    split_d/split_d_dma.cpp
     arithmetic.cpp
     fp32_raw_fma.cpp
     pe_raw_fma.cpp
