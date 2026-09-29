@@ -8,7 +8,7 @@
 - 当前研究任务：独立实现参数化`D×D` Split-D顶层`fsa_stream_split_d`。
 - 默认配置：物理阵列`4×4`、`dim=16`；目标配置仅改参数得到`16×16/dim128`。
 - 算法顺序：每个PE含FP16工作寄存器`reg`和FP32 `score_acc`；先执行`dim/D`轮QK累加，完整S后softmax，再执行`dim/D`轮PV。
-- 当前第一优先级：commit`83b9b515`已使4×4/16同时满足DSP40、QK/ROW_SUM II5、PWL/PV II1、7.300ns、单PE/单Accumulator和RTL数据9/9通过；16×16/128的CSim和CSynth已完成，但`runPeArray`控制流过于复杂而无法流水化，必须先验证交接前文件拆分，再重构层次化PE执行入口。
+- 当前第一优先级：拆分本体已在commit`2c94ef1`通过4×4/16的CSim+CSynth回归（指标与拆分前逐项相同，加载内联未回退），交接文档第11节要求的"先验证拆分"已完成；下一步是按交接文档第8节把巨型`runPeArray`重构为层次化PE bank，并用16×16/128 CSynth确认流水恢复目标II。
 
 ## 2 硬约束
 
@@ -40,8 +40,8 @@
 
 **当前源码修改：**
 
-- **拆分后待验证状态（Confirmed）：**拆分只做了代码搬家，未主动改变算法、pragma、循环顺序或函数签名；8个关键函数各只有1处定义（`runPeArray`、`runAccumulatorColumns`在`split_d_compute.cpp`，`loadElemTile`、`loadValueTile`在`split_d_dma.cpp`），`run_hls.tcl`已列入全部5个实现文件。但Q/K/V加载虽仍保留`#pragma HLS INLINE`，其定义已移入独立翻译单元，**是否仍被内联必须由4×4 CSynth确认**，不能视为已完成HLS回归。
-- commit`83b9b515`的4×4/16完整Vitis测试已通过；当前未提交的文件拆分尚未Vitis回归。
+- **拆分后待验证状态（Confirmed，已由`2c94ef1`的CSynth验证）：**拆分只做了代码搬家，未主动改变算法、pragma、循环顺序或函数签名；8个关键函数各只有1处定义（`runPeArray`、`runAccumulatorColumns`在`split_d_compute.cpp`，`loadElemTile`、`loadValueTile`在`split_d_dma.cpp`），`run_hls.tcl`已列入全部5个实现文件。Q/K/V加载的`#pragma HLS INLINE`在移入独立翻译单元后**仍然生效**，4×4/16 CSynth已确认没有生成独立加载模块。
+- commit`2c94ef1`（拆分本体）：4×4/16拆分回归**已通过**。远端CSim PASS、CSynth PASS（16:02:39–16:09:26），顶层Target 10.00ns/Estimated7.300ns/Uncertainty2.70ns，BRAM8、DSP40、FF29732、LUT124651，最坏延迟427162627 cycles，与拆分前基线**逐项相同**；RTL循环QK/ROW_SUM achieved5/target5、PWL/PV achieved1/target1；`stagePeArrayResult`/`stageAccumulatorResult`为latency1/II1/DSP0。跨翻译单元的Q/K/V强制`INLINE`**仍然生效**（无`loadElemTile`/`loadValueTile`子报告与RTL模块）。本轮范围只到CSynth，拆分后RTL CoSim未执行。
 - 16×16/128已完成CSim和CSynth：CSim通过，估算周期7.300ns，生成一套256PE和一套16列Accumulator；但`runPeArray`及其QK、ROW_SUM、PWL、PV调用循环流水失败，CSynth约耗时2小时41分。RTL CoSim运行到4/7后按用户要求停止，未完成C post-check，数据状态为未验收。
 - 以下条目是**拆分前**候选的历史过程记录（对应当前`PROJECT_CONTEXT.md`里已不存在的单文件源码），保留用于避免重走已排除的路线：已删除`hls::task`、`hls_thread_local`、四条命令/结果stream和`run()`层DATAFLOW，Tcl恢复普通`cosim_design -rtl verilog`；`runPeArray`/`runAccumulatorColumns`保持STP II1并在内部调用独立STP II1/latency1结果级，16:33 CSynth确认分级切断调用返回写回路径使顶层回到7.300ns；`runController`对两者各设`ALLOCATION function ... limit=1`，13:50 build确认各只有一个物理实例；QK和ROW_SUM保留真实反馈并把目标II改为5，不使用虚假依赖声明；PV为8个feature上下文交错的单一固定边界II1循环，`output_acc`声明`inter false`、`pv_sum`声明`RAW distance=8 true`，无外层outline也无`PIPELINE off`；`loadElemTile`由`INLINE off`改为强制`INLINE`，feature0与last-feature basis诊断在RTL中通过，确认Q/K加载错位已修复；PWL由task批量请求/回收改为有限流水调用，8段扫描期间保持`PE.reg`中的X、命中结果暂存到已不再保存S的`PE.score_acc`，无阵列外P副本。
 - 11:03的FRP源码候选仍在相同14160ns死锁；本地没有同步该次`csynth.rpt`和`sim/verilog`，无法确认工具是否真正采用FRP，因此不能把它当作有效硬件修复。
@@ -179,7 +179,7 @@ Q/K/V AXI
 ### 未完成
 
 - Split-D RTL CoSim、IP导出、Vivado实现和板测。
-- 拆分后源码的4×4/16 Vitis回归。
+- 拆分后源码的4×4/16 Vitis回归：**已完成**（2026-09-29 16:09，被测commit`2c94ef1`，CSim+CSynth通过，指标与拆分前相同；见`docs/修改日志/2026-09-29_1551_split_d_split_regression_修改日志.md`）。
 - Split-D `16×16/dim128`的目标II和完整RTL数据验收。
 - 生产基线IP导出、Vivado实现后时序和板测。
 
@@ -195,7 +195,7 @@ Q/K/V AXI
 
 ## 11 交接摘要
 
-当前任务是参数化`D×D` Split-D阵列。4×4/16已在commit`83b9b515`完成CSim、CSynth和RTL CoSim 9/9全验收；Q/K/V加载错位均已修复。16×16/128的CSim和CSynth完成，单一256PE结构和7.300ns估计成立，但巨大`runPeArray`控制流无法pipeline，相关循环II失败，CoSim只完成4/7后停止。交接前源码已拆为顶层、控制器、计算和DMA模块但尚未Vitis回归。接手后先验证拆分不回退4×4指标，再做层次化PE bank重构；详见`docs/Split-D_FSA_DeepSeek迁移交接_20260929.md`。
+当前任务是参数化`D×D` Split-D阵列。4×4/16已在commit`83b9b515`完成CSim、CSynth和RTL CoSim 9/9全验收；Q/K/V加载错位均已修复。16×16/128的CSim和CSynth完成，单一256PE结构和7.300ns估计成立，但巨大`runPeArray`控制流无法pipeline，相关循环II失败，CoSim只完成4/7后停止。交接前的源码拆分已在commit`2c94ef1`通过4×4/16的CSim+CSynth回归，指标与拆分前逐项相同且加载内联未回退；拆分后的RTL CoSim尚未运行。下一步按层次化PE bank重构以解决16×16流水失败；详见`docs/Split-D_FSA_DeepSeek迁移交接_20260929.md`。
 
 ## 12 本项目可用的DSH skill
 

@@ -51,7 +51,7 @@
 
 | 轮次 | 被测commit | 修改摘要 | 本地测试 | 远端测试 | 验收状态 |
 |---:|---|---|---|---|---|
-| 1 | 待填 | 推送交接前的纯文件拆分，不改算法 | 结构检查 | 待测 | 待判定 |
+| 1 | `2c94ef1` | 推送交接前的纯文件拆分，不改算法 | 结构检查通过；本地无法编译 | 4×4/16 CSim PASS、CSynth PASS（约6分47秒） | 通过（本轮范围，CoSim未执行） |
 
 ## 5. 逐轮记录
 
@@ -80,9 +80,54 @@
 
 #### 修改后远端测试
 
-- 被测commit：待填
-- 结果：待填
+- 被测commit：`2c94ef1289050f3a0116d759200dfe9057e6526a`（远端HEAD经`git rev-parse HEAD`核对一致）
+- 推送：`8216f04..2c94ef1` 到 `origin/fsa_split_D`
+- `.bashrc`加载：已确认。远端`~/.bashrc`第119-122行加载 `/opt/Xilinx_2024.2/{Vivado,Vitis,Vitis_HLS}/2024.2/settings64.sh`；必须用**交互式** bash（`bash -ic`）才会读取`.bashrc`，非交互`bash -lc`不读，因此本轮统一用交互式方式加载
+- 拉取冲突处理：无。远端tracked工作树干净，`git pull --ff-only`从`8216f04`快进到`2c94ef1`；原有未跟踪 `evidence/`、`logs/`、Vivado日志未触碰
+- 环境与参数：VU37P `xcvu37p_CIV-fsvh2892-2-e`、4×4 PE、HEAD_DIM=16、10ns时钟、2.7ns uncertainty、Vitis HLS 2024.2
+- 命令：`./run_hls.sh fsa_stream_split_d`（仓库入口，由用户指明），范围由临时`/tmp/run_hls_regression.tcl`（`set RUN_COSIM 0`）限定为 CSim + CSynth
+- 开始/结束时间：2026-09-29 16:02:39 至 16:09:26 +08:00，约6分47秒
+- 结果与退出码：PASS，code 0
+- 关键指标（与拆分前基线逐项对照）：
+  - CSim：`[PASS] fsa_stream_split_d: PE=4x4 HEAD_DIM=16 DIM_BLOCKS=4`，重复3次
+  - 顶层：Target 10.00ns / Estimated **7.300ns** / Uncertainty 2.70ns；BRAM **8**、DSP **40**、FF **29732**、LUT **124651**、URAM 0
+  - 顶层最坏延迟 427162627 cycles（与拆分前相同）
+  - `runPeArray`：DSP16、latency4、II1、7.054ns；`runAccumulatorColumns`：DSP8、latency7、II1、7.299ns；`stagePeArrayResult`/`stageAccumulatorResult`：II1 latency1、DSP0
+  - RTL循环实测：QK(`VITIS_LOOP_168_6_169_7`) achieved 5 / target 5；ROW_SUM(`VITIS_LOOP_364_33`) achieved 5 / target 5；PWL(`VITIS_LOOP_321_26`) achieved 1 / target 1；PV(`VITIS_LOOP_408_38`) achieved 1 / target 1（trip count 80，与“8个feature上下文 × 10个操作”一致）
+  - 加载内联：`syn/report/`下**无**`loadElemTile`/`loadValueTile`报告，生成的Verilog中**无**任何load子模块，确认跨翻译单元的强制`INLINE`仍然生效
+  - 拆分前遗留的`peArrayTask`/`accumulatorTask`/`KPN`模块名在新报告中均已消失
+- 证据路径：`hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1/syn/report/fsa_stream_split_d_csynth.rpt`、`runPeArray_csynth.rpt`、`runAccumulatorColumns_csynth.rpt`、`runController_Pipeline_VITIS_LOOP_{168_6_VITIS_LOOP_169_7,364_33,321_26,408_38}_csynth.rpt`，以及`/tmp/splitd_r1_regression.log`
+- 未执行阶段：RTL CoSim（本轮范围之外）、IP导出、Vivado实现、板测
 
 #### 本轮结论与下一步
 
-- 待填
+- 已解决的问题：**拆分未造成任何回退**。Q/K/V加载的强制内联在定义移入独立翻译单元后仍然生效（无独立加载模块、无对应子报告），这消除了拆分前最主要的未知风险。
+- 仍存在的问题：拆分后的RTL数值行为尚未用CoSim验证；本轮只证明到CSynth层面。
+- 验收标准状态：本轮6项标准全部满足（CSim通过、CSynth完成、7.300ns、单阵列DSP40、QK/ROW_SUM II5与PWL/PV II1、加载内联仍生效）。CoSim明确不在本轮范围，记为未执行。
+- 失败分析：本轮无失败。
+- 下一轮修改：由用户决定。可选方向：(a) 以同一`2c94ef1`运行一次4×4 RTL CoSim，确认拆分未改变RTL数据；(b) 直接进入16×16可流水PE bank重构（交接文档第8节）。
+- 本轮闭环状态：已完成。
+
+### 第2轮（未开始）
+
+- 状态：用户要求每轮结束暂停汇报，本轮结束后等待用户决定下一轮范围，尚未启动。
+
+## 6. 调用结束总结
+
+- 结束时间：2026-09-29 16:20 +08:00
+- 结束原因：第1轮验收标准全部满足且用户未设最大轮数；按“每轮结束暂停汇报”的要求停在轮边界，等待用户决定是否继续及下一轮范围
+- 已完成闭环迭代：1（未设上限）
+- 未完成迭代：无
+- 最终被测代码commit：`2c94ef1289050f3a0116d759200dfe9057e6526a`
+- 最终日志commit：待本轮日志更新后提交（本文件更新时该commit尚未产生）
+- 验收结果：4×4/16拆分回归通过——CSim PASS、CSynth PASS、7.300ns、DSP40/BRAM8/FF29732/LUT124651、QK/ROW_SUM II5、PWL/PV II1、Q/K/V加载内联保持单套16PE阵列
+- 仍未解决：拆分后RTL CoSim数据验收；16×16/128的PE入口流水与目标II
+- 建议下一步：见“下一轮修改”
+- 独立最终报告：未要求
+
+## 7. 本轮过程中的环境问题与更正
+
+- 传输脚本曾带CRLF行尾，导致远端`TOOL`变量尾部含`\r`、`$TOOL/bin`加入PATH无效并使`cp`找不到文件；已改为传输时`tr -d '\r'`，远端脚本现为纯LF。
+- 一次脚本使用 `/opt/Xilinx_2024.2/Vitis_HLS/2024.2/include/ap_int.h` 失败：该目录不存在，`ap_int.h`与`ap_fixed.h`位于 `/opt/Xilinx_2024.2/Vitis/2024.2/include/`。
+- 更正：本轮**没有**向仓库添加任何`ap_int.h`/`ap_fixed.h`。经核查仓库`include/`下只有`fsa`，而CSim在仅加载`.bashrc`的正常环境下即可找到这些头文件，因此该复制既无必要也未发生；`.gitignore`中只有一条无关的 `/third_party/vitis_hls/include/`。
+- 更正：此前“远端工具链不可用（`TOOL=NONE`）”的结论是探针引号错误造成的假象；实际用交互式bash加载`.bashrc`后`vitis-run`/`vitis_hls`均可正常调用。
