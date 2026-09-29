@@ -30,11 +30,16 @@ namespace detail{
     /**
      * @brief 一次PE阵列求值占用的拍数（即runPeArray的流水间隔）。
      *
-     * 4×4时16个PE一拍即可完成；16×16时256个PE的调度规模远超单拍，
-     * 需要多拍间隔才能让工具完成流水调度。QK和ROW_SUM的目标II是5，
-     * 因此取5不会降低这两个阶段的吞吐。
+     * 4×4时16个PE一拍即可完成，若声明多拍会白白拉长每个调用点，使
+     * QK/ROW_SUM的实际II从5退化到10、PWL/PV从1退化到5，因此必须为1。
+     * 16×16时256个PE的调度规模远超单拍，需要多拍间隔才能让工具完成
+     * 流水调度；QK和ROW_SUM的目标II是5，取5不降低这两个阶段的吞吐。
      */
-    constexpr int PE_ARRAY_II = 5;
+#ifdef FSA_SPLIT_D_PE_ARRAY_II
+    constexpr int PE_ARRAY_II = FSA_SPLIT_D_PE_ARRAY_II;
+#else
+    constexpr int PE_ARRAY_II = PE_DIM <= 4 ? 1 : 5;
+#endif
 
     void runPeArray(
         const PeState pe[PE_DIM][PE_DIM],
