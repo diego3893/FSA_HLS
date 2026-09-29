@@ -23,14 +23,6 @@ namespace detail{
     constexpr int PE_BANK_ROWS = 4;
     constexpr int PE_BANK_DIM = PE_DIM < PE_BANK_ROWS ? PE_DIM : PE_BANK_ROWS;
 
-    void peBankMacUnit(
-        const PeState pe_row[PE_BANK_DIM],
-        const elem_t operand_b_row[PE_BANK_DIM],
-        const acc_t operand_c_row[PE_BANK_DIM],
-        bool exp2_mode,
-        PeMacUnitOutput result_row[PE_BANK_DIM]
-    );
-
     void runPeArray(
         const PeState pe[PE_DIM][PE_DIM],
         const elem_t operand_b[PE_DIM][PE_DIM],

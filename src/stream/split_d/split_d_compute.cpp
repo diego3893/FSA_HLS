@@ -42,42 +42,13 @@ namespace detail{
     }
 
     /**
-     * @brief 一个bank内部的一行PE：PE_BANK_DIM个PE并行完成同一拍的RawFMA。
+     * @brief 层次化调度整套PE阵列：按行bank分组，组内完全展开。
      *
-     * 行内完全展开，函数本身保持单拍流水，因此调用它的循环不会把整个
-     * 阵列的控制流和数据端口带进自身的流水边界。
-     */
-    void peBankMacUnit(
-        const PeState pe_row[PE_BANK_DIM],
-        const elem_t operand_b_row[PE_BANK_DIM],
-        const acc_t operand_c_row[PE_BANK_DIM],
-        bool exp2_mode,
-        PeMacUnitOutput result_row[PE_BANK_DIM]
-    ){
-        #pragma HLS INLINE off
-        #pragma HLS PIPELINE II=1 style=stp
-        #pragma HLS ARRAY_PARTITION variable=pe_row complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=operand_b_row complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=operand_c_row complete dim=1
-        #pragma HLS ARRAY_PARTITION variable=result_row complete dim=1
-
-        for(int col=0; col<PE_BANK_DIM; ++col){
-            #pragma HLS UNROLL
-            result_row[col] = peMacUnit(
-                pe_row[col].reg,
-                operand_b_row[col],
-                operand_c_row[col],
-                exp2_mode
-            );
-        }
-    }
-
-    /**
-     * @brief 层次化调度整套PE阵列：按bank行调用peBankMacUnit。
-     *
-     * 每个bank只看到自己的PE_BANK_DIM列操作数，因此单个函数的控制流和
-     * 端口规模随bank大小固定，不再随PE_DIM增长；bank数量由PE_DIM决定，
-     * 4×4时为1个bank，16×16时为16个bank，物理PE总数始终是PE_DIM×PE_DIM。
+     * PE_BANK_ROWS行构成一个bank，bank内PE_BANK_DIM个PE在同一个bank循环体里
+     * 原地完全展开；行基址只作为该bank的起始行号，因此单个bank的控制流和
+     * 操作数规模固定为PE_BANK_DIM，不随PE_DIM增长。bank数量由PE_DIM决定：
+     * 4×4时为1个bank（16个PE），16×16时为16个bank（256个PE），物理PE总数
+     * 始终是PE_DIM×PE_DIM，且不为任何阶段复制bank。
      */
     void runPeArray(
         const PeState pe[PE_DIM][PE_DIM],
@@ -92,16 +63,24 @@ namespace detail{
         #pragma HLS ARRAY_PARTITION variable=operand_c complete dim=0
         #pragma HLS ARRAY_PARTITION variable=result complete dim=0
 
+        PeMacUnitOutput computed[PE_DIM][PE_DIM];
+        #pragma HLS ARRAY_PARTITION variable=computed complete dim=0
+
         for(int bank=0; bank<PE_DIM; bank+=PE_BANK_DIM){
             #pragma HLS UNROLL
-            peBankMacUnit(
-                pe[bank],
-                operand_b[bank],
-                operand_c[bank],
-                exp2_mode,
-                result[bank]
-            );
+            for(int offset=0; offset<PE_BANK_DIM; ++offset){
+                #pragma HLS UNROLL
+                const int row = bank+offset;
+                for(int col=0; col<PE_DIM; ++col){
+                    #pragma HLS UNROLL
+                    computed[row][col] = peMacUnit(
+                        pe[row][col].reg, operand_b[row][col],
+                        operand_c[row][col], exp2_mode
+                    );
+                }
+            }
         }
+        stagePeArrayResult(computed, result);
     }
 
     void runAccumulatorColumns(
