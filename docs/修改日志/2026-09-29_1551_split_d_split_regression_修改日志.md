@@ -3,7 +3,7 @@
 ## 1. 本次调用信息
 
 - 开始时间：2026-09-29 15:51 +08:00
-- 当前状态：进行中
+- 当前状态：进行中（第1轮已完成；第2轮4×4 CoSim通过，PE bank候选待测）
 - 本地仓库：`C:\Users\30130\Desktop\workstation\FlashAttention\FSA_HLS`
 - 远端仓库：`FSA-FPGA-NM37-tailBox:/home/zhangchenxuan/FSA_HLS`
 - 分支：`fsa_split_D`
@@ -52,6 +52,7 @@
 | 轮次 | 被测commit | 修改摘要 | 本地测试 | 远端测试 | 验收状态 |
 |---:|---|---|---|---|---|
 | 1 | `2c94ef1` | 推送交接前的纯文件拆分，不改算法 | 结构检查通过；本地无法编译 | 4×4/16 CSim PASS、CSynth PASS（约6分47秒） | 通过（本轮范围，CoSim未执行） |
+| 2 | `7eb300e` | 仅提交skills与交接文档；随后编写PE bank重构 | 结构检查 | 4×4/16完整流程含CoSim：**PASS**（9/9，C post-check PASS） | 4×4全通过；PE候选待测 |
 
 ## 5. 逐轮记录
 
@@ -108,22 +109,52 @@
 - 下一轮修改：由用户决定。可选方向：(a) 以同一`2c94ef1`运行一次4×4 RTL CoSim，确认拆分未改变RTL数据；(b) 直接进入16×16可流水PE bank重构（交接文档第8节）。
 - 本轮闭环状态：已完成。
 
-### 第2轮（未开始）
+### 第2轮：4×4完整CoSim与PE bank重构起点
 
-- 状态：用户要求每轮结束暂停汇报，本轮结束后等待用户决定下一轮范围，尚未启动。
+#### 修改前判断与计划
 
-## 6. 调用结束总结
+- 继承的遗留问题：第1轮只验证到CSynth，拆分后的RTL数值行为未验证。
+- 用户要求：提交skills改动；对新commit跑CoSim；若合格则开始修改PE并测试16×16/128。
+- 本轮计划：先用仓库默认`RUN_COSIM 1`对`7eb300e`跑4×4完整流程（CSim+CSynth+RTL CoSim），确认拆分未改变RTL数据；合格后按交接文档第8节把巨型`runPeArray`改成层次化PE bank。
 
-- 结束时间：2026-09-29 16:20 +08:00
-- 结束原因：第1轮验收标准全部满足且用户未设最大轮数；按“每轮结束暂停汇报”的要求停在轮边界，等待用户决定是否继续及下一轮范围
+#### 修改后远端测试（CoSim）
+
+- 被测commit：`7eb300ef3a9ba35dec3e23653dfc2cd3aff64049`
+- 命令：`./run_hls.sh fsa_stream_split_d`（仓库默认Tcl，`RUN_CSIM 1`/`RUN_COSIM 1`/`EXPORT_IP 0`）
+- 开始/结束：2026-09-29 17:14:19 至 17:21:02 +08:00，rc=0
+- 结果：**C/RTL co-simulation finished: PASS**；C post-check PASS；RTL Verilog `Status: Pass`，Latency min55/avg2369/max8028，Interval min770/avg2648/max8018，总执行21243 cycles；`## run all`后9/9事务完成于212635ns；无deadlock、无`Bad TV file`
+- 证据：`hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1/sim/report/fsa_stream_split_d_cosim.rpt`，运行日志`/tmp/splitd_r2_cosim.log`
+- 结论：拆分后的4×4/16至此**CSim+CSynth+RTL CoSim全部通过**，与拆分前`83b9b515`的9/9验收等价。
+
+#### 本轮实际修改（PE bank重构）
+
+- `include/fsa/stream/split_d/split_d_internal.hpp`：新增`PE_BANK_ROWS=4`、`PE_BANK_DIM=min(PE_DIM,PE_BANK_ROWS)`与`peBankMacUnit`声明。
+- `src/stream/split_d/split_d_compute.cpp`：把原来"单个巨型函数一次接收`pe`/`operand_b`/`operand_c`三个`PE_DIM×PE_DIM`整体数组、在同一个流水边界内展开全部PE"的`runPeArray`，改为层次化结构——新增`peBankMacUnit`只处理`PE_BANK_DIM`个PE（行内`UNROLL`、函数自身`II=1 style=stp`、数组按维完全分区），`runPeArray`改为按bank调用它的`UNROLL`循环。
+- 硬件含义：bank划分只是同一套`PE_DIM×PE_DIM`物理阵列的RTL组织。4×4时`PE_DIM=4=PE_BANK_ROWS`，整阵列仍是1个bank、16个PE；16×16时`PE_BANK_DIM=4`，形成16个bank、共256个PE。没有为QK/ROW_SUM/PWL/PV分别复制bank。
+- `runPeArray`的`PIPELINE` pragma被移除（该函数不再是单拍流水体，而是多个bank调用的组合），`peBankMacUnit`承接`II=1 style=stp`；`stagePeArrayResult`保留但不再由`runPeArray`调用。
+- 与计划的偏差：无。本轮只做结构层次化，未改算法、FMA顺序、精度合同、接口或Tcl。
+
+#### 本地验证
+
+| 检查 | 结果 |
+|---|---|
+| `git diff --check` | 见提交前检查 |
+| 符号唯一性 | `peBankMacUnit`与`runPeArray`各1处定义 |
+| 本地编译 | 未执行（Windows缺`ap_int.h`、WSL被拒），由远端CSim承担 |
+
+#### 本轮状态
+
+- 4×4完整验收：**已通过**（CSim+CSynth+CoSim）。
+- PE bank重构：已写完，**尚未经过任何Vitis编译或综合**；4×4不回退与16×16能否流水恢复目标II都待远端验证。
+- 本轮闭环状态：进行中（PE候选尚未推送与测试）。
+
+## 6. 第1次调用结束总结（2026-09-29 16:20）
+
+- 结束原因：第1轮验收标准全部满足且用户未设最大轮数；按“每轮结束暂停汇报”的要求停在轮边界
 - 已完成闭环迭代：1（未设上限）
-- 未完成迭代：无
 - 最终被测代码commit：`2c94ef1289050f3a0116d759200dfe9057e6526a`
-- 最终日志commit：待本轮日志更新后提交（本文件更新时该commit尚未产生）
 - 验收结果：4×4/16拆分回归通过——CSim PASS、CSynth PASS、7.300ns、DSP40/BRAM8/FF29732/LUT124651、QK/ROW_SUM II5、PWL/PV II1、Q/K/V加载内联保持单套16PE阵列
 - 仍未解决：拆分后RTL CoSim数据验收；16×16/128的PE入口流水与目标II
-- 建议下一步：见“下一轮修改”
-- 独立最终报告：未要求
 
 ## 7. 本轮过程中的环境问题与更正
 
@@ -131,3 +162,14 @@
 - 一次脚本使用 `/opt/Xilinx_2024.2/Vitis_HLS/2024.2/include/ap_int.h` 失败：该目录不存在，`ap_int.h`与`ap_fixed.h`位于 `/opt/Xilinx_2024.2/Vitis/2024.2/include/`。
 - 更正：本轮**没有**向仓库添加任何`ap_int.h`/`ap_fixed.h`。经核查仓库`include/`下只有`fsa`，而CSim在仅加载`.bashrc`的正常环境下即可找到这些头文件，因此该复制既无必要也未发生；`.gitignore`中只有一条无关的 `/third_party/vitis_hls/include/`。
 - 更正：此前“远端工具链不可用（`TOOL=NONE`）”的结论是探针引号错误造成的假象；实际用交互式bash加载`.bashrc`后`vitis-run`/`vitis_hls`均可正常调用。
+
+## 8. 第2轮过程中的操作失误与更正（重要）
+
+- **失误：轮询脚本重复启动HLS。** 我为“启动+轮询”写的脚本在开头无条件`rm -f`日志并`nohup`启动，因此每次重新执行该脚本都会**再起一个**完整的HLS运行。结果服务器上同时存在多个`vitis_hls`+`xsim`进程，互相争用同一个`hls/fsa_stream_split_d/build`目录，并留下两个`ets`>8万的孤儿进程（`run_hls.sh`被SSH中断后其子进程未随之退出）。
+- **处置：** 已用`kill -TERM`定向终止这两个孤儿进程族（PID 559555、563491及其xsim子进程），清理后`ps`确认`NONE_LEFT`；通过的那次CoSim报告（17:20）与`fsa_stream_split_d_build/`完好无损。**未触碰**其他用户的进程。
+- **更正后的做法（后续轮次必须遵守）：**
+  1. **启动与轮询分离**：启动脚本只在需要新运行时执行一次；轮询必须是独立的只读脚本，不得包含`rm -f`日志或`nohup`启动。
+  2. **启动前先确认没有在跑的同类任务**：`ps -eo pid,etimes,cmd | grep -E 'vitis_hls|xsim'`，有残留先处理，不要并行。
+  3. **SSH中断不等于远端作业停止**：用`nohup`+独立日志启动，断线只影响本地轮询；恢复轮询时只读日志，不要重启作业。
+  4. **判定证据以报告文件为准**：`sim/report/*_cosim.rpt`的`Status`行与`C post-check`行，而不是终端最后一行。
+- 影响评估：本轮那次PASS来自17:14:19启动、17:21:02结束的完整运行（rc=0，报告齐全，9/9事务，C post-check PASS），期间另一个更早的运行在17:20左右也结束，两者的9/9时间点不同但都指向同一被测commit的源码；由于两次运行读取的都是同一份已被第3次运行重置的build目录，**为避免任何歧义，16×16轮次将在确认无残留进程后重新进行一次干净的4×4基线测量**（若时间允许）或至少确保16×16测量期间服务器上只有一个HLS作业。

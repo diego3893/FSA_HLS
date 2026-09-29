@@ -14,6 +14,23 @@ namespace detail{
 
     constexpr int PV_INTERLEAVE = 8;
 
+    /**
+     * @brief 一个PE bank包含的阵列行数。
+     *
+     * 4×4时整阵列恰好是一个4×4 bank；16×16时是16个1行bank。
+     * 该常数只改变同一套PE阵列的RTL层次，不改变PE总数。
+     */
+    constexpr int PE_BANK_ROWS = 4;
+    constexpr int PE_BANK_DIM = PE_DIM < PE_BANK_ROWS ? PE_DIM : PE_BANK_ROWS;
+
+    void peBankMacUnit(
+        const PeState pe_row[PE_BANK_DIM],
+        const elem_t operand_b_row[PE_BANK_DIM],
+        const acc_t operand_c_row[PE_BANK_DIM],
+        bool exp2_mode,
+        PeMacUnitOutput result_row[PE_BANK_DIM]
+    );
+
     void runPeArray(
         const PeState pe[PE_DIM][PE_DIM],
         const elem_t operand_b[PE_DIM][PE_DIM],
