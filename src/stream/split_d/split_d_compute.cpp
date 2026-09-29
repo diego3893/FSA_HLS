@@ -105,7 +105,9 @@ namespace detail{
         #pragma HLS ARRAY_PARTITION variable=computed complete dim=0
 
         for(int bank=0; bank<PE_DIM; bank+=PE_BANK_ROWS){
-            #pragma HLS UNROLL
+            // 这里刻意不写UNROLL：bank循环必须是流水的迭代维度，每拍只调度
+            // 一个bank。若把它展开，所有bank又会合成同一个巨型单拍体，
+            // 等于没有拆分——这是此前多次"bank分组"尝试失败的原因。
             PeState node_pe[PE_BANK_NODES];
             elem_t node_b[PE_BANK_NODES];
             acc_t node_c[PE_BANK_NODES];
