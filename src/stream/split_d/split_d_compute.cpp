@@ -49,6 +49,11 @@ namespace detail{
      * 操作数规模固定为PE_BANK_DIM，不随PE_DIM增长。bank数量由PE_DIM决定：
      * 4×4时为1个bank（16个PE），16×16时为16个bank（256个PE），物理PE总数
      * 始终是PE_DIM×PE_DIM，且不为任何阶段复制bank。
+     *
+     * 函数按PE_ARRAY_II拍接受一次新的阵列求值：4×4的阵列求值本身只需1拍，
+     * 16×16时256个PE的调度规模远大于单拍，声明多拍间隔才能让工具完成流水
+     * 调度而不报"控制流过于复杂"。QK和ROW_SUM的目标II就是5，因此该间隔不
+     * 降低这两个阶段的吞吐。
      */
     void runPeArray(
         const PeState pe[PE_DIM][PE_DIM],
@@ -58,6 +63,7 @@ namespace detail{
         PeMacUnitOutput result[PE_DIM][PE_DIM]
     ){
         #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=PE_ARRAY_II style=stp
         #pragma HLS ARRAY_PARTITION variable=pe complete dim=0
         #pragma HLS ARRAY_PARTITION variable=operand_b complete dim=0
         #pragma HLS ARRAY_PARTITION variable=operand_c complete dim=0
