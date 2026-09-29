@@ -29,7 +29,7 @@ namespace detail{
 #ifdef FSA_SPLIT_D_PE_BANK_ROWS
         FSA_SPLIT_D_PE_BANK_ROWS;
 #else
-        1;   // 诊断变体：4×4也走4次bank迭代，检验rolled路径本身
+        PE_DIM <= 4 ? PE_DIM : 1;
 #endif
     constexpr int PE_BANK_NODES =
         (PE_DIM < PE_BANK_ROWS ? PE_DIM : PE_BANK_ROWS) * PE_DIM;

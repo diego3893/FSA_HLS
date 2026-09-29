@@ -8,7 +8,7 @@
 - 当前研究任务：独立实现参数化`D×D` Split-D顶层`fsa_stream_split_d`。
 - 默认配置：物理阵列`4×4`、`dim=16`；目标配置仅改参数得到`16×16/dim128`。
 - 算法顺序：每个PE含FP16工作寄存器`reg`和FP32 `score_acc`；先执行`dim/D`轮QK累加，完整S后softmax，再执行`dim/D`轮PV。
-- 当前第一优先级：拆分本体已在commit`2c94ef1`通过4×4/16的CSim+CSynth回归（指标与拆分前逐项相同，加载内联未回退），交接文档第11节要求的"先验证拆分"已完成；下一步是按交接文档第8节把巨型`runPeArray`重构为层次化PE bank，并用16×16/128 CSynth确认流水恢复目标II。
+- 当前第一优先级：**4×4/16已在commit`cf11987`冻结**（CSim+CSynth+RTL CoSim全通过，7.300ns、DSP40、II 5/5/1/1）。16×16/128的**根因已确证**：单拍流水体内被完全展开64个`peMacUnit`，Vitis报`SCHED 204-65 control-flow is too complicated`；已排除"bank分组""多周期间隔""固定规模节点数组"三种做法。下一步按第15节的架构调研方向改阵列形态（`D×P`矩形+行尾归约树，或回到systolic/streaming形态），并按V0→V5消融序列先做C综合定位。
 
 ## 2 硬约束
 
@@ -21,6 +21,7 @@
 - 不恢复已造成RTL错误的`pe_pipeline/cmp_pipeline inter false`；不恢复Accumulator反馈DATAFLOW环或单actor写多个有限DMA请求FIFO。
 - 不更改时钟、器件、接口或阵列参数来掩盖综合失败。
 - 当前NM37/Vitis HLS 2024.2/7事务testbench下，16×16 RTL CoSim从`## run all`开始的正常墙钟区间为15至45分钟，60分钟为硬超时；超过60分钟未完成7/7和C post-check即停止并判性能/可验证性不合格。连续20分钟无任何进度变化可提前超时。
+- 远端测试的唯一标准入口是仓库根目录`./run_hls.sh fsa_stream_split_d`；16×16只用`FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128`切换参数。未经用户明确要求，不得创建wrapper、替代Tcl、自建testbench或其他测试脚本。
 - 上一轮远端闭环已结束。后续智能体不得沿用旧授权继续推送或测试；开始新一轮前以用户最新授权的轮数和范围为准，每轮结束必须暂停汇报，提前全部合格则提前结束。
 - 没有读取对应新build前，不得声称实例数、DSP、II、时序、CoSim或死锁问题已经解决。
 - 只维护仓库根目录的`PROJECT_CONTEXT.md`；`docs/`目录中的同名文件为历史快照，停止更新。
@@ -30,6 +31,8 @@
 ## 3 当前状态
 
 ### 3.1 Split-D当前候选
+
+**4×4/16已冻结（2026-09-30）：**被测commit`cf1198715c087f274f738ae283a0b6d529e3e5cf`（PE阵列按bank分组、bank内用固定规模一维节点数组）。规范命令`./run_hls.sh fsa_stream_split_d`完整流程通过：CSim PASS、CSynth顶层**7.300ns**、BRAM8/**DSP40**/FF31486/LUT125477、`runPeArray`与`peBankMacUnit`均Final II=1、QK/ROW_SUM achieved5/target5、PWL/PV achieved1/target1、无`too complicated`、RTL CoSim **9/9 PASS**且C post-check通过。相对旧基线FF/LUT各增约1.7k/0.8k（来自bank节点寄存器），时序、DSP与II均未回退。
 
 **最近一次有结果的build：**2026-09-29 10:44的Q/K内联候选，被测commit为`83b9b51585cbc3ed4002f596b2c437a8afae8523`。4×4/16的CSim、CSynth和RTL CoSim全部通过；CoSim完成9/9且C post-check通过。
 
@@ -220,3 +223,93 @@ Q/K/V AXI
 - 终止条件：验收全部通过、达到用户设定最大轮数、出现阻塞、或需要用户作出新的设计决定；每轮结束都暂停并向用户汇报。
 - 第6步的联网搜索已纳入该skill的站立授权，不必每轮单独询问。
 - 与本文件第2节一致：未授权轮数时不得自行无限重测；上一轮闭环已结束，**当前仍未获得新的远端授权**。
+
+## 14 服务器测试的官方协议（2026-09-29用户规定）
+
+- **只允许仓库自带入口，且只有这两条命令**：4×4/16用`./run_hls.sh fsa_stream_split_d`；16×16/128用`FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 ./run_hls.sh fsa_stream_split_d`。
+- **禁止自定义测试脚本、wrapper、替代Tcl、临时testbench**；禁止改`run_hls.sh`或`hls/fsa_stream_split_d/run_hls.tcl`的流程来跳过CSim、CSynth或CoSim，也不得用收窄测试范围的方式规避某一步。
+- 运行前用Bash加载`~/.bashrc`（远端该文件source AMD/Xilinx 2024.2的`settings64.sh`，**只有交互式bash才读**），并确认服务器拉取的是本轮**精确commit**。
+- 只读命令（`grep`/`rg`/`sed`/`find`）可以读build与报告，但不得用来生成替代流程。
+- 服务器上既有的无关未跟踪文件（`evidence/`、`logs/`、`vitis_hls.log`、`vivado*`）不得删除或修改。
+- **CoSim墙钟门槛**：从xsim输出`## run all`开始计时，到7/7事务、RTL仿真退出和C post-check结束为止。15–45分钟为正常；45–60分钟为警告但仍继续等待；超过60分钟仍未完成7/7与C post-check即**立即中断**，判定CoSim超时、性能/可验证性不合格；连续20分钟无任何事务或内部进度变化可提前按超时处理。
+- 超时后必须保存并报告当前build证据：已完成事务数、最后进度、是否出现deadlock、C post-check是否执行；数据只能标为**未验收**，不得写成通过，也不得写成数值失败。
+- 2026-09-29违反与纠正记录：本轮迭代中我曾用临时Tcl（`set RUN_COSIM 0`）收窄范围，并写过多个自定义启动/轮询脚本与`#ifdef`诊断打印。这些做法已被上述协议取代，**不得再用**；远端工作树与`build/`事后已恢复干净。
+
+## 15 16×16失败的根因证据与架构调研方向（2026-09-30）
+
+### 15.0 最新进展：结构性阻塞已解除，但数值仍未通过（2026-09-30 02:30）
+
+**已解阻塞**：移除 bank 循环上的 `#pragma HLS UNROLL` 后（commit `ccc0f6a`），16×16 的 `runPeArray` 不再报 `SCHED 204-65`，CSynth 由"≥100分钟未完成"降到 **26分50秒**，顶层估算仍 **7.300ns**，RTL CoSim **跑满 7/7 事务**（此前 4/7 即卡）。`runPeArray` 的 Final II=5（4×4 为 1），QK/ROW_SUM 循环 Final II=**9**（目标 5，未达标）。16×16 资源：BRAM8、**DSP160**、FF**164470**、LUT**545729**。
+
+**当前失败点**：CoSim 的 C post-check 失败，7个用例中4个超差：
+
+| 用例 | L | max_error |
+|---|---|---|
+| single-key-first | 1 | 通过 |
+| two-key-ones-v | 2 | 通过 |
+| two-key-basis-v | 2 | 0.144584（输出2/3、1/3 vs 期望0.522083、0.477917） |
+| two-key-basis-v-last-feature | 2 | 0.144584（同上） |
+| primary-noncausal | 5 | 0.427467（max_at=[0][103]） |
+| primary-causal | 5 | 0.216993（max_at=[3][8]） |
+| full-tile | 16 | 通过 |
+
+**4×4仍全部通过**：`ccc0f6a`（rolled bank）4×4 CSynth 2分54秒、7.300ns、CoSim 9/9 PASS。
+
+**已排除的假设**：把 bank 粒度临时改成2行（commit `2f568aa`）或**1行**（`2b67966`，使4×4的bank循环也迭代4次），4×4 都**完整通过**（CSim+CSynth+RTL CoSim 9/9）。因此"rolled bank 循环次数/对共享`computed`的写冒险"**不是**根因——故障**只在 `PE_DIM=16` 出现**，属于规模相关的RTL语义差异。
+
+**收敛线索**：16×16下失败的4个用例集中在**部分tile**（L=2双key、L=5非因果/因果），而 L=1 单key与 **L=16 整tile**都通过；`two-key-*` 在评分阵列版本(`c8db70c`)也曾失败。部分tile路径（`score_valid`掩码与尾处理）与整tile/MACC规模都值得优先检查。
+
+**下一步的两个候选修法**（尚未验证，每次16×16约45分钟）：
+1. 去掉 `runPeArray` 内跨迭代共享的 `computed` 中间数组，让 bank 结果直接写入 `result` 的对应行，消除"部分写入即被读走"的可能；
+2. 去掉 `runPeArray` 上的 `PIPELINE` 声明（或把 `PE_ARRAY_II` 提到 ≥ 其实际时延），避免调用者循环（QK II=5 / PV II=1）与函数流水重叠，从而在共享 `pe`/`result` 数组上产生调用间冒险。
+
+### 15.1 已确证的直接证据
+
+16×16（`PE_DIM=16`）在CSynth调度阶段失败，Vitis原文（4×4下同一告警出现0次）：
+
+```text
+INFO:    [SCHED 204-11] Starting scheduling ...
+WARNING: [SCHED 204-65] Unable to satisfy pipeline directive for function 'runPeArray':
+         control-flow is too complicated to be pipelined.
+INFO:    [HLS 214-131] Inlining function 'fsa::peMacUnit(half, half, float, bool)' into 'runPeArray'
+```
+
+**根因判定（2026-09-30更正）：不是"MAC数量"。** 早期`ecdc987`/`c8db70c`的日志里出现过`Unrolling ... factor of 4 / 4 / 16`（那是`PE_BANK_ROWS=4`时的64个MAC），但`cf11987`已把bank改成`PE_DIM<=4 ? PE_DIM : 1`，D=16时是**1 bank × 16个`peMacUnit`**。然而D=16失败、D=4（同样16个MAC、单bank16个PE）却通过并达到7.300ns——**所以16个MAC本身没问题**。
+
+质变在于**跨函数边界的数组规模**：`pe`/`operand_b`/`operand_c`/`result`/`computed`都是`PE_DIM×PE_DIM`，D=16时元素数是D=4的16倍，`complete dim=0`分区后展开为数千个独立信号与选择器。这与UG1399中"This issue is typically caused by arrays"一致。
+
+**待补的直接证据**：用一次16×16 CSynth的RTL层次/端口宽度报告确认上述端口规模的量级。
+
+已排除的做法（都试过且无效）：
+- 在`runPeArray`内部按行bank分组（`ecdc987`）——4×4下CSim直接功能失败（输出全0），因为独立bank函数用一维数组形参；改为行基址分组后4×4恢复（`c6a222a`）。
+- 给`runPeArray`声明多周期流水间隔（`PIPELINE II=5`，`fd7cd12`）——16×16仍报同样的`204-65`；且固定5拍会让4×4回退（顶层7.434ns、QK/ROW_SUM II退化到10、PWL/PV退化到5），故必须按规模自适应。
+- 用固定规模一维"节点数组"让整个`D×D`阵列不跨函数边界（`cf11987`）——4×4通过并冻结，但16×16仍报`204-65`。
+- **bank循环带`#pragma HLS UNROLL`**——这是关键教训：bank循环被展开后，所有bank又合成同一个巨型单拍体，等于没有拆分。此前所有"bank分组"尝试都犯了这个错。
+
+### 15.2 架构调研结论（文献调研，未改代码）
+
+设计律：**并行的维度应当是互相独立的query行；归约的维度应当是同一行内的key/head元素。** 方阵把"query行"和"key列"都放到物理维度上，导致row-max/row-sum必须跨物理PE边界，控制流与数据依赖交织。
+
+- 文献直接支持：SWAT(DAC'24)批评SALO的方阵——"the systolic array's square structure requires square tiling ... This tiling is suboptimal for row-wise SoftMax operations"（[SWAT](https://ar5iv.labs.arxiv.org/html/2405.17025)）。
+- 推荐方向（置信度medium）：把`D×D`方阵改成**`D×P`矩形阵列，P沿head维铺开**，归约移到**行尾小归约树**；每个PE退化为"1个fp16操作数寄存器 + 1个fp32累加器 + 纯MAC内循环"，无分支、无跨PE依赖。`D=16,P=16`仍是256 PE，head=16时一周期出完整点积，head=128时变成`HD/P=8`次串行累加进同一累加器，**开销不随D平方增长**。
+- 阵列尺寸可由外部位宽反推的官方经验：Vitis BLAS L2 GEMM"the size is set according the external memory datawidth"，512-bit接口对应16×16（[AMD Vitis BLAS](https://xilinx.github.io/Vitis_Libraries/blas/2022.1/user_guide/L2/L2_gemm_content.html)）。
+- 单阵列复用有先例：SALO在同一32×32阵列内跑完QK→exp→行求和→归一化→PV，每PE只有1个MAC+1个累加寄存器，QK用output-stationary、PV用weight-stationary（[SALO](https://ar5iv.labs.arxiv.org/html/2206.14550)）。
+- 不建议把split-K/flash-decoding作为主要手段：它解决GPU上SM填不满的并行度问题，单FPGA单阵列动机不成立，且引入partial `(m,l,O)`合并与浮点累加顺序不确定。
+- 另一条与本项目生产基线一致的思路：回到**systolic/streaming**形态（`fsa_stream`的R×C阵列+C个CMP+单C-lane Accumulator已通过完整CoSim），让数据按拍流过阵列，而不是"单拍调度整个阵列"。
+
+### 15.3 下一步的最低成本验证（先C综合，7.300ns不变）
+
+**按修正后的根因，优先级改为：**
+
+- **B（先做，改动最小）**：让`runPeArray`里的**bank循环真正成为流水迭代维度**——即去掉bank循环上的`#pragma HLS UNROLL`，使每拍只调度一个bank。这与已失败的"行bank分组"有本质区别：之前bank循环仍被`UNROLL`，16个bank又合成同一个巨型单拍体。D=16时若`PE_BANK_ROWS=1`则每拍1个bank、bank内16个PE；需检查RTL实例数确认工具没有把bank函数outline成多份（那会违反单阵列约束）。
+- **A（medium-high，与B可叠加）**：把`runPeArray`改成"每PE每拍做固定小事的紧凑循环流水"——流水体内只有读数组 + 1次fp16×fp16→fp32 MAC + 写数组，无分支、无内层循环，PE状态仍是唯一那份。注意QK要II≤5则每拍MAC数需≥52（256/5），因此风险回到**时序**：7.300ns由256 PE的门级深度与布线决定，不会因为改结构自动变松。
+- **C（medium，必须叠加A/B）**：`D×P`矩形阵列 + 行尾归约树（见15.2）。单独做矩形化不能保证消除204-65；SALO是ASIC实现，HLS可流水性无证据。
+- **E（退路，高置信）**：退回`fsa_stream`的streaming/systolic形态（已完整CoSim通过，且与官方库同形），代价是放弃"每PE一个`score_acc`"的结构。
+
+**消融序列（定位"锅在数组规模还是在softmax"）：** V0单PE纯MAC → V1只有QK的阵列（无softmax）→ V2加行尾row-max树 → V3加online rescale + exp2 → V4加PV复用同阵列 → V5全kernel+DMA。V1与V3的对比是关键判据。另需从综合报告的层次/实例数确认阵列没有被隐式复制。
+
+风险提示：PV要求V以转置顺序流入，可能BRAM端口爆炸；QK需把`K[j][d*P+p]`广播给整行，实质需要P个读端口；fp32累加路径能否打7.300ns只能靠综合报告确认。
+
+**官方证据链（HLS侧调研确认）：** UG902 Code Style指出"When a loop or function is pipelined, ... unrolls all loops in the hierarchy below"，且"If there is a loop with variable bounds in this hierarchy, it prevents pipelining"；UG1399中"This issue is typically caused by arrays"。公开的≥256 PE Vitis HLS 2D阵列实现**没有**找到先例（spcl/gemm_hls用1D PE链+`Stream<>`+DATAFLOW，ViT-Accelerator用逐拍位移的16×16，AutoSA用tiling factor+strip-mine）。
+
+未获取的证据：`204-65`无官方条目；`hls-guidance/200-880`与AMD社区帖正文均只拿到标题；FARE（ACM/SIGDA FPGA 2026，DOI 10.1145/3748173.3779572）全文因403未读到，未对其做任何事实陈述。
