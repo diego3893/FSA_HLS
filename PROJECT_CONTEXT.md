@@ -251,6 +251,30 @@ Q/K/V AXI
 
 ## 15 16×16失败的根因证据与架构调研方向（2026-09-30）
 
+### 15.000 P1 结果：依赖搬家不足以解决 II（2026-09-30 13:30）
+
+P1 把 QK 与 ROW_SUM 的内层累加搬入 `runPeAccumulateTile` / `runPeRowSum`（commit `f9f0638`），让控制器每 tile 只调用一次、内部数组每迭代私有。**实测结果**：
+
+| 配置 | 顶层估算 | II | 200-880 | 200-875 | CoSim |
+|---|---|---|---|---|---|
+| 4×4（`f9f0638`） | 7.893ns（与P0相同） | 5/5/1/1 | 0 | 0 | 9/9 PASS |
+| 16×16（`f9f0638`） | 见下轮实测 | 仍为 **8**（目标5） | **4** | **8** | 见下轮实测 |
+
+**关键发现：两条违例现在物理上不可满足。** 归属已从控制器搬进新函数内部（改动范围变小）：
+
+```text
+[200-880] in module 'runPeAccumulateTile' (loop VITIS_LOOP_175_1_176_2):
+  carried dependence (II=5, distance=1) store 'operand_c_write_ln196' -> load 'operand_c_load_1'
+[200-880] in module 'runPeRowSum' (loop VITIS_LOOP_231_1):
+  carried dependence (II=5, distance=1) store 'row_sum_write_ln255' -> load 'row_sum_load_1'
+[200-875] II = 6/7 infeasible due to multiple pipeline iteration latency = 8
+  and incompatible II = 5 of 'call' operation to 'runPeArray' (split_d_compute.cpp:200)
+```
+
+即：**只要流水体内还有一次需要 8 拍完成的 `runPeArray` 调用，II=5 就不可能达成**——工具明确说明 II=6/7 与"调用不可重叠"矛盾。P1 的"搬家"策略因此被证伪（对 II 而言），但它把改动范围收敛到了两个函数的内部，**对 P3 是有利的**。
+
+**P3 的设计因此更明确**：必须让 `runPeArray` 的**迭代延迟 ≤ 5 拍**（当前 8 拍），或者把该调用从流水体内消除。已在做的最低成本切入点是：在一次 `runPeArray` 求值内完成全部 `DIM_BLOCKS` 轮累加（把块循环移入函数），使 `runPeArray` 每 tile 只被调用一次。
+
 ### 15.00 当前最佳状态与唯一剩余差距（2026-09-30 12:50，含P0复测）
 
 **数据已经全对，两档都通过CoSim；唯一不合格项是时序（两档都是）。**
