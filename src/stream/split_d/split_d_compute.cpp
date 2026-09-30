@@ -101,13 +101,15 @@ namespace detail{
         #pragma HLS ARRAY_PARTITION variable=operand_c complete dim=0
         #pragma HLS ARRAY_PARTITION variable=result complete dim=0
 
-        PeMacUnitOutput computed[PE_DIM][PE_DIM];
-        #pragma HLS ARRAY_PARTITION variable=computed complete dim=0
-
         for(int bank=0; bank<PE_DIM; bank+=PE_BANK_ROWS){
             // 这里刻意不写UNROLL：bank循环必须是流水的迭代维度，每拍只调度
             // 一个bank。若把它展开，所有bank又会合成同一个巨型单拍体，
             // 等于没有拆分——这是此前多次"bank分组"尝试失败的原因。
+            //
+            // bank结果直接写入result的对应行，不再经过跨迭代共享的中间数组：
+            // 官方示例明确说明，未声明依赖时工具会假设存在跨迭代依赖并以更大的
+            // II 保守调度（Vitis Accel Examples "Loop Dependency Inter"），
+            // 去掉共享中间数组可同时避免保守调度和"部分写入被读走"的竞态。
             PeState node_pe[PE_BANK_NODES];
             elem_t node_b[PE_BANK_NODES];
             acc_t node_c[PE_BANK_NODES];
@@ -128,11 +130,11 @@ namespace detail{
             peBankMacUnit(node_pe, node_b, node_c, exp2_mode, node_result);
             for(int offset=0; offset<PE_BANK_NODES; ++offset){
                 #pragma HLS UNROLL
-                computed[bank+offset/PE_DIM][offset%PE_DIM] =
-                    node_result[offset];
+                const int row = bank+offset/PE_DIM;
+                const int col = offset%PE_DIM;
+                result[row][col] = node_result[offset];
             }
         }
-        stagePeArrayResult(computed, result);
     }
 
     void runAccumulatorColumns(
