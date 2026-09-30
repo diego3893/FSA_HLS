@@ -114,10 +114,12 @@ namespace detail{
             elem_t node_b[PE_BANK_NODES];
             acc_t node_c[PE_BANK_NODES];
             PeMacUnitOutput node_result[PE_BANK_NODES];
+            PeMacUnitOutput node_staged[PE_BANK_NODES];
             #pragma HLS ARRAY_PARTITION variable=node_pe complete dim=1
             #pragma HLS ARRAY_PARTITION variable=node_b complete dim=1
             #pragma HLS ARRAY_PARTITION variable=node_c complete dim=1
             #pragma HLS ARRAY_PARTITION variable=node_result complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=node_staged complete dim=1
 
             for(int offset=0; offset<PE_BANK_NODES; ++offset){
                 #pragma HLS UNROLL
@@ -128,11 +130,18 @@ namespace detail{
                 node_c[offset] = operand_c[row][col];
             }
             peBankMacUnit(node_pe, node_b, node_c, exp2_mode, node_result);
+            // bank结果先经过本bank自己的寄存级再写入result：该寄存级与
+            // stagePeArrayResult等价（切断调用返回的组合写回路径），但它只
+            // 属于本次迭代，因此既不产生跨迭代共享数组，也不引入假依赖。
+            for(int offset=0; offset<PE_BANK_NODES; ++offset){
+                #pragma HLS UNROLL
+                node_staged[offset] = node_result[offset];
+            }
             for(int offset=0; offset<PE_BANK_NODES; ++offset){
                 #pragma HLS UNROLL
                 const int row = bank+offset/PE_DIM;
                 const int col = offset%PE_DIM;
-                result[row][col] = node_result[offset];
+                result[row][col] = node_staged[offset];
             }
         }
     }
