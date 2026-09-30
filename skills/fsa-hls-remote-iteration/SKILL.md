@@ -37,6 +37,16 @@ Use an SSH host alias with key-based authentication. Every remote SSH command or
 
 For repository-specific commands, module names, parameters, artifacts, and test selection, read [references/fsa-hls-workflow.md](references/fsa-hls-workflow.md). For the required per-invocation record, read and follow [references/iteration-log-template.md](references/iteration-log-template.md).
 
+## Never build a custom test harness
+
+Test only through the repository's own entry points. Do not write or use custom test scripts, wrappers, substitute Tcl files, or temporary testbenches, and never edit `run_hls.sh` or `hls/<module>/run_hls.tcl` to change which stages run or to skip a stage.
+
+- For `fsa_stream_split_d`, the only permitted commands are `./run_hls.sh fsa_stream_split_d` for 4×4/16 and `FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 ./run_hls.sh fsa_stream_split_d` for 16×16/128.
+- Narrowing a round's scope by disabling C simulation, C synthesis, or co-simulation is not allowed.
+- Read-only inspection with `grep`, `rg`, `sed`, `find` and similar is allowed for build artifacts and reports; it must not become an alternative flow.
+- Launching the job through an SSH command line (for example inside `tmux`) is fine, because the command that actually runs is still `./run_hls.sh <module>`.
+- Do not delete or modify unrelated pre-existing untracked files on the server.
+
 ## Use standing authorization for the invocation
 
 Invoking this skill with the target repository, branch, SSH host/path, acceptance criteria, and test scope grants standing user authorization for the full in-scope iteration loop. Do not ask the user again before:
@@ -117,6 +127,8 @@ After `.bashrc` is loaded, initialize any additional remote toolchain environmen
 ## Read and judge the remote result
 
 Read all remote data needed for the agreed validation level — not just the last terminal line. Immediately update the round's log entry with results, evidence, diagnosis, acceptance status, resolved problems, remaining problems, and the next intended modification. Read the actual failing log or report and identify the narrowest supported cause. Do not respond by relaxing golden outputs, tolerances, device, clock, uncertainty, array size, interface, or required validation stage unless the user changes the acceptance contract.
+
+For a co-simulation round, time the RTL phase from the xsim `## run all` line to the completion of every transaction and the C post-check: 15–45 minutes is normal, 45–60 minutes is a warning window that still waits, and past 60 minutes without 7/7 and the C post-check is an immediate stop judged as a co-simulation timeout. Twenty consecutive minutes without transaction or intra-transaction progress is an early timeout. On a timeout, save and report the completed transaction count, the last progress, whether a deadlock report exists, and whether the C post-check ran; mark the data 未验收 — never passed, and never a numerical failure.
 
 If the round fails acceptance, search the web for a solution before changing code: look for tool documentation, vendor guidance, or comparable reported problems; record what was searched, what was found, the source links, and how the external evidence combines with the local report to support the next change. Prefer primary tool documentation over forum guesswork and state clearly when the search produced no usable evidence.
 

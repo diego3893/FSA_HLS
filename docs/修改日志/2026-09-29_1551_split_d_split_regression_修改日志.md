@@ -53,6 +53,8 @@
 |---:|---|---|---|---|---|
 | 1 | `2c94ef1` | 推送交接前的纯文件拆分，不改算法 | 结构检查通过；本地无法编译 | 4×4/16 CSim PASS、CSynth PASS（约6分47秒） | 通过（本轮范围，CoSim未执行） |
 | 2 | `7eb300e` | 仅提交skills与交接文档；随后编写PE bank重构 | 结构检查 | 4×4/16完整流程含CoSim：**PASS**（9/9，C post-check PASS） | 4×4全通过；PE候选待测 |
+| 3a | `ecdc987` | 独立bank函数`peBankMacUnit`+一维数组形参 | 结构检查 | 4×4/16 CSim **FAIL**（8用例全0） | 不通过；已回退该实现 |
+| 3b | `c6a222a` | 改为`runPeArray`内部行基址分组，操作数不跨函数 | 结构检查 | 4×4/16 CSim+CSynth+CoSim 全部PASS | 4×4通过；16×16进行中 |
 
 ## 5. 逐轮记录
 
@@ -147,6 +149,40 @@
 - 4×4完整验收：**已通过**（CSim+CSynth+CoSim）。
 - PE bank重构：已写完，**尚未经过任何Vitis编译或综合**；4×4不回退与16×16能否流水恢复目标II都待远端验证。
 - 本轮闭环状态：进行中（PE候选尚未推送与测试）。
+
+### 第3轮：PE bank重构（两次尝试）
+
+#### 用户新规定的服务器测试协议（本轮起强制执行）
+
+- 只允许仓库自带入口：4×4/16用`./run_hls.sh fsa_stream_split_d`；16×16/128用`FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 ./run_hls.sh fsa_stream_split_d`。
+- **禁止**自定义测试脚本、wrapper、替代Tcl、临时testbench，禁止改流程跳过任何阶段。
+- 只读命令可读build与报告；CoSim墙钟从`## run all`起算，15–45分钟正常，45–60分钟警告但继续等，>60分钟未完成7/7与C post-check立即中断判超时，连续20分钟无进度可提前按超时；超时数据只能标"未验收"。
+
+#### 尝试1：独立bank函数（commit`ecdc987`）——失败
+
+- 做法：新增`peBankMacUnit`处理`PE_BANK_DIM`个PE（行内`UNROLL`、自身`II=1 style=stp`、一维数组形参完全分区），`runPeArray`按bank调用它。
+- 结果：按规范命令跑4×4，**CSim失败**：8个用例全部`actual=0`（输出全0），48.72秒退出。
+- 诊断（经用户允许的诊断打印，且用base64同步到远端测试克隆，未进入仓库）：`runPeArray`写出的`result[0][0]`数值正确、QK累加正确、PWL后`reg[0][0]=1.0`，但ROW_SUM处`row_sum[0]=0`。
+- A/B判定：把`split_d_compute.cpp`换回bank之前的版本（同一诊断控制器），CSim立即PASS（`sum[0]=1.000000`、`normalized[0][0]=-0.226318`）。因此缺陷确定在bank实现本身。
+- 已排除："bank函数内局部累积再拷出"仍全0，说明不是引用写回问题；仍是"独立函数 + 一维数组形参"这条路本身。
+
+#### 尝试2：行基址分组（commit`c6a222a`）——4×4通过
+
+- 做法：删除`peBankMacUnit`及其一维数组形参，改为在`runPeArray`内部按行基址分组：外层bank循环(`bank += PE_BANK_ROWS`)，内层`offset`展开`PE_BANK_DIM`行，`row = bank+offset`，行列均`UNROLL`，保持`complete dim=0`分区与原有`computed → stagePeArrayResult → result`写回路径。操作数数组不再跨函数边界。
+- 4×4/16远端结果（被测commit`c6a222a`，规范命令`./run_hls.sh fsa_stream_split_d`，19:08:35–19:15 左右）：
+  - CSim `[PASS] fsa_stream_split_d: PE=4x4 HEAD_DIM=16 DIM_BLOCKS=4`
+  - CSynth：顶层Target 10.00ns / Estimated **7.300ns** / Uncertainty 2.70ns；BRAM **8**、DSP **40**、FF **29732**、LUT **124651**（与基线逐项相同）
+  - `runPeArray`：DSP16、latency4、II1、7.054ns；`runAccumulatorColumns`：DSP8、latency7、II1、7.299ns
+  - 循环II：QK(`168_6_169_7`) achieved 5/target 5；ROW_SUM(`364_33`) achieved 5/target 5；PWL(`321_26`) achieved 1/target 1；PV(`408_38`) achieved 1/target 1
+  - RTL CoSim：**PASS**，9/9事务，无deadlock、无Bad TV；Verilog `Status: Pass`，Latency min55/avg2369/max8028，Interval min770/avg2648/max8018，总21243 cycles；C post-check已执行并通过
+- 结论：4×4/16的数据、硬件结构与时序**全部通过且无回退**。
+- 16×16/128：已按规范命令启动（同一commit`c6a222a`），结果待记录。
+
+#### 本轮状态
+
+- 4×4/16：**通过**（CSim+CSynth+RTL CoSim，指标与基线相同）。
+- 16×16/128：进行中。
+- 本轮闭环状态：进行中。
 
 ## 6. 第1次调用结束总结（2026-09-29 16:20）
 

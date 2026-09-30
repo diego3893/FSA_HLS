@@ -69,6 +69,10 @@ FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 \
 ./run_hls.sh fsa_stream_split_d
 ```
 
+以上`run_hls.sh`是服务器测试的唯一标准入口。除非用户明确要求，不得在服务器新建wrapper脚本、替代Tcl、独立编译脚本、自建testbench或其他临时自动化脚本来绕过该入口。4×4直接运行默认命令；16×16只通过上述两个环境变量切换参数。
+
+60分钟CoSim门槛由智能体读取同一终端输出并从`## run all`开始计时；到时直接向正在运行的标准命令发送中断并保存现有build和日志，不要为了实现计时再生成脚本。读取报告可以使用`rg`、`grep`、`sed`、`find`等只读命令，但这些命令不能重新编译或替代`run_hls.sh`。
+
 服务器环境：
 
 - SSH别名：`FSA-FPGA-NM37-tailBox`
@@ -235,6 +239,7 @@ FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 \
 - 遇到HLS错误先读取完整report、日志和生成层次，再修改源码；不要根据单条警告盲目加pragma。
 - 远端已有未跟踪`evidence/`、`logs/`和Vivado日志，不在本任务范围，不得删除。
 - 未经用户新授权，不要无限迭代、推送或占用服务器进行数小时重测。
+- 服务器测试只允许直接执行仓库根目录的`./run_hls.sh fsa_stream_split_d`；参数只能通过已有环境变量传入。未经用户明确要求，不得创建任何测试wrapper、替代Tcl或临时testbench。
 
 ### 10.1 单轮迭代闭环
 
@@ -244,7 +249,7 @@ FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 \
 2. 本地修改并完成静态检查或可用的本地测试。
 3. 只提交本轮任务文件，记录commit并推送。
 4. 远端使用Bash加载`~/.bashrc`，确认工作树后fast-forward到精确commit。
-5. 按第9节顺序测试；触发第4.4节超时门槛时立即停止。
+5. 直接运行`./run_hls.sh fsa_stream_split_d`，按第9节顺序测试；触发第4.4节超时门槛时中断该命令。不得另写脚本执行本步骤。
 6. 读取新build的结构、资源、II、时序和数据证据，不能只看终端最后一行。
 7. 更新本次调用的修改日志和根目录`PROJECT_CONTEXT.md`。
 8. 每完成一轮暂停并向用户汇报；只有仍在用户授权的轮数内且用户要求继续时，才进入下一轮。

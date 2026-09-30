@@ -35,22 +35,47 @@ From the remote repository root, run:
 
 Supported names in the current `run_hls.sh` are `pe`, `pe_raw_fma`, `fp32_raw_fma`, `cmp`, `input_delayer`, `output_delayer`, `sa`, `delayer_sa`, `accumulator`, `accumulator_pipeline`, `fsa_core`, `fsa_core_execute`, `fsa_core_request`, `fsa_dma`, `fsa_stream`, `fsa_stream_split_d`, `fsa_streaming_v2`, `fsa_core_full`, and `sram` (`sram` maps to the `banked_sram` directory; `banked_sram` is accepted as an alias). `fsa_stream_request` and `fsa_streaming_dataflow` are **not** supported names. Re-read the live script before use, because this list has changed before.
 
-The current split-D module takes its parameters only through Tcl environment checks:
+The current split-D module takes its parameters only through Tcl environment checks. These are the only permitted invocations:
 
 ```bash
-FSA_SPLIT_D_PE_DIM=4 FSA_SPLIT_D_HEAD_DIM=16 ./run_hls.sh fsa_stream_split_d
-
-FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 \
+# 4x4 / HEAD_DIM=16
 ./run_hls.sh fsa_stream_split_d
+
+# 16x16 / HEAD_DIM=128
+FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 ./run_hls.sh fsa_stream_split_d
 ```
 
 `FSA_MAX_SEQUENCE_LENGTH` is the third honored variable. `RUN_CSIM`, `RUN_COSIM`, and `EXPORT_IP` are **not** environment-overridable in this module: `hls/fsa_stream_split_d/run_hls.tcl` sets them directly (`RUN_CSIM 1`, `RUN_COSIM 1`, `EXPORT_IP 0`). The same is true of `fsa_stream`. Only inspect a module's Tcl to decide what it honors; never pass a variable that its Tcl ignores and then treat that as a scoped test.
 
-Because co-simulation is on by default for this module, a round that should stop after C simulation and C synthesis must change the stage switches in the Tcl. That changes the tested artifact and must be included in the reviewed task diff and reported as part of the round's test scope. Scope the change to an environment-guarded temporary Tcl so that the repository default stays `RUN_COSIM 1`, and remove the temporary files after the run.
+### Do not build custom test harnesses
 
-Regenerating a Vitis CSim testbench also needs Vitis's `ap_int.h` and `ap_fixed.h` for the testbench's include path. If those are not already present in the repository, extract them from the installed Vitis headers into a temporary path and remove that path afterwards; never commit a copy of vendor headers.
+The user prohibits custom test scripts, wrappers, substitute Tcl files, and temporary testbenches. This means:
+
+- run the repository entry point exactly as listed above; never copy or edit `run_hls.tcl` to change which stages run, and never introduce a `RUN_COSIM 0`/`RUN_CSIM 0` variant;
+- do not narrow a round's scope by disabling a stage; if a round should stop after C simulation and C synthesis, that follows from the repository default only, never from editing the flow;
+- `grep`, `rg`, `sed`, `find` and similar read-only commands are allowed to read build artifacts and reports; they must not be used to generate an alternative flow;
+- launching the job through an SSH command line (for example inside `tmux`) is fine, because the command that actually runs is still `./run_hls.sh <module>`.
+
+Regenerating a Vitis CSim testbench also needs Vitis's `ap_int.h` and `ap_fixed.h` for the testbench's include path. In the normal remote environment these resolve from the Vitis installation via `~/.bashrc`; do not copy vendor headers into the repository.
 
 A run of `run_hls.sh` removes that module's previous `hls/<module>/<module>_build` directory and ZIP and replaces them with the new results, and fails with "HLS完成后没有找到构建目录" when `hls/<module>/build` does not exist. Only run it in the designated remote test clone, never in a directory holding the sole copy of valuable uncommitted build evidence.
+
+### Environment loading
+
+The remote `~/.bashrc` sources the AMD/Xilinx 2024.2 `settings64.sh` files; it is read by **interactive** bash only. Launch through an interactive shell (`bash -ic`/`bash -is`), or source the settings explicitly inside a `tmux` session, otherwise `vitis-run`/`vitis_hls` are not on `PATH`.
+
+### Co-simulation wall-clock budget
+
+Measure from the xsim line `## run all` until all transactions finish, RTL simulation exits, and the C post-check completes. Exclude C simulation, C synthesis, Verilog compile, and `xelab`.
+
+- 15 to 45 minutes: normal.
+- 45 to 60 minutes: warning window, but keep waiting.
+- Past 60 minutes without 7/7 and the C post-check: interrupt immediately and judge the candidate as a co-simulation timeout, failing performance and verifiability.
+- No transaction or intra-transaction progress for 20 consecutive minutes: treat as an early timeout.
+
+After a timeout, save and report the build evidence: completed transaction count, last progress, whether a deadlock report exists, and whether the C post-check ran. In that state the data may only be marked 未验收 — never "passed", and never a numerical failure.
+
+Never shrink the test transaction count, disable checks, or run only C simulation to get around this budget. Recalibrate and get user confirmation before changing the threshold for a different server, tool version, or testbench.
 
 ## Safe Git and SSH sequence
 
