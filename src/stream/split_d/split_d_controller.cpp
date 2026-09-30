@@ -164,38 +164,11 @@ namespace detail{
                     }
                 }
 
-                // 外层明确保留dim/D轮；每轮依次消费D个特征。
-                for(int block=0; block<DIM_BLOCKS; ++block){
-                    for(int lane=0; lane<PE_DIM; ++lane){
-                        #pragma HLS PIPELINE II=5
-                        const int feature = block*PE_DIM+lane;
-                        for(int row=0; row<PE_DIM; ++row){
-                            #pragma HLS UNROLL
-                            for(int col=0; col<PE_DIM; ++col){
-                                #pragma HLS UNROLL
-                                pe[row][col].reg =
-                                    (unsigned)col<active_queries
-                                        ? q_tile[col][feature] : elemZero();
-                                operand_b[row][col] =
-                                    (unsigned)row<active_keys
-                                        ? k_tile[row][feature] : elemZero();
-                                operand_c[row][col] =
-                                    pe[row][col].score_acc;
-                            }
-                        }
-                        detail::runPeArray(
-                            pe, operand_b, operand_c, false, pe_result
-                        );
-                        for(int row=0; row<PE_DIM; ++row){
-                            #pragma HLS UNROLL
-                            for(int col=0; col<PE_DIM; ++col){
-                                #pragma HLS UNROLL
-                                pe[row][col].score_acc =
-                                    pe_result[row][col].out_accType;
-                            }
-                        }
-                    }
-                }
+                // QK的block/lane循环和operand准备都已移入runPeAccumulateTile，
+                // 累加值只在函数内部的PE.score_acc上传递，这里只发起一次调用。
+                detail::runPeAccumulateTile(
+                    q_tile, k_tile, active_queries, active_keys, pe
+                );
 
                 acc_t next_max[PE_DIM]{};
                 acc_t alpha[PE_DIM]{};
@@ -359,29 +332,11 @@ namespace detail{
                 }
 
                 // 使用同一PE阵列逐行累加P，得到一次ROW_SUM。
+                // row循环与operand准备已移入runPeRowSum，此处只调用一次；
+                // 该函数与QK共用同一个runPeArray调用点，不复制阵列。
                 acc_t row_sum[PE_DIM]{};
                 #pragma HLS ARRAY_PARTITION variable=row_sum complete dim=1
-                for(int row=0; row<PE_DIM; ++row){
-                    #pragma HLS PIPELINE II=5
-                    detail::clearOperands(operand_b, operand_c);
-                    for(int r=0; r<PE_DIM; ++r){
-                        #pragma HLS UNROLL
-                        for(int col=0; col<PE_DIM; ++col){
-                            #pragma HLS UNROLL
-                            operand_b[r][col] = elemOne();
-                            operand_c[r][col] = r==row
-                                ? row_sum[col] : accZero();
-                        }
-                    }
-                    detail::runPeArray(
-                        pe, operand_b, operand_c, false, pe_result
-                    );
-                    for(int col=0; col<PE_DIM; ++col){
-                        #pragma HLS UNROLL
-                        row_sum[col] =
-                            pe_result[row][col].out_accType;
-                    }
-                }
+                detail::runPeRowSum(pe, row_sum);
                 detail::runAccumulatorColumns(
                     false, alpha, running_sum, row_sum, acc_result
                 );

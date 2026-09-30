@@ -146,6 +146,117 @@ namespace detail{
         }
     }
 
+    /**
+     * @brief 一个key tile的QK累加全部在本函数内完成，对外只暴露一次调用。
+     *
+     * 上一版把block/lane循环留在控制器里，每次lane迭代都跨函数边界调用
+     * runPeArray，并用控制器的共享数组operand_c传递"下一次累加值"，于是
+     * operand_c在相邻迭代之间形成store→load的跨迭代依赖，工具只能报
+     * HLS 200-880/200-875并把II压到8。这里把循环体和数组都收进函数内部：
+     * operand_b/operand_c作为本迭代私有的局部数组，只在runPeArray调用前
+     * 被写、调用中被读，跨迭代不再有共享数组；pe[][].score_acc的RAW则被
+     * 一次阵列求值（PE_ARRAY_II拍）完全吸收在流水体内。
+     *
+     * 单次runPeArray调用点仍然只有一个，因此不会为阶段复制PE阵列。
+     */
+    void runPeAccumulateTile(
+        const elem_t q_tile[PE_DIM][HEAD_DIM],
+        const elem_t k_tile[PE_DIM][HEAD_DIM],
+        unsigned active_queries,
+        unsigned active_keys,
+        PeState pe[PE_DIM][PE_DIM]
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS ARRAY_PARTITION variable=q_tile complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=k_tile complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=pe complete dim=0
+
+        // 外层明确保留dim/D轮；每轮依次消费D个特征。
+        for(int block=0; block<DIM_BLOCKS; ++block){
+            for(int lane=0; lane<PE_DIM; ++lane){
+                #pragma HLS PIPELINE II=5
+                const int feature = block*PE_DIM+lane;
+                elem_t operand_b[PE_DIM][PE_DIM];
+                acc_t operand_c[PE_DIM][PE_DIM];
+                PeMacUnitOutput pe_result[PE_DIM][PE_DIM];
+                #pragma HLS ARRAY_PARTITION variable=operand_b complete dim=0
+                #pragma HLS ARRAY_PARTITION variable=operand_c complete dim=0
+                #pragma HLS ARRAY_PARTITION variable=pe_result complete dim=0
+
+                for(int row=0; row<PE_DIM; ++row){
+                    #pragma HLS UNROLL
+                    for(int col=0; col<PE_DIM; ++col){
+                        #pragma HLS UNROLL
+                        pe[row][col].reg =
+                            (unsigned)col<active_queries
+                                ? q_tile[col][feature] : elemZero();
+                        operand_b[row][col] =
+                            (unsigned)row<active_keys
+                                ? k_tile[row][feature] : elemZero();
+                        operand_c[row][col] =
+                            pe[row][col].score_acc;
+                    }
+                }
+                runPeArray(
+                    pe, operand_b, operand_c, false, pe_result
+                );
+                for(int row=0; row<PE_DIM; ++row){
+                    #pragma HLS UNROLL
+                    for(int col=0; col<PE_DIM; ++col){
+                        #pragma HLS UNROLL
+                        pe[row][col].score_acc =
+                            pe_result[row][col].out_accType;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @brief 用同一PE阵列逐行累加P，得到一次ROW_SUM。
+     *
+     * 与runPeAccumulateTile同样把row循环和operand_b/operand_c收进函数：
+     * row_sum的跨行累加只发生在函数内部的局部数组上，runPeArray在相邻行
+     * 之间不再通过控制器的共享数组传递数据。累加顺序仍是row=0..PE_DIM-1，
+     * 每行的部分和累加到对应列，结果与逐行调用时完全一致。
+     */
+    void runPeRowSum(
+        const PeState pe[PE_DIM][PE_DIM],
+        acc_t row_sum[PE_DIM]
+    ){
+        #pragma HLS INLINE off
+        #pragma HLS ARRAY_PARTITION variable=pe complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=row_sum complete dim=1
+
+        for(int row=0; row<PE_DIM; ++row){
+            #pragma HLS PIPELINE II=5
+            elem_t operand_b[PE_DIM][PE_DIM];
+            acc_t operand_c[PE_DIM][PE_DIM];
+            PeMacUnitOutput pe_result[PE_DIM][PE_DIM];
+            #pragma HLS ARRAY_PARTITION variable=operand_b complete dim=0
+            #pragma HLS ARRAY_PARTITION variable=operand_c complete dim=0
+            #pragma HLS ARRAY_PARTITION variable=pe_result complete dim=0
+
+            for(int r=0; r<PE_DIM; ++r){
+                #pragma HLS UNROLL
+                for(int col=0; col<PE_DIM; ++col){
+                    #pragma HLS UNROLL
+                    operand_b[r][col] = elemOne();
+                    operand_c[r][col] = r==row
+                        ? row_sum[col] : accZero();
+                }
+            }
+            runPeArray(
+                pe, operand_b, operand_c, false, pe_result
+            );
+            for(int col=0; col<PE_DIM; ++col){
+                #pragma HLS UNROLL
+                row_sum[col] =
+                    pe_result[row][col].out_accType;
+            }
+        }
+    }
+
     void runAccumulatorColumns(
         const bool exp2_mode,
         const acc_t in_a[PE_DIM],
