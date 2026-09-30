@@ -101,6 +101,27 @@ ssh -o BatchMode=yes <host-alias> "bash -lc 'source ~/.bashrc || exit $?; set -e
 ssh -o BatchMode=yes <host-alias> "bash -lc 'source ~/.bashrc || exit $?; set -euo pipefail; <additional toolchain initialization and test command>'"
 ```
 
+### Polling long runs
+
+An HLS run takes minutes on the small configuration and around 45 minutes on 16×16, so it must not be driven by one long-lived SSH call. Start the run detached (so it survives the launching shell), then poll with **short, read-only SSH calls separated by local waits**:
+
+```text
+# one-time: start detached, so the job survives any dropped connection
+setsid nohup bash /tmp/<runner>.sh > /dev/null 2>&1 < /dev/null &
+
+# then, every 2-5 minutes: a short read-only check (no job restart, no log deletion)
+ps -eo pid,etimes,cmd | grep -E 'vitis_hls|xsim' | grep -v grep
+tail -n 20 /tmp/<run>.log
+grep -aE '## run all|RTL Simulation : [0-9]+ / [0-9]+|co-simulation finished' /tmp/<run>.log
+```
+
+Rules:
+
+- the launching command removes nothing and starts the job once; a poller must never `rm -f` the log or start a second run — that path previously created duplicate `vitis_hls`/`xsim` processes competing for the same build directory and left orphaned `xsim` sessions behind;
+- keep each poll short (tens of seconds). A long-lived connection is itself a failure mode: the transport can drop mid-run, and a Tailscale peer that goes offline (check `tailscale status`, which must run outside the DSH file sandbox because it uses a protected named pipe) will silently kill the session while the remote job keeps running;
+- after any connection loss, re-check the process list before touching anything: if the job is still running, only read its log;
+- a detached runner must verify the exact commit before testing and abort on mismatch; that guard previously caught a run launched before the commit had been pushed.
+
 The preflight must check `pwd`, `git rev-parse --show-toplevel`, remote URL, branch, `HEAD`, and `git status --porcelain`. Use `git pull --ff-only`; never resolve a remote merge automatically. Compare `git rev-parse HEAD` on both machines before accepting test evidence.
 
 The user has preauthorized one exact pull-conflict recovery: when the verified repository root's `run_hls.sh` is the sole file identified by the pull failure and its scoped Git status, delete exactly `<verified-repository-root>/run_hls.sh` and retry `git pull --ff-only` without requesting approval. Log the original error, scoped status, resolved deletion path, deletion, and retry result. This authorization does not cover any other file or any recursive cleanup. If the deleted file was tracked and the pull remains blocked, stop; do not add an unrequested restore, reset, checkout, stash, or clean operation.
