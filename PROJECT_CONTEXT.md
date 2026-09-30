@@ -260,11 +260,14 @@ Q/K/V AXI
 **待办**：`peBankMacUnit` 目前已无调用点（定义仍在 `split_d_compute.cpp:51`），需要在后续清理或复用；`PE_ARRAY_II` 在 16×16 仍为 5，是否改为 1 取决于 16×16 综合是否再报 `204-65`（单bank展开成巨型单拍体曾触发过该告警）。
 
 **服务器连通性阻塞（2026-09-30 13:50 起）**：
-- `ssh FSA-FPGA-NM37-tailBox` 失败，原文 `Connection timed out during banner exchange`（三次重试均如此）；
-- 别名在 `~/.ssh/config` 中为 `HostName 10.128.157.196`，实际解析到 Tailscale 地址 `100.114.138.109`；该地址与 `10.128.157.196` 的 22 端口均不可达；
-- 本机 Tailscale 服务状态为 **Running**（`tailscale status` CLI 报"failed to connect to local tailscaled"，与沙箱禁止命名管道的已知行为一致，不代表服务未运行）；
-- 外网（`github.com:443`）正常，因此不是本机断网；
-- **判断**：Tailscale 隧道或服务器侧 SSH 服务异常，属环境问题而非本轮改动引入。P3a 的 4×4 运行（`/tmp/p3a_4x4.sh`，日志 `/tmp/p3a_4x4_summary.log`）可能在服务器侧已完成或仍在跑，但**目前无法读取结果**，需等连通性恢复后按 `p3a_4x4_summary.log` 与 `build/` 报告确认。
+- `ssh FSA-FPGA-NM37-tailBox` 失败，原文 `Connection timed out during banner exchange`（多次重试均如此）；
+- **根因已确证（沙箱外只读诊断）**：别名在 `~/.ssh/config` 中为 `HostName 10.128.157.196`，实际解析到 Tailscale 地址 `100.114.138.109`；`tailscale status` 显示该地址对应主机 **`desktop-4h6raeb`，状态 `offline, last seen 1h ago`**。本机 `100.86.236.43 diego-legion` 在线，**tailnet 本身正常，是目标主机掉线**；
+- 注意：在 DSH 沙箱内跑 `tailscale status` 会报 `open \\.\pipe\ProtectedPrefix\Administrators\Tailscale\tailscaled: Access is denied` —— 这是沙箱禁止命名管道，**不代表服务或登录异常**；该诊断必须在沙箱外执行；
+- **P3a 的 4×4 运行结果仍待读取**（远端 `/tmp/p3a_4x4_summary.log`，脚本 `/tmp/p3a_4x4.sh`）；如果它当时已启动，其日志按 `p3a_4x4.sh` 的设计会完整落盘，恢复后可直接读取，不必重跑。
+
+**恢复后的第一件事（已准备好，见 `.tmprun/p3a_4x4.sh`）**：按 `p3a_4x4_summary.log` 读取 P3a 的 4×4 结果（顶层时序是否回到 7.300ns、资源、II、`200-880/875` 计数、CoSim）；若日志不完整则只重跑 4×4（约 8 分钟）。随后跑 16×16（约 45 分钟），重点看是否复发 `SCHED 204-65`（单bank展开成巨型单拍体曾触发该告警）以及 II 与迭代延迟是否改善。
+
+**已固化的长跑轮询规程（本次阻塞的副产物）**：`skills/fsa-hls-remote-iteration/references/fsa-hls-workflow.md` 新增 “Polling long runs” 小节，要求：作业只启动一次并 detached；轮询用**短只读连接**加本地等待（不得重启作业、不得删日志）；连接中断后先查进程列表再动作；runner 必须校验精确 commit 并能在不匹配时中止（本次已实际拦下一次未推送就启动的运行）。
 
 ### 15.000 P1 结果：依赖搬家不足以解决 II（2026-09-30 13:30）
 
