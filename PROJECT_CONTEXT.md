@@ -251,6 +251,21 @@ Q/K/V AXI
 
 ## 15 16×16失败的根因证据与架构调研方向（2026-09-30）
 
+### 15.0000 P3a 进行中 + 服务器连通性阻塞（2026-09-30 14:00）
+
+**P3a 改动已提交**（commit `426ff6c`）：把 `runPeArray` 的 rolled bank 循环与 node 数组整体删除，改为**整个阵列在同一个流水体内原地求值**（row/col 由 `UNROLL` 展成编译期常量）。目的有二：
+1. 消除 4×4/16×16 共同的时序根因——`result[row][col]` 的写回索引不再是循环变量，写回路径上的选择逻辑消失（对照：`cf11987` 单bank+独立寄存级 7.300ns vs rolled 形状 7.893/7.934ns）；
+2. 把一次阵列求值的延迟从 8 拍压下来，从而给 QK/ROW_SUM 的 II=5 让路（`200-875` 明确说明"迭代延迟=8 与调用不可重叠"是硬约束）。
+
+**待办**：`peBankMacUnit` 目前已无调用点（定义仍在 `split_d_compute.cpp:51`），需要在后续清理或复用；`PE_ARRAY_II` 在 16×16 仍为 5，是否改为 1 取决于 16×16 综合是否再报 `204-65`（单bank展开成巨型单拍体曾触发过该告警）。
+
+**服务器连通性阻塞（2026-09-30 13:50 起）**：
+- `ssh FSA-FPGA-NM37-tailBox` 失败，原文 `Connection timed out during banner exchange`（三次重试均如此）；
+- 别名在 `~/.ssh/config` 中为 `HostName 10.128.157.196`，实际解析到 Tailscale 地址 `100.114.138.109`；该地址与 `10.128.157.196` 的 22 端口均不可达；
+- 本机 Tailscale 服务状态为 **Running**（`tailscale status` CLI 报"failed to connect to local tailscaled"，与沙箱禁止命名管道的已知行为一致，不代表服务未运行）；
+- 外网（`github.com:443`）正常，因此不是本机断网；
+- **判断**：Tailscale 隧道或服务器侧 SSH 服务异常，属环境问题而非本轮改动引入。P3a 的 4×4 运行（`/tmp/p3a_4x4.sh`，日志 `/tmp/p3a_4x4_summary.log`）可能在服务器侧已完成或仍在跑，但**目前无法读取结果**，需等连通性恢复后按 `p3a_4x4_summary.log` 与 `build/` 报告确认。
+
 ### 15.000 P1 结果：依赖搬家不足以解决 II（2026-09-30 13:30）
 
 P1 把 QK 与 ROW_SUM 的内层累加搬入 `runPeAccumulateTile` / `runPeRowSum`（commit `f9f0638`），让控制器每 tile 只调用一次、内部数组每迭代私有。**实测结果**：
