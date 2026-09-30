@@ -200,6 +200,20 @@ Q/K/V AXI
 
 当前任务是参数化`D×D` Split-D阵列。4×4/16已在commit`83b9b515`完成CSim、CSynth和RTL CoSim 9/9全验收；Q/K/V加载错位均已修复。16×16/128的CSim和CSynth完成，单一256PE结构和7.300ns估计成立，但巨大`runPeArray`控制流无法pipeline，相关循环II失败，CoSim只完成4/7后停止。交接前的源码拆分已在commit`2c94ef1`通过4×4/16的CSim+CSynth回归，指标与拆分前逐项相同且加载内联未回退；拆分后的RTL CoSim尚未运行。下一步按层次化PE bank重构以解决16×16流水失败；详见`docs/Split-D_FSA_DeepSeek迁移交接_20260929.md`。
 
+**2026-09-30最新状态（覆盖以上）：**两档的**数据都已通过**（4×4 RTL CoSim 9/9、16×16 RTL CoSim 7/7，均含C post-check）。`SCHED 204-65`已解除（去掉bank循环的`UNROLL`），16×16数值错误已修（去掉跨bank迭代共享的`computed`数组）。**唯一未达标项是时序**：4×4估算7.893ns、16×16估算7.934ns，均超7.300ns预算；16×16的QK/ROW_SUM循环II=8、PWL/PV循环II=5（目标5/1）。根因、四组对照实验与后续阶段计划见本文档`#15.00`与`docs/Split-D后续修改计划书_20260930.md`。
+
+## 11.1 本地git推送的环境坑（2026-09-30，已修复）
+
+- **症状**：本地`git push`必然失败，报`ssh.exe: *** fatal error - couldn't create signal pipe, Win32 error 5`，在DSH的`workspace-write`沙箱下必须每次申请升级才能推送。
+- **根因**：**msys运行时**问题，不是"push要经由sh"。git默认使用的`C:\Program Files\Git\usr\bin\ssh.exe`依赖`msys-2.0.dll`，该DLL在每个msys进程启动时创建内部signal pipe，而该spawn路径不在DSH已修补DACL的范围内，因此在`workspace-write`下必然ACCESS_DENIED。同一台机器上`Git\usr\bin\sh.exe`报同一条错，是同一根因。
+- **修法（已落地）**：把git的ssh换成**原生Win32 OpenSSH**，用**裸路径**（不带引号、不带参数）：
+  ```bash
+  git config --global core.sshCommand C:/Windows/System32/OpenSSH/ssh.exe
+  ```
+  原生ssh直接`CreateProcess`，不经过msys，因此不再触发signal pipe。**注意**：写成`GIT_SSH_COMMAND='...ssh.exe -o BatchMode=yes'`这类带引号或带参数的写法会被判成需要POSIX shell包装的variant，又会落回msys路径而失败——必须用裸路径。
+- **验证**：`git ls-remote origin`与一次真实`git push`（`adc49cb..645be9f`）均在**未申请任何权限**的情况下成功。
+- **注意**：`.gitconfig`不进版本库，换机器或重装需重设；DSH沙箱对工作区外写入（`C:\Users\30130\.gitconfig`）仍需一次升级授权才能设置本项。
+
 ## 12 本项目可用的DSH skill
 
 本项目的流程已作为DSH skill安装在用户级`C:\Users\30130\.dsh\skills\`，源件保存在`skills/`（源件不随会话变化，安装副本由源件改写得到）：
