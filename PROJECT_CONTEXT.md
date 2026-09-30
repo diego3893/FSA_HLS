@@ -336,8 +336,6 @@ WARNING: [HLS 200-875] II = 6 is infeasible due to multiple pipeline iteration l
 
 ### 15.0 结构性阻塞解除过程（2026-09-30 02:30）
 
-### 15.0 结构性阻塞解除过程（2026-09-30 02:30）
-
 **已解阻塞**：移除 bank 循环上的 `#pragma HLS UNROLL` 后（commit `ccc0f6a`），16×16 的 `runPeArray` 不再报 `SCHED 204-65`，CSynth 由"≥100分钟未完成"降到 **26分50秒**，顶层估算仍 **7.300ns**，RTL CoSim **跑满 7/7 事务**（此前 4/7 即卡）。`runPeArray` 的 Final II=5（4×4 为 1），QK/ROW_SUM 循环 Final II=**9**（目标 5，未达标）。16×16 资源：BRAM8、**DSP160**、FF**164470**、LUT**545729**。
 
 **当前失败点**：CoSim 的 C post-check 失败，7个用例中4个超差：
