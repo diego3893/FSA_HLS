@@ -251,34 +251,42 @@ Q/K/V AXI
 
 ## 15 16×16失败的根因证据与架构调研方向（2026-09-30）
 
-### 15.00 当前最佳状态与唯一剩余差距（2026-09-30 12:00）
+### 15.00 当前最佳状态与唯一剩余差距（2026-09-30 12:50，含P0复测）
 
-**数据已经全对，两档都通过CoSim；唯一不合格项是时序。**
+**数据已经全对，两档都通过CoSim；唯一不合格项是时序（两档都是）。**
 
-当前最佳commit为 `2a5a140`（= `caedc93` 去掉被证伪的强制时延）：
+P0 在正式默认参数下复测（commit `11b10c9`，规范命令，12:47 完成）：
 
-| 配置 | CSim | CSynth | RTL CoSim | 顶层估算周期 | 判定 |
-|---|---|---|---|---|---|
-| 4×4/16 | PASS | 通过（2分53秒） | **9/9 PASS** | **7.893ns** | 数据/硬件通过，**时序超7.300ns** |
-| 16×16/128 | PASS | 通过（25分37秒，`runPeArray` Final II=5，无`204-65`） | **7/7 PASS** | **7.934ns** | 数据/硬件通过，**时序超7.300ns** |
+| 配置 | CSim | CSynth | RTL CoSim | 顶层估算周期 | II（QK/ROW_SUM/PWL/PV） | 资源 |
+|---|---|---|---|---|---|---|
+| **4×4/16** | PASS | 通过（2分52秒） | **9/9 PASS**（C post-check通过） | **7.893ns** ✗ | **5/5/1/1** ✓ | DSP 40、FF 31737、LUT 125288、BRAM 8 |
+| **16×16/128** | PASS | 通过（25分37秒，`runPeArray` Final II=5，无`204-65`） | **7/7 PASS**（C post-check通过） | **7.934ns** ✗ | **8/8/5/5** ✗ | DSP 160、FF 164470、LUT 545729、BRAM 8 |
 
-即：用户提出的"4×4与16×16都通过"里，**数据与硬件结构已达标，只剩时序**。
+**P0 的关键修正**：4×4 的 II 与资源全达标，但**时序同样是 7.893ns**——`cf11987`（单bank + 独立`stagePeArrayResult`）曾经达到的 7.300ns **在当前 rolled 形状下没有复现**。因此：
 
-**关键机理（已用三组对照钉死）**：
+- 4×4 与 16×16 **共享同一个时序根因**：rolled bank 循环使 `result[row][col]` 的写回索引成为循环变量，写回路径上多了选择逻辑（约 +0.59ns）。
+- 两档的**唯一差距都是时序**；16×16 另外还有 II 未达标（8/8/5/5）。
+
+**关键机理（四组对照，已钉死）**：
 
 | 版本 | bank机制 | 4×4顶层 | 16×16顶层 |
 |---|---|---|---|
 | `cf11987` | 单bank + 独立`stagePeArrayResult`寄存级 | **7.300ns** ✓ | 综合失败(`204-65`) |
 | `3a92f73` | rolled bank，**无**寄存级 | 7.893ns ✗ | 7.934ns ✗（数值已正确） |
 | `caedc93` | rolled bank，bank内`node_staged`寄存级 | 7.893ns ✗ | 7.934ns ✗（数值已正确） |
-| `9a6a100` | 再给bank函数加`LATENCY min=1 max=1` | **20.851ns** ✗✗ | （已中断） |
+| `9a6a100` | 再给bank函数加`LATENCY min=1 max=1` | **20.851ns** ✗✗ | 已中断（更差） |
 
-结论：**时序差距来自"bank循环被rolled"**——`result[row][col]`的写入索引随循环变量变化，写回路径上多了选择逻辑（+0.59ns）；而 `cf11987` 的7.300ns来自"整阵列一次调用+独立非内联寄存级"的形状。三个尝试（去掉共享`computed`、bank内寄存级、强制单拍时延）分别解决了数值、部分恢复、严重恶化，**都没能把rolled形状的时序拉回7.300ns**。
+**II 未达标的官方原因（16×16，Vitis原文）**：
+```text
+WARNING: [HLS 200-880] Unable to enforce a carried dependence constraint (II = 5, distance = 1)
+  between 'store' ('operand_c_6_write_ln182') and 'load' ('operand_c_6_load_1') on 'operand_c'.
+WARNING: [HLS 200-875] II = 6 is infeasible due to multiple pipeline iteration latency = 8
+  and incompatible II = 5 of 'call' operation to 'runPeArray'.
+```
 
-**下次可试的方向（尚未验证）**：
-1. 把寄存级做成**独立的非内联函数**（`INLINE off`+`PIPELINE II=1`+`LATENCY 1/1`，与`cf11987`相同），但在rolled循环内按bank切片调用它——即把 `stagePeArrayResult` 的"模块边界"重新引入 rolled 形状；
-2. 让bank结果先写入**固定索引**（例如bank内按offset索引的本地数组），再由一个独立的`PIPELINE II=1`展开循环写回`result`，使写回索引在一个单独的流水级里变成常量；
-3. 若以上都不行，则本项目的结构性问题回到 `PROJECT_CONTEXT#15.2`：改用 `D×P` 矩形阵列或 systolic/streaming 形态，从形状上消掉"大阵列rolled写回"的需求。
+**P1 采用的改法（已定，见计划书 §4.2）**：把内层累加（`DIM_BLOCKS` 轮）与 ROW_SUM 的 `D` 行累加**移入 `runPeArray` 内部**，使 QK 内层循环不再含有延迟 8 拍的函数调用、也不再跨迭代读写 `operand_c`。这是同时消除 `200-880` 与 `200-875` 的最直接结构改法。
+
+### 15.0 结构性阻塞解除过程（2026-09-30 02:30）
 
 ### 15.0 结构性阻塞解除过程（2026-09-30 02:30）
 
