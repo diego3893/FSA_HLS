@@ -57,6 +57,9 @@ namespace detail{
     ){
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=1 style=stp
+        // 输出必须寄存：这一级对应此前的stagePeArrayResult，用来切断
+        // "PE乘法+结构体写回"的组合返回路径，是顶层守住7.300ns的关键。
+        #pragma HLS LATENCY min=1 max=1
         #pragma HLS ARRAY_PARTITION variable=node_pe complete dim=1
         #pragma HLS ARRAY_PARTITION variable=node_b complete dim=1
         #pragma HLS ARRAY_PARTITION variable=node_c complete dim=1
