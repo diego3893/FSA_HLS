@@ -1,0 +1,331 @@
+
+
+================================================================
+== Vitis HLS Report for 'runPeRowSum'
+================================================================
+* Date:           Sat Oct 10 01:16:13 2026
+
+* Version:        2024.2 (Build 5238294 on Nov  8 2024)
+* Project:        build
+* Solution:       solution1 (Vivado IP Flow Target)
+* Product family: virtexuplusHBM
+* Target device:  xcvu37p_CIV-fsvh2892-2-e
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing: 
+    * Summary: 
+    +--------+----------+----------+------------+
+    |  Clock |  Target  | Estimated| Uncertainty|
+    +--------+----------+----------+------------+
+    |ap_clk  |  10.00 ns|  7.054 ns|     2.70 ns|
+    +--------+----------+----------+------------+
+
++ Latency: 
+    * Summary: 
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+    |  Latency (cycles) |  Latency (absolute) |  Interval |                    Pipeline                    |
+    |   min   |   max   |    min   |    max   | min | max |                      Type                      |
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+    |       22|       22|  0.220 us|  0.220 us|   21|   21|  loop auto-rewind stp (delay=0 clock cycles(s))|
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+
+    + Detail: 
+        * Instance: 
+        +-----------------------+------------+---------+---------+-----------+-----------+-----+-----+---------+
+        |                       |            |  Latency (cycles) |   Latency (absolute)  |  Interval | Pipeline|
+        |        Instance       |   Module   |   min   |   max   |    min    |    max    | min | max |   Type  |
+        +-----------------------+------------+---------+---------+-----------+-----------+-----+-----+---------+
+        |grp_runPeArray_fu_200  |runPeArray  |        3|        3|  30.000 ns|  30.000 ns|    1|    1|      yes|
+        +-----------------------+------------+---------+---------+-----------+-----------+-----+-----+---------+
+
+        * Loop: 
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+        |                    |  Latency (cycles) | Iteration|  Initiation Interval  | Trip |          |
+        |      Loop Name     |   min   |   max   |  Latency |  achieved |   target  | Count| Pipelined|
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+        |- VITIS_LOOP_204_1  |       20|       20|         6|          5|          5|     4|       yes|
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+
+
+
+================================================================
+== Utilization Estimates
+================================================================
+* Summary: 
++---------------------+---------+------+---------+---------+-----+
+|         Name        | BRAM_18K|  DSP |    FF   |   LUT   | URAM|
++---------------------+---------+------+---------+---------+-----+
+|DSP                  |        -|     -|        -|        -|    -|
+|Expression           |        -|     -|        0|      576|    -|
+|FIFO                 |        -|     -|        -|        -|    -|
+|Instance             |        -|     -|        0|       80|    -|
+|Memory               |        -|     -|        -|        -|    -|
+|Multiplexer          |        -|     -|        0|      177|    -|
+|Register             |        -|     -|      658|        -|    -|
++---------------------+---------+------+---------+---------+-----+
+|Total                |        0|     0|      658|      833|    0|
++---------------------+---------+------+---------+---------+-----+
+|Available SLR        |     1344|  3008|   869120|   434560|  320|
++---------------------+---------+------+---------+---------+-----+
+|Utilization SLR (%)  |        0|     0|       ~0|       ~0|    0|
++---------------------+---------+------+---------+---------+-----+
+|Available            |     4032|  9024|  2607360|  1303680|  960|
++---------------------+---------+------+---------+---------+-----+
+|Utilization (%)      |        0|     0|       ~0|       ~0|    0|
++---------------------+---------+------+---------+---------+-----+
+
++ Detail: 
+    * Instance: 
+    +---------------------------+----------------------+---------+----+---+----+-----+
+    |          Instance         |        Module        | BRAM_18K| DSP| FF| LUT| URAM|
+    +---------------------------+----------------------+---------+----+---+----+-----+
+    |sparsemux_9_2_32_1_1_U638  |sparsemux_9_2_32_1_1  |        0|   0|  0|  20|    0|
+    |sparsemux_9_2_32_1_1_U639  |sparsemux_9_2_32_1_1  |        0|   0|  0|  20|    0|
+    |sparsemux_9_2_32_1_1_U640  |sparsemux_9_2_32_1_1  |        0|   0|  0|  20|    0|
+    |sparsemux_9_2_32_1_1_U641  |sparsemux_9_2_32_1_1  |        0|   0|  0|  20|    0|
+    +---------------------------+----------------------+---------+----+---+----+-----+
+    |Total                      |                      |        0|   0|  0|  80|    0|
+    +---------------------------+----------------------+---------+----+---+----+-----+
+
+    * DSP: 
+    N/A
+
+    * Memory: 
+    N/A
+
+    * FIFO: 
+    N/A
+
+    * Expression: 
+    +------------------------+----------+----+---+----+------------+------------+
+    |      Variable Name     | Operation| DSP| FF| LUT| Bitwidth P0| Bitwidth P1|
+    +------------------------+----------+----+---+----+------------+------------+
+    |add_ln204_fu_304_p2     |         +|   0|  0|  10|           3|           1|
+    |cmp19_1_fu_371_p2       |      icmp|   0|  0|  10|           3|           1|
+    |cmp19_2_fu_412_p2       |      icmp|   0|  0|  10|           3|           2|
+    |cmp19_3_fu_453_p2       |      icmp|   0|  0|  10|           3|           2|
+    |cmp19_fu_330_p2         |      icmp|   0|  0|  10|           3|           1|
+    |icmp_ln204_fu_298_p2    |      icmp|   0|  0|  12|           3|           4|
+    |operand_c_10_fu_435_p3  |    select|   0|  0|  32|           1|          32|
+    |operand_c_11_fu_444_p3  |    select|   0|  0|  32|           1|          32|
+    |operand_c_12_fu_458_p3  |    select|   0|  0|  32|           1|          32|
+    |operand_c_13_fu_467_p3  |    select|   0|  0|  32|           1|          32|
+    |operand_c_14_fu_476_p3  |    select|   0|  0|  32|           1|          32|
+    |operand_c_15_fu_485_p3  |    select|   0|  0|  32|           1|          32|
+    |operand_c_1_fu_344_p3   |    select|   0|  0|  32|           1|          32|
+    |operand_c_2_fu_353_p3   |    select|   0|  0|  32|           1|          32|
+    |operand_c_3_fu_362_p3   |    select|   0|  0|  32|           1|          32|
+    |operand_c_4_fu_376_p3   |    select|   0|  0|  32|           1|          32|
+    |operand_c_5_fu_385_p3   |    select|   0|  0|  32|           1|          32|
+    |operand_c_6_fu_394_p3   |    select|   0|  0|  32|           1|          32|
+    |operand_c_7_fu_403_p3   |    select|   0|  0|  32|           1|          32|
+    |operand_c_8_fu_417_p3   |    select|   0|  0|  32|           1|          32|
+    |operand_c_9_fu_426_p3   |    select|   0|  0|  32|           1|          32|
+    |operand_c_fu_335_p3     |    select|   0|  0|  32|           1|          32|
+    |ap_enable_pp0           |       xor|   0|  0|   2|           1|           2|
+    +------------------------+----------+----+---+----+------------+------------+
+    |Total                   |          |   0|  0| 576|          35|         525|
+    +------------------------+----------+----+---+----+------------+------------+
+
+    * Multiplexer: 
+    +----------------------------------------------+----+-----------+-----+-----------+
+    |                     Name                     | LUT| Input Size| Bits| Total Bits|
+    +----------------------------------------------+----+-----------+-----+-----------+
+    |ap_NS_fsm                                     |  31|          6|    1|          6|
+    |ap_done_int                                   |   9|          2|    1|          2|
+    |ap_enable_reg_pp0_iter0                       |   9|          2|    1|          2|
+    |ap_enable_reg_pp0_iter0_reg                   |   9|          2|    1|          2|
+    |ap_enable_reg_pp0_iter1                       |   9|          2|    1|          2|
+    |ap_sig_allocacmp_row_1                        |   9|          2|    3|          6|
+    |ap_sig_allocacmp_row_sum_write_assign_1_load  |  14|          3|   32|         96|
+    |ap_sig_allocacmp_row_sum_write_assign_2_load  |  14|          3|   32|         96|
+    |ap_sig_allocacmp_row_sum_write_assign_3_load  |  14|          3|   32|         96|
+    |ap_sig_allocacmp_row_sum_write_assign_load    |  14|          3|   32|         96|
+    |row_fu_100                                    |   9|          2|    3|          6|
+    |row_sum_write_assign_1_fu_88                  |   9|          2|   32|         64|
+    |row_sum_write_assign_2_fu_92                  |   9|          2|   32|         64|
+    |row_sum_write_assign_3_fu_96                  |   9|          2|   32|         64|
+    |row_sum_write_assign_fu_84                    |   9|          2|   32|         64|
+    +----------------------------------------------+----+-----------+-----+-----------+
+    |Total                                         | 177|         38|  267|        666|
+    +----------------------------------------------+----+-----------+-----+-----------+
+
+    * Register: 
+    +------------------------------------+----+----+-----+-----------+
+    |                Name                | FF | LUT| Bits| Const Bits|
+    +------------------------------------+----+----+-----+-----------+
+    |ap_CS_fsm                           |   5|   0|    5|          0|
+    |ap_done_reg                         |   1|   0|    1|          0|
+    |ap_enable_reg_pp0_iter0_reg         |   1|   0|    1|          0|
+    |ap_enable_reg_pp0_iter1             |   1|   0|    1|          0|
+    |grp_runPeArray_fu_200_ap_start_reg  |   1|   0|    1|          0|
+    |icmp_ln204_reg_818                  |   1|   0|    1|          0|
+    |pe_result_out_accType_10_reg_880    |  32|   0|   32|          0|
+    |pe_result_out_accType_11_reg_885    |  32|   0|   32|          0|
+    |pe_result_out_accType_12_reg_890    |  32|   0|   32|          0|
+    |pe_result_out_accType_13_reg_895    |  32|   0|   32|          0|
+    |pe_result_out_accType_14_reg_900    |  32|   0|   32|          0|
+    |pe_result_out_accType_15_reg_905    |  32|   0|   32|          0|
+    |pe_result_out_accType_1_reg_835     |  32|   0|   32|          0|
+    |pe_result_out_accType_2_reg_840     |  32|   0|   32|          0|
+    |pe_result_out_accType_3_reg_845     |  32|   0|   32|          0|
+    |pe_result_out_accType_4_reg_850     |  32|   0|   32|          0|
+    |pe_result_out_accType_5_reg_855     |  32|   0|   32|          0|
+    |pe_result_out_accType_6_reg_860     |  32|   0|   32|          0|
+    |pe_result_out_accType_7_reg_865     |  32|   0|   32|          0|
+    |pe_result_out_accType_8_reg_870     |  32|   0|   32|          0|
+    |pe_result_out_accType_9_reg_875     |  32|   0|   32|          0|
+    |pe_result_out_accType_reg_830       |  32|   0|   32|          0|
+    |row_1_reg_809                       |   3|   0|    3|          0|
+    |row_fu_100                          |   3|   0|    3|          0|
+    |row_sum_write_assign_1_fu_88        |  32|   0|   32|          0|
+    |row_sum_write_assign_2_fu_92        |  32|   0|   32|          0|
+    |row_sum_write_assign_3_fu_96        |  32|   0|   32|          0|
+    |row_sum_write_assign_fu_84          |  32|   0|   32|          0|
+    |trunc_ln204_reg_822                 |   2|   0|    2|          0|
+    +------------------------------------+----+----+-----+-----------+
+    |Total                               | 658|   0|  658|          0|
+    +------------------------------------+----+----+-----+-----------+
+
+
+
+================================================================
+== Interface
+================================================================
+* Summary: 
++----------------------------------+-----+-----+------------+----------------+--------------+
+|             RTL Ports            | Dir | Bits|  Protocol  |  Source Object |    C Type    |
++----------------------------------+-----+-----+------------+----------------+--------------+
+|ap_clk                            |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_rst                            |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_start                          |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_done                           |  out|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_idle                           |  out|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_ready                          |  out|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_return_0                       |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_return_1                       |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_return_2                       |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_return_3                       |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din1      |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din2      |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din3      |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din4      |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din5      |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din6      |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din7      |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din8      |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din9      |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din10     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din11     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din12     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din13     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din14     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din15     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din16     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din17     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din18     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din19     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din20     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din21     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din22     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din23     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din24     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din25     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din26     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din27     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din28     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din29     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din30     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din31     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din32     |  out|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din33     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din34     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din35     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din36     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din37     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din38     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din39     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din40     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din41     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din42     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din43     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din44     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din45     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din46     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din47     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din48     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_din49     |  out|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_0   |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_1   |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_2   |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_3   |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_4   |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_5   |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_6   |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_7   |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_8   |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_9   |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_10  |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_11  |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_12  |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_13  |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_14  |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_15  |   in|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_16  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_17  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_18  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_19  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_20  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_21  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_22  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_23  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_24  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_25  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_26  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_27  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_28  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_29  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_30  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_31  |   in|   16|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_32  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_33  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_34  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_35  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_36  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_37  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_38  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_39  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_40  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_41  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_42  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_43  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_44  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_45  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_46  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_dout0_47  |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_ce        |  out|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_start     |  out|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_ready     |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_done      |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|grp_runPeArray_fu_985_p_idle      |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|pe_reg_read                       |   in|   16|     ap_none|     pe_reg_read|        scalar|
+|pe_reg_read_16                    |   in|   16|     ap_none|  pe_reg_read_16|        scalar|
+|pe_reg_read_17                    |   in|   16|     ap_none|  pe_reg_read_17|        scalar|
+|pe_reg_read_18                    |   in|   16|     ap_none|  pe_reg_read_18|        scalar|
+|pe_reg_read_19                    |   in|   16|     ap_none|  pe_reg_read_19|        scalar|
+|pe_reg_read_20                    |   in|   16|     ap_none|  pe_reg_read_20|        scalar|
+|pe_reg_read_21                    |   in|   16|     ap_none|  pe_reg_read_21|        scalar|
+|pe_reg_read_22                    |   in|   16|     ap_none|  pe_reg_read_22|        scalar|
+|pe_reg_read_23                    |   in|   16|     ap_none|  pe_reg_read_23|        scalar|
+|pe_reg_read_24                    |   in|   16|     ap_none|  pe_reg_read_24|        scalar|
+|pe_reg_read_25                    |   in|   16|     ap_none|  pe_reg_read_25|        scalar|
+|pe_reg_read_26                    |   in|   16|     ap_none|  pe_reg_read_26|        scalar|
+|pe_reg_read_27                    |   in|   16|     ap_none|  pe_reg_read_27|        scalar|
+|pe_reg_read_28                    |   in|   16|     ap_none|  pe_reg_read_28|        scalar|
+|pe_reg_read_29                    |   in|   16|     ap_none|  pe_reg_read_29|        scalar|
+|pe_reg_read_30                    |   in|   16|     ap_none|  pe_reg_read_30|        scalar|
++----------------------------------+-----+-----+------------+----------------+--------------+
+

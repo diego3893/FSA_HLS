@@ -8,3 +8,7 @@
 
 # Preserve official log bytes and tool-generated trailing spaces for SHA256 checks.
 docs/evidence/split_d_46cbbd0_4x4_recheck/*.txt -text -whitespace
+docs/evidence/split_d_25d6dda_4x4/*.txt -text -whitespace
+docs/evidence/split_d_25d6dda_4x4/*.rpt -text -whitespace
+docs/evidence/split_d_25d6dda_4x4/*.xml -text -whitespace
+docs/evidence/split_d_25d6dda_4x4/*.log -text -whitespace
