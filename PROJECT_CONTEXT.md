@@ -8,11 +8,15 @@
 - 当前研究任务：独立实现参数化`D×D` Split-D顶层`fsa_stream_split_d`。
 - 默认配置：物理阵列`4×4`、`dim=16`；目标配置仅改参数得到`16×16/dim128`。
 - 算法顺序：每个PE含FP16工作寄存器`reg`和FP32 `score_acc`；先执行`dim/D`轮QK累加，完整S后softmax，再执行`dim/D`轮PV。
-- 当前第一优先级：**4×4/16已在commit`cf11987`冻结**（CSim+CSynth+RTL CoSim全通过，7.300ns、DSP40、II 5/5/1/1）。16×16/128的**根因已确证**：单拍流水体内被完全展开64个`peMacUnit`，Vitis报`SCHED 204-65 control-flow is too complicated`；已排除"bank分组""多周期间隔""固定规模节点数组"三种做法。下一步按第15节的架构调研方向改阵列形态（`D×P`矩形+行尾归约树，或回到systolic/streaming形态），并按V0→V5消融序列先做C综合定位。
+- **当前第一优先级：4×4/16 已用 P3a 形状重新达标**（见第15.00000节）。被测commit `426ff6c`，规范命令 `./run_hls.sh fsa_stream_split_d` 完整通过：CSim PASS、CSynth **7.300ns**（2分48秒）、DSP40/BRAM8/FF31923/LUT125123、QK循环II5、ROW_SUM循环II5、PV与扁平循环II1、`runPeArray` latency3/II1、`200-880`/`200-875`/`too complex` 均为0、RTL CoSim **Pass**（C post-check通过）。
+- **16×16/128暂时搁置**（用户2026-10-09既有指示）。历史P1的CoSim通过当时7事务，但有效长度最大5，不能外推为满tile/多tile全面通过；顶层7.934ns、阶段II8/8/5/5未达标。当前P3a形状的16×16尚未验证，不能假定也有latency3。
+- 4×4改为整阵列流水体和常量写回索引后，HLS估算周期由7.893ns改善至7.300ns；尚缺完整关键路径对照，选择逻辑为当前解释，不推广成16×16唯一根因。
+- **2026-10-09当前执行方案：**`docs/Split-D修正与TAPA启发的分阶段修改验收方案_20261009.md`。已再次对照正式Tcl全部9个编译源文件、关联头文件/测试及相关Chisel位置，补充第13节核查记录。先补4×4测试与实例证据，再试query列空间分块及距离感知通信流水；未改代码或运行新构建。
 
 ## 2 硬约束
 
 - 不修改`FSA-main`；现有生产顶层`fsa_stream`的接口和行为保持不变。
+- **git操作由用户执行（2026-10-09起）**：仓库根`AGENTS.md`（已跟踪）规定"不进行git操作，可以提示有关键文件未跟踪"。因此智能体只改文件并提示状态，**不执行add/commit/push**；需要远端拿到新commit时，先请用户推送。远端测试入口不变。
 - Split-D使用独立顶层`fsa_stream_split_d`，保持Q/K/V/O四个64-bit AXI master bundle、AXI-Lite控制、VU37P器件、10ns时钟和2.7ns uncertainty。
 - 只允许一套参数化`D×D` PE RawFMA阵列；QK、softmax相关步骤和PV顺序复用。
 - Split-D每个PE只保留一个FP16 `reg`和一个FP32 `score_acc`；禁止阵列外增加完整S/P副本。
@@ -26,11 +30,15 @@
 - 没有读取对应新build前，不得声称实例数、DSP、II、时序、CoSim或死锁问题已经解决。
 - 只维护仓库根目录的`PROJECT_CONTEXT.md`；`docs/`目录中的同名文件为历史快照，停止更新。
 - 用户已把本文件的外部上下文维护长期委派给智能体：发现过期、缺失或矛盾内容时直接原地修订，不必每次征询；但只能写入可验证证据，不得凭推测写入结论，也不得为了产生更新而空改。
-- 远端授权边界：上述闭环已用满2轮并结束，**当前没有有效的远端授权**；SSH、推送和占用服务器都需要用户在新会话中重新明确授权轮数与范围。
+- 远端授权边界：本会话用户已授权SSH只读核对日志和相关报告，该范围内无需重复询问；没有授权新的远端构建、IP导出、Vivado实现或板测。Git操作仍由用户执行，恢复测试按最新范围与轮数授权。
 
 ## 3 当前状态
 
 ### 3.1 Split-D当前候选
+
+**当前状态，以本段为准：**P3a `426ff6c`的4×4已通过CSim/CSynth/CoSim，估算7.300ns、阶段II5/5/1/1、DSP40；当前源码的单一物理实例仍待新build补证。6处PE调用跨控制器及未内联QK/ROW_SUM，不能单靠顶层ALLOCATION证明共享。已发现testbench未拒绝NaN误差、非法长度只查O[0]；近期先修改既有testbench并扩展4×4边界覆盖。下面至3.2节的旧候选说明均为历史，不作当前实施指令。
+
+**第二次静态核查补充：**分块B不能替代全局D/H；需保留FP32 max→FP16转换→SUB_MAX→SCALE→PWL量化顺序、K/V外存读取次数和总D条倒数通路。当前reference是double精确exp的数学参考，不证明重构位级一致；后续在既有测试中同时验收独立误差与固定输入的原始O位模式基线。HLS PE先舍入FP32再转FP16/FTZ，而Chisel分别从raw输出舍入，两者完整合同一致性仍待定向证据。广播/汇聚需证明有限缓冲等待关系，前向图不能单独证明无死锁。
 
 **4×4/16已冻结（2026-09-30）：**被测commit`cf1198715c087f274f738ae283a0b6d529e3e5cf`（PE阵列按bank分组、bank内用固定规模一维节点数组）。规范命令`./run_hls.sh fsa_stream_split_d`完整流程通过：CSim PASS、CSynth顶层**7.300ns**、BRAM8/**DSP40**/FF31486/LUT125477、`runPeArray`与`peBankMacUnit`均Final II=1、QK/ROW_SUM achieved5/target5、PWL/PV achieved1/target1、无`too complicated`、RTL CoSim **9/9 PASS**且C post-check通过。相对旧基线FF/LUT各增约1.7k/0.8k（来自bank节点寄存器），时序、DSP与II均未回退。
 
@@ -95,12 +103,13 @@ Q/K/V AXI
 ## 5 关键决策
 
 1. **单阵列优先。**任何II改善必须在一套PE阵列和一套Accumulator条件下成立；资源复制获得的II1不验收。
-2. **先结构后性能。**单PE/单Accumulator、DSP40、PV II1和7.300ns已稳定通过；当前冻结算术结构，只针对RTL数值错误做可判别诊断和最小修复。
+2. **先补测试与结构证据，再优化物理实现。**P3a功能与HLS指标已通过，当前没有确认新的RTL数值错误；先修测试漏报及覆盖，再查共享实例。冻结算术合同，后续以query分块与通信流水做单因素对照。
 3. **保留精度合同。**PE使用FP16×FP16+FP32 RawFMA；Accumulator使用FP32×FP32+FP32 RawFMA；softmax/PWL与现有位精确参考一致。
+   当前结构修改固定已验收HLS算术路径，不能用0.03数学误差通过替代位级保持证明，也不能据此声称Chisel所有舍入/特殊值均一致。涉及公共算术时，另核对既有RawFMA测试和受影响生产基线。
 4. **以生成物为证据。**函数定义唯一、源码`UNROLL`、ALLOCATION pragma或总DSP任一单项都不足以证明单阵列；必须交叉检查层次、RTL实例、运算符和循环调度。
 5. **本地测试与HLS验收分开。**C++通过只证明功能，不证明综合结构、II、时序或RTL正确性。
-6. **共享必须在同一综合层级内显式成立。**AMD文档说明函数共享要求调用位于同一层级；当前自动outline把QK/ROW_SUM/PV拆到不同层级，顶层`ALLOCATION`不能稳定跨层合并。
-7. **不再把关闭流水当作最终结构。**推荐把所有PE操作收敛到一个唯一调用点或持久PE执行actor，PE本体保持II1；ROW_SUM/PV的真实反馈依赖通过多上下文交错调度隐藏，而不是复制阵列或关闭整个循环流水。
+6. **共享必须有实例证据。**AMD文档要求共享调用在同层级。当前存在跨层调用，物理复制尚未证实；先检查，再做最小层级修复或收敛到有限状态执行器，不复活旧同步请求/响应task闭环。
+7. **区分服务间隔和反馈延迟。**单元latency可大于II；真实反馈需满足依赖距离×II覆盖完整反馈路径延迟，并满足资源服务能力。物理通信插级后重新核对PV的distance8，不用假依赖掩盖问题。
 
 ## 6 已排除方案
 
@@ -130,21 +139,27 @@ Q/K/V AXI
 - Split-D测试：`tests/stream/test_fsa_stream_split_d.cpp`
 - Split-D HLS入口：`hls/fsa_stream_split_d/run_hls.tcl`
 - 根运行入口：`run_hls.sh`
+- 当前分阶段方案：`docs/Split-D修正与TAPA启发的分阶段修改验收方案_20261009.md`；旧20260930计划与DeepSeek交接用于历史参考，冲突处以新方案的核查结果为准。
 - Split-D历史交接：`docs/split_d_implementation_plan_20260923/PROJECT_CONTEXT.md`（停止维护，不作为当前状态来源）
 - Split-D迁移交接：`docs/Split-D_FSA_DeepSeek迁移交接_20260929.md`（当前任务的第2优先级来源）
-- 本地`build/fsa_stream_split_d_build/solution1/`是**拆分前**的旧生成物（最新`csynth.rpt`为2026-09-28 16:51，仍含已删除的`peArrayTask`/`accumulatorTask`/`KPN`模块），只能作为历史基线，**不得**用于描述当前源码；当前有效证据在NM37服务器的`hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1/`，本地`hls/fsa_stream_split_d/`下没有build目录。
+- `hls/fsa_stream_split_d/fsa_stream_split_d_build/`：远端该目录下的报告在**2026-10-01 07:00**被一次**来源不明的build**覆盖（报告显示DSP 352、LUT 1,268,693、FF 272,062，CoSim 7事务共10,244,525 cycles；量级远超16×16应有的DSP160，疑似阵列被隐式复制）。按用户2026-10-09指示，**不追查该build**，后续我们自己测试时会覆盖它。因此：**当前`syn/report/`不能作为任何commit的证据**；结论只引用各次运行自己的日志（`/tmp/p0_*`、`/tmp/p1_*`、`/tmp/p3a_*`）。
+- 本地`build/fsa_stream_split_d_build/solution1/`是**拆分前**的旧生成物（最新`csynth.rpt`为2026-09-28 16:51，仍含已删除的`peArrayTask`/`accumulatorTask`/`KPN`模块），只能作为历史基线，**不得**用于描述当前源码。
 
 默认参数为`FSA_SPLIT_D_PE_DIM=4`、`FSA_SPLIT_D_HEAD_DIM=16`；目标参数为`16/128`。
 
 ## 8 下一步
 
-1. 先对拆分后的源码运行默认4×4/16 CSim和CSynth，确认加载内联层次、单阵列、DSP40、II和7.300ns均未回退。
-2. 拆分回归通过后，把单个巨大`runPeArray`重构为层次化row bank或小tile bank；bank必须共同构成唯一物理阵列，不能按阶段复制。
-3. 先用16×16/128 CSynth确认PE入口和QK、ROW_SUM、PWL、PV循环恢复目标II，再运行长时间RTL CoSim。
+1. 在既有testbench修复非有限输出漏报、扩大canary检查，增加4×4的L=3/4/5/8/9边界；保留原诊断用例与误差门槛。核实finiteAccMax特殊值合同，不擅自改算法。
+2. 用户同步候选源码且授权该轮后，通过官方完整入口验证4×4，并补齐RTL实例路径/运算单元数。若确有复制，再修共享层级；若无复制，保留已验收结构。
+3. 试按query列分成两个4×2块，总PE16/Acc4/倒数4，各块拥有完整key方向与本地在线状态。保留D步长、全局causal、量化顺序、8上下文PV和原K/V读取次数；先数组有限调用，再证明并发及广播/汇聚活性。
+4. 获得物理验证授权后先导出正式IP并明确OOC/完整集成载体，再对照自动布局、粗粒度约束和距离感知流水；检查实际AXI宽度、反馈、背压、setup与hold、DRC及端到端时间，不把OOC或HLS估算写成板测结果。
+5. 16×16仍暂缓。恢复时先检查当前单元II配置、15/16/17/32/33边界和物理分块，详见新方案阶段5。H=128的QK是128次逐feature求值，旧64拍估算漏算lane，作废。
 
 ## 9 验证状态
 
 ### 已完成
+
+- 本会话已只读核对P3a/P1原始日志及10个本地/远端文件指纹；完成新分阶段方案和第二次代码对照核查。第二次核查没有执行编译、仿真或远端构建；以下旧运行条目是历史证据，不能据其推定当前RTL实例数量。
 
 - Split-D本地`4×4/dim16`端到端测试。
 - 同一源码仅改参数后的`16×16/dim128`端到端测试。
@@ -181,26 +196,29 @@ Q/K/V AXI
 
 ### 未完成
 
-- Split-D RTL CoSim、IP导出、Vivado实现和板测。
-- 拆分后源码的4×4/16 Vitis回归：**已完成**（2026-09-29 16:09，被测commit`2c94ef1`，CSim+CSynth通过，指标与拆分前相同；见`docs/修改日志/2026-09-29_1551_split_d_split_regression_修改日志.md`）。
-- Split-D `16×16/dim128`的目标II和完整RTL数据验收。
-- 生产基线IP导出、Vivado实现后时序和板测。
+- 4×4的P3a功能、II与HLS周期已通过；新增测试覆盖、唯一物理实例证据、IP与实现时序仍待后续阶段。文档计划不等于代码修改已完成。
+- **16×16/128 的目标II与完整验收：暂时搁置**（用户2026-10-09指示只做4×4）。
+- Split-D 的 IP 导出、Vivado 实现后时序、板测（两档都未做）。
+- 生产基线 IP 导出、Vivado 实现后时序和板测。
+- 代码清理：`peBankMacUnit` 在 P3a 后已无调用点（定义在 `split_d_compute.cpp:51`），需清理或复用；`PE_ARRAY_II` 在16×16仍为5，是否改1待16×16恢复后按是否复发`204-65`决定。
 
 ## 10 环境与复现
 
-- 本地：Windows PowerShell；无Vitis/Vivado，且Windows缺Vitis `ap_int.h`、WSL启动被系统拒绝，因此**当前连C++编译检查也无法在本地执行**；拆分后源码的编译与综合结论只能来自服务器，本地仅能做`git diff --check`、文件结构和符号唯一性检查。
+- 本地：Windows PowerShell；仓库已有`third_party/vitis_hls/include/ap_int.h`，旧“缺ap_int.h”说法不成立。完整C++/Vitis/Vivado工具链是否可用尚未重新验证；本次只做文件检查，不声称编译通过，也不执行Git检查。
 - 服务器：Vitis HLS 2024.2，器件`xcvu37p_CIV-fsvh2892-2-e`。
 - 时钟：10.0ns，uncertainty 2.7ns；不得放宽。
 - Split-D服务器命令：`./run_hls.sh fsa_stream_split_d`。
 - 生产基线命令：`./run_hls.sh fsa_stream`。
-- 分支`fsa_split_D`，代码基线`83b9b515`，仓库HEAD`8216f04`只在该基线上补充4×4验收文档。工作树**不等于**HEAD：交接前完成的源码拆分（`split_d_controller.cpp`、`split_d_compute.cpp`、`split_d_dma.cpp`、`split_d_internal.hpp`四个未跟踪文件，加上`fsa_stream_split_d.cpp`、`run_hls.tcl`、本文件和修改日志的未提交改动）尚未提交、尚未Vitis回归，不得把HEAD当作当前工作树内容。
+- 分支`fsa_split_D`。**2026-10-09核对（只读）**：本地HEAD `591c6fc`（工作区干净、无未跟踪文件），**远端HEAD `426ff6c`**——两者不一致，而`426ff6c`正是P3a被测commit、`591c6fc`是其后4个纯文档提交。因智能体不做git操作（第2节），本地领先的提交需用户推送才会同步到远端；后续若在本地改源码，远端要测试也必须先由用户推送。
 - 旧`source_manifest.json`和`delivery_validation.json`是历史快照，不代表当前源码。
 
 ## 11 交接摘要
 
-当前任务是参数化`D×D` Split-D阵列。4×4/16已在commit`83b9b515`完成CSim、CSynth和RTL CoSim 9/9全验收；Q/K/V加载错位均已修复。16×16/128的CSim和CSynth完成，单一256PE结构和7.300ns估计成立，但巨大`runPeArray`控制流无法pipeline，相关循环II失败，CoSim只完成4/7后停止。交接前的源码拆分已在commit`2c94ef1`通过4×4/16的CSim+CSynth回归，指标与拆分前逐项相同且加载内联未回退；拆分后的RTL CoSim尚未运行。下一步按层次化PE bank重构以解决16×16流水失败；详见`docs/Split-D_FSA_DeepSeek迁移交接_20260929.md`。
+当前任务是保持一套D×D PE/一套D列Accumulator的Split-D，并制定物理感知优化路径。P3a的4×4功能与HLS指标已由原始日志确认，当前物理实例证据待补；16×16暂缓。已完成`docs/Split-D修正与TAPA启发的分阶段修改验收方案_20261009.md`，未实施代码或新构建。第一修改包为既有testbench的有限性、canary及4×4边界覆盖；随后查实例，再试query列分块、粗粒度布局与通信流水。不得从旧历史段恢复已作废的bank/矩形/64拍推论。
 
-**2026-09-30最新状态（覆盖以上）：**两档的**数据都已通过**（4×4 RTL CoSim 9/9、16×16 RTL CoSim 7/7，均含C post-check）。`SCHED 204-65`已解除（去掉bank循环的`UNROLL`），16×16数值错误已修（去掉跨bank迭代共享的`computed`数组）。**唯一未达标项是时序**：4×4估算7.893ns、16×16估算7.934ns，均超7.300ns预算；16×16的QK/ROW_SUM循环II=8、PWL/PV循环II=5（目标5/1）。根因、四组对照实验与后续阶段计划见本文档`#15.00`与`docs/Split-D后续修改计划书_20260930.md`。
+第二次核查已修订方案：保留D/H和全局索引、K/V读取量及现有量化链；补倒数通路、位模式基线、广播/汇聚等待关系、IP导出与OOC/全系统时序等级。范围以方案第13节为准，不声称所有独立模块已逐行审计。失败构建读取本轮临时build，旧成功目录可能仍存在，不得误引用。
+
+**2026-10-09最新状态（覆盖以上）：** 4×4/16 已用 **P3a 形状重新达标**（被测commit `426ff6c`，规范命令完整通过：CSim PASS、CSynth 7.300ns、DSP40、QK/ROW_SUM II=5/5、PV II=1、`runPeArray` latency3/II1、`200-880`/`200-875`/`too complex`=0、RTL CoSim Pass）。16×16/128 **用户指示暂时搁置**；其历史最好状态是数值已全对（CoSim 7/7）、`204-65`已解除，未达标项为顶层7.934ns与II 8/8/5/5。详见第15.00000节（P3a结果）与第15.00节（四组对照与根因）。
 
 ## 11.1 本地git推送的环境坑（2026-09-30，已修复）
 
@@ -235,8 +253,8 @@ Q/K/V AXI
 1. 推送本地commit（含本轮日志与`PROJECT_CONTEXT.md`更新）；2. 远端SSH+显式加载`~/.bashrc`、`git pull --ff-only`、核对远端HEAD等于该commit；3. 远端Vitis测试；4. 读结果（报告、日志、RTL、资源）；5. 判断是否合格；6. 不合格则**先联网搜索解决方案**并记录来源与结论；7. 本地更改并做本地验证；8. 回到第1步，该修改成为下一轮被测commit。
 
 - 终止条件：验收全部通过、达到用户设定最大轮数、出现阻塞、或需要用户作出新的设计决定；每轮结束都暂停并向用户汇报。
-- 第6步的联网搜索已纳入该skill的站立授权，不必每轮单独询问。
-- 与本文件第2节一致：未授权轮数时不得自行无限重测；上一轮闭环已结束，**当前仍未获得新的远端授权**。
+- 第6步的联网搜索已纳入该skill的站立授权，不必每轮单独询问。2026-10-09起Git同步由用户执行，以上历史闭环中的push/pull不再由智能体执行。
+- 与本文件第2节一致：当前有SSH只读核查授权，但没有新构建轮次授权；不得把只读许可当作远端测试许可。
 
 ## 14 服务器测试的官方协议（2026-09-29用户规定）
 
@@ -251,37 +269,35 @@ Q/K/V AXI
 
 ## 15 16×16失败的根因证据与架构调研方向（2026-09-30）
 
-### 15.0000 P3a 进行中 + 服务器连通性阻塞（2026-09-30 14:00）
+> 2026-10-09核查修正：本节保留历史日志和候选推论。以下“调用延迟必须≤II”“H=128的QK约64拍”“arrays句子证明204-65根因”“D×P统一key/head归约”“分次调用仍保证256物理PE”均不作当前结论；解释与执行顺序以新分阶段方案为准。P3a的已核实数字仍有效，单实例与实现时序另需证据。
 
-**P3a 改动已提交**（commit `426ff6c`）：把 `runPeArray` 的 rolled bank 循环与 node 数组整体删除，改为**整个阵列在同一个流水体内原地求值**（row/col 由 `UNROLL` 展成编译期常量）。目的有二：
-1. 消除 4×4/16×16 共同的时序根因——`result[row][col]` 的写回索引不再是循环变量，写回路径上的选择逻辑消失（对照：`cf11987` 单bank+独立寄存级 7.300ns vs rolled 形状 7.893/7.934ns）；
-2. 把一次阵列求值的延迟从 8 拍压下来，从而给 QK/ROW_SUM 的 II=5 让路（`200-875` 明确说明"迭代延迟=8 与调用不可重叠"是硬约束）。
+### 15.00000 4×4/16 已达标：P3a 形状（2026-10-09 确认）
 
-**待办**：`peBankMacUnit` 目前已无调用点（定义仍在 `split_d_compute.cpp:51`），需要在后续清理或复用；`PE_ARRAY_II` 在 16×16 仍为 5，是否改为 1 取决于 16×16 综合是否再报 `204-65`（单bank展开成巨型单拍体曾触发过该告警）。
+**结论（Confirmed）**：被测commit `426ff6c`，规范命令 `./run_hls.sh fsa_stream_split_d` 完整跑完（2026-09-30 13:52），**4×4/16 六项判据全部合格**：
 
-**服务器连通性阻塞（2026-09-30 13:50 起）**：
-- `ssh FSA-FPGA-NM37-tailBox` 失败，原文 `Connection timed out during banner exchange`（多次重试均如此）；
-- **根因已确证（沙箱外只读诊断）**：别名在 `~/.ssh/config` 中为 `HostName 10.128.157.196`，实际解析到 Tailscale 地址 `100.114.138.109`；`tailscale status` 显示该地址对应主机 **`desktop-4h6raeb`，状态 `offline, last seen 1h ago`**。本机 `100.86.236.43 diego-legion` 在线，**tailnet 本身正常，是目标主机掉线**；
-- 注意：在 DSH 沙箱内跑 `tailscale status` 会报 `open \\.\pipe\ProtectedPrefix\Administrators\Tailscale\tailscaled: Access is denied` —— 这是沙箱禁止命名管道，**不代表服务或登录异常**；该诊断必须在沙箱外执行；
-- **P3a 的 4×4 运行结果仍待读取**（远端 `/tmp/p3a_4x4_summary.log`，脚本 `/tmp/p3a_4x4.sh`）；如果它当时已启动，其日志按 `p3a_4x4.sh` 的设计会完整落盘，恢复后可直接读取，不必重跑。
+| 判据 | 实测 |
+|---|---|
+| CSim / CSynth / RTL CoSim | PASS / 通过（2分48秒，CPU 2.53s调度） / **Pass**（9用例，总21208 cycles，C post-check通过） |
+| **顶层估算周期** | **7.300ns**（ap_clk 10.00 / estimated 7.300 / uncertainty 2.70） |
+| 资源 | DSP **40**、BRAM 8、FF 31923、LUT 125123 |
+| QK 累加循环 | `runPeAccumulateTile` 的 `VITIS_LOOP_148_1_VITIS_LOOP_149_2`：Target 5 → **Final 5** |
+| ROW_SUM 循环 | `runPeRowSum` 的 `VITIS_LOOP_204_1`：Target 5 → **Final 5** |
+| PV/扁平循环 | `VITIS_LOOP_363_28` 与 `VITIS_LOOP_294_20`：Target 1 → **Final 1** |
+| `runPeArray` | **latency 3、Final II=1**（rolled形状时为latency 7） |
+| `200-880` / `200-875` / `too complicated` | **0 / 0 / 0** |
 
-**恢复后的第一件事（已准备好，见 `.tmprun/p3a_4x4.sh`）**：按 `p3a_4x4_summary.log` 读取 P3a 的 4×4 结果（顶层时序是否回到 7.300ns、资源、II、`200-880/875` 计数、CoSim）；若日志不完整则只重跑 4×4（约 8 分钟）。随后跑 16×16（约 45 分钟），重点看是否复发 `SCHED 204-65`（单bank展开成巨型单拍体曾触发该告警）以及 II 与迭代延迟是否改善。
+**机理（Decision + Reason + Evidence）**：把 `runPeArray` 的 rolled bank 循环（16次调用、结果经 node 数组写回）替换为**整个阵列在同一个流水体内原地求值**，使 `result[row][col]` 的写回索引由循环变量变为**编译期常量**。证据：同一 4×4 配置下，rolled 形状为 7.893ns（P0 `11b10c9`、P1 `f9f0638` 两次实测一致），P3a 为 **7.300ns**；DSP 与所有 II 均未退化（资源仅 FF/LUT 小幅变化）。
+**Implication（2026-10-09修正）**：4×4周期改善与形状变化有对照证据，但关键路径归因仍待细化。调用latency与II不能等同，16×16的服务间隔和完整反馈延迟尚未测；不能从4×4的3拍推导16×16达标。
 
-**已固化的长跑轮询规程（本次阻塞的副产物）**：`skills/fsa-hls-remote-iteration/references/fsa-hls-workflow.md` 新增 “Polling long runs” 小节，要求：作业只启动一次并 detached；轮询用**短只读连接**加本地等待（不得重启作业、不得删日志）；连接中断后先查进程列表再动作；runner 必须校验精确 commit 并能在不匹配时中止（本次已实际拦下一次未推送就启动的运行）。
+**证据出处**：远端 `/tmp/p3a_4x4_summary.log`（摘要）与 `/tmp/p3a_4x4.log`（完整日志，含 `COMMIT_OK` 与 `HEAD=426ff6c…`）。**注意不要引用远端 `syn/report/`**——它已被2026-10-01来源不明的build覆盖（见第7节）。
 
-**恢复后的判定树（P3a = commit `426ff6c`，已推送）**：
+**用户指示（2026-10-09）**：**只做4×4，暂时不做16×16的验证**；来源不明的2026-10-01 build不追查，后续自测时覆盖。
 
-1. 先读远端 `/tmp/p3a_4x4_summary.log`。若含 `P3A_4X4_DONE`，直接用它的数据；否则只重跑 4×4（`bash /tmp/p3a_4x4.sh`，约 8 分钟）。
-2. 看 4×4 顶层时序：
-   - **≤7.300ns** → 证明"写回索引变常量"确实修掉两档共享的时序根因，进入第 3 步；
-   - **仍 7.893ns** → 说明时序差距另有来源（下一步查 `runPeArray` 的 latency 与顶层关键路径实例），并把 4×4 视为需要单独定位的问题。
-3. 跑 16×16（`FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 ./run_hls.sh fsa_stream_split_d`，约 45 分钟），按三种结果分支：
-   - **综合通过且 `204-65` 为 0、II 改善** → 继续 P3 后续子步（权重驻留/邻居转发），并准备 P4；
-   - **综合通过但 `204-65` > 0** → 说明"单拍体内 256 个 PE 展开"超出调度能力，退到**分次调用**方案：把阵列拆成 2 次调用、每次覆盖一半（`PE_ARRAY_II` 与调用次数相应调整），再测；
-   - **CSynth 超过 60 分钟未完成** → 立即中断，读 `csynth_design_size.rpt` 与层次报告，确认是否展开爆炸，再决定粒度。
-4. 任何一档的 CoSim 都按墙钟门槛（`## run all` 起算，>60 分钟中断判超时，超时数据只能标未验收）。
+### 15.0000 服务器连通性阻塞（2026-09-30 13:50 起，2026-10-09 已解除）
 
-**本地已确证的对照事实（供 P3 决策）**：4×4（16 个 PE、扁平单拍体）从未报过 `204-65`；16×16（256 个 PE）在两种形状下都报过——一次是扁平数组 + `complete dim=0` 分区（`cf11987` 的 16×16 尝试），一次是 4 行 bank 且 bank 循环带 `UNROLL`（`c6a222a`）。因此 `204-65` 的触发与"单拍体内展开的 PE 数量/端口规模"强相关，而与"是否有 bank 循环"弱相关。这条对照是"若 P3a 复发 204-65 就退到分次调用"的依据。
+- 阻塞期间 `ssh FSA-FPGA-NM37-tailBox` 报 `Connection timed out during banner exchange`；沙箱外 `tailscale status` 显示别名指向的 `desktop-4h6raeb / 100.114.138.109` 为 `offline`（`tx 9984 rx 0`），本机 `diego-legion` 在线 → **是目标主机掉线，tailnet 正常**。
+- **2026-10-09 已恢复**：同一命令返回 `REACHABLE / lenovo-ThinkStation-P920`。服务器基本状态：远端HEAD `426ff6c`、tracked工作树干净、无残留`vitis_hls`/`xsim`、`vitis-run`可用、磁盘712G可用。
+- 环境提示：在DSH沙箱内跑 `tailscale status` 会报 `open \\.\pipe\ProtectedPrefix\Administrators\Tailscale\tailscaled: Access is denied`（沙箱禁止命名管道），**不代表服务异常**，该诊断必须在沙箱外执行。
 
 ### 15.000 P1 结果：依赖搬家不足以解决 II（2026-09-30 13:30）
 
