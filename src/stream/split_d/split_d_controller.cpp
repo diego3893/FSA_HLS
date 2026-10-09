@@ -71,7 +71,7 @@ namespace detail{
 namespace detail{
 
     template<int BLOCK_ID>
-    void runQueryBlock(hls::stream<QueryTileHeader>& headers, hls::stream<elem_t>& q_input, hls::stream<KeyValuePacket>& kv_input, hls::stream<acc_t>& output){
+    void runQueryBlock(hls::stream<QueryTileHeader>& headers, hls::stream<dma_word_t>& q_input, hls::stream<KeyValuePacket>& kv_input, hls::stream<acc_t>& output){
         #pragma HLS INLINE off
         #pragma HLS ALLOCATION function instances=detail::runPeArray limit=1
         #pragma HLS ALLOCATION function instances=detail::runAccumulatorColumns limit=1
@@ -86,9 +86,13 @@ namespace detail{
         elem_t q_tile[QUERY_BLOCK_COLS][HEAD_DIM]{};
         #pragma HLS ARRAY_PARTITION variable=q_tile complete dim=1
         for(int col=0; col<QUERY_BLOCK_COLS; ++col){
-            for(int feature=0; feature<HEAD_DIM; ++feature){
+            for(int word=0; word<QKV_WORDS_PER_TOKEN; ++word){
                 #pragma HLS PIPELINE II=1
-                q_tile[col][feature] = q_input.read();
+                const dma_word_t packed = q_input.read();
+                for(int lane=0; lane<DMA_ELEMS_PER_WORD; ++lane){
+                    #pragma HLS UNROLL
+                    q_tile[col][word*DMA_ELEMS_PER_WORD+lane] = dma_unpack_elem(packed, lane);
+                }
             }
         }
         acc_t output_acc[QUERY_BLOCK_COLS][HEAD_DIM]{};
@@ -133,11 +137,15 @@ namespace detail{
 
             // 即使本块无有效query，也按同一计数消费广播，不跳读causal数据。
             for(int row=0; row<PE_DIM; ++row){
-                for(int feature=0; feature<HEAD_DIM; ++feature){
+                for(int word=0; word<QKV_WORDS_PER_TOKEN; ++word){
                     #pragma HLS PIPELINE II=1
                     const KeyValuePacket packet = kv_input.read();
-                    k_tile[row][feature] = packet.key;
-                    v_tile[row][feature] = packet.value;
+                    for(int lane=0; lane<DMA_ELEMS_PER_WORD; ++lane){
+                        #pragma HLS UNROLL
+                        const int feature = word*DMA_ELEMS_PER_WORD+lane;
+                        k_tile[row][feature] = dma_unpack_elem(packet.key, lane);
+                        v_tile[row][feature] = dma_unpack_elem(packet.value, lane);
+                    }
                 }
             }
 
@@ -466,22 +474,22 @@ namespace detail{
         }
     }
 
-    void distributeQueryTile(const dma_word_t q_address[MAX_QKV_WORDS], const dma_word_t k_address[MAX_QKV_WORDS], const dma_word_t v_address[MAX_QKV_WORDS], const QueryTileHeader header, hls::stream<QueryTileHeader>& header0, hls::stream<QueryTileHeader>& header1, hls::stream<elem_t>& q0, hls::stream<elem_t>& q1, hls::stream<KeyValuePacket>& kv0, hls::stream<KeyValuePacket>& kv1){
+    void distributeQueryTile(const dma_word_t q_address[MAX_QKV_WORDS], const dma_word_t k_address[MAX_QKV_WORDS], const dma_word_t v_address[MAX_QKV_WORDS], const QueryTileHeader header, hls::stream<QueryTileHeader>& header0, hls::stream<QueryTileHeader>& header1, hls::stream<dma_word_t>& q0, hls::stream<dma_word_t>& q1, hls::stream<KeyValuePacket>& kv0, hls::stream<KeyValuePacket>& kv1){
         #pragma HLS INLINE off
         header0.write(header);
         if(QUERY_BLOCKS==2){
             header1.write(header);
         }
-        elem_t q_tile[PE_DIM][HEAD_DIM]{};
-        #pragma HLS ARRAY_PARTITION variable=q_tile complete dim=1
-        loadElemTile(q_address, header.query_base, header.active_queries, q_tile);
+        // 每个外存字只读一次；保留原始位模式，到worker内才解包。
         for(int col=0; col<PE_DIM; ++col){
-            for(int feature=0; feature<HEAD_DIM; ++feature){
+            for(int word=0; word<QKV_WORDS_PER_TOKEN; ++word){
                 #pragma HLS PIPELINE II=1
+                const unsigned address = (header.query_base+(unsigned)col)*(unsigned)QKV_WORDS_PER_TOKEN+(unsigned)word;
+                const dma_word_t packed = (unsigned)col<header.active_queries ? q_address[address] : dma_word_t(0);
                 if(col < QUERY_BLOCK_COLS){
-                    q0.write(q_tile[col][feature]);
+                    q0.write(packed);
                 }else{
-                    q1.write(q_tile[col][feature]);
+                    q1.write(packed);
                 }
             }
         }
@@ -490,18 +498,13 @@ namespace detail{
             const unsigned key_base = key_tile*(unsigned)PE_DIM;
             const unsigned remaining = header.length-key_base;
             const unsigned active_keys = remaining<(unsigned)PE_DIM ? remaining : (unsigned)PE_DIM;
-            elem_t k_tile[PE_DIM][HEAD_DIM]{};
-            elem_t v_tile[PE_DIM][HEAD_DIM]{};
-            #pragma HLS ARRAY_PARTITION variable=k_tile complete dim=1
-            #pragma HLS ARRAY_PARTITION variable=v_tile complete dim=1
-            loadElemTile(k_address, key_base, active_keys, k_tile);
-            loadValueTile(v_address, key_base, active_keys, v_tile);
             for(int row=0; row<PE_DIM; ++row){
-                for(int feature=0; feature<HEAD_DIM; ++feature){
+                for(int word=0; word<QKV_WORDS_PER_TOKEN; ++word){
                     #pragma HLS PIPELINE II=1
+                    const unsigned address = (key_base+(unsigned)row)*(unsigned)QKV_WORDS_PER_TOKEN+(unsigned)word;
                     KeyValuePacket packet;
-                    packet.key = k_tile[row][feature];
-                    packet.value = v_tile[row][feature];
+                    packet.key = (unsigned)row<active_keys ? k_address[address] : dma_word_t(0);
+                    packet.value = (unsigned)row<active_keys ? v_address[address] : dma_word_t(0);
                     kv0.write(packet);
                     if(QUERY_BLOCKS==2){
                         kv1.write(packet);
@@ -528,7 +531,7 @@ namespace detail{
         #pragma HLS INLINE off
         #pragma HLS DATAFLOW
         hls::stream<QueryTileHeader> header0("header0"), header1("header1");
-        hls::stream<elem_t> q0("q0"), q1("q1");
+        hls::stream<dma_word_t> q0("q0"), q1("q1");
         hls::stream<KeyValuePacket> kv0("kv0"), kv1("kv1");
         hls::stream<acc_t> output0("output0"), output1("output1");
         #pragma HLS STREAM variable=header0 depth=2

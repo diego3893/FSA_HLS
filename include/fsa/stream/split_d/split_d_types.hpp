@@ -6,6 +6,7 @@
 #define SPLIT_D_TYPES_HPP
 
 #include "fsa/stream/arithmetic.hpp"
+#include "fsa/stream/dma.hpp"
 #include "fsa/stream/split_d/split_d_config.hpp"
 
 namespace fsa{
@@ -31,10 +32,10 @@ namespace split_d{
         bool causal;
     };
 
-    /// @brief 相同key/feature的K和V，由唯一DMA分发器广播至块内tile缓存。
+    /// @brief 同一key的两个原始64-bit K/V字；worker按DMA lane解包。
     struct KeyValuePacket{
-        elem_t key;
-        elem_t value;
+        dma_word_t key;
+        dma_word_t value;
     };
 
 }  // namespace split_d

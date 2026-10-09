@@ -1,0 +1,97 @@
+INFO: [SIM 2] *************** CSIM start ***************
+INFO: [SIM 4] CSIM will launch CLANG as the compiler.
+   Compiling ../../../../../../tests/stream/test_fsa_stream_split_d.cpp in debug mode
+   Compiling ../../../../../../src/stream/accumulator.cpp in debug mode
+   Compiling ../../../../../../src/stream/dma.cpp in debug mode
+   Compiling ../../../../../../src/stream/pe_raw_fma.cpp in debug mode
+   Compiling ../../../../../../src/stream/fp32_raw_fma.cpp in debug mode
+   Compiling ../../../../../../src/stream/arithmetic.cpp in debug mode
+   Compiling ../../../../../../src/stream/split_d/split_d_dma.cpp in debug mode
+   Compiling ../../../../../../src/stream/split_d/split_d_compute.cpp in debug mode
+   Compiling ../../../../../../src/stream/split_d/split_d_controller.cpp in debug mode
+   Compiling ../../../../../../src/stream/split_d/fsa_stream_split_d.cpp in debug mode
+   Generating csim.exe
+non-finite output: case=self-test-nan L=1 causal=0 at=[0][0] actual=nan actual_bits=0x7fc00000 expected=0 expected_bits=0x0
+non-finite failure: case=self-test-nan first_at=[0][0]
+non-finite output: case=self-test-inf L=1 causal=0 at=[0][0] actual=inf actual_bits=0x7f800000 expected=inf expected_bits=0x7ff0000000000000
+non-finite failure: case=self-test-inf first_at=[0][0]
+[bit-baseline] single-key-first L=1 causal=0 words=8
+[bit-baseline] two-key-ones-v L=2 causal=0 words=16
+[bit-baseline] two-key-basis-v L=2 causal=0 words=16
+[bit-baseline] two-key-basis-v-last-feature L=2 causal=0 words=16
+[bit-baseline] primary-noncausal L=7 causal=0 words=56
+[bit-baseline] primary-causal L=7 causal=1 words=56
+[bit-baseline] full-tile-noncausal L=16 causal=0 words=128
+[bit-baseline] full-tile-causal L=16 causal=1 words=128
+[bit-baseline] boundary-noncausal L=3 causal=0 words=24
+[bit-baseline] boundary-causal L=3 causal=1 words=24
+[bit-baseline] boundary-noncausal L=4 causal=0 words=32
+[bit-baseline] boundary-causal L=4 causal=1 words=32
+[bit-baseline] boundary-noncausal L=5 causal=0 words=40
+[bit-baseline] boundary-causal L=5 causal=1 words=40
+[bit-baseline] boundary-noncausal L=8 causal=0 words=64
+[bit-baseline] boundary-causal L=8 causal=1 words=64
+[bit-baseline] boundary-noncausal L=9 causal=0 words=72
+[bit-baseline] boundary-causal L=9 causal=1 words=72
+[rescale-probe] omitted-alpha gap=0.434121
+[bit-baseline] rescale-second-tile L=9 causal=0 words=72
+[rescale-probe] omitted-alpha gap=0.434121
+[bit-baseline] rescale-second-tile-causal L=9 causal=1 words=72
+[bit-baseline] zero-qk-ones-v L=9 causal=0 words=72
+[bit-baseline] zero-qk-ones-v-causal L=9 causal=1 words=72
+[PWL-probe] boundary=1/8 side=-1 key_bits=0xb58b x_bits=0xafff x=-0.124939 piece=0
+[PWL-probe] boundary=1/8 side=0 key_bits=0xb58c x_bits=0xb000 x=-0.125 piece=1
+[PWL-probe] boundary=1/8 side=1 key_bits=0xb58d x_bits=0xb001 x=-0.125122 piece=1
+[PWL-probe] boundary=2/8 side=-1 key_bits=0xb98b x_bits=0xb3ff x=-0.249878 piece=1
+[PWL-probe] boundary=2/8 side=0 key_bits=0xb98c x_bits=0xb400 x=-0.25 piece=2
+[PWL-probe] boundary=2/8 side=1 key_bits=0xb98d x_bits=0xb401 x=-0.250244 piece=2
+[PWL-probe] boundary=3/8 side=-1 key_bits=0xbc28 x_bits=0xb5ff x=-0.374756 piece=2
+[PWL-probe] boundary=3/8 side=0 key_bits=0xbc29 x_bits=0xb600 x=-0.375 piece=3
+[PWL-probe] boundary=3/8 side=1 key_bits=0xbc2a x_bits=0xb602 x=-0.375488 piece=3
+[PWL-probe] boundary=4/8 side=-1 key_bits=0xbd8b x_bits=0xb7ff x=-0.499756 piece=3
+[PWL-probe] boundary=4/8 side=0 key_bits=0xbd8c x_bits=0xb800 x=-0.5 piece=4
+[PWL-probe] boundary=4/8 side=1 key_bits=0xbd8d x_bits=0xb801 x=-0.500488 piece=4
+[PWL-probe] boundary=5/8 side=-1 key_bits=0xbeee x_bits=0xb8ff x=-0.624512 piece=4
+[PWL-probe] boundary=5/8 side=0 key_bits=0xbeef x_bits=0xb900 x=-0.625 piece=5
+[PWL-probe] boundary=5/8 side=1 key_bits=0xbef0 x_bits=0xb901 x=-0.625488 piece=5
+[PWL-probe] boundary=6/8 side=-1 key_bits=0xc028 x_bits=0xb9ff x=-0.749512 piece=5
+[PWL-probe] boundary=6/8 side=0 key_bits=0xc029 x_bits=0xba00 x=-0.75 piece=6
+[PWL-probe] boundary=6/8 side=1 key_bits=0xc02a x_bits=0xba02 x=-0.750977 piece=6
+[PWL-probe] boundary=7/8 side=-1 key_bits=0xc0da x_bits=0xbaff x=-0.874512 piece=6
+[PWL-unreachable] boundary=7/8 adjacent_key_bits=0x40da/0x40db
+[PWL-probe] boundary=7/8 side=1 key_bits=0xc0db x_bits=0xbb01 x=-0.875488 piece=7
+[PWL-probe] boundary=8/8 side=-1 key_bits=0xc18b x_bits=0xbbff x=-0.999512 piece=7
+[PWL-probe] boundary=8/8 side=0 key_bits=0xc18c x_bits=0xbc00 x=-1 piece=0
+[PWL-probe] boundary=8/8 side=1 key_bits=0xc18d x_bits=0xbc01 x=-1.00098 piece=0
+[bit-baseline] pwl-boundary-noncausal L=25 causal=0 words=200
+[PWL-probe] boundary=1/8 side=-1 key_bits=0xb58b x_bits=0xafff x=-0.124939 piece=0
+[PWL-probe] boundary=1/8 side=0 key_bits=0xb58c x_bits=0xb000 x=-0.125 piece=1
+[PWL-probe] boundary=1/8 side=1 key_bits=0xb58d x_bits=0xb001 x=-0.125122 piece=1
+[PWL-probe] boundary=2/8 side=-1 key_bits=0xb98b x_bits=0xb3ff x=-0.249878 piece=1
+[PWL-probe] boundary=2/8 side=0 key_bits=0xb98c x_bits=0xb400 x=-0.25 piece=2
+[PWL-probe] boundary=2/8 side=1 key_bits=0xb98d x_bits=0xb401 x=-0.250244 piece=2
+[PWL-probe] boundary=3/8 side=-1 key_bits=0xbc28 x_bits=0xb5ff x=-0.374756 piece=2
+[PWL-probe] boundary=3/8 side=0 key_bits=0xbc29 x_bits=0xb600 x=-0.375 piece=3
+[PWL-probe] boundary=3/8 side=1 key_bits=0xbc2a x_bits=0xb602 x=-0.375488 piece=3
+[PWL-probe] boundary=4/8 side=-1 key_bits=0xbd8b x_bits=0xb7ff x=-0.499756 piece=3
+[PWL-probe] boundary=4/8 side=0 key_bits=0xbd8c x_bits=0xb800 x=-0.5 piece=4
+[PWL-probe] boundary=4/8 side=1 key_bits=0xbd8d x_bits=0xb801 x=-0.500488 piece=4
+[PWL-probe] boundary=5/8 side=-1 key_bits=0xbeee x_bits=0xb8ff x=-0.624512 piece=4
+[PWL-probe] boundary=5/8 side=0 key_bits=0xbeef x_bits=0xb900 x=-0.625 piece=5
+[PWL-probe] boundary=5/8 side=1 key_bits=0xbef0 x_bits=0xb901 x=-0.625488 piece=5
+[PWL-probe] boundary=6/8 side=-1 key_bits=0xc028 x_bits=0xb9ff x=-0.749512 piece=5
+[PWL-probe] boundary=6/8 side=0 key_bits=0xc029 x_bits=0xba00 x=-0.75 piece=6
+[PWL-probe] boundary=6/8 side=1 key_bits=0xc02a x_bits=0xba02 x=-0.750977 piece=6
+[PWL-probe] boundary=7/8 side=-1 key_bits=0xc0da x_bits=0xbaff x=-0.874512 piece=6
+[PWL-unreachable] boundary=7/8 adjacent_key_bits=0x40da/0x40db
+[PWL-probe] boundary=7/8 side=1 key_bits=0xc0db x_bits=0xbb01 x=-0.875488 piece=7
+[PWL-probe] boundary=8/8 side=-1 key_bits=0xc18b x_bits=0xbbff x=-0.999512 piece=7
+[PWL-probe] boundary=8/8 side=0 key_bits=0xc18c x_bits=0xbc00 x=-1 piece=0
+[PWL-probe] boundary=8/8 side=1 key_bits=0xc18d x_bits=0xbc01 x=-1.00098 piece=0
+[bit-baseline] pwl-boundary-causal L=25 causal=1 words=200
+[math-summary] 24/24
+[bit-summary] 24/24
+[PASS] fsa_stream_split_d: PE=4x4 HEAD_DIM=16 DIM_BLOCKS=4
+INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 448
+INFO: [SIM 1] CSim done with 0 errors.
+INFO: [SIM 3] *************** CSIM finish ***************
