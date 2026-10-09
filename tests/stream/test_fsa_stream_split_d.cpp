@@ -832,6 +832,30 @@ namespace{
         return fp_struct<elem_t>((ap_uint<16>)bits).to_ieee();
     }
 
+    /// @brief 探针专用正常正数RNE：搜索相邻half数值并比较距离，避开宿主转换。
+    unsigned positiveProbeHalfRneBits(const float value){
+        if(!std::isfinite(value) || value<(float)halfFromBits(0x0400U) || value>(float)halfFromBits(0x7bffU)){
+            return 0U;
+        }
+        unsigned lower = 0x0400U;
+        unsigned upper = 0x7bffU;
+        while(lower < upper){
+            const unsigned middle = (lower+upper+1U)/2U;
+            if((float)halfFromBits(middle) <= value){
+                lower = middle;
+            }else{
+                upper = middle-1U;
+            }
+        }
+        if(lower == 0x7bffU){
+            return lower;
+        }
+        const float lower_distance = value-(float)halfFromBits(lower);
+        const float upper_distance = (float)halfFromBits(lower+1U)-value;
+        return upper_distance<lower_distance || (upper_distance==lower_distance && (lower&1U)!=0U)
+            ? lower+1U : lower;
+    }
+
     bool makePwlBoundaryKeys(std::vector<elem_t>& keys){
         // Q仅feature0为1，首key为0且其余key为负。因此FP32 max恒为0，
         // QK/SUB_MAX保持这些可精确表示的half；只需核对最后的half SCALE。
@@ -839,35 +863,67 @@ namespace{
         keys.assign(1, (elem_t)0.0F);
         for(int boundary=1; boundary<=8; ++boundary){
             const float magnitude = (float)boundary/8.0F;
-            const unsigned center = halfBits((elem_t)(magnitude/(float)scale));
-            const float ulp = (float)halfFromBits(halfBits((elem_t)magnitude)+1U)-magnitude;
+            const unsigned center = positiveProbeHalfRneBits(magnitude/(float)scale);
+            const unsigned boundary_bits = positiveProbeHalfRneBits(magnitude);
+            const float ulp = (float)halfFromBits(boundary_bits+1U)-magnitude;
+            bool found[3] = {false, false, false};
+            unsigned selected_bits[3] = {0U, 0U, 0U};
+            unsigned scaled_bits[3] = {0U, 0U, 0U};
+            float nearest[3] = {
+                std::numeric_limits<float>::infinity(),
+                std::numeric_limits<float>::infinity(),
+                std::numeric_limits<float>::infinity()
+            };
+            if(center==0U || boundary_bits==0U){
+                std::cerr << "PWL probe quantization outside normal range\n";
+                return false;
+            }
             for(int side=-1; side<=1; ++side){
-                bool found = false;
-                elem_t selected = (elem_t)0.0F;
-                float nearest = std::numeric_limits<float>::infinity();
+                const int index = side+1;
                 for(int offset=-32; offset<=32; ++offset){
                     const int candidate_bits = (int)center+offset;
                     if(candidate_bits<=0 || candidate_bits>=0x7c00){
                         continue;
                     }
-                    const elem_t key = (elem_t)-(float)halfFromBits((unsigned)candidate_bits);
-                    const elem_t scaled = (elem_t)((float)key*(float)scale);
-                    const float actual_magnitude = -(float)scaled;
+                    // 两个half正常数的乘积最多22个有效位，FP32乘法在这里精确。
+                    // DUT SCALE的FP16输出按RNE量化，不能使用本地half的截断构造。
+                    const unsigned x_bits = positiveProbeHalfRneBits(
+                        (float)halfFromBits((unsigned)candidate_bits)*(float)scale
+                    );
+                    if(x_bits == 0U){
+                        continue;
+                    }
+                    const float actual_magnitude = (float)halfFromBits(x_bits);
                     const bool correct_side = side<0 ? actual_magnitude<magnitude
                         : side>0 ? actual_magnitude>magnitude : actual_magnitude==magnitude;
                     const float distance = std::abs(actual_magnitude-magnitude);
-                    if(correct_side && distance<nearest){
-                        found = true;
-                        selected = key;
-                        nearest = distance;
+                    if(correct_side && (distance<nearest[index] || (side<0 && distance==nearest[index]))){
+                        found[index] = true;
+                        selected_bits[index] = (unsigned)candidate_bits;
+                        scaled_bits[index] = x_bits;
+                        nearest[index] = distance;
                     }
                 }
-                if(!found || nearest>2.0F*ulp){
+            }
+            if(!found[1] && (!found[0] || !found[2] || selected_bits[0]+1U!=selected_bits[2])){
+                std::cerr << "PWL exact-point unreachability not proven: boundary=" << boundary << "\n";
+                return false;
+            }
+            for(int side=-1; side<=1; ++side){
+                const int index = side+1;
+                if(side==0 && !found[index]){
+                    std::cout << "[PWL-unreachable] boundary=" << boundary << "/8"
+                        << " adjacent_key_bits=0x" << std::hex << selected_bits[0]
+                        << "/0x" << selected_bits[2] << std::dec << "\n";
+                    continue;
+                }
+                if(!found[index] || nearest[index]>2.0F*ulp){
                     std::cerr << "PWL coverage failure: boundary=" << boundary
-                        << " side=" << side << " distance=" << nearest << "\n";
+                        << " side=" << side << " distance=" << nearest[index] << "\n";
                     return false;
                 }
-                const elem_t x = (elem_t)((float)selected*(float)scale);
+                const elem_t selected = halfFromBits(selected_bits[index]|0x8000U);
+                const elem_t x = halfFromBits(scaled_bits[index]|0x8000U);
                 const float absolute_x = -(float)x;
                 const float fraction = absolute_x-std::floor(absolute_x);
                 const unsigned piece = (unsigned)(fraction*8.0F);
