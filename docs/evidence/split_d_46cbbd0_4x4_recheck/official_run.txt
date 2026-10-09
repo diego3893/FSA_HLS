@@ -1,0 +1,150 @@
+bash: 无法设定终端进程组 (748911): 对设备不适当的 ioctl 操作
+bash: 此 shell 中无任务控制
+ BASHRC_LOADED
+;2026-10-10T00:47:43+08:00
+[HLS] 模块：fsa_stream_split_d
+[HLS] 脚本：/home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/run_hls.tcl
+
+****** vitis-run v2024.2 (64-bit)
+  **** SW Build 5239630 on 2024-11-10-11:19:46
+  **** Start of session at: Sat Oct 10 00:47:45 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+  **** HLS Build v2024.2 5238294
+Sourcing Tcl script '/home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/run_hls.tcl'
+FSA Split-D: PE=4x4 HEAD_DIM=16 L_MAX=4096
+INFO: [HLS 200-1510] Running: open_project -reset /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build 
+INFO: [HLS 200-10] Creating and opening project '/home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build'.
+INFO: [HLS 200-1510] Running: set_top fsa_stream_split_d 
+INFO: [HLS 200-1510] Running: add_files /home/zhangchenxuan/FSA_HLS/src/stream/split_d/fsa_stream_split_d.cpp -cflags -std=c++14 -I/home/zhangchenxuan/FSA_HLS/include -DFSA_SPLIT_D_PE_DIM=4 -DFSA_SPLIT_D_HEAD_DIM=16 -DFSA_MAX_SEQUENCE_LENGTH=4096 -DFSA_SPLIT_D_DMA_AXI_QKV_DEPTH=16384 -DFSA_SPLIT_D_DMA_AXI_O_DEPTH=32768 
+INFO: [HLS 200-10] Adding design file '/home/zhangchenxuan/FSA_HLS/src/stream/split_d/fsa_stream_split_d.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_controller.cpp -cflags -std=c++14 -I/home/zhangchenxuan/FSA_HLS/include -DFSA_SPLIT_D_PE_DIM=4 -DFSA_SPLIT_D_HEAD_DIM=16 -DFSA_MAX_SEQUENCE_LENGTH=4096 -DFSA_SPLIT_D_DMA_AXI_QKV_DEPTH=16384 -DFSA_SPLIT_D_DMA_AXI_O_DEPTH=32768 
+INFO: [HLS 200-10] Adding design file '/home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_controller.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp -cflags -std=c++14 -I/home/zhangchenxuan/FSA_HLS/include -DFSA_SPLIT_D_PE_DIM=4 -DFSA_SPLIT_D_HEAD_DIM=16 -DFSA_MAX_SEQUENCE_LENGTH=4096 -DFSA_SPLIT_D_DMA_AXI_QKV_DEPTH=16384 -DFSA_SPLIT_D_DMA_AXI_O_DEPTH=32768 
+INFO: [HLS 200-10] Adding design file '/home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_dma.cpp -cflags -std=c++14 -I/home/zhangchenxuan/FSA_HLS/include -DFSA_SPLIT_D_PE_DIM=4 -DFSA_SPLIT_D_HEAD_DIM=16 -DFSA_MAX_SEQUENCE_LENGTH=4096 -DFSA_SPLIT_D_DMA_AXI_QKV_DEPTH=16384 -DFSA_SPLIT_D_DMA_AXI_O_DEPTH=32768 
+INFO: [HLS 200-10] Adding design file '/home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_dma.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files /home/zhangchenxuan/FSA_HLS/src/stream/arithmetic.cpp -cflags -std=c++14 -I/home/zhangchenxuan/FSA_HLS/include -DFSA_SPLIT_D_PE_DIM=4 -DFSA_SPLIT_D_HEAD_DIM=16 -DFSA_MAX_SEQUENCE_LENGTH=4096 -DFSA_SPLIT_D_DMA_AXI_QKV_DEPTH=16384 -DFSA_SPLIT_D_DMA_AXI_O_DEPTH=32768 
+INFO: [HLS 200-10] Adding design file '/home/zhangchenxuan/FSA_HLS/src/stream/arithmetic.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files /home/zhangchenxuan/FSA_HLS/src/stream/fp32_raw_fma.cpp -cflags -std=c++14 -I/home/zhangchenxuan/FSA_HLS/include -DFSA_SPLIT_D_PE_DIM=4 -DFSA_SPLIT_D_HEAD_DIM=16 -DFSA_MAX_SEQUENCE_LENGTH=4096 -DFSA_SPLIT_D_DMA_AXI_QKV_DEPTH=16384 -DFSA_SPLIT_D_DMA_AXI_O_DEPTH=32768 
+INFO: [HLS 200-10] Adding design file '/home/zhangchenxuan/FSA_HLS/src/stream/fp32_raw_fma.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files /home/zhangchenxuan/FSA_HLS/src/stream/pe_raw_fma.cpp -cflags -std=c++14 -I/home/zhangchenxuan/FSA_HLS/include -DFSA_SPLIT_D_PE_DIM=4 -DFSA_SPLIT_D_HEAD_DIM=16 -DFSA_MAX_SEQUENCE_LENGTH=4096 -DFSA_SPLIT_D_DMA_AXI_QKV_DEPTH=16384 -DFSA_SPLIT_D_DMA_AXI_O_DEPTH=32768 
+INFO: [HLS 200-10] Adding design file '/home/zhangchenxuan/FSA_HLS/src/stream/pe_raw_fma.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files /home/zhangchenxuan/FSA_HLS/src/stream/dma.cpp -cflags -std=c++14 -I/home/zhangchenxuan/FSA_HLS/include -DFSA_SPLIT_D_PE_DIM=4 -DFSA_SPLIT_D_HEAD_DIM=16 -DFSA_MAX_SEQUENCE_LENGTH=4096 -DFSA_SPLIT_D_DMA_AXI_QKV_DEPTH=16384 -DFSA_SPLIT_D_DMA_AXI_O_DEPTH=32768 
+INFO: [HLS 200-10] Adding design file '/home/zhangchenxuan/FSA_HLS/src/stream/dma.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files /home/zhangchenxuan/FSA_HLS/src/stream/accumulator.cpp -cflags -std=c++14 -I/home/zhangchenxuan/FSA_HLS/include -DFSA_SPLIT_D_PE_DIM=4 -DFSA_SPLIT_D_HEAD_DIM=16 -DFSA_MAX_SEQUENCE_LENGTH=4096 -DFSA_SPLIT_D_DMA_AXI_QKV_DEPTH=16384 -DFSA_SPLIT_D_DMA_AXI_O_DEPTH=32768 
+INFO: [HLS 200-10] Adding design file '/home/zhangchenxuan/FSA_HLS/src/stream/accumulator.cpp' to the project
+INFO: [HLS 200-1510] Running: add_files -tb /home/zhangchenxuan/FSA_HLS/tests/stream/test_fsa_stream_split_d.cpp -cflags -std=c++14 -I/home/zhangchenxuan/FSA_HLS/include -DFSA_SPLIT_D_PE_DIM=4 -DFSA_SPLIT_D_HEAD_DIM=16 -DFSA_MAX_SEQUENCE_LENGTH=4096 -DFSA_SPLIT_D_DMA_AXI_QKV_DEPTH=16384 -DFSA_SPLIT_D_DMA_AXI_O_DEPTH=32768 
+INFO: [HLS 200-10] Adding test bench file '/home/zhangchenxuan/FSA_HLS/tests/stream/test_fsa_stream_split_d.cpp' to the project
+INFO: [HLS 200-1510] Running: open_solution -reset solution1 -flow_target vivado 
+INFO: [HLS 200-10] Creating and opening solution '/home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1'.
+INFO: [HLS 200-10] Cleaning up the solution database.
+INFO: [HLS 200-1505] Using flow_target 'vivado'
+Resolution: For help on HLS 200-1505 see docs.xilinx.com/access/sources/dita/topic?Doc_Version=2024.2%20English&url=ug1448-hls-guidance&resourceid=200-1505.html
+INFO: [HLS 200-1510] Running: set_part xcvu37p_CIV-fsvh2892-2-e 
+INFO: [HLS 200-1611] Setting target device to 'xcvu37p_CIV-fsvh2892-2-e'
+INFO: [HLS 200-1510] Running: create_clock -period 10 -name default 
+INFO: [SYN 201-201] Setting up clock 'default' with a period of 10ns.
+INFO: [HLS 200-1510] Running: set_clock_uncertainty 2.7 
+INFO: [SYN 201-201] Setting up clock 'default' with an uncertainty of 2.7ns.
+INFO: [HLS 200-1510] Running: csim_design 
+INFO: [SIM 211-2] *************** CSIM start ***************
+INFO: [SIM 211-4] CSIM will launch CLANG as the compiler.
+INFO: [HLS 200-2036] Building debug C Simulation binaries
+   Compiling ../../../../../../tests/stream/test_fsa_stream_split_d.cpp in debug mode
+   Compiling ../../../../../../src/stream/accumulator.cpp in debug mode
+   Compiling ../../../../../../src/stream/dma.cpp in debug mode
+   Compiling ../../../../../../src/stream/pe_raw_fma.cpp in debug mode
+   Compiling ../../../../../../src/stream/fp32_raw_fma.cpp in debug mode
+   Compiling ../../../../../../src/stream/arithmetic.cpp in debug mode
+   Compiling ../../../../../../src/stream/split_d/split_d_dma.cpp in debug mode
+   Compiling ../../../../../../src/stream/split_d/split_d_compute.cpp in debug mode
+   Compiling ../../../../../../src/stream/split_d/split_d_controller.cpp in debug mode
+   Compiling ../../../../../../src/stream/split_d/fsa_stream_split_d.cpp in debug mode
+   Generating csim.exe
+non-finite output: case=self-test-nan L=1 causal=0 at=[0][0] actual=nan actual_bits=0x7fc00000 expected=0 expected_bits=0x0
+non-finite failure: case=self-test-nan first_at=[0][0]
+non-finite output: case=self-test-inf L=1 causal=0 at=[0][0] actual=inf actual_bits=0x7f800000 expected=inf expected_bits=0x7ff0000000000000
+non-finite failure: case=self-test-inf first_at=[0][0]
+[bit-baseline] single-key-first L=1 causal=0 words=8
+[bit-baseline] two-key-ones-v L=2 causal=0 words=16
+[bit-baseline] two-key-basis-v L=2 causal=0 words=16
+[bit-baseline] two-key-basis-v-last-feature L=2 causal=0 words=16
+[bit-baseline] primary-noncausal L=7 causal=0 words=56
+[bit-baseline] primary-causal L=7 causal=1 words=56
+[bit-baseline] full-tile-noncausal L=16 causal=0 words=128
+[bit-baseline] full-tile-causal L=16 causal=1 words=128
+[bit-baseline] boundary-noncausal L=3 causal=0 words=24
+[bit-baseline] boundary-causal L=3 causal=1 words=24
+[bit-baseline] boundary-noncausal L=4 causal=0 words=32
+[bit-baseline] boundary-causal L=4 causal=1 words=32
+[bit-baseline] boundary-noncausal L=5 causal=0 words=40
+[bit-baseline] boundary-causal L=5 causal=1 words=40
+[bit-baseline] boundary-noncausal L=8 causal=0 words=64
+[bit-baseline] boundary-causal L=8 causal=1 words=64
+[bit-baseline] boundary-noncausal L=9 causal=0 words=72
+[bit-baseline] boundary-causal L=9 causal=1 words=72
+[rescale-probe] omitted-alpha gap=0.434121
+[rescale-probe] omitted-alpha gap=0.434121
+[bit-baseline] zero-qk-ones-v L=9 causal=0 words=72
+[bit-baseline] zero-qk-ones-v-causal L=9 causal=1 words=72
+[PWL-probe] boundary=1/8 side=-1 key_bits=0xb58b x_bits=0xafff x=-0.124939 piece=0
+[PWL-probe] boundary=1/8 side=0 key_bits=0xb58c x_bits=0xb000 x=-0.125 piece=1
+[PWL-probe] boundary=1/8 side=1 key_bits=0xb58d x_bits=0xb001 x=-0.125122 piece=1
+[PWL-probe] boundary=2/8 side=-1 key_bits=0xb98b x_bits=0xb3ff x=-0.249878 piece=1
+[PWL-probe] boundary=2/8 side=0 key_bits=0xb98c x_bits=0xb400 x=-0.25 piece=2
+[PWL-probe] boundary=2/8 side=1 key_bits=0xb98d x_bits=0xb401 x=-0.250244 piece=2
+[PWL-probe] boundary=3/8 side=-1 key_bits=0xbc28 x_bits=0xb5ff x=-0.374756 piece=2
+[PWL-probe] boundary=3/8 side=0 key_bits=0xbc29 x_bits=0xb600 x=-0.375 piece=3
+[PWL-probe] boundary=3/8 side=1 key_bits=0xbc2a x_bits=0xb602 x=-0.375488 piece=3
+[PWL-probe] boundary=4/8 side=-1 key_bits=0xbd8b x_bits=0xb7ff x=-0.499756 piece=3
+[PWL-probe] boundary=4/8 side=0 key_bits=0xbd8c x_bits=0xb800 x=-0.5 piece=4
+[PWL-probe] boundary=4/8 side=1 key_bits=0xbd8d x_bits=0xb801 x=-0.500488 piece=4
+[PWL-probe] boundary=5/8 side=-1 key_bits=0xbeed x_bits=0xb8ff x=-0.624512 piece=4
+[PWL-probe] boundary=5/8 side=0 key_bits=0xbeef x_bits=0xb900 x=-0.625 piece=5
+[PWL-probe] boundary=5/8 side=1 key_bits=0xbef0 x_bits=0xb901 x=-0.625488 piece=5
+[PWL-probe] boundary=6/8 side=-1 key_bits=0xc028 x_bits=0xb9ff x=-0.749512 piece=5
+[PWL-probe] boundary=6/8 side=0 key_bits=0xc029 x_bits=0xba00 x=-0.75 piece=6
+[PWL-probe] boundary=6/8 side=1 key_bits=0xc02a x_bits=0xba02 x=-0.750977 piece=6
+[PWL-probe] boundary=7/8 side=-1 key_bits=0xc0da x_bits=0xbaff x=-0.874512 piece=6
+PWL coverage failure: boundary=7 side=0 distance=inf
+[PWL-probe] boundary=1/8 side=-1 key_bits=0xb58b x_bits=0xafff x=-0.124939 piece=0
+[PWL-probe] boundary=1/8 side=0 key_bits=0xb58c x_bits=0xb000 x=-0.125 piece=1
+[PWL-probe] boundary=1/8 side=1 key_bits=0xb58d x_bits=0xb001 x=-0.125122 piece=1
+[PWL-probe] boundary=2/8 side=-1 key_bits=0xb98b x_bits=0xb3ff x=-0.249878 piece=1
+[PWL-probe] boundary=2/8 side=0 key_bits=0xb98c x_bits=0xb400 x=-0.25 piece=2
+[PWL-probe] boundary=2/8 side=1 key_bits=0xb98d x_bits=0xb401 x=-0.250244 piece=2
+[PWL-probe] boundary=3/8 side=-1 key_bits=0xbc28 x_bits=0xb5ff x=-0.374756 piece=2
+[PWL-probe] boundary=3/8 side=0 key_bits=0xbc29 x_bits=0xb600 x=-0.375 piece=3
+[PWL-probe] boundary=3/8 side=1 key_bits=0xbc2a x_bits=0xb602 x=-0.375488 piece=3
+[PWL-probe] boundary=4/8 side=-1 key_bits=0xbd8b x_bits=0xb7ff x=-0.499756 piece=3
+[PWL-probe] boundary=4/8 side=0 key_bits=0xbd8c x_bits=0xb800 x=-0.5 piece=4
+[PWL-probe] boundary=4/8 side=1 key_bits=0xbd8d x_bits=0xb801 x=-0.500488 piece=4
+[PWL-probe] boundary=5/8 side=-1 key_bits=0xbeed x_bits=0xb8ff x=-0.624512 piece=4
+[PWL-probe] boundary=5/8 side=0 key_bits=0xbeef x_bits=0xb900 x=-0.625 piece=5
+[PWL-probe] boundary=5/8 side=1 key_bits=0xbef0 x_bits=0xb901 x=-0.625488 piece=5
+[PWL-probe] boundary=6/8 side=-1 key_bits=0xc028 x_bits=0xb9ff x=-0.749512 piece=5
+[PWL-probe] boundary=6/8 side=0 key_bits=0xc029 x_bits=0xba00 x=-0.75 piece=6
+[PWL-probe] boundary=6/8 side=1 key_bits=0xc02a x_bits=0xba02 x=-0.750977 piece=6
+[PWL-probe] boundary=7/8 side=-1 key_bits=0xc0da x_bits=0xbaff x=-0.874512 piece=6
+PWL coverage failure: boundary=7 side=0 distance=inf
+[math-summary] 22/24
+[bit-summary] 20/20
+@E Simulation failed: Function 'main' returns nonzero value '1'.
+ERROR: [SIM 211-100] 'csim_design' failed: nonzero return value.
+INFO: [SIM 211-3] *************** CSIM finish ***************
+INFO: [HLS 200-2161] Finished Command csim_design Elapsed time: 00:00:36; Allocated memory: 1.000 MB.
+4
+    while executing
+"source /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/run_hls.tcl"
+    ("uplevel" body line 1)
+    invoked from within
+"uplevel \#0 [list source $tclfile] "
+
+INFO: [HLS 200-112] Total CPU user time: 41.41 seconds. Total CPU system time: 3.98 seconds. Total elapsed time: 55.93 seconds; peak allocated memory: 642.246 MB.
+INFO: [vitis-run 60-1662] Stopping dispatch session having empty uuid.
+RUN_EXIT=date
+ $run_status;RUN_EXIT=--iso-8601=seconds
+ $run_status;exit
+bash: exit: $run_status\: 需要数值参数

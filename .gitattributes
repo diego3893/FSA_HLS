@@ -5,3 +5,6 @@
 *.cpp text eol=lf
 *.hpp text eol=lf
 *.md  text eol=lf
+
+# Preserve official log bytes and tool-generated trailing spaces for SHA256 checks.
+docs/evidence/split_d_46cbbd0_4x4_recheck/*.txt -text -whitespace
