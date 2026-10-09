@@ -1,0 +1,128 @@
+
+
+================================================================
+== Vitis HLS Report for 'stageAccumulatorResult'
+================================================================
+* Date:           Sat Oct 10 02:19:57 2026
+
+* Version:        2024.2 (Build 5238294 on Nov  8 2024)
+* Project:        build
+* Solution:       solution1 (Vivado IP Flow Target)
+* Product family: virtexuplusHBM
+* Target device:  xcvu37p_CIV-fsvh2892-2-e
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing: 
+    * Summary: 
+    +--------+----------+----------+------------+
+    |  Clock |  Target  | Estimated| Uncertainty|
+    +--------+----------+----------+------------+
+    |ap_clk  |  10.00 ns|      0 ns|     2.70 ns|
+    +--------+----------+----------+------------+
+
++ Latency: 
+    * Summary: 
+    +---------+---------+-----------+-----------+-----+-----+---------+
+    |  Latency (cycles) |   Latency (absolute)  |  Interval | Pipeline|
+    |   min   |   max   |    min    |    max    | min | max |   Type  |
+    +---------+---------+-----------+-----------+-----+-----+---------+
+    |        1|        1|  10.000 ns|  10.000 ns|    1|    1|      yes|
+    +---------+---------+-----------+-----------+-----+-----+---------+
+
+    + Detail: 
+        * Instance: 
+        N/A
+
+        * Loop: 
+        N/A
+
+
+
+================================================================
+== Utilization Estimates
+================================================================
+* Summary: 
++---------------------+---------+------+---------+---------+-----+
+|         Name        | BRAM_18K|  DSP |    FF   |   LUT   | URAM|
++---------------------+---------+------+---------+---------+-----+
+|DSP                  |        -|     -|        -|        -|    -|
+|Expression           |        -|     -|        0|        2|    -|
+|FIFO                 |        -|     -|        -|        -|    -|
+|Instance             |        -|     -|        -|        -|    -|
+|Memory               |        -|     -|        -|        -|    -|
+|Multiplexer          |        -|     -|        -|        -|    -|
+|Register             |        -|     -|       66|        -|    -|
++---------------------+---------+------+---------+---------+-----+
+|Total                |        0|     0|       66|        2|    0|
++---------------------+---------+------+---------+---------+-----+
+|Available SLR        |     1344|  3008|   869120|   434560|  320|
++---------------------+---------+------+---------+---------+-----+
+|Utilization SLR (%)  |        0|     0|       ~0|       ~0|    0|
++---------------------+---------+------+---------+---------+-----+
+|Available            |     4032|  9024|  2607360|  1303680|  960|
++---------------------+---------+------+---------+---------+-----+
+|Utilization (%)      |        0|     0|       ~0|       ~0|    0|
++---------------------+---------+------+---------+---------+-----+
+
++ Detail: 
+    * Instance: 
+    N/A
+
+    * DSP: 
+    N/A
+
+    * Memory: 
+    N/A
+
+    * FIFO: 
+    N/A
+
+    * Expression: 
+    +---------------+----------+----+---+----+------------+------------+
+    | Variable Name | Operation| DSP| FF| LUT| Bitwidth P0| Bitwidth P1|
+    +---------------+----------+----+---+----+------------+------------+
+    |ap_enable_pp0  |       xor|   0|  0|   2|           1|           2|
+    +---------------+----------+----+---+----+------------+------------+
+    |Total          |          |   0|  0|   2|           1|           2|
+    +---------------+----------+----+---+----+------------+------------+
+
+    * Multiplexer: 
+    N/A
+
+    * Register: 
+    +----------------------------+----+----+-----+-----------+
+    |            Name            | FF | LUT| Bits| Const Bits|
+    +----------------------------+----+----+-----+-----------+
+    |ap_CS_fsm                   |   1|   0|    1|          0|
+    |ap_enable_reg_pp0_iter1     |   1|   0|    1|          0|
+    |result_write_2_read_reg_42  |  32|   0|   32|          0|
+    |result_write_read_reg_47    |  32|   0|   32|          0|
+    +----------------------------+----+----+-----+-----------+
+    |Total                       |  66|   0|   66|          0|
+    +----------------------------+----+----+-----+-----------+
+
+
+
+================================================================
+== Interface
+================================================================
+* Summary: 
++----------------+-----+-----+------------+------------------------+--------------+
+|    RTL Ports   | Dir | Bits|  Protocol  |      Source Object     |    C Type    |
++----------------+-----+-----+------------+------------------------+--------------+
+|ap_clk          |   in|    1|  ap_ctrl_hs|  stageAccumulatorResult|  return value|
+|ap_rst          |   in|    1|  ap_ctrl_hs|  stageAccumulatorResult|  return value|
+|ap_start        |   in|    1|  ap_ctrl_hs|  stageAccumulatorResult|  return value|
+|ap_done         |  out|    1|  ap_ctrl_hs|  stageAccumulatorResult|  return value|
+|ap_idle         |  out|    1|  ap_ctrl_hs|  stageAccumulatorResult|  return value|
+|ap_ready        |  out|    1|  ap_ctrl_hs|  stageAccumulatorResult|  return value|
+|ap_ce           |   in|    1|  ap_ctrl_hs|  stageAccumulatorResult|  return value|
+|ap_return_0     |  out|   32|  ap_ctrl_hs|  stageAccumulatorResult|  return value|
+|ap_return_1     |  out|   32|  ap_ctrl_hs|  stageAccumulatorResult|  return value|
+|result_write    |   in|   32|     ap_none|            result_write|        scalar|
+|result_write_2  |   in|   32|     ap_none|          result_write_2|        scalar|
++----------------+-----+-----+------------+------------------------+--------------+
+

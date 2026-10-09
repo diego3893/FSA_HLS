@@ -1,0 +1,60 @@
+{
+  "tested_commit": "130c778f5878b34ed998c6be6adcf3e64579c0ea",
+  "stages": [
+    "CSim PASS",
+    "CSynth complete",
+    "CoSim PASS"
+  ],
+  "loops": {
+    "block0_QK": {
+      "achieved_II": 5,
+      "iteration_latency": 6
+    },
+    "block0_ROW_SUM": {
+      "achieved_II": 5,
+      "iteration_latency": 6
+    },
+    "block0_PWL": {
+      "achieved_II": 1,
+      "iteration_latency": 6
+    },
+    "block0_PV": {
+      "achieved_II": 1,
+      "iteration_latency": 9
+    },
+    "block1_QK": {
+      "achieved_II": 5,
+      "iteration_latency": 6
+    },
+    "block1_ROW_SUM": {
+      "achieved_II": 5,
+      "iteration_latency": 6
+    },
+    "block1_PWL": {
+      "achieved_II": 1,
+      "iteration_latency": 6
+    },
+    "block1_PV": {
+      "achieved_II": 1,
+      "iteration_latency": 9
+    }
+  },
+  "forbidden_warning_counts": {
+    "200-880": 0,
+    "200-875": 0,
+    "214-114": 0,
+    "200-471": 0,
+    "too complicated": 0
+  },
+  "invalid_canary_matches": 2,
+  "exact_input_output_baseline_SHA": true,
+  "worker_count": 2,
+  "PE_total": 16,
+  "Accumulator_columns_total": 4,
+  "reciprocal_restoring_loop_count": 4,
+  "independent_worker_start_control": true,
+  "waveform_overlap_trace_available": false,
+  "physical_implementation_verified": false,
+  "valid_transaction_matches": 24,
+  "valid_output_words_compared": 1576
+}

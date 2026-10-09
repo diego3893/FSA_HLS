@@ -1,0 +1,188 @@
+
+
+================================================================
+== Vitis HLS Report for 'runQueryBlock_1_Pipeline_VITIS_LOOP_88_1_VITIS_LOOP_89_2'
+================================================================
+* Date:           Sat Oct 10 02:20:02 2026
+
+* Version:        2024.2 (Build 5238294 on Nov  8 2024)
+* Project:        build
+* Solution:       solution1 (Vivado IP Flow Target)
+* Product family: virtexuplusHBM
+* Target device:  xcvu37p_CIV-fsvh2892-2-e
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing: 
+    * Summary: 
+    +--------+----------+----------+------------+
+    |  Clock |  Target  | Estimated| Uncertainty|
+    +--------+----------+----------+------------+
+    |ap_clk  |  10.00 ns|  2.092 ns|     2.70 ns|
+    +--------+----------+----------+------------+
+
++ Latency: 
+    * Summary: 
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+    |  Latency (cycles) |  Latency (absolute) |  Interval |                    Pipeline                    |
+    |   min   |   max   |    min   |    max   | min | max |                      Type                      |
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+    |       10|       10|  0.100 us|  0.100 us|    9|    9|  loop auto-rewind stp (delay=0 clock cycles(s))|
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+
+    + Detail: 
+        * Instance: 
+        N/A
+
+        * Loop: 
+        +-----------------------------------+---------+---------+----------+-----------+-----------+------+----------+
+        |                                   |  Latency (cycles) | Iteration|  Initiation Interval  | Trip |          |
+        |             Loop Name             |   min   |   max   |  Latency |  achieved |   target  | Count| Pipelined|
+        +-----------------------------------+---------+---------+----------+-----------+-----------+------+----------+
+        |- VITIS_LOOP_88_1_VITIS_LOOP_89_2  |        8|        8|         2|          1|          1|     8|       yes|
+        +-----------------------------------+---------+---------+----------+-----------+-----------+------+----------+
+
+
+
+================================================================
+== Utilization Estimates
+================================================================
+* Summary: 
++---------------------+---------+------+---------+---------+-----+
+|         Name        | BRAM_18K|  DSP |    FF   |   LUT   | URAM|
++---------------------+---------+------+---------+---------+-----+
+|DSP                  |        -|     -|        -|        -|    -|
+|Expression           |        -|     -|        0|       73|    -|
+|FIFO                 |        -|     -|        -|        -|    -|
+|Instance             |        -|     -|        -|        -|    -|
+|Memory               |        -|     -|        -|        -|    -|
+|Multiplexer          |        -|     -|        0|       63|    -|
+|Register             |        -|     -|       12|        -|    -|
++---------------------+---------+------+---------+---------+-----+
+|Total                |        0|     0|       12|      136|    0|
++---------------------+---------+------+---------+---------+-----+
+|Available SLR        |     1344|  3008|   869120|   434560|  320|
++---------------------+---------+------+---------+---------+-----+
+|Utilization SLR (%)  |        0|     0|       ~0|       ~0|    0|
++---------------------+---------+------+---------+---------+-----+
+|Available            |     4032|  9024|  2607360|  1303680|  960|
++---------------------+---------+------+---------+---------+-----+
+|Utilization (%)      |        0|     0|       ~0|       ~0|    0|
++---------------------+---------+------+---------+---------+-----+
+
++ Detail: 
+    * Instance: 
+    N/A
+
+    * DSP: 
+    N/A
+
+    * Memory: 
+    N/A
+
+    * FIFO: 
+    N/A
+
+    * Expression: 
+    +---------------------------+----------+----+---+----+------------+------------+
+    |       Variable Name       | Operation| DSP| FF| LUT| Bitwidth P0| Bitwidth P1|
+    +---------------------------+----------+----+---+----+------------+------------+
+    |add_ln88_1_fu_243_p2       |         +|   0|  0|   9|           2|           1|
+    |add_ln88_fu_212_p2         |         +|   0|  0|  12|           4|           1|
+    |add_ln89_fu_355_p2         |         +|   0|  0|  10|           3|           1|
+    |ap_block_pp0_stage0_11001  |       and|   0|  0|   2|           1|           1|
+    |cond1372_fu_257_p2         |      icmp|   0|  0|   9|           2|           1|
+    |icmp_ln88_fu_206_p2        |      icmp|   0|  0|  12|           4|           5|
+    |icmp_ln89_fu_229_p2        |      icmp|   0|  0|  12|           3|           4|
+    |select_ln88_1_fu_249_p3    |    select|   0|  0|   2|           1|           2|
+    |select_ln88_fu_235_p3      |    select|   0|  0|   3|           1|           1|
+    |ap_enable_pp0              |       xor|   0|  0|   2|           1|           2|
+    +---------------------------+----------+----+---+----+------------+------------+
+    |Total                      |          |   0|  0|  73|          22|          19|
+    +---------------------------+----------+----+---+----+------------+------------+
+
+    * Multiplexer: 
+    +--------------------------------------+----+-----------+-----+-----------+
+    |                 Name                 | LUT| Input Size| Bits| Total Bits|
+    +--------------------------------------+----+-----------+-----+-----------+
+    |ap_done_int                           |   9|          2|    1|          2|
+    |ap_enable_reg_pp0_iter1               |   9|          2|    1|          2|
+    |ap_sig_allocacmp_indvar_flatten_load  |   9|          2|    4|          8|
+    |col_fu_74                             |   9|          2|    2|          4|
+    |indvar_flatten_fu_78                  |   9|          2|    4|          8|
+    |q1_blk_n                              |   9|          2|    1|          2|
+    |word_fu_70                            |   9|          2|    3|          6|
+    +--------------------------------------+----+-----------+-----+-----------+
+    |Total                                 |  63|         14|   16|         32|
+    +--------------------------------------+----+-----------+-----+-----------+
+
+    * Register: 
+    +-------------------------+---+----+-----+-----------+
+    |           Name          | FF| LUT| Bits| Const Bits|
+    +-------------------------+---+----+-----+-----------+
+    |ap_CS_fsm                |  1|   0|    1|          0|
+    |ap_done_reg              |  1|   0|    1|          0|
+    |ap_enable_reg_pp0_iter1  |  1|   0|    1|          0|
+    |col_fu_74                |  2|   0|    2|          0|
+    |indvar_flatten_fu_78     |  4|   0|    4|          0|
+    |word_fu_70               |  3|   0|    3|          0|
+    +-------------------------+---+----+-----+-----------+
+    |Total                    | 12|   0|   12|          0|
+    +-------------------------+---+----+-----+-----------+
+
+
+
+================================================================
+== Interface
+================================================================
+* Summary: 
++-------------------+-----+-----+------------+-----------------------------------------------------------+--------------+
+|     RTL Ports     | Dir | Bits|  Protocol  |                       Source Object                       |    C Type    |
++-------------------+-----+-----+------------+-----------------------------------------------------------+--------------+
+|ap_clk             |   in|    1|  ap_ctrl_hs|  runQueryBlock<1>_Pipeline_VITIS_LOOP_88_1_VITIS_LOOP_89_2|  return value|
+|ap_rst             |   in|    1|  ap_ctrl_hs|  runQueryBlock<1>_Pipeline_VITIS_LOOP_88_1_VITIS_LOOP_89_2|  return value|
+|ap_start           |   in|    1|  ap_ctrl_hs|  runQueryBlock<1>_Pipeline_VITIS_LOOP_88_1_VITIS_LOOP_89_2|  return value|
+|ap_done            |  out|    1|  ap_ctrl_hs|  runQueryBlock<1>_Pipeline_VITIS_LOOP_88_1_VITIS_LOOP_89_2|  return value|
+|ap_idle            |  out|    1|  ap_ctrl_hs|  runQueryBlock<1>_Pipeline_VITIS_LOOP_88_1_VITIS_LOOP_89_2|  return value|
+|ap_ready           |  out|    1|  ap_ctrl_hs|  runQueryBlock<1>_Pipeline_VITIS_LOOP_88_1_VITIS_LOOP_89_2|  return value|
+|q1_dout            |   in|   64|     ap_fifo|                                                         q1|       pointer|
+|q1_empty_n         |   in|    1|     ap_fifo|                                                         q1|       pointer|
+|q1_read            |  out|    1|     ap_fifo|                                                         q1|       pointer|
+|q1_num_data_valid  |   in|    4|     ap_fifo|                                                         q1|       pointer|
+|q1_fifo_cap        |   in|    4|     ap_fifo|                                                         q1|       pointer|
+|q_tile_3_address0  |  out|    3|   ap_memory|                                                   q_tile_3|         array|
+|q_tile_3_ce0       |  out|    1|   ap_memory|                                                   q_tile_3|         array|
+|q_tile_3_we0       |  out|    1|   ap_memory|                                                   q_tile_3|         array|
+|q_tile_3_d0        |  out|   16|   ap_memory|                                                   q_tile_3|         array|
+|q_tile_3_address1  |  out|    3|   ap_memory|                                                   q_tile_3|         array|
+|q_tile_3_ce1       |  out|    1|   ap_memory|                                                   q_tile_3|         array|
+|q_tile_3_we1       |  out|    1|   ap_memory|                                                   q_tile_3|         array|
+|q_tile_3_d1        |  out|   16|   ap_memory|                                                   q_tile_3|         array|
+|q_tile_2_address0  |  out|    3|   ap_memory|                                                   q_tile_2|         array|
+|q_tile_2_ce0       |  out|    1|   ap_memory|                                                   q_tile_2|         array|
+|q_tile_2_we0       |  out|    1|   ap_memory|                                                   q_tile_2|         array|
+|q_tile_2_d0        |  out|   16|   ap_memory|                                                   q_tile_2|         array|
+|q_tile_2_address1  |  out|    3|   ap_memory|                                                   q_tile_2|         array|
+|q_tile_2_ce1       |  out|    1|   ap_memory|                                                   q_tile_2|         array|
+|q_tile_2_we1       |  out|    1|   ap_memory|                                                   q_tile_2|         array|
+|q_tile_2_d1        |  out|   16|   ap_memory|                                                   q_tile_2|         array|
+|q_tile_1_address0  |  out|    3|   ap_memory|                                                   q_tile_1|         array|
+|q_tile_1_ce0       |  out|    1|   ap_memory|                                                   q_tile_1|         array|
+|q_tile_1_we0       |  out|    1|   ap_memory|                                                   q_tile_1|         array|
+|q_tile_1_d0        |  out|   16|   ap_memory|                                                   q_tile_1|         array|
+|q_tile_1_address1  |  out|    3|   ap_memory|                                                   q_tile_1|         array|
+|q_tile_1_ce1       |  out|    1|   ap_memory|                                                   q_tile_1|         array|
+|q_tile_1_we1       |  out|    1|   ap_memory|                                                   q_tile_1|         array|
+|q_tile_1_d1        |  out|   16|   ap_memory|                                                   q_tile_1|         array|
+|q_tile_address0    |  out|    3|   ap_memory|                                                     q_tile|         array|
+|q_tile_ce0         |  out|    1|   ap_memory|                                                     q_tile|         array|
+|q_tile_we0         |  out|    1|   ap_memory|                                                     q_tile|         array|
+|q_tile_d0          |  out|   16|   ap_memory|                                                     q_tile|         array|
+|q_tile_address1    |  out|    3|   ap_memory|                                                     q_tile|         array|
+|q_tile_ce1         |  out|    1|   ap_memory|                                                     q_tile|         array|
+|q_tile_we1         |  out|    1|   ap_memory|                                                     q_tile|         array|
+|q_tile_d1          |  out|   16|   ap_memory|                                                     q_tile|         array|
++-------------------+-----+-----+------------+-----------------------------------------------------------+--------------+
+

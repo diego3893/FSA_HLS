@@ -1,0 +1,4189 @@
+{
+  "memories": [
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "q_tile_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "q_tile_2_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "q_tile_3_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "q_tile_4_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "q_tile_5_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "q_tile_6_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "q_tile_7_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "q_tile_8_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "k_tile_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "k_tile_4_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "k_tile_5_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "k_tile_6_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "k_tile_7_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "k_tile_8_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "k_tile_9_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "k_tile_10_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "v_tile_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "v_tile_4_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "v_tile_5_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "v_tile_6_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "v_tile_7_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "v_tile_8_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "v_tile_9_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "distributeQueryTile",
+      "instances": 1,
+      "columns": [
+        "v_tile_10_U",
+        "distributeQueryTile_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "gatherQueryTile",
+      "instances": 1,
+      "columns": [
+        "normalized_U",
+        "gatherQueryTile_normalized_RAM_AUTO_1R1W",
+        "0",
+        "32",
+        "33",
+        "0",
+        "16",
+        "32",
+        "1",
+        "512"
+      ]
+    },
+    {
+      "module": "gatherQueryTile",
+      "instances": 1,
+      "columns": [
+        "normalized_1_U",
+        "gatherQueryTile_normalized_RAM_AUTO_1R1W",
+        "0",
+        "32",
+        "33",
+        "0",
+        "16",
+        "32",
+        "1",
+        "512"
+      ]
+    },
+    {
+      "module": "gatherQueryTile",
+      "instances": 1,
+      "columns": [
+        "normalized_2_U",
+        "gatherQueryTile_normalized_RAM_AUTO_1R1W",
+        "0",
+        "32",
+        "33",
+        "0",
+        "16",
+        "32",
+        "1",
+        "512"
+      ]
+    },
+    {
+      "module": "gatherQueryTile",
+      "instances": 1,
+      "columns": [
+        "normalized_3_U",
+        "gatherQueryTile_normalized_RAM_AUTO_1R1W",
+        "0",
+        "32",
+        "33",
+        "0",
+        "16",
+        "32",
+        "1",
+        "512"
+      ]
+    },
+    {
+      "module": "runAccumulatorColumns",
+      "instances": 2,
+      "columns": [
+        "fsa_anonymous_namespace_ACC_EXP2_PWL_INTERCEPT_BITS_U",
+        "runAccumulatorColumns_fsa_anonymous_namespace_ACC_EXP2_PWL_INTERCEPT_BITS_ROMcud",
+        "0",
+        "32",
+        "33",
+        "0",
+        "8",
+        "25",
+        "1",
+        "200"
+      ]
+    },
+    {
+      "module": "runAccumulatorColumns",
+      "instances": 2,
+      "columns": [
+        "fsa_anonymous_namespace_ACC_EXP2_PWL_SLOPE_BITS_U",
+        "runAccumulatorColumns_fsa_anonymous_namespace_ACC_EXP2_PWL_SLOPE_BITS_ROM_AUTbkb",
+        "0",
+        "32",
+        "33",
+        "0",
+        "8",
+        "26",
+        "1",
+        "208"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "v_tile_3_U",
+        "runQueryBlock_0_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "v_tile_2_U",
+        "runQueryBlock_0_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "v_tile_1_U",
+        "runQueryBlock_0_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "v_tile_U",
+        "runQueryBlock_0_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "k_tile_3_U",
+        "runQueryBlock_0_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "k_tile_2_U",
+        "runQueryBlock_0_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "k_tile_1_U",
+        "runQueryBlock_0_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "k_tile_U",
+        "runQueryBlock_0_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "fsa_anonymous_namespace_EXP2_PWL_INTERCEPT_BITS_U",
+        "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23_fsa_anonymous_namespace_EXP2_PWL_IeOg",
+        "0",
+        "32",
+        "33",
+        "0",
+        "8",
+        "27",
+        "1",
+        "216"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "fsa_split_d_detail_EXP2_SLOPES_U",
+        "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23_fsa_split_d_detail_EXP2_SLOPES_ROMdEe",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_s",
+      "instances": 1,
+      "columns": [
+        "normalized_U",
+        "runQueryBlock_0_s_normalized_RAM_AUTO_1R1W",
+        "0",
+        "32",
+        "33",
+        "0",
+        "16",
+        "32",
+        "1",
+        "512"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_s",
+      "instances": 1,
+      "columns": [
+        "normalized_1_U",
+        "runQueryBlock_0_s_normalized_RAM_AUTO_1R1W",
+        "0",
+        "32",
+        "33",
+        "0",
+        "16",
+        "32",
+        "1",
+        "512"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_s",
+      "instances": 1,
+      "columns": [
+        "output_acc_U",
+        "runQueryBlock_0_s_output_acc_RAM_AUTO_1R1W",
+        "0",
+        "32",
+        "33",
+        "0",
+        "16",
+        "32",
+        "1",
+        "512"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_s",
+      "instances": 1,
+      "columns": [
+        "output_acc_1_U",
+        "runQueryBlock_0_s_output_acc_RAM_AUTO_1R1W",
+        "0",
+        "32",
+        "33",
+        "0",
+        "16",
+        "32",
+        "1",
+        "512"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_s",
+      "instances": 1,
+      "columns": [
+        "q_tile_U",
+        "runQueryBlock_0_s_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_s",
+      "instances": 1,
+      "columns": [
+        "q_tile_1_U",
+        "runQueryBlock_0_s_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "v_tile_3_U",
+        "runQueryBlock_1_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "v_tile_2_U",
+        "runQueryBlock_1_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "v_tile_1_U",
+        "runQueryBlock_1_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "v_tile_U",
+        "runQueryBlock_1_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "k_tile_3_U",
+        "runQueryBlock_1_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "k_tile_2_U",
+        "runQueryBlock_1_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "k_tile_1_U",
+        "runQueryBlock_1_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "k_tile_U",
+        "runQueryBlock_1_Outline_VITIS_LOOP_111_4_v_tile_3_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "p_anonymous_namespace_EXP2_PWL_INTERCEPT_BITS15_U",
+        "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23_fsa_anonymous_namespace_EXP2_PWL_IeOg",
+        "0",
+        "32",
+        "33",
+        "0",
+        "8",
+        "27",
+        "1",
+        "216"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "EXP2_SLOPES16_U",
+        "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23_fsa_split_d_detail_EXP2_SLOPES_ROMdEe",
+        "0",
+        "16",
+        "17",
+        "0",
+        "8",
+        "16",
+        "1",
+        "128"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_s",
+      "instances": 1,
+      "columns": [
+        "normalized_U",
+        "runQueryBlock_1_s_normalized_RAM_AUTO_1R1W",
+        "0",
+        "32",
+        "33",
+        "0",
+        "16",
+        "32",
+        "1",
+        "512"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_s",
+      "instances": 1,
+      "columns": [
+        "normalized_1_U",
+        "runQueryBlock_1_s_normalized_RAM_AUTO_1R1W",
+        "0",
+        "32",
+        "33",
+        "0",
+        "16",
+        "32",
+        "1",
+        "512"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_s",
+      "instances": 1,
+      "columns": [
+        "output_acc_U",
+        "runQueryBlock_1_s_output_acc_RAM_AUTO_1R1W",
+        "0",
+        "32",
+        "33",
+        "0",
+        "16",
+        "32",
+        "1",
+        "512"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_s",
+      "instances": 1,
+      "columns": [
+        "output_acc_1_U",
+        "runQueryBlock_1_s_output_acc_RAM_AUTO_1R1W",
+        "0",
+        "32",
+        "33",
+        "0",
+        "16",
+        "32",
+        "1",
+        "512"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_s",
+      "instances": 1,
+      "columns": [
+        "q_tile_U",
+        "runQueryBlock_1_s_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_s",
+      "instances": 1,
+      "columns": [
+        "q_tile_1_U",
+        "runQueryBlock_1_s_q_tile_RAM_AUTO_1R1W",
+        "0",
+        "16",
+        "17",
+        "0",
+        "16",
+        "16",
+        "1",
+        "256"
+      ]
+    }
+  ],
+  "fifos": [
+    {
+      "module": "runQueryTile",
+      "instances": 1,
+      "columns": [
+        "header0_U",
+        "0",
+        "516",
+        "0",
+        "-",
+        "2",
+        "129",
+        "258"
+      ]
+    },
+    {
+      "module": "runQueryTile",
+      "instances": 1,
+      "columns": [
+        "header1_U",
+        "0",
+        "516",
+        "0",
+        "-",
+        "2",
+        "129",
+        "258"
+      ]
+    },
+    {
+      "module": "runQueryTile",
+      "instances": 1,
+      "columns": [
+        "header_active_queries_c_U",
+        "0",
+        "5",
+        "0",
+        "-",
+        "3",
+        "3",
+        "9"
+      ]
+    },
+    {
+      "module": "runQueryTile",
+      "instances": 1,
+      "columns": [
+        "header_query_base_c_U",
+        "0",
+        "5",
+        "0",
+        "-",
+        "3",
+        "32",
+        "96"
+      ]
+    },
+    {
+      "module": "runQueryTile",
+      "instances": 1,
+      "columns": [
+        "kv0_U",
+        "0",
+        "6",
+        "0",
+        "-",
+        "8",
+        "32",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryTile",
+      "instances": 1,
+      "columns": [
+        "kv1_U",
+        "0",
+        "6",
+        "0",
+        "-",
+        "8",
+        "32",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryTile",
+      "instances": 1,
+      "columns": [
+        "o_address_c_U",
+        "0",
+        "5",
+        "0",
+        "-",
+        "4",
+        "64",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryTile",
+      "instances": 1,
+      "columns": [
+        "output0_U",
+        "0",
+        "6",
+        "0",
+        "-",
+        "8",
+        "32",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryTile",
+      "instances": 1,
+      "columns": [
+        "output1_U",
+        "0",
+        "6",
+        "0",
+        "-",
+        "8",
+        "32",
+        "256"
+      ]
+    },
+    {
+      "module": "runQueryTile",
+      "instances": 1,
+      "columns": [
+        "q0_U",
+        "0",
+        "6",
+        "0",
+        "-",
+        "8",
+        "16",
+        "128"
+      ]
+    },
+    {
+      "module": "runQueryTile",
+      "instances": 1,
+      "columns": [
+        "q1_U",
+        "0",
+        "6",
+        "0",
+        "-",
+        "8",
+        "16",
+        "128"
+      ]
+    }
+  ],
+  "state_registers": [
+    {
+      "module": "runAccumulatorColumns",
+      "instances": 2,
+      "columns": [
+        "ap_phi_reg_pp0_iter1_prepared_slope_4_reg_725",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runAccumulatorColumns",
+      "instances": 2,
+      "columns": [
+        "ap_phi_reg_pp0_iter1_prepared_slope_reg_591",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_26_reg_2699",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_27_reg_2704",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_28_reg_2709",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_29_reg_2714",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_30_reg_2719",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_31_reg_2724",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_32_reg_2729",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_33_reg_2734",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_34_reg_2739",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_35_reg_2744",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_36_reg_2749",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_37_reg_2754",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_38_reg_2759",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_39_reg_2764",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_40_reg_2769",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_41_reg_2862",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_42_reg_2868",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_43_reg_2874",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_44_reg_2880",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_45_reg_2886",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_46_reg_2892",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_47_reg_2898",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_48_reg_2904",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_reg_2694",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "running_sum_0_fu_166",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "running_sum_1_0_fu_162",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_10_reg_2528",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_11_reg_2539",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_12_reg_2550",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_13_reg_2566",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_14_reg_2577",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_8_reg_2501",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_9_reg_2517",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_reg_2490",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_reg_3_0_promoted297_phi_fu_98",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_reg_3_1_promoted309_phi_fu_102",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_50_reg_909",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_51_reg_914",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_52_reg_919",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_53_reg_924",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_54_reg_929",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_55_reg_934",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_56_reg_939",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_reg_904",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_36_reg_495",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_37_reg_500",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_38_reg_505",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_39_reg_510",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_40_reg_515",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_41_reg_520",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_42_reg_525",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_reg_490",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_35_fu_108",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_36_fu_112",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_37_fu_116",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_38_fu_120",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_39_fu_124",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_40_fu_128",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_41_fu_132",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_42_fu_136",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_16_reg_1409",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_17_reg_1414",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_18_reg_1419",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_19_reg_1424",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_20_reg_1429",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_21_reg_1434",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_22_reg_1439",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_reg_1404",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_10_reg_1462",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_11_reg_1468",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_12_reg_1474",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_13_reg_1480",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_14_reg_1486",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_8_reg_1450",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_9_reg_1456",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_reg_1444",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_29_reg_1805",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_30_reg_1810",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_31_reg_1815",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_32_reg_1820",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_33_reg_1825",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_34_reg_1830",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_35_reg_1835",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_reg_1800",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_18_fu_188",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_19_fu_192",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_20_fu_196",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_21_fu_200",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_22_fu_204",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_23_fu_208",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_24_fu_212",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_25_fu_216",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_26_fu_220",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_27_fu_224",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_28_fu_228",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_29_fu_232",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_30_fu_236",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_31_fu_240",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_32_fu_244",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_fu_184",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_s",
+      "instances": 1,
+      "columns": [
+        "running_sum_0_loc_fu_86",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_0_s",
+      "instances": 1,
+      "columns": [
+        "running_sum_1_0_loc_fu_82",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_10_reg_2739",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_11_reg_2744",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_12_reg_2749",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_13_reg_2754",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_14_reg_2759",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_15_reg_2764",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_16_reg_2769",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_17_reg_2862",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_18_reg_2868",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_19_reg_2874",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_20_reg_2880",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_21_reg_2886",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_22_reg_2892",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_23_reg_2898",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_24_reg_2904",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_2_reg_2699",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_3_reg_2704",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_4_reg_2709",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_5_reg_2714",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_6_reg_2719",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_7_reg_2724",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_8_reg_2729",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_9_reg_2734",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "pe_reg_reg_2694",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "running_sum_0_fu_166",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "running_sum_1_0_fu_162",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_1_reg_2501",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_2_reg_2517",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_3_reg_2528",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_4_reg_2539",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_5_reg_2550",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_6_reg_2566",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_7_reg_2577",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "instances": 1,
+      "columns": [
+        "score_valid_reg_2490",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_reg_3_0_promoted297_phi_fu_98",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_reg_3_1_promoted309_phi_fu_102",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_22_reg_909",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_23_reg_914",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_24_reg_919",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_25_reg_924",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_26_reg_929",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_27_reg_934",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_28_reg_939",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_reg_904",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_10_reg_505",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_11_reg_510",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_12_reg_515",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_13_reg_520",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_14_reg_525",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_8_reg_495",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_9_reg_500",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_162_1",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_reg_490",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_2_fu_108",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_3_fu_112",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_4_fu_116",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_5_fu_120",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_6_fu_124",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_7_fu_128",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_8_fu_132",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_229_13",
+      "instances": 1,
+      "columns": [
+        "pe_reg_9_fu_136",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_1_reg_1409",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_2_reg_1414",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_3_reg_1419",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_4_reg_1424",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_5_reg_1429",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_6_reg_1434",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_7_reg_1439",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_elemType_reg_1404",
+        "16",
+        "0",
+        "16",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_1_reg_1450",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_2_reg_1456",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_3_reg_1462",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_4_reg_1468",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_5_reg_1474",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_6_reg_1480",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_7_reg_1486",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_exp2_reg_1444",
+        "1",
+        "0",
+        "1",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_1_reg_1805",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_2_reg_1810",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_3_reg_1815",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_4_reg_1820",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_5_reg_1825",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_6_reg_1830",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_7_reg_1835",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pe_result_out_accType_reg_1800",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_10_fu_224",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_11_fu_228",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_12_fu_232",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_13_fu_236",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_14_fu_240",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_15_fu_244",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_1_fu_188",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_2_fu_192",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_3_fu_196",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_4_fu_200",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_5_fu_204",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_6_fu_208",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_7_fu_212",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_8_fu_216",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_9_fu_220",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "instances": 1,
+      "columns": [
+        "pv_sum_fu_184",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_s",
+      "instances": 1,
+      "columns": [
+        "running_sum_0_loc_fu_90",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    },
+    {
+      "module": "runQueryBlock_1_s",
+      "instances": 1,
+      "columns": [
+        "running_sum_1_0_loc_fu_86",
+        "32",
+        "0",
+        "32",
+        "0"
+      ]
+    }
+  ],
+  "control_lines": [
+    "wire   [0:0] start_for_runQueryBlock_0_U0_din;",
+    "wire   [0:0] start_for_runQueryBlock_1_U0_din;",
+    ".if_din(start_for_runQueryBlock_0_U0_din),",
+    ".if_din(start_for_runQueryBlock_1_U0_din),",
+    "assign ap_idle = (runQueryBlock_1_U0_ap_idle & runQueryBlock_0_U0_ap_idle & gatherQueryTile_U0_ap_idle & entry_proc_U0_ap_idle & distributeQueryTile_U0_ap_idle);",
+    "assign runQueryBlock_0_U0_ap_continue = 1'b1;",
+    "assign runQueryBlock_0_U0_ap_start = start_for_runQueryBlock_0_U0_empty_n;",
+    "assign runQueryBlock_1_U0_ap_continue = 1'b1;",
+    "assign runQueryBlock_1_U0_ap_start = start_for_runQueryBlock_1_U0_empty_n;",
+    "assign start_for_runQueryBlock_0_U0_din = 1'b1;",
+    "assign start_for_runQueryBlock_1_U0_din = 1'b1;"
+  ],
+  "reports": [
+    {
+      "module": "distributeQueryTile",
+      "clock": "7.300",
+      "II": null,
+      "latency": "233701",
+      "resources": {
+        "BRAM_18K": "0",
+        "FF": "1642",
+        "LUT": "6406",
+        "URAM": "0",
+        "DSP": "0"
+      }
+    },
+    {
+      "module": "distributeQueryTile_Pipeline_1",
+      "clock": "1.776",
+      "II": null,
+      "latency": "66",
+      "resources": {
+        "FF": "9",
+        "LUT": "56",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "distributeQueryTile_Pipeline_4",
+      "clock": "1.776",
+      "II": null,
+      "latency": "66",
+      "resources": {
+        "FF": "9",
+        "LUT": "56",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "distributeQueryTile_Pipeline_5",
+      "clock": "1.776",
+      "II": null,
+      "latency": "66",
+      "resources": {
+        "FF": "9",
+        "LUT": "56",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "distributeQueryTile_Pipeline_VITIS_LOOP_16_1_VITIS_LOOP_17_24",
+      "clock": "7.300",
+      "II": null,
+      "latency": "19",
+      "resources": {
+        "FF": "163",
+        "LUT": "440",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "distributeQueryTile_Pipeline_VITIS_LOOP_16_1_VITIS_LOOP_17_2",
+      "clock": "7.300",
+      "II": null,
+      "latency": "19",
+      "resources": {
+        "FF": "163",
+        "LUT": "440",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "distributeQueryTile_Pipeline_VITIS_LOOP_44_1_VITIS_LOOP_45_2",
+      "clock": "7.300",
+      "II": null,
+      "latency": "19",
+      "resources": {
+        "FF": "163",
+        "LUT": "440",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "distributeQueryTile_Pipeline_VITIS_LOOP_478_1_VITIS_LOOP_479_2",
+      "clock": "2.765",
+      "II": null,
+      "latency": "66",
+      "resources": {
+        "FF": "22",
+        "LUT": "261",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "distributeQueryTile_Pipeline_VITIS_LOOP_499_4_VITIS_LOOP_500_5",
+      "clock": "2.787",
+      "II": null,
+      "latency": "66",
+      "resources": {
+        "FF": "20",
+        "LUT": "327",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "fsa_stream_split_d",
+      "clock": "7.300",
+      "II": null,
+      "latency": "401941507",
+      "resources": {
+        "BRAM_18K": "8",
+        "DSP": "40",
+        "FF": "35571",
+        "LUT": "131306",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "gatherQueryTile",
+      "clock": "7.300",
+      "II": null,
+      "latency": "243",
+      "resources": {
+        "BRAM_18K": "0",
+        "FF": "487",
+        "LUT": "1447",
+        "URAM": "0",
+        "DSP": "0"
+      }
+    },
+    {
+      "module": "gatherQueryTile_Pipeline_1",
+      "clock": "1.792",
+      "II": null,
+      "latency": "66",
+      "resources": {
+        "FF": "9",
+        "LUT": "56",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "gatherQueryTile_Pipeline_VITIS_LOOP_518_1_VITIS_LOOP_519_2",
+      "clock": "2.494",
+      "II": null,
+      "latency": "66",
+      "resources": {
+        "FF": "27",
+        "LUT": "195",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "p_anonymous_namespace_begin_reciprocal",
+      "clock": "6.394",
+      "II": null,
+      "latency": "1",
+      "resources": {
+        "FF": "169",
+        "LUT": "783",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "reciprocalColumns",
+      "clock": "7.281",
+      "II": null,
+      "latency": "42",
+      "resources": {
+        "FF": "680",
+        "LUT": "3191",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "reciprocalColumns_Pipeline_VITIS_LOOP_369_13",
+      "clock": "2.788",
+      "II": null,
+      "latency": "15",
+      "resources": {
+        "FF": "89",
+        "LUT": "406",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "reciprocalColumns_Pipeline_VITIS_LOOP_369_1",
+      "clock": "2.788",
+      "II": null,
+      "latency": "15",
+      "resources": {
+        "FF": "89",
+        "LUT": "406",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runAccumulatorColumns",
+      "clock": "7.299",
+      "II": "1",
+      "latency": "7",
+      "resources": {
+        "BRAM_18K": "0",
+        "DSP": "4",
+        "FF": "2542",
+        "LUT": "14232",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runPeArray",
+      "clock": "7.048",
+      "II": "1",
+      "latency": "3",
+      "resources": {
+        "DSP": "8",
+        "FF": "4603",
+        "LUT": "29570",
+        "BRAM_18K": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Outline_VITIS_LOOP_111_4",
+      "clock": "7.299",
+      "II": null,
+      "latency": "392193",
+      "resources": {
+        "BRAM_18K": "0",
+        "DSP": "16",
+        "FF": "10499",
+        "LUT": "40032",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_16",
+      "clock": "1.792",
+      "II": null,
+      "latency": "34",
+      "resources": {
+        "FF": "8",
+        "LUT": "63",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_1",
+      "clock": "1.776",
+      "II": null,
+      "latency": "34",
+      "resources": {
+        "FF": "8",
+        "LUT": "63",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_3",
+      "clock": "1.792",
+      "II": null,
+      "latency": "34",
+      "resources": {
+        "FF": "8",
+        "LUT": "63",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_5",
+      "clock": "1.776",
+      "II": null,
+      "latency": "66",
+      "resources": {
+        "FF": "9",
+        "LUT": "56",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_6",
+      "clock": "1.776",
+      "II": null,
+      "latency": "66",
+      "resources": {
+        "FF": "9",
+        "LUT": "56",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_7",
+      "clock": "1.482",
+      "II": null,
+      "latency": "10",
+      "resources": {
+        "FF": "6",
+        "LUT": "51",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "clock": "7.048",
+      "II": null,
+      "latency": "82",
+      "resources": {
+        "FF": "569",
+        "LUT": "404",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_135_5_VITIS_LOOP_136_6",
+      "clock": "2.104",
+      "II": null,
+      "latency": "66",
+      "resources": {
+        "FF": "18",
+        "LUT": "139",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_162_1",
+      "clock": "7.048",
+      "II": null,
+      "latency": "22",
+      "resources": {
+        "FF": "338",
+        "LUT": "463",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_177_102",
+      "clock": "2.399",
+      "II": null,
+      "latency": "6",
+      "resources": {
+        "FF": "39",
+        "LUT": "325",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_177_10",
+      "clock": "2.399",
+      "II": null,
+      "latency": "6",
+      "resources": {
+        "FF": "39",
+        "LUT": "325",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_229_13",
+      "clock": "7.120",
+      "II": null,
+      "latency": "8",
+      "resources": {
+        "FF": "631",
+        "LUT": "546",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_287_23",
+      "clock": "7.048",
+      "II": null,
+      "latency": "14",
+      "resources": {
+        "BRAM_18K": "0",
+        "FF": "529",
+        "LUT": "624",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_356_31",
+      "clock": "7.299",
+      "II": null,
+      "latency": "89",
+      "resources": {
+        "FF": "1802",
+        "LUT": "2519",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_438_38",
+      "clock": "7.299",
+      "II": null,
+      "latency": "25",
+      "resources": {
+        "FF": "92",
+        "LUT": "95",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_461_41_VITIS_LOOP_462_42",
+      "clock": "2.785",
+      "II": null,
+      "latency": "34",
+      "resources": {
+        "FF": "17",
+        "LUT": "185",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_Pipeline_VITIS_LOOP_88_1_VITIS_LOOP_89_2",
+      "clock": "2.104",
+      "II": null,
+      "latency": "34",
+      "resources": {
+        "FF": "16",
+        "LUT": "144",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_0_s",
+      "clock": "7.299",
+      "II": null,
+      "latency": "392372",
+      "resources": {
+        "BRAM_18K": "0",
+        "DSP": "20",
+        "FF": "14314",
+        "LUT": "58955",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Outline_VITIS_LOOP_111_4",
+      "clock": "7.299",
+      "II": null,
+      "latency": "392193",
+      "resources": {
+        "BRAM_18K": "0",
+        "DSP": "16",
+        "FF": "10499",
+        "LUT": "40032",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_16",
+      "clock": "1.792",
+      "II": null,
+      "latency": "34",
+      "resources": {
+        "FF": "8",
+        "LUT": "63",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_1",
+      "clock": "1.776",
+      "II": null,
+      "latency": "34",
+      "resources": {
+        "FF": "8",
+        "LUT": "63",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_3",
+      "clock": "1.792",
+      "II": null,
+      "latency": "34",
+      "resources": {
+        "FF": "8",
+        "LUT": "63",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_5",
+      "clock": "1.776",
+      "II": null,
+      "latency": "66",
+      "resources": {
+        "FF": "9",
+        "LUT": "56",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_6",
+      "clock": "1.776",
+      "II": null,
+      "latency": "66",
+      "resources": {
+        "FF": "9",
+        "LUT": "56",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_7",
+      "clock": "1.482",
+      "II": null,
+      "latency": "10",
+      "resources": {
+        "FF": "6",
+        "LUT": "51",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+      "clock": "7.048",
+      "II": null,
+      "latency": "82",
+      "resources": {
+        "FF": "569",
+        "LUT": "404",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_135_5_VITIS_LOOP_136_6",
+      "clock": "2.104",
+      "II": null,
+      "latency": "66",
+      "resources": {
+        "FF": "18",
+        "LUT": "139",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_162_1",
+      "clock": "7.048",
+      "II": null,
+      "latency": "22",
+      "resources": {
+        "FF": "338",
+        "LUT": "463",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_177_101",
+      "clock": "2.399",
+      "II": null,
+      "latency": "6",
+      "resources": {
+        "FF": "39",
+        "LUT": "325",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_177_10",
+      "clock": "2.399",
+      "II": null,
+      "latency": "6",
+      "resources": {
+        "FF": "39",
+        "LUT": "325",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_229_13",
+      "clock": "7.120",
+      "II": null,
+      "latency": "8",
+      "resources": {
+        "FF": "631",
+        "LUT": "546",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_287_23",
+      "clock": "7.048",
+      "II": null,
+      "latency": "14",
+      "resources": {
+        "BRAM_18K": "0",
+        "FF": "529",
+        "LUT": "624",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_356_31",
+      "clock": "7.299",
+      "II": null,
+      "latency": "89",
+      "resources": {
+        "FF": "1802",
+        "LUT": "2519",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_438_38",
+      "clock": "7.299",
+      "II": null,
+      "latency": "25",
+      "resources": {
+        "FF": "92",
+        "LUT": "95",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_461_41_VITIS_LOOP_462_42",
+      "clock": "2.785",
+      "II": null,
+      "latency": "34",
+      "resources": {
+        "FF": "17",
+        "LUT": "185",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_Pipeline_VITIS_LOOP_88_1_VITIS_LOOP_89_2",
+      "clock": "2.104",
+      "II": null,
+      "latency": "34",
+      "resources": {
+        "FF": "16",
+        "LUT": "144",
+        "BRAM_18K": "0",
+        "DSP": "0",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryBlock_1_s",
+      "clock": "7.299",
+      "II": null,
+      "latency": "392372",
+      "resources": {
+        "BRAM_18K": "0",
+        "DSP": "20",
+        "FF": "14346",
+        "LUT": "59104",
+        "URAM": "0"
+      }
+    },
+    {
+      "module": "runQueryTile",
+      "clock": "7.300",
+      "II": null,
+      "latency": "392519",
+      "resources": {
+        "BRAM_18K": "0",
+        "DSP": "40",
+        "FF": "31877",
+        "LUT": "126742",
+        "URAM": "0"
+      }
+    }
+  ]
+}

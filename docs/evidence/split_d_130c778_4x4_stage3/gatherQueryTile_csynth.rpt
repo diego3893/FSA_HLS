@@ -1,0 +1,253 @@
+
+
+================================================================
+== Vitis HLS Report for 'gatherQueryTile'
+================================================================
+* Date:           Sat Oct 10 02:20:07 2026
+
+* Version:        2024.2 (Build 5238294 on Nov  8 2024)
+* Project:        build
+* Solution:       solution1 (Vivado IP Flow Target)
+* Product family: virtexuplusHBM
+* Target device:  xcvu37p_CIV-fsvh2892-2-e
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing: 
+    * Summary: 
+    +--------+----------+----------+------------+
+    |  Clock |  Target  | Estimated| Uncertainty|
+    +--------+----------+----------+------------+
+    |ap_clk  |  10.00 ns|  7.300 ns|     2.70 ns|
+    +--------+----------+----------+------------+
+
++ Latency: 
+    * Summary: 
+    +---------+---------+----------+----------+-----+-----+---------+
+    |  Latency (cycles) |  Latency (absolute) |  Interval | Pipeline|
+    |   min   |   max   |    min   |    max   | min | max |   Type  |
+    +---------+---------+----------+----------+-----+-----+---------+
+    |      210|      243|  2.100 us|  2.430 us|  210|  243|       no|
+    +---------+---------+----------+----------+-----+-----+---------+
+
+    + Detail: 
+        * Instance: 
+        +-----------------------------------------------------------------------+------------------------------------------------------------+---------+---------+----------+----------+-----+-----+------------------------------------------------+
+        |                                                                       |                                                            |  Latency (cycles) |  Latency (absolute) |  Interval |                    Pipeline                    |
+        |                                Instance                               |                           Module                           |   min   |   max   |    min   |    max   | min | max |                      Type                      |
+        +-----------------------------------------------------------------------+------------------------------------------------------------+---------+---------+----------+----------+-----+-----+------------------------------------------------+
+        |grp_gatherQueryTile_Pipeline_1_fu_94                                   |gatherQueryTile_Pipeline_1                                  |       66|       66|  0.660 us|  0.660 us|   65|   65|  loop auto-rewind stp (delay=0 clock cycles(s))|
+        |grp_gatherQueryTile_Pipeline_VITIS_LOOP_521_1_VITIS_LOOP_522_2_fu_106  |gatherQueryTile_Pipeline_VITIS_LOOP_521_1_VITIS_LOOP_522_2  |       66|       66|  0.660 us|  0.660 us|   65|   65|  loop auto-rewind stp (delay=0 clock cycles(s))|
+        |grp_storeOutputTile_fu_118                                             |storeOutputTile                                             |       73|      106|  0.730 us|  1.060 us|   73|  106|                                              no|
+        +-----------------------------------------------------------------------+------------------------------------------------------------+---------+---------+----------+----------+-----+-----+------------------------------------------------+
+
+        * Loop: 
+        N/A
+
+
+
+================================================================
+== Utilization Estimates
+================================================================
+* Summary: 
++---------------------+---------+------+---------+---------+-----+
+|         Name        | BRAM_18K|  DSP |    FF   |   LUT   | URAM|
++---------------------+---------+------+---------+---------+-----+
+|DSP                  |        -|     -|        -|        -|    -|
+|Expression           |        -|     -|        0|        2|    -|
+|FIFO                 |        -|     -|        -|        -|    -|
+|Instance             |        -|     -|      250|      932|    -|
+|Memory               |        0|     -|      128|      132|    0|
+|Multiplexer          |        -|     -|        0|      381|    -|
+|Register             |        -|     -|      109|        -|    -|
++---------------------+---------+------+---------+---------+-----+
+|Total                |        0|     0|      487|     1447|    0|
++---------------------+---------+------+---------+---------+-----+
+|Available SLR        |     1344|  3008|   869120|   434560|  320|
++---------------------+---------+------+---------+---------+-----+
+|Utilization SLR (%)  |        0|     0|       ~0|       ~0|    0|
++---------------------+---------+------+---------+---------+-----+
+|Available            |     4032|  9024|  2607360|  1303680|  960|
++---------------------+---------+------+---------+---------+-----+
+|Utilization (%)      |        0|     0|       ~0|       ~0|    0|
++---------------------+---------+------+---------+---------+-----+
+
++ Detail: 
+    * Instance: 
+    +-----------------------------------------------------------------------+------------------------------------------------------------+---------+----+-----+-----+-----+
+    |                                Instance                               |                           Module                           | BRAM_18K| DSP|  FF | LUT | URAM|
+    +-----------------------------------------------------------------------+------------------------------------------------------------+---------+----+-----+-----+-----+
+    |grp_gatherQueryTile_Pipeline_1_fu_94                                   |gatherQueryTile_Pipeline_1                                  |        0|   0|    9|   56|    0|
+    |grp_gatherQueryTile_Pipeline_VITIS_LOOP_521_1_VITIS_LOOP_522_2_fu_106  |gatherQueryTile_Pipeline_VITIS_LOOP_521_1_VITIS_LOOP_522_2  |        0|   0|   27|  195|    0|
+    |grp_storeOutputTile_fu_118                                             |storeOutputTile                                             |        0|   0|  214|  681|    0|
+    +-----------------------------------------------------------------------+------------------------------------------------------------+---------+----+-----+-----+-----+
+    |Total                                                                  |                                                            |        0|   0|  250|  932|    0|
+    +-----------------------------------------------------------------------+------------------------------------------------------------+---------+----+-----+-----+-----+
+
+    * DSP: 
+    N/A
+
+    * Memory: 
+    +----------------+------------------------------------------+---------+----+----+-----+------+-----+------+-------------+
+    |     Memory     |                  Module                  | BRAM_18K| FF | LUT| URAM| Words| Bits| Banks| W*Bits*Banks|
+    +----------------+------------------------------------------+---------+----+----+-----+------+-----+------+-------------+
+    |normalized_U    |gatherQueryTile_normalized_RAM_AUTO_1R1W  |        0|  32|  33|    0|    16|   32|     1|          512|
+    |normalized_1_U  |gatherQueryTile_normalized_RAM_AUTO_1R1W  |        0|  32|  33|    0|    16|   32|     1|          512|
+    |normalized_2_U  |gatherQueryTile_normalized_RAM_AUTO_1R1W  |        0|  32|  33|    0|    16|   32|     1|          512|
+    |normalized_3_U  |gatherQueryTile_normalized_RAM_AUTO_1R1W  |        0|  32|  33|    0|    16|   32|     1|          512|
+    +----------------+------------------------------------------+---------+----+----+-----+------+-----+------+-------------+
+    |Total           |                                          |        0| 128| 132|    0|    64|  128|     4|         2048|
+    +----------------+------------------------------------------+---------+----+----+-----+------+-----+------+-------------+
+
+    * FIFO: 
+    N/A
+
+    * Expression: 
+    +-----------------+----------+----+---+----+------------+------------+
+    |  Variable Name  | Operation| DSP| FF| LUT| Bitwidth P0| Bitwidth P1|
+    +-----------------+----------+----+---+----+------------+------------+
+    |ap_block_state1  |        or|   0|  0|   2|           1|           1|
+    +-----------------+----------+----+---+----+------------+------------+
+    |Total            |          |   0|  0|   2|           1|           1|
+    +-----------------+----------+----+---+----+------------+------------+
+
+    * Multiplexer: 
+    +-----------------------+----+-----------+-----+-----------+
+    |          Name         | LUT| Input Size| Bits| Total Bits|
+    +-----------------------+----+-----------+-----+-----------+
+    |active_queries_blk_n   |   9|          2|    1|          2|
+    |ap_NS_fsm              |  37|          7|    1|          7|
+    |ap_done                |   9|          2|    1|          2|
+    |normalized_1_address0  |  20|          4|    4|         16|
+    |normalized_1_ce0       |  20|          4|    1|          4|
+    |normalized_1_ce1       |   9|          2|    1|          2|
+    |normalized_1_d0        |  14|          3|   32|         96|
+    |normalized_1_we0       |  14|          3|    1|          3|
+    |normalized_2_address0  |  20|          4|    4|         16|
+    |normalized_2_ce0       |  20|          4|    1|          4|
+    |normalized_2_ce1       |   9|          2|    1|          2|
+    |normalized_2_d0        |  14|          3|   32|         96|
+    |normalized_2_we0       |  14|          3|    1|          3|
+    |normalized_3_address0  |  20|          4|    4|         16|
+    |normalized_3_ce0       |  20|          4|    1|          4|
+    |normalized_3_ce1       |   9|          2|    1|          2|
+    |normalized_3_d0        |  14|          3|   32|         96|
+    |normalized_3_we0       |  14|          3|    1|          3|
+    |normalized_address0    |  20|          4|    4|         16|
+    |normalized_ce0         |  20|          4|    1|          4|
+    |normalized_ce1         |   9|          2|    1|          2|
+    |normalized_d0          |  14|          3|   32|         96|
+    |normalized_we0         |  14|          3|    1|          3|
+    |o_address_blk_n        |   9|          2|    1|          2|
+    |query_base_blk_n       |   9|          2|    1|          2|
+    +-----------------------+----+-----------+-----+-----------+
+    |Total                  | 381|         79|  161|        499|
+    +-----------------------+----+-----------+-----+-----------+
+
+    * Register: 
+    +------------------------------------------------------------------------------------+----+----+-----+-----------+
+    |                                        Name                                        | FF | LUT| Bits| Const Bits|
+    +------------------------------------------------------------------------------------+----+----+-----+-----------+
+    |active_queries_1_reg_163                                                            |   3|   0|    3|          0|
+    |ap_CS_fsm                                                                           |   6|   0|    6|          0|
+    |ap_done_reg                                                                         |   1|   0|    1|          0|
+    |grp_gatherQueryTile_Pipeline_1_fu_94_ap_start_reg                                   |   1|   0|    1|          0|
+    |grp_gatherQueryTile_Pipeline_VITIS_LOOP_521_1_VITIS_LOOP_522_2_fu_106_ap_start_reg  |   1|   0|    1|          0|
+    |grp_storeOutputTile_fu_118_ap_start_reg                                             |   1|   0|    1|          0|
+    |o_address_1_reg_173                                                                 |  64|   0|   64|          0|
+    |query_base_1_reg_168                                                                |  32|   0|   32|          0|
+    +------------------------------------------------------------------------------------+----+----+-----+-----------+
+    |Total                                                                               | 109|   0|  109|          0|
+    +------------------------------------------------------------------------------------+----+----+-----+-----------+
+
+
+
+================================================================
+== Interface
+================================================================
+* Summary: 
++-------------------------------+-----+-----+------------+-----------------+--------------+
+|           RTL Ports           | Dir | Bits|  Protocol  |  Source Object  |    C Type    |
++-------------------------------+-----+-----+------------+-----------------+--------------+
+|ap_clk                         |   in|    1|  ap_ctrl_hs|  gatherQueryTile|  return value|
+|ap_rst                         |   in|    1|  ap_ctrl_hs|  gatherQueryTile|  return value|
+|ap_start                       |   in|    1|  ap_ctrl_hs|  gatherQueryTile|  return value|
+|ap_done                        |  out|    1|  ap_ctrl_hs|  gatherQueryTile|  return value|
+|ap_continue                    |   in|    1|  ap_ctrl_hs|  gatherQueryTile|  return value|
+|ap_idle                        |  out|    1|  ap_ctrl_hs|  gatherQueryTile|  return value|
+|ap_ready                       |  out|    1|  ap_ctrl_hs|  gatherQueryTile|  return value|
+|m_axi_o_gmem_0_AWVALID         |  out|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_AWREADY         |   in|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_AWADDR          |  out|   64|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_AWID            |  out|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_AWLEN           |  out|   32|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_AWSIZE          |  out|    3|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_AWBURST         |  out|    2|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_AWLOCK          |  out|    2|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_AWCACHE         |  out|    4|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_AWPROT          |  out|    3|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_AWQOS           |  out|    4|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_AWREGION        |  out|    4|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_AWUSER          |  out|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_WVALID          |  out|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_WREADY          |   in|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_WDATA           |  out|   64|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_WSTRB           |  out|    8|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_WLAST           |  out|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_WID             |  out|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_WUSER           |  out|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_ARVALID         |  out|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_ARREADY         |   in|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_ARADDR          |  out|   64|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_ARID            |  out|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_ARLEN           |  out|   32|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_ARSIZE          |  out|    3|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_ARBURST         |  out|    2|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_ARLOCK          |  out|    2|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_ARCACHE         |  out|    4|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_ARPROT          |  out|    3|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_ARQOS           |  out|    4|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_ARREGION        |  out|    4|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_ARUSER          |  out|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_RVALID          |   in|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_RREADY          |  out|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_RDATA           |   in|   64|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_RLAST           |   in|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_RID             |   in|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_RFIFONUM        |   in|    9|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_RUSER           |   in|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_RRESP           |   in|    2|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_BVALID          |   in|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_BREADY          |  out|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_BRESP           |   in|    2|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_BID             |   in|    1|       m_axi|           o_gmem|       pointer|
+|m_axi_o_gmem_0_BUSER           |   in|    1|       m_axi|           o_gmem|       pointer|
+|o_address_dout                 |   in|   64|     ap_fifo|        o_address|       pointer|
+|o_address_empty_n              |   in|    1|     ap_fifo|        o_address|       pointer|
+|o_address_read                 |  out|    1|     ap_fifo|        o_address|       pointer|
+|o_address_num_data_valid       |   in|    3|     ap_fifo|        o_address|       pointer|
+|o_address_fifo_cap             |   in|    3|     ap_fifo|        o_address|       pointer|
+|query_base_dout                |   in|   32|     ap_fifo|       query_base|       pointer|
+|query_base_empty_n             |   in|    1|     ap_fifo|       query_base|       pointer|
+|query_base_read                |  out|    1|     ap_fifo|       query_base|       pointer|
+|query_base_num_data_valid      |   in|    3|     ap_fifo|       query_base|       pointer|
+|query_base_fifo_cap            |   in|    3|     ap_fifo|       query_base|       pointer|
+|active_queries_dout            |   in|    3|     ap_fifo|   active_queries|       pointer|
+|active_queries_empty_n         |   in|    1|     ap_fifo|   active_queries|       pointer|
+|active_queries_read            |  out|    1|     ap_fifo|   active_queries|       pointer|
+|active_queries_num_data_valid  |   in|    3|     ap_fifo|   active_queries|       pointer|
+|active_queries_fifo_cap        |   in|    3|     ap_fifo|   active_queries|       pointer|
+|output0_dout                   |   in|   32|     ap_fifo|          output0|       pointer|
+|output0_empty_n                |   in|    1|     ap_fifo|          output0|       pointer|
+|output0_read                   |  out|    1|     ap_fifo|          output0|       pointer|
+|output0_num_data_valid         |   in|    4|     ap_fifo|          output0|       pointer|
+|output0_fifo_cap               |   in|    4|     ap_fifo|          output0|       pointer|
+|output1_dout                   |   in|   32|     ap_fifo|          output1|       pointer|
+|output1_empty_n                |   in|    1|     ap_fifo|          output1|       pointer|
+|output1_read                   |  out|    1|     ap_fifo|          output1|       pointer|
+|output1_num_data_valid         |   in|    4|     ap_fifo|          output1|       pointer|
+|output1_fifo_cap               |   in|    4|     ap_fifo|          output1|       pointer|
++-------------------------------+-----+-----+------------+-----------------+--------------+
+
