@@ -272,25 +272,34 @@ Q/K/V AXI
 
 > 2026-10-09核查修正：本节保留历史日志和候选推论。以下“调用延迟必须≤II”“H=128的QK约64拍”“arrays句子证明204-65根因”“D×P统一key/head归约”“分次调用仍保证256物理PE”均不作当前结论；解释与执行顺序以新分阶段方案为准。P3a的已核实数字仍有效，单实例与实现时序另需证据。
 
-### 15.00000 4×4/16 已达标：P3a 形状（2026-10-09 确认）
+### 15.00000 4×4/16 已达标：P3a 形状（2026-10-09 二次确认，含阶段1测试台）
 
-**结论（Confirmed）**：被测commit `426ff6c`，规范命令 `./run_hls.sh fsa_stream_split_d` 完整跑完（2026-09-30 13:52），**4×4/16 六项判据全部合格**：
+**结论（Confirmed）**：被测 commit **`9c49789`**（P3a 形状 + 阶段1扩展测试台），规范命令 `./run_hls.sh fsa_stream_split_d`，2026-10-09 22:41:59–22:49:06（总 7分07秒），**全部判据合格**：
 
 | 判据 | 实测 |
 |---|---|
-| CSim / CSynth / RTL CoSim | PASS / 通过（2分48秒，CPU 2.53s调度） / **Pass**（9用例，总21208 cycles，C post-check通过） |
+| CSim / CSynth / RTL CoSim | PASS / 通过（2分47秒） / **Pass**（**26/26 事务**，总 66426 cycles，C post-check通过） |
 | **顶层估算周期** | **7.300ns**（ap_clk 10.00 / estimated 7.300 / uncertainty 2.70） |
-| 资源 | DSP **40**、BRAM 8、FF 31923、LUT 125123 |
+| 资源 | DSP **40**、BRAM 8、FF **31923**、LUT **125123** |
 | QK 累加循环 | `runPeAccumulateTile` 的 `VITIS_LOOP_148_1_VITIS_LOOP_149_2`：Target 5 → **Final 5** |
 | ROW_SUM 循环 | `runPeRowSum` 的 `VITIS_LOOP_204_1`：Target 5 → **Final 5** |
-| PV/扁平循环 | `VITIS_LOOP_363_28` 与 `VITIS_LOOP_294_20`：Target 1 → **Final 1** |
-| `runPeArray` | **latency 3、Final II=1**（rolled形状时为latency 7） |
+| PV/扁平循环 | `VITIS_LOOP_363_28`：Target 1 → **Final 1**；`VITIS_LOOP_294_20`：1 → 1 |
+| `runPeArray` | Final **II=1**、Depth 4、**latency 3** |
 | `200-880` / `200-875` / `too complicated` | **0 / 0 / 0** |
+| CoSim 逐事务 | Latency min/avg/max = 50 / 2564 / 8007 cycles；Interval = 45 / 2655 / 7997 |
+| 各阶段耗时 | CSim 36s、CSynth 2分47秒、CoSim 3分10秒 |
+
+**与旧记录（`426ff6c`，9事务）的关系**：本次事务数由 9 增至 **26**（新增边界、定向与非法长度用例），**顶层时序、资源、`runPeArray` II/latency、各循环 II 全部逐项不变** → 同时证明"测试台扩展未改变综合硬件"，并**替换掉**了被 2026-10-01 来源不明 build 覆盖的 `syn/report`，提供新鲜的 4×4 物理资源证据。
+
+**仍未做**：`runPeArray` **实例树级**证据（实例路径数、每实例 RawFMA 数）属阶段2；IP导出、Vivado实现后时序、板测、位模式基线均未做。
+
+**证据出处**：远端 `/tmp/s1_4x4_summary.log` 与 `/tmp/s1_4x4.log`（含 `COMMIT_OK` 与 `HEAD=9c49789…`）；文档 `docs/阶段1本地改动审查结果_20261009.md` §3.5。**注意不要引用 `syn/report` 的历史版本**——本次运行已把它覆盖为自洽的新鲜报告，但后续任何运行都会再次覆盖它。
+
+
+**历史记录（`426ff6c`，2026-09-30 13:52，9事务）**：同一 P3a 形状的首次达标，六项判据与上表**逐项相同**（7.300ns、DSP40、BRAM8、FF31923、LUT125123、QK/ROW_SUM Final II 5、PV Final II 1、`runPeArray` latency3/II1、`200-880/875/too complex` 均 0、CoSim Pass），只是事务数为 9。证据：远端 `/tmp/p3a_4x4_summary.log`、`/tmp/p3a_4x4.log`（`HEAD=426ff6c…`）。
 
 **机理（Decision + Reason + Evidence）**：把 `runPeArray` 的 rolled bank 循环（16次调用、结果经 node 数组写回）替换为**整个阵列在同一个流水体内原地求值**，使 `result[row][col]` 的写回索引由循环变量变为**编译期常量**。证据：同一 4×4 配置下，rolled 形状为 7.893ns（P0 `11b10c9`、P1 `f9f0638` 两次实测一致），P3a 为 **7.300ns**；DSP 与所有 II 均未退化（资源仅 FF/LUT 小幅变化）。
-**Implication（2026-10-09修正）**：4×4周期改善与形状变化有对照证据，但关键路径归因仍待细化。调用latency与II不能等同，16×16的服务间隔和完整反馈延迟尚未测；不能从4×4的3拍推导16×16达标。
-
-**证据出处**：远端 `/tmp/p3a_4x4_summary.log`（摘要）与 `/tmp/p3a_4x4.log`（完整日志，含 `COMMIT_OK` 与 `HEAD=426ff6c…`）。**注意不要引用远端 `syn/report/`**——它已被2026-10-01来源不明的build覆盖（见第7节）。
+**Implication（2026-10-09修正）**：4×4周期改善与形状变化有对照证据，但**关键路径归因仍待细化**。调用latency与II不能等同，16×16的服务间隔和完整反馈延迟尚未测；不能从4×4的3拍推导16×16达标。
 
 **用户指示（2026-10-09）**：**只做4×4，暂时不做16×16的验证**；来源不明的2026-10-01 build不追查，后续自测时覆盖。
 
