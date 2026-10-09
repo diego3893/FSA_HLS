@@ -7,6 +7,9 @@ rem against the vendored Vitis HLS headers plus the repository's local math
 rem stubs, and runs the existing C++ testbench. It proves that the sources and
 rem the testbench compile and that the C-level numerical path still passes; it
 rem does NOT prove synthesis, II, timing or RTL behaviour.
+rem The testbench now also checks a strict official Vitis bit baseline.
+rem Local math stubs are not bit-identical for every case: inspect math-summary
+rem and bit-summary separately. Any bit mismatch still returns a nonzero exit.
 rem
 rem Usage:  tools\local_split_d_check.cmd [PE_DIM] [HEAD_DIM]
 rem Defaults: 4 16
