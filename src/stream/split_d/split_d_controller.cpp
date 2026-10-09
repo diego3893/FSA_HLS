@@ -541,9 +541,9 @@ namespace detail{
         #pragma HLS STREAM variable=output1 depth=8
         distributeQueryTile(q_address, k_address, v_address, header, header0, header1, q0, q1, kv0, kv1);
         runQueryBlock<0>(header0, q0, kv0, output0);
-        if(QUERY_BLOCKS==2){
-            runQueryBlock<1>(header1, q1, kv1, output1);
-        }
+#if FSA_SPLIT_D_QUERY_BLOCK_COLS<FSA_SPLIT_D_PE_DIM
+        runQueryBlock<1>(header1, q1, kv1, output1);
+#endif
         gatherQueryTile(o_address, header.query_base, header.active_queries, output0, output1);
     }
 

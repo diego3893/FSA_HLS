@@ -1,0 +1,196 @@
+
+
+================================================================
+== Vitis HLS Report for 'runPeRowSum'
+================================================================
+* Date:           Sat Oct 10 01:50:16 2026
+
+* Version:        2024.2 (Build 5238294 on Nov  8 2024)
+* Project:        build
+* Solution:       solution1 (Vivado IP Flow Target)
+* Product family: virtexuplusHBM
+* Target device:  xcvu37p_CIV-fsvh2892-2-e
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing: 
+    * Summary: 
+    +--------+----------+----------+------------+
+    |  Clock |  Target  | Estimated| Uncertainty|
+    +--------+----------+----------+------------+
+    |ap_clk  |  10.00 ns|  7.048 ns|     2.70 ns|
+    +--------+----------+----------+------------+
+
++ Latency: 
+    * Summary: 
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+    |  Latency (cycles) |  Latency (absolute) |  Interval |                    Pipeline                    |
+    |   min   |   max   |    min   |    max   | min | max |                      Type                      |
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+    |       22|       22|  0.220 us|  0.220 us|   21|   21|  loop auto-rewind stp (delay=0 clock cycles(s))|
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+
+    + Detail: 
+        * Instance: 
+        +-----------------------+------------+---------+---------+-----------+-----------+-----+-----+---------+
+        |                       |            |  Latency (cycles) |   Latency (absolute)  |  Interval | Pipeline|
+        |        Instance       |   Module   |   min   |   max   |    min    |    max    | min | max |   Type  |
+        +-----------------------+------------+---------+---------+-----------+-----------+-----+-----+---------+
+        |grp_runPeArray_fu_128  |runPeArray  |        3|        3|  30.000 ns|  30.000 ns|    1|    1|      yes|
+        +-----------------------+------------+---------+---------+-----------+-----------+-----+-----+---------+
+
+        * Loop: 
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+        |                    |  Latency (cycles) | Iteration|  Initiation Interval  | Trip |          |
+        |      Loop Name     |   min   |   max   |  Latency |  achieved |   target  | Count| Pipelined|
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+        |- VITIS_LOOP_161_1  |       20|       20|         6|          5|          5|     4|       yes|
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+
+
+
+================================================================
+== Utilization Estimates
+================================================================
+* Summary: 
++---------------------+---------+------+---------+---------+-----+
+|         Name        | BRAM_18K|  DSP |    FF   |   LUT   | URAM|
++---------------------+---------+------+---------+---------+-----+
+|DSP                  |        -|     -|        -|        -|    -|
+|Expression           |        -|     -|        0|      320|    -|
+|FIFO                 |        -|     -|        -|        -|    -|
+|Instance             |        -|     8|     4603|    29610|    -|
+|Memory               |        -|     -|        -|        -|    -|
+|Multiplexer          |        -|     -|        0|      131|    -|
+|Register             |        -|     -|      338|        -|    -|
++---------------------+---------+------+---------+---------+-----+
+|Total                |        0|     8|     4941|    30061|    0|
++---------------------+---------+------+---------+---------+-----+
+|Available SLR        |     1344|  3008|   869120|   434560|  320|
++---------------------+---------+------+---------+---------+-----+
+|Utilization SLR (%)  |        0|    ~0|       ~0|        6|    0|
++---------------------+---------+------+---------+---------+-----+
+|Available            |     4032|  9024|  2607360|  1303680|  960|
++---------------------+---------+------+---------+---------+-----+
+|Utilization (%)      |        0|    ~0|       ~0|        2|    0|
++---------------------+---------+------+---------+---------+-----+
+
++ Detail: 
+    * Instance: 
+    +---------------------------+----------------------+---------+----+------+-------+-----+
+    |          Instance         |        Module        | BRAM_18K| DSP|  FF  |  LUT  | URAM|
+    +---------------------------+----------------------+---------+----+------+-------+-----+
+    |grp_runPeArray_fu_128      |runPeArray            |        0|   8|  4603|  29570|    0|
+    |sparsemux_9_2_32_1_1_U440  |sparsemux_9_2_32_1_1  |        0|   0|     0|     20|    0|
+    |sparsemux_9_2_32_1_1_U441  |sparsemux_9_2_32_1_1  |        0|   0|     0|     20|    0|
+    +---------------------------+----------------------+---------+----+------+-------+-----+
+    |Total                      |                      |        0|   8|  4603|  29610|    0|
+    +---------------------------+----------------------+---------+----+------+-------+-----+
+
+    * DSP: 
+    N/A
+
+    * Memory: 
+    N/A
+
+    * FIFO: 
+    N/A
+
+    * Expression: 
+    +-----------------------------------------+----------+----+---+----+------------+------------+
+    |              Variable Name              | Operation| DSP| FF| LUT| Bitwidth P0| Bitwidth P1|
+    +-----------------------------------------+----------+----+---+----+------------+------------+
+    |add_ln161_fu_190_p2                      |         +|   0|  0|  10|           3|           1|
+    |cmp19_1_fu_233_p2                        |      icmp|   0|  0|  10|           3|           1|
+    |cmp19_2_fu_256_p2                        |      icmp|   0|  0|  10|           3|           2|
+    |cmp19_3_fu_279_p2                        |      icmp|   0|  0|  10|           3|           2|
+    |cmp19_fu_210_p2                          |      icmp|   0|  0|  10|           3|           1|
+    |icmp_ln161_fu_184_p2                     |      icmp|   0|  0|  12|           3|           4|
+    |grp_runPeArray_fu_128_operand_c_read     |    select|   0|  0|  32|           1|          32|
+    |grp_runPeArray_fu_128_operand_c_read_10  |    select|   0|  0|  32|           1|          32|
+    |grp_runPeArray_fu_128_operand_c_read_11  |    select|   0|  0|  32|           1|          32|
+    |grp_runPeArray_fu_128_operand_c_read_12  |    select|   0|  0|  32|           1|          32|
+    |grp_runPeArray_fu_128_operand_c_read_13  |    select|   0|  0|  32|           1|          32|
+    |grp_runPeArray_fu_128_operand_c_read_14  |    select|   0|  0|  32|           1|          32|
+    |grp_runPeArray_fu_128_operand_c_read_8   |    select|   0|  0|  32|           1|          32|
+    |grp_runPeArray_fu_128_operand_c_read_9   |    select|   0|  0|  32|           1|          32|
+    |ap_enable_pp0                            |       xor|   0|  0|   2|           1|           2|
+    +-----------------------------------------+----------+----+---+----+------------+------------+
+    |Total                                    |          |   0|  0| 320|          27|         269|
+    +-----------------------------------------+----------+----+---+----+------------+------------+
+
+    * Multiplexer: 
+    +----------------------------------------------+----+-----------+-----+-----------+
+    |                     Name                     | LUT| Input Size| Bits| Total Bits|
+    +----------------------------------------------+----+-----------+-----+-----------+
+    |ap_NS_fsm                                     |  31|          6|    1|          6|
+    |ap_done_int                                   |   9|          2|    1|          2|
+    |ap_enable_reg_pp0_iter0                       |   9|          2|    1|          2|
+    |ap_enable_reg_pp0_iter0_reg                   |   9|          2|    1|          2|
+    |ap_enable_reg_pp0_iter1                       |   9|          2|    1|          2|
+    |ap_sig_allocacmp_row_6                        |   9|          2|    3|          6|
+    |ap_sig_allocacmp_row_sum_write_assign_1_load  |  14|          3|   32|         96|
+    |ap_sig_allocacmp_row_sum_write_assign_load    |  14|          3|   32|         96|
+    |row_fu_76                                     |   9|          2|    3|          6|
+    |row_sum_write_assign_1_fu_72                  |   9|          2|   32|         64|
+    |row_sum_write_assign_fu_68                    |   9|          2|   32|         64|
+    +----------------------------------------------+----+-----------+-----+-----------+
+    |Total                                         | 131|         28|  139|        346|
+    +----------------------------------------------+----+-----------+-----+-----------+
+
+    * Register: 
+    +------------------------------------+----+----+-----+-----------+
+    |                Name                | FF | LUT| Bits| Const Bits|
+    +------------------------------------+----+----+-----+-----------+
+    |ap_CS_fsm                           |   5|   0|    5|          0|
+    |ap_done_reg                         |   1|   0|    1|          0|
+    |ap_enable_reg_pp0_iter0_reg         |   1|   0|    1|          0|
+    |ap_enable_reg_pp0_iter1             |   1|   0|    1|          0|
+    |grp_runPeArray_fu_128_ap_start_reg  |   1|   0|    1|          0|
+    |icmp_ln161_reg_472                  |   1|   0|    1|          0|
+    |pe_result_out_accType_15_reg_487    |  32|   0|   32|          0|
+    |pe_result_out_accType_16_reg_492    |  32|   0|   32|          0|
+    |pe_result_out_accType_17_reg_497    |  32|   0|   32|          0|
+    |pe_result_out_accType_18_reg_502    |  32|   0|   32|          0|
+    |pe_result_out_accType_19_reg_507    |  32|   0|   32|          0|
+    |pe_result_out_accType_20_reg_512    |  32|   0|   32|          0|
+    |pe_result_out_accType_21_reg_517    |  32|   0|   32|          0|
+    |pe_result_out_accType_reg_482       |  32|   0|   32|          0|
+    |row_6_reg_463                       |   3|   0|    3|          0|
+    |row_fu_76                           |   3|   0|    3|          0|
+    |row_sum_write_assign_1_fu_72        |  32|   0|   32|          0|
+    |row_sum_write_assign_fu_68          |  32|   0|   32|          0|
+    |trunc_ln161_reg_476                 |   2|   0|    2|          0|
+    +------------------------------------+----+----+-----+-----------+
+    |Total                               | 338|   0|  338|          0|
+    +------------------------------------+----+----+-----+-----------+
+
+
+
+================================================================
+== Interface
+================================================================
+* Summary: 
++----------------+-----+-----+------------+----------------+--------------+
+|    RTL Ports   | Dir | Bits|  Protocol  |  Source Object |    C Type    |
++----------------+-----+-----+------------+----------------+--------------+
+|ap_clk          |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_rst          |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_start        |   in|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_done         |  out|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_idle         |  out|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_ready        |  out|    1|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_return_0     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|ap_return_1     |  out|   32|  ap_ctrl_hs|     runPeRowSum|  return value|
+|pe_reg_read     |   in|   16|     ap_none|     pe_reg_read|        scalar|
+|pe_reg_read_8   |   in|   16|     ap_none|   pe_reg_read_8|        scalar|
+|pe_reg_read_9   |   in|   16|     ap_none|   pe_reg_read_9|        scalar|
+|pe_reg_read_10  |   in|   16|     ap_none|  pe_reg_read_10|        scalar|
+|pe_reg_read_11  |   in|   16|     ap_none|  pe_reg_read_11|        scalar|
+|pe_reg_read_12  |   in|   16|     ap_none|  pe_reg_read_12|        scalar|
+|pe_reg_read_13  |   in|   16|     ap_none|  pe_reg_read_13|        scalar|
+|pe_reg_read_14  |   in|   16|     ap_none|  pe_reg_read_14|        scalar|
++----------------+-----+-----+------------+----------------+--------------+
+

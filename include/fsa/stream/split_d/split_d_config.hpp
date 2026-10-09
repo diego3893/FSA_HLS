@@ -17,6 +17,12 @@
 #define FSA_SPLIT_D_HEAD_DIM 16
 #endif
 
+#ifndef FSA_SPLIT_D_QUERY_BLOCK_COLS
+#define FSA_SPLIT_D_QUERY_BLOCK_COLS \
+    ((FSA_SPLIT_D_PE_DIM>=2 && FSA_SPLIT_D_PE_DIM%2==0) \
+        ? FSA_SPLIT_D_PE_DIM/2 : FSA_SPLIT_D_PE_DIM)
+#endif
+
 #ifndef FSA_SPLIT_D_DMA_AXI_QKV_DEPTH
 #define FSA_SPLIT_D_DMA_AXI_QKV_DEPTH \
     ((FSA_MAX_SEQUENCE_LENGTH*FSA_SPLIT_D_HEAD_DIM)/4)
@@ -37,11 +43,7 @@ namespace split_d{
     constexpr int HEAD_DIM = FSA_SPLIT_D_HEAD_DIM;
 
     /// @brief 每个空间块拥有的query列数；D及token tile步长保持原值。
-#ifdef FSA_SPLIT_D_QUERY_BLOCK_COLS
     constexpr int QUERY_BLOCK_COLS = FSA_SPLIT_D_QUERY_BLOCK_COLS;
-#else
-    constexpr int QUERY_BLOCK_COLS = PE_DIM>=2 && PE_DIM%2==0 ? PE_DIM/2 : PE_DIM;
-#endif
     constexpr int QUERY_BLOCKS = PE_DIM/QUERY_BLOCK_COLS;
 
     /// @brief QK和PV需要依次执行的Split-D轮数。

@@ -99,7 +99,8 @@ namespace detail{
 
     /// @brief 按原block/lane顺序完成H个feature的QK；FP32反馈仅属于本块。
     void runPeAccumulateTile(const elem_t q_tile[QUERY_BLOCK_COLS][HEAD_DIM], const elem_t k_tile[PE_DIM][HEAD_DIM], unsigned active_queries, unsigned active_keys, PeState pe[PE_DIM][QUERY_BLOCK_COLS]){
-        #pragma HLS INLINE off
+        // 将PE调用放入块内同一作用域，避免helper各自复制一套D×B阵列。
+        #pragma HLS INLINE
         #pragma HLS ARRAY_PARTITION variable=q_tile complete dim=1
         #pragma HLS ARRAY_PARTITION variable=k_tile complete dim=1
         #pragma HLS ARRAY_PARTITION variable=pe complete dim=0
@@ -154,7 +155,7 @@ namespace detail{
      * 每行的部分和累加到对应列，结果与逐行调用时完全一致。
      */
     void runPeRowSum(const PeState pe[PE_DIM][QUERY_BLOCK_COLS], acc_t row_sum[QUERY_BLOCK_COLS]){
-        #pragma HLS INLINE off
+        #pragma HLS INLINE
         #pragma HLS ARRAY_PARTITION variable=pe complete dim=0
         #pragma HLS ARRAY_PARTITION variable=row_sum complete dim=1
 
