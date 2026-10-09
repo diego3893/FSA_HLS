@@ -36,6 +36,14 @@ namespace split_d{
     /// @brief 完整Q/K/V向量维度。
     constexpr int HEAD_DIM = FSA_SPLIT_D_HEAD_DIM;
 
+    /// @brief 每个空间块拥有的query列数；D及token tile步长保持原值。
+#ifdef FSA_SPLIT_D_QUERY_BLOCK_COLS
+    constexpr int QUERY_BLOCK_COLS = FSA_SPLIT_D_QUERY_BLOCK_COLS;
+#else
+    constexpr int QUERY_BLOCK_COLS = PE_DIM>=2 && PE_DIM%2==0 ? PE_DIM/2 : PE_DIM;
+#endif
+    constexpr int QUERY_BLOCKS = PE_DIM/QUERY_BLOCK_COLS;
+
     /// @brief QK和PV需要依次执行的Split-D轮数。
     constexpr int DIM_BLOCKS = HEAD_DIM/PE_DIM;
 
@@ -51,6 +59,12 @@ namespace split_d{
         (MAX_SEQUENCE_LENGTH+PE_DIM-1)/PE_DIM;
 
     static_assert(PE_DIM>0, "Split-D PE维度必须大于0");
+    static_assert(QUERY_BLOCK_COLS>0 && QUERY_BLOCK_COLS<=PE_DIM,
+                  "query块宽必须在1至D之间");
+    static_assert(PE_DIM%QUERY_BLOCK_COLS==0,
+                  "query块宽必须整除全局D");
+    static_assert(QUERY_BLOCKS==1 || QUERY_BLOCKS==2,
+                  "阶段3首版支持一个对照块或两个空间块");
     static_assert(HEAD_DIM>0, "Split-D head dimension必须大于0");
     static_assert(HEAD_DIM%PE_DIM==0,
                   "首版Split-D要求HEAD_DIM能被PE_DIM整除");

@@ -25,17 +25,14 @@ namespace detail{
         }
     }
 
-    void stageAccumulatorResult(
-        const acc_t input[PE_DIM],
-        acc_t result[PE_DIM]
-    ){
+    void stageAccumulatorResult(const acc_t input[QUERY_BLOCK_COLS], acc_t result[QUERY_BLOCK_COLS]){
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=1 style=stp
         #pragma HLS LATENCY min=1 max=1
         #pragma HLS ARRAY_PARTITION variable=input complete dim=1
         #pragma HLS ARRAY_PARTITION variable=result complete dim=1
 
-        for(int col=0; col<PE_DIM; ++col){
+        for(int col=0; col<QUERY_BLOCK_COLS; ++col){
             #pragma HLS UNROLL
             result[col] = input[col];
         }
@@ -73,27 +70,8 @@ namespace detail{
         }
     }
 
-    /**
-     * @brief 层次化调度整套PE阵列：按bank分组，bank内完全展开。
-     *
-     * PE_BANK_ROWS行构成一个bank，bank内PE_BANK_NODES个PE原地完全展开；
-     * 每个bank只以固定规模的一维节点数组调用peBankMacUnit，因此单个bank的
-     * 控制流和端口规模固定，不随PE_DIM增长。bank数量由PE_DIM决定：
-     * 4×4时为1个bank（16个PE），16×16时为16个bank（256个PE），物理PE总数
-     * 始终是PE_DIM×PE_DIM，且不为任何阶段复制bank。
-     *
-     * 函数按PE_ARRAY_II拍接受一次新的阵列求值：4×4的阵列求值本身只需1拍，
-     * 16×16时256个PE的调度规模远大于单拍，声明多拍间隔才能让工具完成流水
-     * 调度而不报"控制流过于复杂"。QK和ROW_SUM的目标II就是5，因此该间隔不
-     * 降低这两个阶段的吞吐。
-     */
-    void runPeArray(
-        const PeState pe[PE_DIM][PE_DIM],
-        const elem_t operand_b[PE_DIM][PE_DIM],
-        const acc_t operand_c[PE_DIM][PE_DIM],
-        const bool exp2_mode,
-        PeMacUnitOutput result[PE_DIM][PE_DIM]
-    ){
+    /// @brief 一个D×B空间块的共享RawFMA阵列，D为key方向，B为query列。
+    void runPeArray(const PeState pe[PE_DIM][QUERY_BLOCK_COLS], const elem_t operand_b[PE_DIM][QUERY_BLOCK_COLS], const acc_t operand_c[PE_DIM][QUERY_BLOCK_COLS], const bool exp2_mode, PeMacUnitOutput result[PE_DIM][QUERY_BLOCK_COLS]){
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=PE_ARRAY_II style=stp
         #pragma HLS ARRAY_PARTITION variable=pe complete dim=0
@@ -101,13 +79,13 @@ namespace detail{
         #pragma HLS ARRAY_PARTITION variable=operand_c complete dim=0
         #pragma HLS ARRAY_PARTITION variable=result complete dim=0
 
-        // P3：不再按bank循环调用，而是让整个阵列在同一个流水体内原地求值。
+        // 一个空间块为D×B，坐标完全展开；块内六个阶段共享这条求值通路。
         // row/col由UNROLL展开为编译期常量，因此result的写回索引是常量而不是
         // 循环变量——此前的rolled bank形状正是因为写回索引随循环变量变化，
         // 才在写回路径上多出选择逻辑（4×4 7.300→7.893ns、16×16→7.934ns）。
         for(int row=0; row<PE_DIM; ++row){
             #pragma HLS UNROLL
-            for(int col=0; col<PE_DIM; ++col){
+            for(int col=0; col<QUERY_BLOCK_COLS; ++col){
                 #pragma HLS UNROLL
                 result[row][col] = peMacUnit(
                     pe[row][col].reg,
@@ -119,26 +97,8 @@ namespace detail{
         }
     }
 
-    /**
-     * @brief 一个key tile的QK累加全部在本函数内完成，对外只暴露一次调用。
-     *
-     * 上一版把block/lane循环留在控制器里，每次lane迭代都跨函数边界调用
-     * runPeArray，并用控制器的共享数组operand_c传递"下一次累加值"，于是
-     * operand_c在相邻迭代之间形成store→load的跨迭代依赖，工具只能报
-     * HLS 200-880/200-875并把II压到8。这里把循环体和数组都收进函数内部：
-     * operand_b/operand_c作为本迭代私有的局部数组，只在runPeArray调用前
-     * 被写、调用中被读，跨迭代不再有共享数组；pe[][].score_acc的RAW则被
-     * 一次阵列求值（PE_ARRAY_II拍）完全吸收在流水体内。
-     *
-     * 单次runPeArray调用点仍然只有一个，因此不会为阶段复制PE阵列。
-     */
-    void runPeAccumulateTile(
-        const elem_t q_tile[PE_DIM][HEAD_DIM],
-        const elem_t k_tile[PE_DIM][HEAD_DIM],
-        unsigned active_queries,
-        unsigned active_keys,
-        PeState pe[PE_DIM][PE_DIM]
-    ){
+    /// @brief 按原block/lane顺序完成H个feature的QK；FP32反馈仅属于本块。
+    void runPeAccumulateTile(const elem_t q_tile[QUERY_BLOCK_COLS][HEAD_DIM], const elem_t k_tile[PE_DIM][HEAD_DIM], unsigned active_queries, unsigned active_keys, PeState pe[PE_DIM][QUERY_BLOCK_COLS]){
         #pragma HLS INLINE off
         #pragma HLS ARRAY_PARTITION variable=q_tile complete dim=1
         #pragma HLS ARRAY_PARTITION variable=k_tile complete dim=1
@@ -149,16 +109,16 @@ namespace detail{
             for(int lane=0; lane<PE_DIM; ++lane){
                 #pragma HLS PIPELINE II=5
                 const int feature = block*PE_DIM+lane;
-                elem_t operand_b[PE_DIM][PE_DIM];
-                acc_t operand_c[PE_DIM][PE_DIM];
-                PeMacUnitOutput pe_result[PE_DIM][PE_DIM];
+                elem_t operand_b[PE_DIM][QUERY_BLOCK_COLS];
+                acc_t operand_c[PE_DIM][QUERY_BLOCK_COLS];
+                PeMacUnitOutput pe_result[PE_DIM][QUERY_BLOCK_COLS];
                 #pragma HLS ARRAY_PARTITION variable=operand_b complete dim=0
                 #pragma HLS ARRAY_PARTITION variable=operand_c complete dim=0
                 #pragma HLS ARRAY_PARTITION variable=pe_result complete dim=0
 
                 for(int row=0; row<PE_DIM; ++row){
                     #pragma HLS UNROLL
-                    for(int col=0; col<PE_DIM; ++col){
+                    for(int col=0; col<QUERY_BLOCK_COLS; ++col){
                         #pragma HLS UNROLL
                         pe[row][col].reg =
                             (unsigned)col<active_queries
@@ -175,7 +135,7 @@ namespace detail{
                 );
                 for(int row=0; row<PE_DIM; ++row){
                     #pragma HLS UNROLL
-                    for(int col=0; col<PE_DIM; ++col){
+                    for(int col=0; col<QUERY_BLOCK_COLS; ++col){
                         #pragma HLS UNROLL
                         pe[row][col].score_acc =
                             pe_result[row][col].out_accType;
@@ -193,26 +153,23 @@ namespace detail{
      * 之间不再通过控制器的共享数组传递数据。累加顺序仍是row=0..PE_DIM-1，
      * 每行的部分和累加到对应列，结果与逐行调用时完全一致。
      */
-    void runPeRowSum(
-        const PeState pe[PE_DIM][PE_DIM],
-        acc_t row_sum[PE_DIM]
-    ){
+    void runPeRowSum(const PeState pe[PE_DIM][QUERY_BLOCK_COLS], acc_t row_sum[QUERY_BLOCK_COLS]){
         #pragma HLS INLINE off
         #pragma HLS ARRAY_PARTITION variable=pe complete dim=0
         #pragma HLS ARRAY_PARTITION variable=row_sum complete dim=1
 
         for(int row=0; row<PE_DIM; ++row){
             #pragma HLS PIPELINE II=5
-            elem_t operand_b[PE_DIM][PE_DIM];
-            acc_t operand_c[PE_DIM][PE_DIM];
-            PeMacUnitOutput pe_result[PE_DIM][PE_DIM];
+            elem_t operand_b[PE_DIM][QUERY_BLOCK_COLS];
+            acc_t operand_c[PE_DIM][QUERY_BLOCK_COLS];
+            PeMacUnitOutput pe_result[PE_DIM][QUERY_BLOCK_COLS];
             #pragma HLS ARRAY_PARTITION variable=operand_b complete dim=0
             #pragma HLS ARRAY_PARTITION variable=operand_c complete dim=0
             #pragma HLS ARRAY_PARTITION variable=pe_result complete dim=0
 
             for(int r=0; r<PE_DIM; ++r){
                 #pragma HLS UNROLL
-                for(int col=0; col<PE_DIM; ++col){
+                for(int col=0; col<QUERY_BLOCK_COLS; ++col){
                     #pragma HLS UNROLL
                     operand_b[r][col] = elemOne();
                     operand_c[r][col] = r==row
@@ -222,7 +179,7 @@ namespace detail{
             runPeArray(
                 pe, operand_b, operand_c, false, pe_result
             );
-            for(int col=0; col<PE_DIM; ++col){
+            for(int col=0; col<QUERY_BLOCK_COLS; ++col){
                 #pragma HLS UNROLL
                 row_sum[col] =
                     pe_result[row][col].out_accType;
@@ -230,13 +187,7 @@ namespace detail{
         }
     }
 
-    void runAccumulatorColumns(
-        const bool exp2_mode,
-        const acc_t in_a[PE_DIM],
-        const acc_t in_b[PE_DIM],
-        const acc_t in_c[PE_DIM],
-        acc_t result[PE_DIM]
-    ){
+    void runAccumulatorColumns(const bool exp2_mode, const acc_t in_a[QUERY_BLOCK_COLS], const acc_t in_b[QUERY_BLOCK_COLS], const acc_t in_c[QUERY_BLOCK_COLS], acc_t result[QUERY_BLOCK_COLS]){
         #pragma HLS INLINE off
         #pragma HLS PIPELINE II=1 style=stp
         #pragma HLS ARRAY_PARTITION variable=in_a complete dim=1
@@ -244,10 +195,10 @@ namespace detail{
         #pragma HLS ARRAY_PARTITION variable=in_c complete dim=1
         #pragma HLS ARRAY_PARTITION variable=result complete dim=1
 
-        acc_t computed[PE_DIM];
+        acc_t computed[QUERY_BLOCK_COLS];
         #pragma HLS ARRAY_PARTITION variable=computed complete dim=1
 
-        for(int col=0; col<PE_DIM; ++col){
+        for(int col=0; col<QUERY_BLOCK_COLS; ++col){
             #pragma HLS UNROLL
             const AccPwlInput pwl = prepareAccPwlInput(in_a[col]);
             const acc_t operand_a = exp2_mode
@@ -267,15 +218,12 @@ namespace detail{
         stageAccumulatorResult(computed, result);
     }
 
-    void reciprocalColumns(
-        const acc_t denominator[PE_DIM],
-        acc_t result[PE_DIM]
-    ){
+    void reciprocalColumns(const acc_t denominator[QUERY_BLOCK_COLS], acc_t result[QUERY_BLOCK_COLS]){
         #pragma HLS INLINE off
         #pragma HLS ARRAY_PARTITION variable=denominator complete dim=1
         #pragma HLS ARRAY_PARTITION variable=result complete dim=1
 
-        for(int col=0; col<PE_DIM; ++col){
+        for(int col=0; col<QUERY_BLOCK_COLS; ++col){
             #pragma HLS UNROLL
             result[col] = denominator[col]!=accZero()
                 ? accumulator_reciprocal(denominator[col]) : accZero();

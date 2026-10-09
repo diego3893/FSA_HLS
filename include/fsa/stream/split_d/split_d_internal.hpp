@@ -6,6 +6,7 @@
 #define SPLIT_D_INTERNAL_HPP
 
 #include "fsa/stream/dma.hpp"
+#include <hls_stream.h>
 #include "fsa/stream/split_d/split_d_types.hpp"
 
 namespace fsa{
@@ -15,15 +16,10 @@ namespace detail{
     constexpr int PV_INTERLEAVE = 8;
 
     /**
-     * @brief 一个PE bank包含的阵列行数与节点个数。
+     * @brief 遗留bank接口的行数与节点个数，当前runPeArray不使用该接口。
      *
-     * bank是同一套PE阵列的RTL层次分组，不改变物理PE总数。每个bank以固定
-     * 规模的一维节点数组作为函数实参，因此跨函数边界传递的数组尺寸不随
-     * PE_DIM增长，避免大阵列把流水函数的控制流撑到无法调度。
-     *
-     * 小阵列（PE_DIM<=4）整阵列就是一个bank，保持已验证的单bank结构；
-     * 大阵列按行分bank，把跨函数传递的数组规模压到PE_DIM个节点。
-     * 可用-DFSA_SPLIT_D_PE_BANK_ROWS=<n>覆盖该选择。
+     * 本阶段保留死代码，避免混入清理变更；宏不由官方Tcl的环境变量透传，
+     * 修改它不能将当前D×B阵列分块，也不证明物理实例或流水可行。
      */
     constexpr int PE_BANK_ROWS =
 #ifdef FSA_SPLIT_D_PE_BANK_ROWS
@@ -35,12 +31,10 @@ namespace detail{
         (PE_DIM < PE_BANK_ROWS ? PE_DIM : PE_BANK_ROWS) * PE_DIM;
 
     /**
-     * @brief 一次PE阵列求值占用的拍数（即runPeArray的流水间隔）。
+     * @brief runPeArray的目标发射间隔，不是一次求值的latency。
      *
-     * 4×4时16个PE一拍即可完成，若声明多拍会白白拉长每个调用点，使
-     * QK/ROW_SUM的实际II从5退化到10、PWL/PV从1退化到5，因此必须为1。
-     * 16×16时256个PE的调度规模远超单拍，需要多拍间隔才能让工具完成
-     * 流水调度；QK和ROW_SUM的目标II是5，取5不降低这两个阶段的吞吐。
+     * 已验收未分块4×4的实际II=1、latency=3。阶段3的D×B实例须重新
+     * 验收；16×16的遗留默认5尚未验证，不能据此保证PWL/PV II=1。
      */
 #ifdef FSA_SPLIT_D_PE_ARRAY_II
     constexpr int PE_ARRAY_II = FSA_SPLIT_D_PE_ARRAY_II;
@@ -57,11 +51,11 @@ namespace detail{
     );
 
     void runPeArray(
-        const PeState pe[PE_DIM][PE_DIM],
-        const elem_t operand_b[PE_DIM][PE_DIM],
-        const acc_t operand_c[PE_DIM][PE_DIM],
+        const PeState pe[PE_DIM][QUERY_BLOCK_COLS],
+        const elem_t operand_b[PE_DIM][QUERY_BLOCK_COLS],
+        const acc_t operand_c[PE_DIM][QUERY_BLOCK_COLS],
         bool exp2_mode,
-        PeMacUnitOutput result[PE_DIM][PE_DIM]
+        PeMacUnitOutput result[PE_DIM][QUERY_BLOCK_COLS]
     );
 
     /**
@@ -69,8 +63,8 @@ namespace detail{
      *
      * 对应Chisel中QK在阵列上连续跑完dim/D轮才产生完整S的时序：block/lane
      * 循环和operand_b/operand_c的准备都放进本函数，累加值只在函数内部的
-     * pe[][].score_acc上传递。这样调用者只需一次调用，PE阵列调用点仍然
-     * 唯一（runPeArray只在本函数内部被调用），不会为阶段复制阵列。
+     * pe[][].score_acc上传递。调用者只需一次调用，PE接口尺寸为D×B；
+     * 块内其他阶段也调用runPeArray，实际共享须由RTL验收。
      *
      * @param q_tile Q tile，已按col装入query
      * @param k_tile K tile，已按row装入key
@@ -79,11 +73,11 @@ namespace detail{
      * @param pe PE阵列状态，score_acc进入前必须已清零，返回时保存完整S
      */
     void runPeAccumulateTile(
-        const elem_t q_tile[PE_DIM][HEAD_DIM],
+        const elem_t q_tile[QUERY_BLOCK_COLS][HEAD_DIM],
         const elem_t k_tile[PE_DIM][HEAD_DIM],
         unsigned active_queries,
         unsigned active_keys,
-        PeState pe[PE_DIM][PE_DIM]
+        PeState pe[PE_DIM][QUERY_BLOCK_COLS]
     );
 
     /**
@@ -91,27 +85,27 @@ namespace detail{
      *
      * 对应Chisel中SA对概率矩阵做行累加的时序：row循环与operand_b/operand_c
      * 的准备都在本函数内部完成，row_sum只在函数内部逐步累加。与
-     * runPeAccumulateTile共用同一个runPeArray调用点。
+     * runPeAccumulateTile共享同一块内runPeArray实例，不把调用点数当实例数。
      *
      * @param pe PE阵列状态，reg保存待累加的P
      * @param row_sum 输出，每列query的P行累加结果
      */
     void runPeRowSum(
-        const PeState pe[PE_DIM][PE_DIM],
-        acc_t row_sum[PE_DIM]
+        const PeState pe[PE_DIM][QUERY_BLOCK_COLS],
+        acc_t row_sum[QUERY_BLOCK_COLS]
     );
 
     void runAccumulatorColumns(
         bool exp2_mode,
-        const acc_t in_a[PE_DIM],
-        const acc_t in_b[PE_DIM],
-        const acc_t in_c[PE_DIM],
-        acc_t result[PE_DIM]
+        const acc_t in_a[QUERY_BLOCK_COLS],
+        const acc_t in_b[QUERY_BLOCK_COLS],
+        const acc_t in_c[QUERY_BLOCK_COLS],
+        acc_t result[QUERY_BLOCK_COLS]
     );
 
     void reciprocalColumns(
-        const acc_t denominator[PE_DIM],
-        acc_t result[PE_DIM]
+        const acc_t denominator[QUERY_BLOCK_COLS],
+        acc_t result[QUERY_BLOCK_COLS]
     );
 
     void loadElemTile(

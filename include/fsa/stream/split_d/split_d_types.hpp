@@ -22,6 +22,21 @@ namespace split_d{
         acc_t score_acc{};
     };
 
+    /// @brief 分发器送给每块的query-tile头，计数决定全部有限数据的消费量。
+    struct QueryTileHeader{
+        unsigned query_base;
+        unsigned active_queries;
+        unsigned key_tiles;
+        unsigned length;
+        bool causal;
+    };
+
+    /// @brief 相同key/feature的K和V，由唯一DMA分发器广播至块内tile缓存。
+    struct KeyValuePacket{
+        elem_t key;
+        elem_t value;
+    };
+
 }  // namespace split_d
 }  // namespace fsa
 
