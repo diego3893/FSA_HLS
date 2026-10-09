@@ -16,7 +16,8 @@
 ## 2 硬约束
 
 - 不修改`FSA-main`；现有生产顶层`fsa_stream`的接口和行为保持不变。
-- **git操作由用户执行（2026-10-09起）**：仓库根`AGENTS.md`（已跟踪）规定"不进行git操作，可以提示有关键文件未跟踪"。因此智能体只改文件并提示状态，**不执行add/commit/push**；需要远端拿到新commit时，先请用户推送。远端测试入口不变。
+- **git操作已由用户授权给智能体（2026-10-09，用户明确："你可以使用git同步内容"）。** 注意与仓库根`AGENTS.md`第88行"不进行git操作"**不一致**——用户口头授权优先，智能体据此执行add/commit/push并核对远端HEAD。**建议用户同步修订`AGENTS.md`**，否则下个会话可能重新按"禁止git"执行。
+- 远端构建/CoSim/Vivado/板测的授权**不随git授权自动获得**；每次仍需明确轮次与范围。
 - Split-D使用独立顶层`fsa_stream_split_d`，保持Q/K/V/O四个64-bit AXI master bundle、AXI-Lite控制、VU37P器件、10ns时钟和2.7ns uncertainty。
 - 只允许一套参数化`D×D` PE RawFMA阵列；QK、softmax相关步骤和PV顺序复用。
 - Split-D每个PE只保留一个FP16 `reg`和一个FP32 `score_acc`；禁止阵列外增加完整S/P副本。
