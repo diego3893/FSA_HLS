@@ -52,3 +52,5 @@ vivado -mode batch -source tools/split_d_nm37/scripts/build_and_report.tcl \
 可追加官方HBM TLM功能对照：`simulate.tcl <新工程副本路径> hbm_tlm`。仅切换Vivado实际允许的HBM模型，FSA、自检、SmartConnect仍使用RTL，ROM、52事务、全部canary/位模式及复位测试不变。默认`rtl`流程保留。TLM结果不得作为实际HBM延迟、吞吐或物理时序证据。
 
 Vivado2024.2的官方HBM TLM在`hbm_sc.h`将APB和`apb_complete`声明为`xsc_stub_port`，不模拟校准。可选TLM功能对照仅在仿真宏下将BD内部`init_done`适配为clock_locked，日志显式标记FUNCTIONAL ONLY；普通RTL模式无此适配。TLM对照不证明HBM初始化/校准/复位恢复，不能替代默认RTL流程或板测。
+
+板级时钟必须按NM37原理图第3页处理：U7为100MHz LVDS，经100nF电容交流耦合，BH42/BJ42位于1.2V Bank65。XDC保留DIFF_SSTL12并显式ODT=RTT_48，提供接收端split终端/偏置，最终设计断言防止使用缺该修正的旧DCP。SW2低复位同时连接ZU5，不能当FSA独占复位。板级来源、检查步骤与未完成项见`docs/综合报告/NM37板测依据与原理图核查_20261010.md`。

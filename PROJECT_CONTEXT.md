@@ -140,7 +140,7 @@ Q/K/V AXI
 
 ## 7 当前工作集
 
-- 当前工作集：`tools/split_d_nm37/`、1316修改日志、`docs/综合报告/Split-D_4x4存储与完整集成验收_20261010.md`；正式计算证据bf41d16，系统候选a0e137a，测试脚本3ac1786。进程/目录/失败根因与首动作以第11节为准，整体未验收。
+- 当前工作集：`tools/split_d_nm37/`、1316修改日志、`docs/综合报告/Split-D_4x4存储与完整集成验收_20261010.md`；正式计算证据bf41d16，系统复位版本a0e137a、测试脚本f2dacc7；新增原理图发现时钟ODT遗漏，当前待测修正显式RTT_48。进程/目录/失败根因与首动作以第11节为准，整体未验收。
 
 - Split-D配置与类型：`include/fsa/stream/split_d/`
 - Split-D顶层：`src/stream/split_d/fsa_stream_split_d.cpp`
@@ -229,7 +229,7 @@ Q/K/V AXI
 - 时钟：10.0ns，uncertainty 2.7ns；不得放宽。
 - Split-D服务器命令：`./run_hls.sh fsa_stream_split_d`。
 - 生产基线命令：`./run_hls.sh fsa_stream`。
-- 分支`fsa_split_D`；最终计算HLS/IP被测bf41d16，完整系统硬件a0e137a、测试脚本3ac1786。此前b3e4957/OOC auto_context为历史对照；文档提交不算重新HLS验收。
+- 分支`fsa_split_D`；最终计算HLS/IP被测bf41d16，完整系统已测物理a0e137a、测试脚本f2dacc7；新硬件修正为时钟ODT RTT_48，未物理验收。此前b3e4957/OOC auto_context为历史对照；文档提交不算重新HLS验收。
 - 旧`source_manifest.json`和`delivery_validation.json`是历史快照，不代表当前源码。
 
 ## 11 交接摘要
@@ -240,7 +240,9 @@ Q/K/V AXI
 
 **2026-10-10 13:16当前任务：**三个4×4工作包，第1/2轮已闭环、工作包1/2合格；第3轮真实HBM完整集成仍在执行。最终计算IP/source固定bf41d1602d5c59d35033b74c2ab82fddc232a528：数学/严格24/24、26 CoSim、与25d6dda全部原始word相同、16PE/4Acc/II5/5/1/1、7.300ns/DSP40，总72696cycles；tile RAMB18由40降0、AXI RAMB36仍7，物理LUT50432/FF28058、内部setup+0.330/hold+0.010ns。完整OOC仍因外部min0ns hold4575失败，必须留真实系统关闭。正式component SHA a64c7be2ae2cc026bd4164cd347004a67287aba3688a93d703bbfc065a3a26dc。
 
-**当前系统候选与首动作：**系统硬件a0e137ac7831e1efc424a91010289627c5dd98da，18:23:04新工程创建成功；双域XCI确认C_EXT_RESET_HIGH=0/C_AUX_RESET_HIGH=1。RTL仿真project=build/split_d_nm37_a0e137a_ipbf/project（会话78409），18:24:41独立副本_impl启动实现（会话80214）。最新测试脚本3ac1786d1e501d435ef4d140020da1348ae5c00e增加官方HBM TLM对照（旧会话41703已因APB stub无效等待停止），仅HBM切tlm，SmartConnect/FSA/controller仍rtl；52事务/全32768canary/金标准不变。官方hbm_sc.h的apb_complete为xsc_stub_port，TLM无初始化/校准模型；仅仿真宏的init_done=clock_locked适配已准备，TLM只能补数值功能，不证明HBM初始化/校准/复位恢复或真实吞吐，默认RTL门槛仍保留。先读对应/tmp/codex_nm37_*_20261010.log，不重复启动。纯XDC a394旧复位硬件实现（74141）只用于时钟模型证据，不当最终系统验收。bitstream/板测尚未执行。唯一VU37P target=210017937722A，另一个ZU5不使用。
+**当前系统候选与首动作：**正式计算IP仍bf41d16。系统复位版本a0e137a已于18:54:06完成实现，setup/hold=+0.200/+0.010ns、98003 nets全部route、LUT60777/FF43700/R36=45/R18=0/DSP40，自动DRC/methodology Error/Critical门槛通过；原始证据docs/evidence/split_d_nm37_a0e137a_board_review/。但用户提供原理图后确认时钟U7为LVDS、100nF AC耦合，当前1.2V Bank65/DIFF_SSTL12未显式split ODT；已新增RTT_48及synth/route/bitstream断言，旧DCP不能作为最终板级通过。新精确提交重新实现待启动。原理图与官方资料见docs/综合报告/NM37板测依据与原理图核查_20261010.md。SW2复位共享ZU5，不当FSA独占按钮。
+
+**运行中的仿真：**默认RTL project=build/split_d_nm37_a0e137a_ipbf/project（会话78409）已通过10us时钟/复位检查，18:53时推进到50us，真实APB初始化未完成。TLM f2dacc7 project=build/split_d_nm37_f2dacc7_tlm_ipbf/project（会话4515），仅仿真宏init_done=clock_locked；官方hbm_sc.h的APB为stub。已执行忙中复位及首笔控制写，18:53仍卡pc24核完成轮询，无52笔PASS。独立100us诊断确认FSA ap_start=1/ap_idle=0/ap_done=0/length=1；继续查数据流，不把TLM当HBM初始化/校准/复位恢复/吞吐证明。a394旧复位的纯XDC实现18:40已完成，仅时钟关系对照。bitstream/板测未执行；唯一VU37P target=210017937722A，另一ZU5不使用。先读对应/tmp日志，不重复正式运行。
 
 **已证实失败与范围：**a0c4329 TB超时无尺寸3e9在Time0溢出，已改显式64位保持3s合同；旧完整仿真768因unused aux active-low且接0永久复位，20us诊断锁定=1但APB/AXI/selftest reset全0，已精确停止并保留WDB。HBM内部两primary重复造成4条TIMING Critical；789 XDC foreach/if被忽略而exit1，改为纯generated_clock＋普通Tcl断言。原始日志/失败报告/XCI在docs/evidence/split_d_nm37_a0c4329_ipbf41d16/和split_d_nm37_7892c75_reset_diagnosis/。控制器4项unit通过；最终系统仿真/CDC/物理/板测尚无PASS。授权与日志见第2节/1316修改日志。
 

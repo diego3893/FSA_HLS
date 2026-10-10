@@ -1,0 +1,125 @@
+
+****** Vivado v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sat Oct 10 18:53:14 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source /tmp/codex_nm37_odt_diagnostic.tcl
+# open_checkpoint build/split_d_nm37_a394c8d_ipbf/reports/routed.dcp
+Command: open_checkpoint build/split_d_nm37_a394c8d_ipbf/reports/routed.dcp
+
+Starting open_checkpoint Task
+
+Time (s): cpu = 00:00:00.04 ; elapsed = 00:00:00.04 . Memory (MB): peak = 1358.227 ; gain = 0.000 ; free physical = 36175 ; free virtual = 53130
+INFO: [Device 21-403] Loading part xcvu37p_CIV-fsvh2892-2-e
+Netlist sorting complete. Time (s): cpu = 00:00:00.96 ; elapsed = 00:00:00.96 . Memory (MB): peak = 2952.363 ; gain = 0.000 ; free physical = 34309 ; free virtual = 51482
+INFO: [Netlist 29-17] Analyzing 4164 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 1 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2024.2
+INFO: [Project 1-570] Preparing netlist for logic optimization
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'u_bd/split_d_system_i/hbm_0/HBM_REF_CLK_0' is not directly connected to top level port. 'IBUF_LOW_PWR' is ignored for synthesis but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'u_bd/split_d_system_i/hbm_0/HBM_REF_CLK_1' is not directly connected to top level port. 'IBUF_LOW_PWR' is ignored for synthesis but preserved for implementation.
+Read ShapeDB Complete: Time (s): cpu = 00:00:00.27 ; elapsed = 00:00:00.29 . Memory (MB): peak = 3277.457 ; gain = 36.719 ; free physical = 34169 ; free virtual = 51176
+INFO: [Timing 38-478] Restoring timing data from binary archive.
+INFO: [Timing 38-479] Binary timing data restore complete.
+INFO: [Project 1-856] Restoring constraints from binary archive.
+INFO: [Project 1-853] Binary constraint restore complete.
+INFO: [Designutils 20-5722] Start Reading Physical Databases.
+Reading placement.
+Read Netlist Cache: Time (s): cpu = 00:00:00.09 ; elapsed = 00:00:00.11 . Memory (MB): peak = 3878.500 ; gain = 0.000 ; free physical = 37752 ; free virtual = 54759
+Reading placer database...
+Read Device Cache: Time (s): cpu = 00:00:00.03 ; elapsed = 00:00:00.03 . Memory (MB): peak = 3878.500 ; gain = 0.000 ; free physical = 37736 ; free virtual = 54744
+Read PlaceDB: Time (s): cpu = 00:00:03 ; elapsed = 00:00:03 . Memory (MB): peak = 3945.539 ; gain = 67.039 ; free physical = 37640 ; free virtual = 54648
+Read PulsedLatchDB: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3945.539 ; gain = 0.000 ; free physical = 37640 ; free virtual = 54648
+Reading routing.
+Read RouteStorage: Time (s): cpu = 00:00:08 ; elapsed = 00:00:07 . Memory (MB): peak = 4319.172 ; gain = 373.633 ; free physical = 37279 ; free virtual = 54289
+Read Physdb Files: Time (s): cpu = 00:00:11 ; elapsed = 00:00:10 . Memory (MB): peak = 4319.172 ; gain = 440.672 ; free physical = 37279 ; free virtual = 54289
+Restored from archive | CPU: 12.060000 secs | Memory: 388.832520 MB |
+Finished XDEF File Restore: Time (s): cpu = 00:00:12 ; elapsed = 00:00:10 . Memory (MB): peak = 4319.172 ; gain = 440.672 ; free physical = 37280 ; free virtual = 54290
+Netlist sorting complete. Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.01 . Memory (MB): peak = 4319.172 ; gain = 0.000 ; free physical = 37280 ; free virtual = 54290
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 2080 instances were transformed.
+  CFGLUT5 => CFGLUT5 (SRL16E, SRLC32E): 104 instances
+  DSP48E1 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 16 instances
+  DSP48E2 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 24 instances
+  HBM_TWO_STACK_INTF => HBM_TWO_STACK_INTF (HBM_REF_CLK(x2), HBM_SNGLBLI_INTF_APB(x2), HBM_SNGLBLI_INTF_AXI(x32)): 1 instance 
+  IBUF => IBUF (IBUFCTRL, INBUF): 1 instance 
+  IBUFDS => IBUFDS (DIFFINBUF, IBUFCTRL): 1 instance 
+  RAM16X1D => RAM32X1D (RAMD32(x2)): 258 instances
+  RAM16X1S => RAM32X1S (RAMS32): 1440 instances
+  RAM32M16 => RAM32M16 (RAMD32(x14), RAMS32(x2)): 230 instances
+  RAM32X1D => RAM32X1D (RAMD32(x2)): 5 instances
+
+INFO: [Project 1-604] Checkpoint was created with Vivado v2024.2 (64-bit) build 5239630
+open_checkpoint: Time (s): cpu = 00:00:51 ; elapsed = 00:00:56 . Memory (MB): peak = 4319.172 ; gain = 2960.945 ; free physical = 37280 ; free virtual = 54290
+# set_property ODT RTT_48 [get_ports {board_clk_p board_clk_n}]
+# foreach p [get_ports {board_clk_p board_clk_n}] { puts "CLOCK_TERMINATION $p ODT=[get_property ODT $p]"; report_property $p }
+CLOCK_TERMINATION board_clk_p ODT=RTT_48
+Property            Type         Read-only  Value
+CLASS               string       true       port
+DIFF_PAIR_PORT      port         true       board_clk_n
+DIFF_PAIR_TYPE      enum         true       P
+DIRECTION           enum         false      IN
+HD.ASSIGNED_PPLOCS  string*      true       
+HD.TANDEM           int          false      0
+HOLD_SLACK          double       true       needs timing update***
+IBUF_LOW_PWR        bool         false      1
+INTERFACE           interface    false      CLK.SYS_CLK_100_24283
+IOBANK              int          true       65
+IOSTANDARD          enum         false      DIFF_SSTL12
+IS_GT_TERM          bool         true       0
+IS_LOC_FIXED        bool         false      1
+IS_REUSED           bool         true       0
+LOC                 site         false      IOB_X0Y78
+LOGIC_VALUE         string       true       needs timing update***
+NAME                string       false      board_clk_p
+ODT                 enum         false      RTT_48
+OFFCHIP_TERM        string       false      NONE
+PACKAGE_PIN         package_pin  false      BH42
+PARTITION_ID        int          true       0
+PULLTYPE            string       false      
+SETUP_SLACK         double       true       needs timing update***
+UNCONNECTED         bool         true       0
+X_IFC_LOGICAL_NAME  string       false      CLK
+CLOCK_TERMINATION board_clk_n ODT=RTT_48
+Property            Type         Read-only  Value
+CLASS               string       true       port
+DIFF_PAIR_PORT      port         true       board_clk_p
+DIFF_PAIR_TYPE      enum         true       N
+DIRECTION           enum         false      IN
+HD.ASSIGNED_PPLOCS  string*      true       
+HD.TANDEM           int          false      0
+HOLD_SLACK          double       true       needs timing update***
+IBUF_LOW_PWR        bool         false      1
+INTERFACE           interface    false      CLK.SYS_CLK_100_24283
+IOBANK              int          true       65
+IOSTANDARD          enum         false      DIFF_SSTL12
+IS_GT_TERM          bool         true       0
+IS_LOC_FIXED        bool         false      1
+IS_REUSED           bool         true       0
+LOC                 site         false      IOB_X0Y79
+LOGIC_VALUE         string       true       needs timing update***
+NAME                string       false      board_clk_n
+ODT                 enum         false      RTT_48
+OFFCHIP_TERM        string       false      NONE
+PACKAGE_PIN         package_pin  false      BJ42
+PARTITION_ID        int          true       0
+PULLTYPE            string       false      
+SETUP_SLACK         double       true       needs timing update***
+UNCONNECTED         bool         true       0
+X_IFC_LOGICAL_NAME  string       false      CLK
+# report_drc -file /tmp/codex_nm37_odt_diagnostic_drc.rpt
+Command: report_drc -file /tmp/codex_nm37_odt_diagnostic_drc.rpt
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/opt/Xilinx_2024.2/Vivado/2024.2/data/ip'.
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Vivado_Tcl 2-168] The results of DRC are in file /tmp/codex_nm37_odt_diagnostic_drc.rpt.
+report_drc completed successfully
+report_drc: Time (s): cpu = 00:01:24 ; elapsed = 00:00:23 . Memory (MB): peak = 4906.570 ; gain = 587.398 ; free physical = 36664 ; free virtual = 53678
+# close_design
+INFO: [Common 17-206] Exiting Vivado at Sat Oct 10 18:54:53 2026...

@@ -1,0 +1,30 @@
+{
+  "system_hardware_commit": "a0e137ac7831e1efc424a91010289627c5dd98da",
+  "compute_commit": "bf41d1602d5c59d35033b74c2ab82fddc232a528",
+  "implementation_setup_ns": 0.2,
+  "implementation_hold_ns": 0.01,
+  "final_board_gate": false,
+  "reason": "AC-coupled clock ODT correction and system functional/board validation pending",
+  "files_sha256": {
+    "codex_nm37_a0e137a_system_impl_20261010.log": "04d4e4f33daad71f4b380eebbfa151efc86bb3f45bd87e3788078548707f2401",
+    "codex_nm37_io_review.log": "8d704da2db9b08353b8d6bca49fea172e947b246dc70fed660f9a2b30b917c69",
+    "codex_nm37_io_review.rpt": "efa929065862fc1bf74b8fa923687f966aab5e410cb60dd61390a5de8190ae25",
+    "codex_nm37_odt_diagnostic.log": "bd854650631b62bc2704827749ae32f7e6f7a8f5058c6a3d4ddefd814ea8f672",
+    "codex_nm37_odt_diagnostic_drc.rpt": "968883227e0d18bf68868edff17700b7f394b6d90313ef3d101fe7b516557019",
+    "reports/bus_skew.rpt": "cb14e715dafab1024d430582466fff7a1267da56c29dd69c4a1d1f60fc6094fb",
+    "reports/cdc.rpt": "c913fd2408c9d80d706af19727732de0ee85ecd8b95d67de9ad44ea8548217e1",
+    "reports/clocks.rpt": "c3bd1e03561fe05cdb5baa6d224d6c9b869b49f7dcfb90ae4c9c8fed1d5de680",
+    "reports/clock_interaction.rpt": "e7105299cf2c3ff62fcf5f41125c6c1a85a3ff8c9ff2928add4b809e957e5e5f",
+    "reports/drc.rpt": "46e4dcc856048e9986aa99f1253e64223e058ad51ce50d0516cc89576d674a96",
+    "reports/effective_constraints.xdc": "3fa3e788a6ba45e0ed7ba313677564ae68fa5a83290996b8c6749e69a102b936",
+    "reports/exceptions.rpt": "5f7ef3c772ec7a6335e8293c890d1ee54d9dffaf07e7f0fd2601815fad74c990",
+    "reports/hold_paths.rpt": "2abd428c84cdffba3f5b098f83fa2dc5325a21cd5955f82e9f4d774a9dd157ca",
+    "reports/methodology.rpt": "98db0926ce52cd8e3f98ee1a6974e343b6eb8894f3f04563766a27637e5b6d1c",
+    "reports/route_status.rpt": "c422b139ab292dabd4e988906fc39d5a4e94a88e9c907400d410c61c62903072",
+    "reports/setup_paths.rpt": "8cf8819e861521e345309dc234b89355f3a3ae44ecfbf1226ca754458fa3fa9c",
+    "reports/synthesis_utilization.rpt": "38771b00ba652f096f6fd6596e90cf1e6510b52a93874a8e6be1f6bd4bd046a5",
+    "reports/timing_gate.txt": "1d0e65971a5200e88ba8909e22109df5923f75240e38f2af73c142b35ad50038",
+    "reports/timing_summary.rpt": "59168a8e01abd0b7d282ee93b024e3841fab7d0140e61c04572ecc18ba42c3f3",
+    "reports/utilization.rpt": "e8ccd3af8c721baac5137c3a1561588d5eedd43cdc6c760ec2c5238d8da160f3"
+  }
+}

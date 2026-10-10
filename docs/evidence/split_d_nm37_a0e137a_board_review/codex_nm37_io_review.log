@@ -1,0 +1,229 @@
+
+****** Vivado v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sat Oct 10 18:49:48 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source /tmp/codex_nm37_io_review.tcl
+# open_checkpoint build/split_d_nm37_a394c8d_ipbf/reports/routed.dcp
+Command: open_checkpoint build/split_d_nm37_a394c8d_ipbf/reports/routed.dcp
+
+Starting open_checkpoint Task
+
+Time (s): cpu = 00:00:00.04 ; elapsed = 00:00:00.05 . Memory (MB): peak = 1358.262 ; gain = 0.000 ; free physical = 30492 ; free virtual = 47335
+INFO: [Device 21-403] Loading part xcvu37p_CIV-fsvh2892-2-e
+Netlist sorting complete. Time (s): cpu = 00:00:01 ; elapsed = 00:00:01 . Memory (MB): peak = 2952.398 ; gain = 0.000 ; free physical = 28859 ; free virtual = 45706
+INFO: [Netlist 29-17] Analyzing 4164 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 1 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2024.2
+INFO: [Project 1-570] Preparing netlist for logic optimization
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'u_bd/split_d_system_i/hbm_0/HBM_REF_CLK_0' is not directly connected to top level port. 'IBUF_LOW_PWR' is ignored for synthesis but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'u_bd/split_d_system_i/hbm_0/HBM_REF_CLK_1' is not directly connected to top level port. 'IBUF_LOW_PWR' is ignored for synthesis but preserved for implementation.
+Read ShapeDB Complete: Time (s): cpu = 00:00:00.26 ; elapsed = 00:00:00.27 . Memory (MB): peak = 3277.555 ; gain = 36.719 ; free physical = 28547 ; free virtual = 45396
+INFO: [Timing 38-478] Restoring timing data from binary archive.
+INFO: [Timing 38-479] Binary timing data restore complete.
+INFO: [Project 1-856] Restoring constraints from binary archive.
+INFO: [Project 1-853] Binary constraint restore complete.
+INFO: [Designutils 20-5722] Start Reading Physical Databases.
+Reading placement.
+Read Netlist Cache: Time (s): cpu = 00:00:00.11 ; elapsed = 00:00:00.12 . Memory (MB): peak = 3886.598 ; gain = 0.000 ; free physical = 28084 ; free virtual = 44936
+Reading placer database...
+Read Device Cache: Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.02 . Memory (MB): peak = 3886.598 ; gain = 0.000 ; free physical = 28084 ; free virtual = 44936
+Read PlaceDB: Time (s): cpu = 00:00:03 ; elapsed = 00:00:03 . Memory (MB): peak = 3951.637 ; gain = 65.039 ; free physical = 28016 ; free virtual = 44868
+Read PulsedLatchDB: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3951.637 ; gain = 0.000 ; free physical = 28016 ; free virtual = 44868
+Reading routing.
+Read RouteStorage: Time (s): cpu = 00:00:09 ; elapsed = 00:00:07 . Memory (MB): peak = 4317.379 ; gain = 365.742 ; free physical = 27652 ; free virtual = 44510
+Read Physdb Files: Time (s): cpu = 00:00:12 ; elapsed = 00:00:11 . Memory (MB): peak = 4317.379 ; gain = 430.781 ; free physical = 27652 ; free virtual = 44510
+Restored from archive | CPU: 12.470000 secs | Memory: 388.832520 MB |
+Finished XDEF File Restore: Time (s): cpu = 00:00:12 ; elapsed = 00:00:11 . Memory (MB): peak = 4317.379 ; gain = 430.781 ; free physical = 27655 ; free virtual = 44513
+Netlist sorting complete. Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 4317.379 ; gain = 0.000 ; free physical = 27649 ; free virtual = 44507
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 2080 instances were transformed.
+  CFGLUT5 => CFGLUT5 (SRL16E, SRLC32E): 104 instances
+  DSP48E1 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 16 instances
+  DSP48E2 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 24 instances
+  HBM_TWO_STACK_INTF => HBM_TWO_STACK_INTF (HBM_REF_CLK(x2), HBM_SNGLBLI_INTF_APB(x2), HBM_SNGLBLI_INTF_AXI(x32)): 1 instance 
+  IBUF => IBUF (IBUFCTRL, INBUF): 1 instance 
+  IBUFDS => IBUFDS (DIFFINBUF, IBUFCTRL): 1 instance 
+  RAM16X1D => RAM32X1D (RAMD32(x2)): 258 instances
+  RAM16X1S => RAM32X1S (RAMS32): 1440 instances
+  RAM32M16 => RAM32M16 (RAMD32(x14), RAMS32(x2)): 230 instances
+  RAM32X1D => RAM32X1D (RAMD32(x2)): 5 instances
+
+INFO: [Project 1-604] Checkpoint was created with Vivado v2024.2 (64-bit) build 5239630
+open_checkpoint: Time (s): cpu = 00:00:52 ; elapsed = 00:00:56 . Memory (MB): peak = 4317.379 ; gain = 2959.117 ; free physical = 27651 ; free virtual = 44509
+# foreach p [get_ports {board_clk_p board_clk_n reset_n}] { report_property $p }
+Property            Type         Read-only  Value
+CLASS               string       true       port
+DIFF_PAIR_PORT      port         true       board_clk_n
+DIFF_PAIR_TYPE      enum         true       P
+DIRECTION           enum         false      IN
+HD.ASSIGNED_PPLOCS  string*      true       
+HD.TANDEM           int          false      0
+HOLD_SLACK          double       true       needs timing update***
+IBUF_LOW_PWR        bool         false      1
+INTERFACE           interface    false      CLK.SYS_CLK_100_24283
+IOBANK              int          true       65
+IOSTANDARD          enum         false      DIFF_SSTL12
+IS_GT_TERM          bool         true       0
+IS_LOC_FIXED        bool         false      1
+IS_REUSED           bool         true       0
+LOC                 site         false      IOB_X0Y78
+LOGIC_VALUE         string       true       needs timing update***
+NAME                string       false      board_clk_p
+OFFCHIP_TERM        string       false      NONE
+PACKAGE_PIN         package_pin  false      BH42
+PARTITION_ID        int          true       0
+PULLTYPE            string       false      
+SETUP_SLACK         double       true       needs timing update***
+UNCONNECTED         bool         true       0
+X_IFC_LOGICAL_NAME  string       false      CLK
+Property            Type         Read-only  Value
+CLASS               string       true       port
+DIFF_PAIR_PORT      port         true       board_clk_p
+DIFF_PAIR_TYPE      enum         true       N
+DIRECTION           enum         false      IN
+HD.ASSIGNED_PPLOCS  string*      true       
+HD.TANDEM           int          false      0
+HOLD_SLACK          double       true       needs timing update***
+IBUF_LOW_PWR        bool         false      1
+INTERFACE           interface    false      CLK.SYS_CLK_100_24283
+IOBANK              int          true       65
+IOSTANDARD          enum         false      DIFF_SSTL12
+IS_GT_TERM          bool         true       0
+IS_LOC_FIXED        bool         false      1
+IS_REUSED           bool         true       0
+LOC                 site         false      IOB_X0Y79
+LOGIC_VALUE         string       true       needs timing update***
+NAME                string       false      board_clk_n
+OFFCHIP_TERM        string       false      NONE
+PACKAGE_PIN         package_pin  false      BJ42
+PARTITION_ID        int          true       0
+PULLTYPE            string       false      
+SETUP_SLACK         double       true       needs timing update***
+UNCONNECTED         bool         true       0
+X_IFC_LOGICAL_NAME  string       false      CLK
+Property            Type         Read-only  Value
+CLASS               string       true       port
+DIRECTION           enum         false      IN
+HD.ASSIGNED_PPLOCS  string*      true       
+HD.TANDEM           int          false      0
+HOLD_SLACK          double       true       needs timing update***
+INTERFACE           interface    false      RST.RESET_N_24283
+IOBANK              int          true       69
+IOSTANDARD          enum         false      LVCMOS18
+IS_GT_TERM          bool         true       0
+IS_LOC_FIXED        bool         false      1
+IS_REUSED           bool         true       0
+LOC                 site         false      IOB_X0Y304
+LOGIC_VALUE         string       true       needs timing update***
+NAME                string       false      reset_n
+OFFCHIP_TERM        string       false      NONE
+PACKAGE_PIN         package_pin  false      BF2
+PARTITION_ID        int          true       0
+PULLTYPE            string       false      
+SETUP_SLACK         double       true       needs timing update***
+UNCONNECTED         bool         true       0
+X_IFC_LOGICAL_NAME  string       false      RST
+# foreach c [get_cells -hier -filter {NAME =~ *u_board_clk*}] { report_property $c }
+Property            Type    Read-only  Value
+BEL                 string  false      HPIOBDIFFINBUF.DIFFINBUF
+BOX_TYPE            string  false      PRIMITIVE
+CAPACITANCE         string  false      DONT_CARE
+CLASS               string  true       cell
+DIFF_TERM           bool    true       0
+IBUF_DELAY_VALUE    string  false      0
+IBUF_LOW_PWR        bool    true       1
+IFD_DELAY_VALUE     string  false      AUTO
+IOSTANDARD          string  true       DIFF_SSTL12
+IS_BEL_FIXED        bool    false      0
+IS_BLACKBOX         bool    true       0
+IS_BOUNDARY_INST    bool    true       0
+IS_DEBUGGABLE       bool    true       1
+IS_ENCRYPTED        bool    true       0
+IS_LOC_FIXED        bool    false      1
+IS_MATCHED          bool    true       1
+IS_ORIG_CELL        bool    true       1
+IS_PRIMITIVE        bool    true       1
+IS_REUSED           bool    true       0
+IS_SEQUENTIAL       bool    true       0
+LOC                 site    false      HPIOBDIFFINBUF_X0Y36
+NAME                string  true       u_board_clk
+ORIG_REF_NAME       string  true       IBUFDS
+PRIMITIVE_COUNT     int     true       1
+PRIMITIVE_GROUP     enum    true       I/O
+PRIMITIVE_LEVEL     enum    true       MACRO
+PRIMITIVE_SUBGROUP  enum    true       INPUT_BUFFER
+PRIMITIVE_TYPE      enum    true       I/O.INPUT_BUFFER.IBUFDS
+REF_NAME            string  true       IBUFDS
+REUSE_STATUS        enum    true       
+SLR_INDEX           int     true       0
+STATUS              enum    true       FIXED
+Property                 Type    Read-only  Value
+BEL                      string  false      HPIOBDIFFINBUF.DIFFINBUF
+CLASS                    string  true       cell
+DIFF_TERM                bool    true       0
+IBUF_LOW_PWR             string  true       1
+IFD_DELAY_VALUE          string  false      AUTO
+ISTANDARD                string  false      DEFAULT
+IS_BEL_FIXED             bool    false      0
+IS_BLACKBOX              bool    true       0
+IS_BOUNDARY_INST         bool    true       0
+IS_DEBUGGABLE            bool    true       1
+IS_ENCRYPTED             bool    true       0
+IS_LOC_FIXED             bool    false      1
+IS_MATCHED               bool    true       0
+IS_ORIG_CELL             bool    true       1
+IS_PRIMITIVE             bool    true       1
+IS_REUSED                bool    true       0
+IS_SEQUENTIAL            bool    true       1
+LOC                      site    false      HPIOBDIFFINBUF_X0Y36
+NAME                     string  true       u_board_clk/DIFFINBUF_INST
+ORIG_REF_NAME            string  true       DIFFINBUF
+PARENT                   cell    true       u_board_clk
+PRIMITIVE_COUNT          int     true       1
+PRIMITIVE_GROUP          enum    true       I/O
+PRIMITIVE_LEVEL          enum    true       INTERNAL
+PRIMITIVE_SUBGROUP       enum    true       INPUT_BUFFER
+PRIMITIVE_TYPE           enum    true       I/O.INPUT_BUFFER.IBUFDS
+REF_NAME                 string  true       DIFFINBUF
+REUSE_STATUS             enum    true       
+SIM_INPUT_BUFFER_OFFSET  int     false      0
+SLR_INDEX                int     true       0
+STATUS                   enum    true       FIXED
+Property            Type    Read-only  Value
+BEL                 string  false      HPIOB_M.IBUFCTRL
+CLASS               string  true       cell
+ISTANDARD           string  false      UNUSED
+IS_BEL_FIXED        bool    false      0
+IS_BLACKBOX         bool    true       0
+IS_BOUNDARY_INST    bool    true       0
+IS_DEBUGGABLE       bool    true       1
+IS_ENCRYPTED        bool    true       0
+IS_LOC_FIXED        bool    false      1
+IS_MATCHED          bool    true       0
+IS_ORIG_CELL        bool    true       1
+IS_PRIMITIVE        bool    true       1
+IS_REUSED           bool    true       0
+IS_SEQUENTIAL       bool    true       0
+LOC                 site    false      IOB_X0Y78
+NAME                string  true       u_board_clk/IBUFCTRL_INST
+ORIG_REF_NAME       string  true       IBUFCTRL
+PARENT              cell    true       u_board_clk
+PRIMITIVE_COUNT     int     true       1
+PRIMITIVE_GROUP     enum    true       I/O
+PRIMITIVE_LEVEL     enum    true       INTERNAL
+PRIMITIVE_SUBGROUP  enum    true       INPUT_BUFFER
+PRIMITIVE_TYPE      enum    true       I/O.INPUT_BUFFER.IBUFDS
+REF_NAME            string  true       IBUFCTRL
+REUSE_STATUS        enum    true       
+SLR_INDEX           int     true       0
+STATUS              enum    true       FIXED
+USE_IBUFDISABLE     string  false      FALSE
+# report_io -file /tmp/codex_nm37_io_review.rpt
+report_io: Time (s): cpu = 00:00:00.49 ; elapsed = 00:00:00.7 . Memory (MB): peak = 4337.754 ; gain = 20.375 ; free physical = 27598 ; free virtual = 44457
+# close_design
+INFO: [Common 17-206] Exiting Vivado at Sat Oct 10 18:51:07 2026...

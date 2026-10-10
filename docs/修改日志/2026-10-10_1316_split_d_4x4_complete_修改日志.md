@@ -133,3 +133,7 @@ Q完整覆盖`QUERY_BLOCK_COLS×QKV_WORDS_PER_TOKEN×DMA_ELEMS_PER_WORD`，K/V�
 - 官方UG900和实际Vivado只读属性查询确认HBM/两SmartConnect均支持tlm/rtl，当前均rtl。增加可选hbm_tlm功能对照，仅HBM使用官方TLM，FSA/controller/SmartConnect保持RTL，不改变硬件配置、52事务/32768canary/金标准/复位覆盖；默认RTL流程继续。TLM不可用来声称实际HBM吞吐，实际吞吐须板测。TB释放检查改!==1确保X也失败。这是同一第3轮诊断补强，非新的HLS迭代。
 
 - 3ac1786 TLM已通过10us关键复位释放检查，但1.6ms后APB完成仍0；只读官方生成hbm_sc.h确认APB/APB-complete为xsc_stub_port，TLM不建模校准，不能等待这些stub。精确停止该无效等待，保留日志。增加仅仿真宏NM37_HBM_TLM_FUNCTIONAL的readiness适配（BD内部init_done=clock_locked），明确FUNCTIONAL ONLY，不计HBM初始化/校准/复位恢复通过；默认RTL不启用宏，仍保留真实初始化和所有52事务门槛。硬件/计算IP不改。
+
+- 用户新增联网板测调研和NM37原理图核查，继续同一第3轮。23页提取文本并放大相关时钟/复位/JTAG/HBM电路；BH42/BJ42/BF2及Bank电压符合现有映射，SW2复位同时连接ZU5。SiTime精确型号确认U7为100MHz LVDS；AC电容后的FPGA接收侧无图示偏置，当前XDC只有DIFF_SSTL12、默认ODT RTT_NONE，终端遗漏成立。依据AMD UG571表1-44/AC耦合章节，最小修正为split ODT RTT_48，保留1.2V标准/100MHz/2.7ns预算，加入普通Tcl断言。18:54内存DCP诊断接受双端口RTT_48，DRC无Error/Critical，原DCP未修改；需在新精确提交重做实现，DRC不等于模拟电气实测。官方来源及后续HBM/JTAG验收步骤见新增板级核查报告。
+- a394纯XDC旧复位对照18:40:06实现exit0，setup/hold+0.226/+0.010ns，只证明约束修正。a0e137a修正复位版18:54:06实现exit0，setup/hold+0.200/+0.010ns，98003 nets全route、LUT60777/FF43700/R36=45/R18=0/DSP40；DRC/methodology无Error/Critical。已归档a0物理及I/O/ODT诊断到docs/evidence/split_d_nm37_a0e137a_board_review/，其最终board gate=false（还缺ODT新实现、系统功能与真实板测）。
+- f2 TLM首笔尚未结束，独立100us快照确认ap_start=1、ap_idle=0、ap_done=0、length=1，control轮询读到0x1；继续查内部数据流。首次独立快照因未继承厂商simulate.sh的LD_LIBRARY_PATH缺libxtlm.so，补实际厂商路径后成功读取；正式Vivado仿真环境无此错误。默认RTL已推进50us且关键复位释放，APB校准仍未完成，不声称功能PASS。
