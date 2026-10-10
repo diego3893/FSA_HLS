@@ -1,0 +1,233 @@
+{
+  "commit": "b3e4957",
+  "baseline_commit": "25d6dda678104d8a856292b83c1c48607a1148fd",
+  "cases": [
+    {
+      "transaction": 0,
+      "name": "single-key-first",
+      "length": 1,
+      "causal": false,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 1,
+      "name": "two-key-ones-v",
+      "length": 2,
+      "causal": false,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 2,
+      "name": "two-key-basis-v",
+      "length": 2,
+      "causal": false,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 3,
+      "name": "two-key-basis-v-last-feature",
+      "length": 2,
+      "causal": false,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 4,
+      "name": "primary-noncausal",
+      "length": 7,
+      "causal": false,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 5,
+      "name": "primary-causal",
+      "length": 7,
+      "causal": true,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 6,
+      "name": "full-tile-noncausal",
+      "length": 16,
+      "causal": false,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 7,
+      "name": "full-tile-causal",
+      "length": 16,
+      "causal": true,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 8,
+      "name": "boundary-noncausal",
+      "length": 3,
+      "causal": false,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 9,
+      "name": "boundary-causal",
+      "length": 3,
+      "causal": true,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 10,
+      "name": "boundary-noncausal",
+      "length": 4,
+      "causal": false,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 11,
+      "name": "boundary-causal",
+      "length": 4,
+      "causal": true,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 12,
+      "name": "boundary-noncausal",
+      "length": 5,
+      "causal": false,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 13,
+      "name": "boundary-causal",
+      "length": 5,
+      "causal": true,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 14,
+      "name": "boundary-noncausal",
+      "length": 8,
+      "causal": false,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 15,
+      "name": "boundary-causal",
+      "length": 8,
+      "causal": true,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 16,
+      "name": "boundary-noncausal",
+      "length": 9,
+      "causal": false,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 17,
+      "name": "boundary-causal",
+      "length": 9,
+      "causal": true,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 18,
+      "name": "rescale-second-tile",
+      "length": 9,
+      "causal": false,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 19,
+      "name": "rescale-second-tile-causal",
+      "length": 9,
+      "causal": true,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 20,
+      "name": "zero-qk-ones-v",
+      "length": 9,
+      "causal": false,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 21,
+      "name": "zero-qk-ones-v-causal",
+      "length": 9,
+      "causal": true,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 22,
+      "name": "pwl-boundary-noncausal",
+      "length": 25,
+      "causal": false,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 23,
+      "name": "pwl-boundary-causal",
+      "length": 25,
+      "causal": true,
+      "rtl_match": true,
+      "mismatched_words": 0
+    },
+    {
+      "transaction": 24,
+      "name": "invalid-length-zero",
+      "length": 0,
+      "causal": false,
+      "rtl_match": true
+    },
+    {
+      "transaction": 25,
+      "name": "invalid-length-over-max",
+      "length": 4097,
+      "causal": false,
+      "rtl_match": true
+    }
+  ],
+  "sha256": {
+    "q": "483b7a3b2786c64379a8f3d66918c5c8720f2b1171a26e98d3322b8b8f8469d8",
+    "k": "89f4922fbdce574b39cec924f87a4b5fb788b60615c935156295914ce7c36e8f",
+    "v": "ee7dc598d89089f6edb4a78a6baec347973b56cd08f15ba34dc779dfcd8ea2de",
+    "c_o": "73dd80b27e9c69e27660b01194bdad25a5c4bcefdd4b9b11fa804edc655e7bd0",
+    "rtl_o": "73dd80b27e9c69e27660b01194bdad25a5c4bcefdd4b9b11fa804edc655e7bd0"
+  },
+  "valid_matches": 24,
+  "all_c_rtl_o_equal": true,
+  "c_o_equals_unpartitioned": true,
+  "rtl_o_equals_unpartitioned": true,
+  "all_input_sha_equal": true,
+  "cosim_cycles": {
+    "MAX_LATENCY": "18423",
+    "MIN_LATENCY": "50",
+    "AVER_LATENCY": "3095",
+    "MAX_THROUGHPUT": "18413",
+    "MIN_THROUGHPUT": "45",
+    "AVER_THROUGHPUT": "3207",
+    "TOTAL_EXECUTE_TIME": "80242"
+  }
+}
