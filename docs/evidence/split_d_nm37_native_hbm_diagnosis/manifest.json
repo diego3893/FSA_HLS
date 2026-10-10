@@ -12,10 +12,17 @@
     "codex_nm37_hbm_nets_diagnostic_1900.log": "1a053058eb08b438bad243b50ae41b8f39c37829ed30634aea2d504dc98c0e2c",
     "codex_nm37_tlm_tokens_diagnostic_1900.log": "2a88d74a0c7bc74057333f2977785a49373a10d97f9ed1901d8b0577843c34ba",
     "473a4f9_100us_traffic_analysis.txt": "8f7924cf36f490798f807a8b17b04fdfe71d84e3921e94fdcebf3947e3ae7c15",
-    "473a4f9_native_traffic_100us.vcd.gz": "2b6a7355918acba61bcdf3348d5e85aaf887304175fd23e77eb20ad920232995"
+    "473a4f9_native_traffic_100us.vcd.gz": "2b6a7355918acba61bcdf3348d5e85aaf887304175fd23e77eb20ad920232995",
+    "codex_nm37_473a4f9_100us_diagnostic.log": "5d984bce38ef3d9d95132dfb6a9c586c318b80e9eb606a77061bcd52011bd8a3",
+    "codex_nm37_473a4f9_tlm_sim_20261010.log": "383fd60addf86bb7b825b7d6ced760305fbb5617ca898801a6a5e3951fde52d2",
+    "codex_nm37_473a4f9_unit_20261010.log": "1702f1a5bbbdabaadda5c203f338fa923267d8028e2a2a787837990fe4b956a0",
+    "codex_nm37_4a5c803_monitor_diag.log": "4cdf4dcdb01c67de1e346dd5dd7deebac57330e7a054b9b3798e82e256adfa3c"
   },
   "native_vcd_uncompressed_sha256": "fefdbe60a8ccc4bae791a08bbe4c41841789eb020b3863a0ad5a684b13ac4b9b",
   "native_vcd_compute_commit": "bf41d1602d5c59d35033b74c2ab82fddc232a528",
   "native_vcd_system_commit": "473a4f910728d28d9375d91afd7e99d9ad9450b1",
-  "native_vcd_end_ps": 100000000
+  "native_vcd_end_ps": 100000000,
+  "native_selftest_unit_pass": true,
+  "explicit_axi_monitors_100us_observed": true,
+  "core_monitor_old_launch_valid": false
 }

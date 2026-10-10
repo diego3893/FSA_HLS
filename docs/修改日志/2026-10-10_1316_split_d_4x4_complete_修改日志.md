@@ -144,3 +144,14 @@ Q完整覆盖`QUERY_BLOCK_COLS×QKV_WORDS_PER_TOKEN×DMA_ELEMS_PER_WORD`，K/V�
 - 473a4f910728d28d9375d91afd7e99d9ad9450b1已提交/推送/远端ffpull并精确核对component。19:28:03—19:28:52新256位自检4项unit全部通过（正常、注错、超时保持/排空、忙中复位）；lane与邻居canary检查通过。官方TLM工程19:30:24生成完成并启动52数据事务；默认RTL新工程19:30:24—19:32:00生成并启动真实初始化/忙中复位/52事务。旧失败与SIZE证据归档docs/evidence/split_d_nm37_native_hbm_diagnosis/，没有功能PASS。
 - 新TLM 100us独立快照HBM AWSIZE已5，但首笔K/V装载仍等待、无核完成；因此不能把修SIZE写成全部故障解决。正在用官方VCD记录并统计各AXI边界与内部pipeline等待，定位第二个问题。真实默认RTL尚未完成；未启动最终物理实现或上板。
 - 独立100us VCD（15723182bytes）统计：Q/K/V各接受1个LEN3/SIZE3源请求，经SmartConnect变为HBM三个LEN0/SIZE5请求；HBM仅返回Q/K两个完整256位响应，源Q/K各收到4拍，V无返回，内部pipeline因V读等待。该证据定位到TLM HBM返回边界，不足以断言RTL/真实硬件同样丢响应；默认RTL对照继续。另实际xvlog prj/elaborate.log均无axi_watch/core_latency_watch/bind_axi_watch，bind文件被Vivado编译排序排除；之前不能据此声称通信统计或纯核计时有效。下一补强将被动监视器改TB显式实例化，并核对实际编译/运行。
+- 4a5c8032ccc372438cf0ddbcc4fcaf22a6918796显式监视器诊断19:48:24—19:50:30完成：实际编译/运行Q/K/V AR=1/1/1、R=4/4/0，与原始VCD相符，无协议稳定性Fatal；这仅是100us观察，不是52笔PASS。core计时active=0暴露另一处观察错误：正式顶层ap_idle在ap_start有效时为0，start&&ap_idle不能检测启动。已读bf41正式RTL，实际launch谓词为ap_start&&ap_CS_fsm_state1；下一最小修正仅改仿真观察连接，重新确认active=1，不改计算IP或系统硬件。自包含4a5c包287文件/component/ROM静态SHA通过。4a5c物理任务将在该诊断后独立新工程执行；473默认RTL完整仿真仍运行，不重复。
+- 用户要求“等正在跑的测试停止后就暂停，然后返回当前的进度”。20:02只读复核：4a5c物理工程19:52:03生成完成、20:01:13进入impl_1；473默认RTL最后50us心跳，HBM初始化尚未完成、cases=0。仅等待上述已启动任务结束并记录结果，不启动任何新测试/实现/bitstream/板测；本地core计时谓词修正保留为未提交、未验证。旧20us辅助复位诊断进程1495091/1495158仍驻留于build/nm37_init_diagnostic_xsim_1810，脚本含quit，不算新一轮验收结果。
+
+
+### 第3轮分析结束：用户要求暂停，整体未验收
+
+- 473a4f9默认RTL19:32:00—20:17:46自然结束：真实初始化及忙中整体复位恢复通过；109335ns Fatal，cases0/code02/pc26/actual全X，外层验收exit1。核对generate_program.py及ROM后，pc26为O区前置canary READ，地址0x002ffff8、期望0x0000000012345678；不是O数值比较。此前笼统的“首笔输出检查”在此纠正为前置保护字，不能把错误直接归因attention算术。原生SIZE5修正尚未解决全部系统功能问题。
+- 4a5c803完整实现19:52:04—20:22:18自然结束、exit0：setup+0.261/hold+0.010ns、TNS/THS0、99857 nets全route；LUT61894/FF45210/R36=45/R18=0/DSP40，时钟RTT_48/100MHz/2.7ns断言通过，DRC/methodology无Error/Critical。CDC13/2 Info＋696 CDC15 Warning，详细复核未完成；18组bus-skew最小slack+3.739ns。
+- 新完整报告/日志19文件归档docs/evidence/split_d_nm37_4a5c803_pause/，原始字节SHA留manifest；DCP/WDB留服务器。20:25核对两项主任务已退出，旧有限20us诊断残留PID1495091/1495158经准确cwd/script核对后SIGTERM关闭，无剩余本任务Vivado/XSIM进程，没有删除文件。
+- 已解决：自检单元lane/邻居canary通过、时钟ODT遗漏、完整实现自动门槛、显式AXI监视器实际编译/运行。未解决：首个canary全X、TLM V无返回、core计时谓词补丁未验证、CDC详细复核、完整52笔系统功能和板上验收。bitstream/JTAG/板测均未执行。
+- 当前第3轮远端数据已读并分析，部分验收失败；按用户要求暂停，不启动第4轮或任何补跑。本地core监视器补丁未提交，保留待恢复；用户AGENTS.md及无关未跟踪文件不动。工作包1/2仍通过，工作包3及整体任务未完成。

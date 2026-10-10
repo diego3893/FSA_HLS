@@ -1,0 +1,2124 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version      : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
+| Date              : Sat Oct 10 20:21:07 2026
+| Host              : lenovo-ThinkStation-P920 running 64-bit Ubuntu 24.04.3 LTS
+| Command           : report_timing -delay_type min -path_type full_clock_expanded -max_paths 30 -file /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_4a5c803_phys_ipbf/reports/hold_paths.rpt
+| Design            : split_d_nm37_top
+| Device            : xcvu37p_CIV-fsvh2892
+| Speed File        : -2  PRODUCTION 1.30 05-01-2022
+| Design State      : Routed
+| Temperature Grade : E
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             0.010ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.174ns  (logic 0.082ns (47.126%)  route 0.092ns (52.874%))
+  Logic Levels:           1  (LUT4=1)
+  Clock Path Skew:        0.104ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.322ns
+    Source Clock Delay      (SCD):    3.629ns
+    Clock Pessimism Removal (CPR):    -0.411ns
+  Clock Net Delay (Source):      1.790ns (routing 0.530ns, distribution 1.260ns)
+  Clock Net Delay (Destination): 2.027ns (routing 0.581ns, distribution 1.446ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.790     3.629    <hidden>
+    SLICE_X8Y12          FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X8Y12          FDRE (Prop_FFF2_SLICEM_C_Q)
+                                                      0.060     3.689 r  <hidden>
+                         net (fo=1, routed)           0.068     3.757    <hidden>
+    SLICE_X7Y12          LUT4 (Prop_C6LUT_SLICEL_I0_O)
+                                                      0.022     3.779 r  <hidden>
+                         net (fo=1, routed)           0.024     3.803    <hidden>
+    SLICE_X7Y12          FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       2.027     3.322    <hidden>
+    SLICE_X7Y12          FDRE                                         r  <hidden>
+                         clock pessimism              0.411     3.733    
+    SLICE_X7Y12          FDRE (Hold_CFF_SLICEL_C_D)
+                                                      0.060     3.793    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.793    
+                         arrival time                           3.803    
+  -------------------------------------------------------------------
+                         slack                                  0.010    
+
+Slack (MET) :             0.011ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell SRLC32E clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.099ns  (logic 0.038ns (38.507%)  route 0.061ns (61.493%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.042ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.970ns
+    Source Clock Delay      (SCD):    2.159ns
+    Clock Pessimism Removal (CPR):    -0.231ns
+  Clock Net Delay (Source):      1.079ns (routing 0.319ns, distribution 0.760ns)
+  Clock Net Delay (Destination): 1.236ns (routing 0.351ns, distribution 0.885ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.373     0.452 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.492    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.492 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.196     0.688    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.230     0.918 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.146     1.064    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.017     1.081 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.079     2.159    <hidden>
+    SLICE_X16Y18         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X16Y18         FDRE (Prop_AFF_SLICEM_C_Q)
+                                                      0.038     2.197 r  <hidden>
+                         net (fo=2, routed)           0.061     2.258    <hidden>
+    SLICE_X16Y17         SRLC32E                                      r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.472     0.572 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.622    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.622 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.222     0.844    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.295     0.549 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.166     0.715    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.019     0.734 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.236     1.970    <hidden>
+    SLICE_X16Y17         SRLC32E                                      r  <hidden>
+                         clock pessimism              0.231     2.201    
+    SLICE_X16Y17         SRLC32E (Hold_C6LUT_SLICEM_CLK_D)
+                                                      0.046     2.247    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -2.247    
+                         arrival time                           2.258    
+  -------------------------------------------------------------------
+                         slack                                  0.011    
+
+Slack (MET) :             0.011ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/sect_addr_buf_reg[34]/C
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/could_multi_bursts.addr_buf_reg[34]/D
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.189ns  (logic 0.108ns (57.143%)  route 0.081ns (42.857%))
+  Logic Levels:           2  (CARRY8=1 LUT3=1)
+  Clock Path Skew:        0.118ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.310ns
+    Source Clock Delay      (SCD):    3.607ns
+    Clock Pessimism Removal (CPR):    -0.415ns
+  Clock Net Delay (Source):      1.769ns (routing 0.530ns, distribution 1.239ns)
+  Clock Net Delay (Destination): 2.015ns (routing 0.581ns, distribution 1.434ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.769     3.607    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/ap_clk
+    SLICE_X7Y67          FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/sect_addr_buf_reg[34]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X7Y67          FDRE (Prop_CFF_SLICEL_C_Q)
+                                                      0.058     3.665 r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/sect_addr_buf_reg[34]/Q
+                         net (fo=1, routed)           0.061     3.726    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/sect_addr_buf[34]
+    SLICE_X5Y66          LUT3 (Prop_H6LUT_SLICEL_I0_O)
+                                                      0.023     3.749 r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/could_multi_bursts.addr_buf[27]_i_2/O
+                         net (fo=1, routed)           0.010     3.759    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/could_multi_bursts.addr_buf[27]_i_2_n_0
+    SLICE_X5Y66          CARRY8 (Prop_CARRY8_SLICEL_S[7]_O[7])
+                                                      0.027     3.786 r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/could_multi_bursts.addr_buf_reg[27]_i_1/O[7]
+                         net (fo=1, routed)           0.010     3.796    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/could_multi_bursts.addr_buf_reg[27]_i_1_n_8
+    SLICE_X5Y66          FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/could_multi_bursts.addr_buf_reg[34]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       2.015     3.310    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/ap_clk
+    SLICE_X5Y66          FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/could_multi_bursts.addr_buf_reg[34]/C
+                         clock pessimism              0.415     3.725    
+    SLICE_X5Y66          FDRE (Hold_HFF_SLICEL_C_D)
+                                                      0.060     3.785    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/could_multi_bursts.addr_buf_reg[34]
+  -------------------------------------------------------------------
+                         required time                         -3.785    
+                         arrival time                           3.796    
+  -------------------------------------------------------------------
+                         slack                                  0.011    
+
+Slack (MET) :             0.011ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/load_unit_0/tmp_addr_reg[55]/C
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p2_reg[55]/D
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.164ns  (logic 0.060ns (36.585%)  route 0.104ns (63.415%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.091ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.219ns
+    Source Clock Delay      (SCD):    3.543ns
+    Clock Pessimism Removal (CPR):    -0.415ns
+  Clock Net Delay (Source):      1.704ns (routing 0.530ns, distribution 1.174ns)
+  Clock Net Delay (Destination): 1.924ns (routing 0.581ns, distribution 1.343ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.704     3.543    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/load_unit_0/ap_clk
+    SLICE_X24Y73         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/load_unit_0/tmp_addr_reg[55]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X24Y73         FDRE (Prop_GFF2_SLICEL_C_Q)
+                                                      0.060     3.603 r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/load_unit_0/tmp_addr_reg[55]/Q
+                         net (fo=2, routed)           0.104     3.707    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p2_reg[95]_0[52]
+    SLICE_X25Y72         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p2_reg[55]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.924     3.219    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/ap_clk
+    SLICE_X25Y72         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p2_reg[55]/C
+                         clock pessimism              0.415     3.633    
+    SLICE_X25Y72         FDRE (Hold_DFF2_SLICEL_C_D)
+                                                      0.062     3.695    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p2_reg[55]
+  -------------------------------------------------------------------
+                         required time                         -3.695    
+                         arrival time                           3.707    
+  -------------------------------------------------------------------
+                         slack                                  0.011    
+
+Slack (MET) :             0.011ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.175ns  (logic 0.061ns (34.854%)  route 0.114ns (65.146%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.102ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.248ns
+    Source Clock Delay      (SCD):    3.557ns
+    Clock Pessimism Removal (CPR):    -0.411ns
+  Clock Net Delay (Source):      1.718ns (routing 0.530ns, distribution 1.188ns)
+  Clock Net Delay (Destination): 1.953ns (routing 0.581ns, distribution 1.372ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.718     3.557    <hidden>
+    SLICE_X25Y56         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X25Y56         FDRE (Prop_DFF2_SLICEL_C_Q)
+                                                      0.061     3.618 r  <hidden>
+                         net (fo=4, routed)           0.114     3.732    <hidden>
+    SLICE_X23Y54         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.953     3.248    <hidden>
+    SLICE_X23Y54         FDRE                                         r  <hidden>
+                         clock pessimism              0.411     3.658    
+    SLICE_X23Y54         FDRE (Hold_HFF2_SLICEL_C_D)
+                                                      0.062     3.720    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.720    
+                         arrival time                           3.732    
+  -------------------------------------------------------------------
+                         slack                                  0.011    
+
+Slack (MET) :             0.011ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_hbm_top/TWO_STACK_HBM.hbm_apb_mst_0/data_store_0_reg[19]/C
+                            (rising edge-triggered cell FDCE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_hbm_top/TWO_STACK_HBM.hbm_apb_mst_0/apb_pwdata_r_reg[19]/D
+                            (rising edge-triggered cell FDCE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.169ns  (logic 0.080ns (47.337%)  route 0.089ns (52.663%))
+  Logic Levels:           1  (LUT6=1)
+  Clock Path Skew:        0.098ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.043ns
+    Source Clock Delay      (SCD):    3.379ns
+    Clock Pessimism Removal (CPR):    -0.434ns
+  Clock Net Delay (Source):      1.541ns (routing 0.530ns, distribution 1.011ns)
+  Clock Net Delay (Destination): 1.748ns (routing 0.581ns, distribution 1.167ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.541     3.379    u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_hbm_top/TWO_STACK_HBM.hbm_apb_mst_0/APB_0_PCLK
+    SLICE_X63Y5          FDCE                                         r  u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_hbm_top/TWO_STACK_HBM.hbm_apb_mst_0/data_store_0_reg[19]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X63Y5          FDCE (Prop_CFF_SLICEM_C_Q)
+                                                      0.058     3.437 r  u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_hbm_top/TWO_STACK_HBM.hbm_apb_mst_0/data_store_0_reg[19]/Q
+                         net (fo=1, routed)           0.067     3.504    u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_hbm_top/TWO_STACK_HBM.hbm_apb_mst_0/data_store_0_reg_n_0_[19]
+    SLICE_X62Y5          LUT6 (Prop_D6LUT_SLICEL_I0_O)
+                                                      0.022     3.526 r  u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_hbm_top/TWO_STACK_HBM.hbm_apb_mst_0/apb_pwdata_r[19]_i_1/O
+                         net (fo=1, routed)           0.022     3.548    u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_hbm_top/TWO_STACK_HBM.hbm_apb_mst_0/apb_pwdata_r[19]_i_1_n_0
+    SLICE_X62Y5          FDCE                                         r  u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_hbm_top/TWO_STACK_HBM.hbm_apb_mst_0/apb_pwdata_r_reg[19]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.748     3.043    u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_hbm_top/TWO_STACK_HBM.hbm_apb_mst_0/APB_0_PCLK
+    SLICE_X62Y5          FDCE                                         r  u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_hbm_top/TWO_STACK_HBM.hbm_apb_mst_0/apb_pwdata_r_reg[19]/C
+                         clock pessimism              0.434     3.477    
+    SLICE_X62Y5          FDCE (Hold_DFF_SLICEL_C_D)
+                                                      0.060     3.537    u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_hbm_top/TWO_STACK_HBM.hbm_apb_mst_0/apb_pwdata_r_reg[19]
+  -------------------------------------------------------------------
+                         required time                         -3.537    
+                         arrival time                           3.548    
+  -------------------------------------------------------------------
+                         slack                                  0.011    
+
+Slack (MET) :             0.012ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/data_p1_reg[82]/C
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/sect_total_reg[6]/D
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.237ns  (logic 0.085ns (35.865%)  route 0.152ns (64.135%))
+  Logic Levels:           1  (CARRY8=1)
+  Clock Path Skew:        0.165ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.309ns
+    Source Clock Delay      (SCD):    3.633ns
+    Clock Pessimism Removal (CPR):    -0.489ns
+  Clock Net Delay (Source):      1.794ns (routing 0.530ns, distribution 1.264ns)
+  Clock Net Delay (Destination): 2.014ns (routing 0.581ns, distribution 1.433ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.794     3.633    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/ap_clk
+    SLICE_X8Y58          FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/data_p1_reg[82]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X8Y58          FDRE (Prop_EFF_SLICEM_C_Q)
+                                                      0.058     3.691 r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/data_p1_reg[82]/Q
+                         net (fo=1, routed)           0.142     3.833    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/p_1_in[18]
+    SLICE_X7Y60          CARRY8 (Prop_CARRY8_SLICEL_S[7]_O[7])
+                                                      0.027     3.860 r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/sect_total_reg[6]_i_1__0/O[7]
+                         net (fo=1, routed)           0.010     3.870    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/sect_total1[18]
+    SLICE_X7Y60          FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/sect_total_reg[6]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       2.014     3.309    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/ap_clk
+    SLICE_X7Y60          FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/sect_total_reg[6]/C
+                         clock pessimism              0.489     3.798    
+    SLICE_X7Y60          FDRE (Hold_HFF_SLICEL_C_D)
+                                                      0.060     3.858    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/sect_total_reg[6]
+  -------------------------------------------------------------------
+                         required time                         -3.858    
+                         arrival time                           3.870    
+  -------------------------------------------------------------------
+                         slack                                  0.012    
+
+Slack (MET) :             0.012ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.175ns  (logic 0.059ns (33.718%)  route 0.116ns (66.282%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.103ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.249ns
+    Source Clock Delay      (SCD):    3.557ns
+    Clock Pessimism Removal (CPR):    -0.411ns
+  Clock Net Delay (Source):      1.718ns (routing 0.530ns, distribution 1.188ns)
+  Clock Net Delay (Destination): 1.954ns (routing 0.581ns, distribution 1.373ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.718     3.557    <hidden>
+    SLICE_X26Y57         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X26Y57         FDRE (Prop_BFF_SLICEL_C_Q)
+                                                      0.059     3.616 r  <hidden>
+                         net (fo=2, routed)           0.116     3.732    <hidden>
+    SLICE_X24Y56         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.954     3.249    <hidden>
+    SLICE_X24Y56         FDRE                                         r  <hidden>
+                         clock pessimism              0.411     3.659    
+    SLICE_X24Y56         FDRE (Hold_EFF_SLICEL_C_D)
+                                                      0.060     3.719    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.719    
+                         arrival time                           3.732    
+  -------------------------------------------------------------------
+                         slack                                  0.012    
+
+Slack (MET) :             0.012ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.177ns  (logic 0.061ns (34.463%)  route 0.116ns (65.537%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.103ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.248ns
+    Source Clock Delay      (SCD):    3.556ns
+    Clock Pessimism Removal (CPR):    -0.411ns
+  Clock Net Delay (Source):      1.717ns (routing 0.530ns, distribution 1.187ns)
+  Clock Net Delay (Destination): 1.953ns (routing 0.581ns, distribution 1.372ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.717     3.556    <hidden>
+    SLICE_X25Y53         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X25Y53         FDRE (Prop_DFF2_SLICEL_C_Q)
+                                                      0.061     3.617 r  <hidden>
+                         net (fo=2, routed)           0.116     3.733    <hidden>
+    SLICE_X23Y53         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.953     3.248    <hidden>
+    SLICE_X23Y53         FDRE                                         r  <hidden>
+                         clock pessimism              0.411     3.658    
+    SLICE_X23Y53         FDRE (Hold_EFF2_SLICEL_C_D)
+                                                      0.062     3.720    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.720    
+                         arrival time                           3.733    
+  -------------------------------------------------------------------
+                         slack                                  0.012    
+
+Slack (MET) :             0.012ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/data_p1_reg[70]/C
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/beat_len_reg[3]/D
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.174ns  (logic 0.058ns (33.376%)  route 0.116ns (66.624%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.102ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.322ns
+    Source Clock Delay      (SCD):    3.632ns
+    Clock Pessimism Removal (CPR):    -0.411ns
+  Clock Net Delay (Source):      1.793ns (routing 0.530ns, distribution 1.263ns)
+  Clock Net Delay (Destination): 2.027ns (routing 0.581ns, distribution 1.446ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.793     3.632    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/ap_clk
+    SLICE_X9Y57          FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/data_p1_reg[70]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X9Y57          FDRE (Prop_HFF_SLICEL_C_Q)
+                                                      0.058     3.690 r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/data_p1_reg[70]/Q
+                         net (fo=4, routed)           0.116     3.805    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/p_1_in[6]
+    SLICE_X7Y58          FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/beat_len_reg[3]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       2.027     3.322    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/ap_clk
+    SLICE_X7Y58          FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/beat_len_reg[3]/C
+                         clock pessimism              0.411     3.733    
+    SLICE_X7Y58          FDRE (Hold_AFF_SLICEL_C_D)
+                                                      0.060     3.793    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/beat_len_reg[3]
+  -------------------------------------------------------------------
+                         required time                         -3.793    
+                         arrival time                           3.805    
+  -------------------------------------------------------------------
+                         slack                                  0.012    
+
+Slack (MET) :             0.012ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf_reg[26]/C
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf_reg[27]/D
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.225ns  (logic 0.169ns (74.976%)  route 0.056ns (25.023%))
+  Logic Levels:           3  (CARRY8=2 LUT3=1)
+  Clock Path Skew:        0.153ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.223ns
+    Source Clock Delay      (SCD):    3.559ns
+    Clock Pessimism Removal (CPR):    -0.489ns
+  Clock Net Delay (Source):      1.720ns (routing 0.530ns, distribution 1.190ns)
+  Clock Net Delay (Destination): 1.928ns (routing 0.581ns, distribution 1.347ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.720     3.559    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/ap_clk
+    SLICE_X25Y59         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf_reg[26]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X25Y59         FDRE (Prop_HFF_SLICEL_C_Q)
+                                                      0.058     3.617 r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf_reg[26]/Q
+                         net (fo=3, routed)           0.033     3.650    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/m_axi_k_gmem_ARADDR[23]
+    SLICE_X25Y59         LUT3 (Prop_H6LUT_SLICEL_I2_O)
+                                                      0.036     3.686 r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf[26]_i_2/O
+                         net (fo=1, routed)           0.010     3.696    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf[26]_i_2_n_0
+    SLICE_X25Y59         CARRY8 (Prop_CARRY8_SLICEL_S[7]_CO[7])
+                                                      0.044     3.740 r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf_reg[26]_i_1/CO[7]
+                         net (fo=1, routed)           0.004     3.744    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf_reg[26]_i_1_n_0
+    SLICE_X25Y60         CARRY8 (Prop_CARRY8_SLICEL_CI_O[0])
+                                                      0.031     3.775 r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf_reg[34]_i_1/O[0]
+                         net (fo=1, routed)           0.009     3.784    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf_reg[34]_i_1_n_15
+    SLICE_X25Y60         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf_reg[27]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.928     3.223    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/ap_clk
+    SLICE_X25Y60         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf_reg[27]/C
+                         clock pessimism              0.489     3.712    
+    SLICE_X25Y60         FDRE (Hold_AFF_SLICEL_C_D)
+                                                      0.060     3.772    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf_reg[27]
+  -------------------------------------------------------------------
+                         required time                         -3.772    
+                         arrival time                           3.784    
+  -------------------------------------------------------------------
+                         slack                                  0.012    
+
+Slack (MET) :             0.012ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/prepared_integer_15_reg_24846_reg[16]/C
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/prepared_integer_15_reg_24846_pp0_iter1_reg_reg[16]/D
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.165ns  (logic 0.058ns (35.152%)  route 0.107ns (64.848%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.091ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.138ns
+    Source Clock Delay      (SCD):    3.475ns
+    Clock Pessimism Removal (CPR):    -0.428ns
+  Clock Net Delay (Source):      1.637ns (routing 0.530ns, distribution 1.107ns)
+  Clock Net Delay (Destination): 1.843ns (routing 0.581ns, distribution 1.262ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.637     3.475    u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/ap_clk
+    SLICE_X135Y177       FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/prepared_integer_15_reg_24846_reg[16]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X135Y177       FDRE (Prop_HFF_SLICEL_C_Q)
+                                                      0.058     3.533 r  u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/prepared_integer_15_reg_24846_reg[16]/Q
+                         net (fo=1, routed)           0.107     3.640    u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/prepared_integer_15_reg_24846_reg_n_0_[16]
+    SLICE_X134Y178       FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/prepared_integer_15_reg_24846_pp0_iter1_reg_reg[16]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.843     3.138    u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/ap_clk
+    SLICE_X134Y178       FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/prepared_integer_15_reg_24846_pp0_iter1_reg_reg[16]/C
+                         clock pessimism              0.428     3.566    
+    SLICE_X134Y178       FDRE (Hold_EFF2_SLICEL_C_D)
+                                                      0.062     3.628    u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/prepared_integer_15_reg_24846_pp0_iter1_reg_reg[16]
+  -------------------------------------------------------------------
+                         required time                         -3.628    
+                         arrival time                           3.640    
+  -------------------------------------------------------------------
+                         slack                                  0.012    
+
+Slack (MET) :             0.012ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/could_multi_bursts.len_buf_reg[3]/C
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/req_fifo/U_fifo_srl/mem_reg[6][67]_srl7/D
+                            (rising edge-triggered cell SRL16E clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.150ns  (logic 0.061ns (40.667%)  route 0.089ns (59.333%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.109ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.333ns
+    Source Clock Delay      (SCD):    3.636ns
+    Clock Pessimism Removal (CPR):    -0.411ns
+  Clock Net Delay (Source):      1.797ns (routing 0.530ns, distribution 1.267ns)
+  Clock Net Delay (Destination): 2.038ns (routing 0.581ns, distribution 1.457ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.797     3.636    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/ap_clk
+    SLICE_X6Y58          FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/could_multi_bursts.len_buf_reg[3]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X6Y58          FDRE (Prop_DFF2_SLICEM_C_Q)
+                                                      0.061     3.697 r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_burst_conv/could_multi_bursts.len_buf_reg[3]/Q
+                         net (fo=1, routed)           0.089     3.786    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/req_fifo/U_fifo_srl/in[64]
+    SLICE_X4Y59          SRL16E                                       r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/req_fifo/U_fifo_srl/mem_reg[6][67]_srl7/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       2.038     3.333    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/req_fifo/U_fifo_srl/ap_clk
+    SLICE_X4Y59          SRL16E                                       r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/req_fifo/U_fifo_srl/mem_reg[6][67]_srl7/CLK
+                         clock pessimism              0.411     3.744    
+    SLICE_X4Y59          SRL16E (Hold_A6LUT_SLICEM_CLK_D)
+                                                      0.029     3.773    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/req_fifo/U_fifo_srl/mem_reg[6][67]_srl7
+  -------------------------------------------------------------------
+                         required time                         -3.773    
+                         arrival time                           3.786    
+  -------------------------------------------------------------------
+                         slack                                  0.012    
+
+Slack (MET) :             0.013ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_reciprocalColumns_fu_201/output_value_reg_419_reg[3]/C
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_reciprocalColumns_fu_201/result_write_assign_reg_68_reg[3]/D
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.178ns  (logic 0.059ns (33.146%)  route 0.119ns (66.854%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.105ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.173ns
+    Source Clock Delay      (SCD):    3.489ns
+    Clock Pessimism Removal (CPR):    -0.422ns
+  Clock Net Delay (Source):      1.651ns (routing 0.530ns, distribution 1.121ns)
+  Clock Net Delay (Destination): 1.878ns (routing 0.581ns, distribution 1.297ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.651     3.489    u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_reciprocalColumns_fu_201/ap_clk
+    SLICE_X36Y153        FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_reciprocalColumns_fu_201/output_value_reg_419_reg[3]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X36Y153        FDRE (Prop_EFF_SLICEL_C_Q)
+                                                      0.059     3.548 r  u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_reciprocalColumns_fu_201/output_value_reg_419_reg[3]/Q
+                         net (fo=1, routed)           0.119     3.667    u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_reciprocalColumns_fu_201/output_value_reg_419[3]
+    SLICE_X38Y154        FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_reciprocalColumns_fu_201/result_write_assign_reg_68_reg[3]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.878     3.173    u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_reciprocalColumns_fu_201/ap_clk
+    SLICE_X38Y154        FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_reciprocalColumns_fu_201/result_write_assign_reg_68_reg[3]/C
+                         clock pessimism              0.422     3.595    
+    SLICE_X38Y154        FDRE (Hold_CFF_SLICEL_C_D)
+                                                      0.060     3.655    u_bd/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_reciprocalColumns_fu_201/result_write_assign_reg_68_reg[3]
+  -------------------------------------------------------------------
+                         required time                         -3.655    
+                         arrival time                           3.667    
+  -------------------------------------------------------------------
+                         slack                                  0.013    
+
+Slack (MET) :             0.013ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.166ns  (logic 0.083ns (50.000%)  route 0.083ns (50.000%))
+  Logic Levels:           1  (LUT4=1)
+  Clock Path Skew:        0.093ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.301ns
+    Source Clock Delay      (SCD):    3.619ns
+    Clock Pessimism Removal (CPR):    -0.411ns
+  Clock Net Delay (Source):      1.780ns (routing 0.530ns, distribution 1.250ns)
+  Clock Net Delay (Destination): 2.006ns (routing 0.581ns, distribution 1.425ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.780     3.619    <hidden>
+    SLICE_X4Y25          FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X4Y25          FDRE (Prop_FFF2_SLICEM_C_Q)
+                                                      0.060     3.679 r  <hidden>
+                         net (fo=1, routed)           0.061     3.740    <hidden>
+    SLICE_X3Y25          LUT4 (Prop_B6LUT_SLICEL_I2_O)
+                                                      0.023     3.763 r  <hidden>
+                         net (fo=1, routed)           0.022     3.785    <hidden>
+    SLICE_X3Y25          FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       2.006     3.301    <hidden>
+    SLICE_X3Y25          FDRE                                         r  <hidden>
+                         clock pessimism              0.411     3.712    
+    SLICE_X3Y25          FDRE (Hold_BFF_SLICEL_C_D)
+                                                      0.060     3.772    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.772    
+                         arrival time                           3.785    
+  -------------------------------------------------------------------
+                         slack                                  0.013    
+
+Slack (MET) :             0.013ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.172ns  (logic 0.060ns (34.888%)  route 0.112ns (65.112%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.097ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.239ns
+    Source Clock Delay      (SCD):    3.552ns
+    Clock Pessimism Removal (CPR):    -0.410ns
+  Clock Net Delay (Source):      1.714ns (routing 0.530ns, distribution 1.184ns)
+  Clock Net Delay (Destination): 1.944ns (routing 0.581ns, distribution 1.363ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.714     3.552    <hidden>
+    SLICE_X27Y0          FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X27Y0          FDRE (Prop_AFF2_SLICEM_C_Q)
+                                                      0.060     3.612 r  <hidden>
+                         net (fo=2, routed)           0.112     3.724    <hidden>
+    SLICE_X26Y1          FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.944     3.239    <hidden>
+    SLICE_X26Y1          FDRE                                         r  <hidden>
+                         clock pessimism              0.410     3.649    
+    SLICE_X26Y1          FDRE (Hold_HFF2_SLICEL_C_D)
+                                                      0.062     3.711    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.711    
+                         arrival time                           3.724    
+  -------------------------------------------------------------------
+                         slack                                  0.013    
+
+Slack (MET) :             0.013ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf_reg[49]/C
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.178ns  (logic 0.059ns (33.159%)  route 0.119ns (66.841%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.105ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.235ns
+    Source Clock Delay      (SCD):    3.545ns
+    Clock Pessimism Removal (CPR):    -0.415ns
+  Clock Net Delay (Source):      1.706ns (routing 0.530ns, distribution 1.176ns)
+  Clock Net Delay (Destination): 1.940ns (routing 0.581ns, distribution 1.359ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.706     3.545    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/ap_clk
+    SLICE_X25Y62         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf_reg[49]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X25Y62         FDRE (Prop_GFF_SLICEL_C_Q)
+                                                      0.059     3.604 r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.addr_buf_reg[49]/Q
+                         net (fo=3, routed)           0.119     3.722    <hidden>
+    SLICE_X22Y62         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.940     3.235    <hidden>
+    SLICE_X22Y62         FDRE                                         r  <hidden>
+                         clock pessimism              0.415     3.650    
+    SLICE_X22Y62         FDRE (Hold_GFF_SLICEL_C_D)
+                                                      0.060     3.710    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.710    
+                         arrival time                           3.722    
+  -------------------------------------------------------------------
+                         slack                                  0.013    
+
+Slack (MET) :             0.013ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell SRLC32E clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Fast Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.094ns  (logic 0.039ns (41.557%)  route 0.055ns (58.444%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.042ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.973ns
+    Source Clock Delay      (SCD):    2.162ns
+    Clock Pessimism Removal (CPR):    -0.231ns
+  Clock Net Delay (Source):      1.082ns (routing 0.319ns, distribution 0.763ns)
+  Clock Net Delay (Destination): 1.239ns (routing 0.351ns, distribution 0.888ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.373     0.452 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.492    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.492 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.196     0.688    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.230     0.918 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.146     1.064    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.017     1.081 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.082     2.162    <hidden>
+    SLICE_X16Y9          FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X16Y9          FDRE (Prop_DFF_SLICEM_C_Q)
+                                                      0.039     2.201 r  <hidden>
+                         net (fo=2, routed)           0.055     2.256    <hidden>
+    SLICE_X16Y8          SRLC32E                                      r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.472     0.572 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.622    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.622 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.222     0.844    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.295     0.549 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.166     0.715    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.019     0.734 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.239     1.973    <hidden>
+    SLICE_X16Y8          SRLC32E                                      r  <hidden>
+                         clock pessimism              0.231     2.204    
+    SLICE_X16Y8          SRLC32E (Hold_G6LUT_SLICEM_CLK_D)
+                                                      0.039     2.243    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -2.243    
+                         arrival time                           2.256    
+  -------------------------------------------------------------------
+                         slack                                  0.013    
+
+Slack (MET) :             0.013ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.165ns  (logic 0.057ns (34.545%)  route 0.108ns (65.455%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.090ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.118ns
+    Source Clock Delay      (SCD):    3.450ns
+    Clock Pessimism Removal (CPR):    -0.422ns
+  Clock Net Delay (Source):      1.611ns (routing 0.530ns, distribution 1.081ns)
+  Clock Net Delay (Destination): 1.823ns (routing 0.581ns, distribution 1.242ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.611     3.450    <hidden>
+    SLICE_X42Y30         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X42Y30         FDRE (Prop_FFF_SLICEM_C_Q)
+                                                      0.057     3.507 r  <hidden>
+                         net (fo=2, routed)           0.108     3.615    <hidden>
+    SLICE_X42Y29         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.823     3.118    <hidden>
+    SLICE_X42Y29         FDRE                                         r  <hidden>
+                         clock pessimism              0.422     3.539    
+    SLICE_X42Y29         FDRE (Hold_GFF2_SLICEM_C_D)
+                                                      0.062     3.601    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.601    
+                         arrival time                           3.615    
+  -------------------------------------------------------------------
+                         slack                                  0.013    
+
+Slack (MET) :             0.013ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell RAMD32 clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.199ns  (logic 0.058ns (29.146%)  route 0.141ns (70.854%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.108ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.256ns
+    Source Clock Delay      (SCD):    3.559ns
+    Clock Pessimism Removal (CPR):    -0.410ns
+  Clock Net Delay (Source):      1.720ns (routing 0.530ns, distribution 1.190ns)
+  Clock Net Delay (Destination): 1.961ns (routing 0.581ns, distribution 1.380ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.720     3.559    <hidden>
+    SLICE_X23Y55         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X23Y55         FDRE (Prop_CFF_SLICEL_C_Q)
+                                                      0.058     3.617 r  <hidden>
+                         net (fo=1, routed)           0.141     3.758    <hidden>
+    SLICE_X21Y55         RAMD32                                       r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.961     3.256    <hidden>
+    SLICE_X21Y55         RAMD32                                       r  <hidden>
+                         clock pessimism              0.410     3.666    
+    SLICE_X21Y55         RAMD32 (Hold_B5LUT_SLICEM_CLK_I)
+                                                      0.078     3.744    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.744    
+                         arrival time                           3.758    
+  -------------------------------------------------------------------
+                         slack                                  0.013    
+
+Slack (MET) :             0.013ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/data_fifo/U_fifo_srl/dout_reg[58]/C
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.168ns  (logic 0.057ns (33.967%)  route 0.111ns (66.033%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.093ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.313ns
+    Source Clock Delay      (SCD):    3.632ns
+    Clock Pessimism Removal (CPR):    -0.411ns
+  Clock Net Delay (Source):      1.793ns (routing 0.530ns, distribution 1.263ns)
+  Clock Net Delay (Destination): 2.018ns (routing 0.581ns, distribution 1.437ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.793     3.632    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/data_fifo/U_fifo_srl/ap_clk
+    SLICE_X4Y46          FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/data_fifo/U_fifo_srl/dout_reg[58]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X4Y46          FDRE (Prop_FFF_SLICEM_C_Q)
+                                                      0.057     3.689 r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/data_fifo/U_fifo_srl/dout_reg[58]/Q
+                         net (fo=2, routed)           0.111     3.799    <hidden>
+    SLICE_X3Y45          FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       2.018     3.313    <hidden>
+    SLICE_X3Y45          FDRE                                         r  <hidden>
+                         clock pessimism              0.411     3.724    
+    SLICE_X3Y45          FDRE (Hold_FFF2_SLICEL_C_D)
+                                                      0.062     3.786    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.786    
+                         arrival time                           3.799    
+  -------------------------------------------------------------------
+                         slack                                  0.013    
+
+Slack (MET) :             0.014ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.176ns  (logic 0.058ns (32.955%)  route 0.118ns (67.045%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.102ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.176ns
+    Source Clock Delay      (SCD):    3.496ns
+    Clock Pessimism Removal (CPR):    -0.422ns
+  Clock Net Delay (Source):      1.657ns (routing 0.530ns, distribution 1.127ns)
+  Clock Net Delay (Destination): 1.881ns (routing 0.581ns, distribution 1.300ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.657     3.496    <hidden>
+    SLICE_X37Y4          FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X37Y4          FDRE (Prop_GFF_SLICEM_C_Q)
+                                                      0.058     3.554 r  <hidden>
+                         net (fo=1, routed)           0.118     3.672    <hidden>
+    SLICE_X36Y5          FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.881     3.176    <hidden>
+    SLICE_X36Y5          FDRE                                         r  <hidden>
+                         clock pessimism              0.422     3.598    
+    SLICE_X36Y5          FDRE (Hold_HFF_SLICEL_C_D)
+                                                      0.060     3.658    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.658    
+                         arrival time                           3.672    
+  -------------------------------------------------------------------
+                         slack                                  0.014    
+
+Slack (MET) :             0.014ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.154ns  (logic 0.058ns (37.662%)  route 0.096ns (62.338%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.078ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.158ns
+    Source Clock Delay      (SCD):    3.502ns
+    Clock Pessimism Removal (CPR):    -0.422ns
+  Clock Net Delay (Source):      1.663ns (routing 0.530ns, distribution 1.133ns)
+  Clock Net Delay (Destination): 1.863ns (routing 0.581ns, distribution 1.282ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.663     3.502    <hidden>
+    SLICE_X32Y2          FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X32Y2          FDRE (Prop_FFF_SLICEL_C_Q)
+                                                      0.058     3.560 r  <hidden>
+                         net (fo=1, routed)           0.096     3.656    <hidden>
+    SLICE_X33Y2          FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.863     3.158    <hidden>
+    SLICE_X33Y2          FDRE                                         r  <hidden>
+                         clock pessimism              0.422     3.580    
+    SLICE_X33Y2          FDRE (Hold_EFF2_SLICEL_C_D)
+                                                      0.062     3.642    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.642    
+                         arrival time                           3.656    
+  -------------------------------------------------------------------
+                         slack                                  0.014    
+
+Slack (MET) :             0.014ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/load_unit_0/tmp_addr_reg[38]/C
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p2_reg[38]/D
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.174ns  (logic 0.059ns (33.987%)  route 0.115ns (66.013%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.098ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.226ns
+    Source Clock Delay      (SCD):    3.543ns
+    Clock Pessimism Removal (CPR):    -0.415ns
+  Clock Net Delay (Source):      1.704ns (routing 0.530ns, distribution 1.174ns)
+  Clock Net Delay (Destination): 1.931ns (routing 0.581ns, distribution 1.350ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.704     3.543    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/load_unit_0/ap_clk
+    SLICE_X24Y70         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/load_unit_0/tmp_addr_reg[38]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X24Y70         FDRE (Prop_CFF2_SLICEL_C_Q)
+                                                      0.059     3.602 r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/load_unit_0/tmp_addr_reg[38]/Q
+                         net (fo=2, routed)           0.115     3.716    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p2_reg[95]_0[35]
+    SLICE_X25Y69         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p2_reg[38]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.931     3.226    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/ap_clk
+    SLICE_X25Y69         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p2_reg[38]/C
+                         clock pessimism              0.415     3.640    
+    SLICE_X25Y69         FDRE (Hold_HFF2_SLICEL_C_D)
+                                                      0.062     3.702    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p2_reg[38]
+  -------------------------------------------------------------------
+                         required time                         -3.702    
+                         arrival time                           3.716    
+  -------------------------------------------------------------------
+                         slack                                  0.014    
+
+Slack (MET) :             0.014ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/req_fifo/U_fifo_srl/dout_reg[46]/C
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/rs_req/data_p2_reg[46]/D
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.180ns  (logic 0.061ns (33.813%)  route 0.119ns (66.187%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.105ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.310ns
+    Source Clock Delay      (SCD):    3.621ns
+    Clock Pessimism Removal (CPR):    -0.415ns
+  Clock Net Delay (Source):      1.782ns (routing 0.530ns, distribution 1.252ns)
+  Clock Net Delay (Destination): 2.015ns (routing 0.581ns, distribution 1.434ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.782     3.621    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/req_fifo/U_fifo_srl/ap_clk
+    SLICE_X4Y68          FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/req_fifo/U_fifo_srl/dout_reg[46]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X4Y68          FDRE (Prop_DFF2_SLICEM_C_Q)
+                                                      0.061     3.682 r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/req_fifo/U_fifo_srl/dout_reg[46]/Q
+                         net (fo=2, routed)           0.119     3.801    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/rs_req/D[43]
+    SLICE_X2Y69          FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/rs_req/data_p2_reg[46]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       2.015     3.310    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/rs_req/ap_clk
+    SLICE_X2Y69          FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/rs_req/data_p2_reg[46]/C
+                         clock pessimism              0.415     3.725    
+    SLICE_X2Y69          FDRE (Hold_FFF2_SLICEM_C_D)
+                                                      0.062     3.787    u_bd/split_d_system_i/fsa_0/inst/o_gmem_m_axi_U/bus_write/wreq_throttle/rs_req/data_p2_reg[46]
+  -------------------------------------------------------------------
+                         required time                         -3.787    
+                         arrival time                           3.801    
+  -------------------------------------------------------------------
+                         slack                                  0.014    
+
+Slack (MET) :             0.014ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.162ns  (logic 0.079ns (48.765%)  route 0.083ns (51.235%))
+  Logic Levels:           1  (LUT4=1)
+  Clock Path Skew:        0.088ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.309ns
+    Source Clock Delay      (SCD):    3.632ns
+    Clock Pessimism Removal (CPR):    -0.411ns
+  Clock Net Delay (Source):      1.793ns (routing 0.530ns, distribution 1.263ns)
+  Clock Net Delay (Destination): 2.014ns (routing 0.581ns, distribution 1.433ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.793     3.632    <hidden>
+    SLICE_X6Y9           FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X6Y9           FDRE (Prop_FFF_SLICEM_C_Q)
+                                                      0.057     3.689 r  <hidden>
+                         net (fo=1, routed)           0.061     3.750    <hidden>
+    SLICE_X5Y9           LUT4 (Prop_G6LUT_SLICEL_I2_O)
+                                                      0.022     3.772 r  <hidden>
+                         net (fo=1, routed)           0.022     3.794    <hidden>
+    SLICE_X5Y9           FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       2.014     3.309    <hidden>
+    SLICE_X5Y9           FDRE                                         r  <hidden>
+                         clock pessimism              0.411     3.720    
+    SLICE_X5Y9           FDRE (Hold_GFF_SLICEL_C_D)
+                                                      0.060     3.780    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.780    
+                         arrival time                           3.794    
+  -------------------------------------------------------------------
+                         slack                                  0.014    
+
+Slack (MET) :             0.014ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p1_reg[69]/C
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/beat_len_reg[2]/D
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.234ns  (logic 0.059ns (25.183%)  route 0.175ns (74.817%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.160ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.156ns
+    Source Clock Delay      (SCD):    3.484ns
+    Clock Pessimism Removal (CPR):    -0.489ns
+  Clock Net Delay (Source):      1.646ns (routing 0.530ns, distribution 1.116ns)
+  Clock Net Delay (Destination): 1.861ns (routing 0.581ns, distribution 1.280ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.646     3.484    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/ap_clk
+    SLICE_X33Y59         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p1_reg[69]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X33Y59         FDRE (Prop_DFF_SLICEL_C_Q)
+                                                      0.059     3.543 r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p1_reg[69]/Q
+                         net (fo=4, routed)           0.175     3.719    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/p_1_in[5]
+    SLICE_X32Y60         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/beat_len_reg[2]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.861     3.156    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/ap_clk
+    SLICE_X32Y60         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/beat_len_reg[2]/C
+                         clock pessimism              0.489     3.645    
+    SLICE_X32Y60         FDRE (Hold_BFF_SLICEL_C_D)
+                                                      0.060     3.705    u_bd/split_d_system_i/fsa_0/inst/k_gmem_m_axi_U/bus_read/rreq_burst_conv/beat_len_reg[2]
+  -------------------------------------------------------------------
+                         required time                         -3.705    
+                         arrival time                           3.719    
+  -------------------------------------------------------------------
+                         slack                                  0.014    
+
+Slack (MET) :             0.014ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.189ns  (logic 0.082ns (43.294%)  route 0.107ns (56.706%))
+  Logic Levels:           1  (LUT3=1)
+  Clock Path Skew:        0.116ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.166ns
+    Source Clock Delay      (SCD):    3.472ns
+    Clock Pessimism Removal (CPR):    -0.422ns
+  Clock Net Delay (Source):      1.634ns (routing 0.530ns, distribution 1.104ns)
+  Clock Net Delay (Destination): 1.871ns (routing 0.581ns, distribution 1.290ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.634     3.472    <hidden>
+    SLICE_X33Y25         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X33Y25         FDRE (Prop_BFF2_SLICEL_C_Q)
+                                                      0.060     3.532 r  <hidden>
+                         net (fo=3, routed)           0.083     3.616    <hidden>
+    SLICE_X32Y25         LUT3 (Prop_F6LUT_SLICEL_I1_O)
+                                                      0.022     3.638 r  <hidden>
+                         net (fo=1, routed)           0.024     3.662    <hidden>
+    SLICE_X32Y25         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.871     3.166    <hidden>
+    SLICE_X32Y25         FDRE                                         r  <hidden>
+                         clock pessimism              0.422     3.588    
+    SLICE_X32Y25         FDRE (Hold_FFF_SLICEL_C_D)
+                                                      0.060     3.648    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.648    
+                         arrival time                           3.662    
+  -------------------------------------------------------------------
+                         slack                                  0.014    
+
+Slack (MET) :             0.014ns  (arrival time - required time)
+  Source:                 u_bd/split_d_system_i/fsa_0/inst/control_s_axi_U/int_v_address_reg[28]/C
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_bd/split_d_system_i/fsa_0/inst/v_address_read_reg_234_reg[28]/D
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.156ns  (logic 0.059ns (37.922%)  route 0.097ns (62.078%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.081ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.220ns
+    Source Clock Delay      (SCD):    3.553ns
+    Clock Pessimism Removal (CPR):    -0.415ns
+  Clock Net Delay (Source):      1.715ns (routing 0.530ns, distribution 1.185ns)
+  Clock Net Delay (Destination): 1.925ns (routing 0.581ns, distribution 1.344ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.715     3.553    u_bd/split_d_system_i/fsa_0/inst/control_s_axi_U/ap_clk
+    SLICE_X15Y78         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/control_s_axi_U/int_v_address_reg[28]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X15Y78         FDRE (Prop_GFF_SLICEL_C_Q)
+                                                      0.059     3.612 r  u_bd/split_d_system_i/fsa_0/inst/control_s_axi_U/int_v_address_reg[28]/Q
+                         net (fo=3, routed)           0.097     3.709    u_bd/split_d_system_i/fsa_0/inst/v_address[28]
+    SLICE_X16Y78         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/v_address_read_reg_234_reg[28]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.925     3.220    u_bd/split_d_system_i/fsa_0/inst/ap_clk
+    SLICE_X16Y78         FDRE                                         r  u_bd/split_d_system_i/fsa_0/inst/v_address_read_reg_234_reg[28]/C
+                         clock pessimism              0.415     3.634    
+    SLICE_X16Y78         FDRE (Hold_EFF_SLICEM_C_D)
+                                                      0.060     3.694    u_bd/split_d_system_i/fsa_0/inst/v_address_read_reg_234_reg[28]
+  -------------------------------------------------------------------
+                         required time                         -3.694    
+                         arrival time                           3.709    
+  -------------------------------------------------------------------
+                         slack                                  0.014    
+
+Slack (MET) :             0.014ns  (arrival time - required time)
+  Source:                 <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by clk_out1_split_d_system_clk_wiz_0_0  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk_out1_split_d_system_clk_wiz_0_0
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns - clk_out1_split_d_system_clk_wiz_0_0 rise@0.000ns)
+  Data Path Delay:        0.186ns  (logic 0.093ns (50.052%)  route 0.093ns (49.948%))
+  Logic Levels:           1  (LUT6=1)
+  Clock Path Skew:        0.111ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    3.152ns
+    Source Clock Delay      (SCD):    3.462ns
+    Clock Pessimism Removal (CPR):    -0.422ns
+  Clock Net Delay (Source):      1.624ns (routing 0.530ns, distribution 1.094ns)
+  Clock Net Delay (Destination): 1.857ns (routing 0.581ns, distribution 1.276ns)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.079     0.079    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.518     0.597 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.040     0.637    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.637 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.333     0.970    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                      0.630     1.600 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.215     1.815    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.024     1.839 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.624     3.462    <hidden>
+    SLICE_X39Y29         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X39Y29         FDRE (Prop_HFF_SLICEM_C_Q)
+                                                      0.058     3.520 f  <hidden>
+                         net (fo=23, routed)          0.071     3.591    <hidden>
+    SLICE_X38Y29         LUT6 (Prop_G6LUT_SLICEL_I5_O)
+                                                      0.035     3.626 r  <hidden>
+                         net (fo=1, routed)           0.022     3.648    <hidden>
+    SLICE_X38Y29         FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk_out1_split_d_system_clk_wiz_0_0 rise edge)
+                                                      0.000     0.000 r  
+    BH42                                              0.000     0.000 r  board_clk_p (IN)
+                         net (fo=0)                   0.100     0.100    u_board_clk/I
+    HPIOBDIFFINBUF_X0Y36 DIFFINBUF (Prop_DIFFINBUF_HPIOBDIFFINBUF_DIFF_IN_P_O)
+                                                      0.615     0.715 r  u_board_clk/DIFFINBUF_INST/O
+                         net (fo=1, routed)           0.050     0.765    u_board_clk/OUT
+    BH42                 IBUFCTRL (Prop_IBUFCTRL_HPIOB_M_I_O)
+                                                      0.000     0.765 r  u_board_clk/IBUFCTRL_INST/O
+                         net (fo=4, routed)           0.384     1.149    u_bd/split_d_system_i/clk_wiz_0/inst/clk_in1
+    MMCM_X0Y1            MMCME4_ADV (Prop_MMCM_CLKIN1_CLKOUT0)
+                                                     -0.127     1.022 r  u_bd/split_d_system_i/clk_wiz_0/inst/mmcme4_adv_inst/CLKOUT0
+                         net (fo=1, routed)           0.245     1.267    u_bd/split_d_system_i/clk_wiz_0/inst/clk_out1_split_d_system_clk_wiz_0_0
+    BUFGCE_X0Y24         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     1.295 r  u_bd/split_d_system_i/clk_wiz_0/inst/clkout1_buf/O
+    X3Y1 (CLOCK_ROOT)    net (fo=50729, routed)       1.857     3.152    <hidden>
+    SLICE_X38Y29         FDRE                                         r  <hidden>
+                         clock pessimism              0.422     3.574    
+    SLICE_X38Y29         FDRE (Hold_GFF_SLICEL_C_D)
+                                                      0.060     3.634    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -3.634    
+                         arrival time                           3.648    
+  -------------------------------------------------------------------
+                         slack                                  0.014    
+
+
+
+

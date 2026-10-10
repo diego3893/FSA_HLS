@@ -1,0 +1,90 @@
+
+****** Vivado v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sat Oct 10 19:28:05 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source ../../tools/split_d_nm37/scripts/unit_test.tcl
+# set package_dir [file normalize [file join [file dirname [info script]] ..]]
+# file copy [file join $package_dir sim unit_program.mem] [file join [pwd] unit_program.mem]
+# exec xvlog --sv [file join $package_dir rtl split_d_selftest.sv] [file join $package_dir sim tb_split_d_selftest.sv]
+# exec xelab tb_split_d_selftest -s selftest_unit
+# foreach args {{} {-testplusarg inject} {-testplusarg timeout} {-testplusarg reset}} {
+#     set result [exec xsim selftest_unit -runall {*}$args]
+#     puts $result
+#     if {[string first "SELFTEST UNIT PASS" $result]<0 || [string first "Fatal:" $result]>=0} { error "Controller unit test failed: $args" }
+# }
+
+****** xsim v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sat Oct 10 19:28:32 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source xsim.dir/selftest_unit/xsim_script.tcl
+# xsim {selftest_unit} -autoloadwcfg -runall
+Time resolution is 1 ps
+run -all
+SELFTEST UNIT PASS inject=0 timeout=0 cases=26
+$finish called at time : 2195 ns : File "/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/sim/tb_split_d_selftest.sv" Line 258
+exit
+INFO: [Common 17-206] Exiting xsim at Sat Oct 10 19:28:36 2026...
+
+****** xsim v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sat Oct 10 19:28:38 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source xsim.dir/selftest_unit/xsim_script.tcl
+# xsim {selftest_unit} -testplusarg inject -autoloadwcfg -runall
+Time resolution is 1 ps
+run -all
+SELFTEST UNIT PASS inject=1 timeout=0 cases= 0
+$finish called at time : 705 ns : File "/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/sim/tb_split_d_selftest.sv" Line 258
+exit
+INFO: [Common 17-206] Exiting xsim at Sat Oct 10 19:28:41 2026...
+
+****** xsim v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sat Oct 10 19:28:43 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source xsim.dir/selftest_unit/xsim_script.tcl
+# xsim {selftest_unit} -testplusarg timeout -autoloadwcfg -runall
+Time resolution is 1 ps
+run -all
+SELFTEST UNIT PASS inject=0 timeout=0 cases= 0
+$finish called at time : 5455 ns : File "/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/sim/tb_split_d_selftest.sv" Line 258
+exit
+INFO: [Common 17-206] Exiting xsim at Sat Oct 10 19:28:47 2026...
+
+****** xsim v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sat Oct 10 19:28:49 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source xsim.dir/selftest_unit/xsim_script.tcl
+# xsim {selftest_unit} -testplusarg reset -autoloadwcfg -runall
+Time resolution is 1 ps
+run -all
+SELFTEST UNIT PASS inject=0 timeout=0 cases=26
+$finish called at time : 2315 ns : File "/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/sim/tb_split_d_selftest.sv" Line 258
+exit
+INFO: [Common 17-206] Exiting xsim at Sat Oct 10 19:28:52 2026...
+# puts "ALL_CONTROLLER_UNIT_GATES_PASS"
+ALL_CONTROLLER_UNIT_GATES_PASS
+INFO: [Common 17-206] Exiting Vivado at Sat Oct 10 19:28:52 2026...
