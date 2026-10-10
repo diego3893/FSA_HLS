@@ -27,6 +27,15 @@ module tb_split_d_system;
         .fail_code(code),.cases_done(cases),.debug_pc(pc),.debug_state(state),
         .last_case_cycles(last_cycles),.actual_word(actual)
     );
+`ifdef NM37_HBM_TLM_FUNCTIONAL
+    // The official hbm_sc.h declares apb_complete as xsc_stub_port. TLM
+    // does not model calibration; enable functional traffic after lock.
+    // RTL/default runs never enable this adapter and must await real init.
+    initial begin
+        $display("HBM TLM FUNCTIONAL ONLY: APB initialization is unmodeled; readiness adapter enabled");
+        force dut.split_d_system_i.init_done = clock_locked;
+    end
+`endif
     initial begin
         #1000 reset_n = 1;
         wait(clock_locked && init_done);

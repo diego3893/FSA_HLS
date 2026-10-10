@@ -131,3 +131,5 @@ Q完整覆盖`QUERY_BLOCK_COLS×QKV_WORDS_PER_TOKEN×DMA_ELEMS_PER_WORD`，K/V�
 
 - 18:23:04 a0e137a工程生成成功，原始XCI双域C_AUX_RESET_HIGH=1/C_EXT_RESET_HIGH=0已递归核对；18:24:41在独立副本启动完整系统实现，正式RTL仿真同时编译中。自包含build/nm37_delivery_a0e137a静态验证287文件SHA/正式component/ROM/相对入口通过，尚不代表工具验收。
 - 官方UG900和实际Vivado只读属性查询确认HBM/两SmartConnect均支持tlm/rtl，当前均rtl。增加可选hbm_tlm功能对照，仅HBM使用官方TLM，FSA/controller/SmartConnect保持RTL，不改变硬件配置、52事务/32768canary/金标准/复位覆盖；默认RTL流程继续。TLM不可用来声称实际HBM吞吐，实际吞吐须板测。TB释放检查改!==1确保X也失败。这是同一第3轮诊断补强，非新的HLS迭代。
+
+- 3ac1786 TLM已通过10us关键复位释放检查，但1.6ms后APB完成仍0；只读官方生成hbm_sc.h确认APB/APB-complete为xsc_stub_port，TLM不建模校准，不能等待这些stub。精确停止该无效等待，保留日志。增加仅仿真宏NM37_HBM_TLM_FUNCTIONAL的readiness适配（BD内部init_done=clock_locked），明确FUNCTIONAL ONLY，不计HBM初始化/校准/复位恢复通过；默认RTL不启用宏，仍保留真实初始化和所有52事务门槛。硬件/计算IP不改。

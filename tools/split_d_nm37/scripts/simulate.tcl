@@ -11,6 +11,11 @@ if {[llength $hbm]!=1} { error "Expected one real HBM IP" }
 set selected [expr {$model eq "hbm_tlm" ? "tlm" : "rtl"}]
 if {$selected ni [get_property ALLOWED_SIM_MODELS $hbm]} { error "HBM model unsupported" }
 set_property SELECTED_SIM_MODEL $selected $hbm
+set defines [get_property VERILOG_DEFINE [get_filesets sim_1]]
+set index [lsearch -exact $defines NM37_HBM_TLM_FUNCTIONAL]
+if {$index>=0} { set defines [lreplace $defines $index $index] }
+if {$model eq "hbm_tlm"} { lappend defines NM37_HBM_TLM_FUNCTIONAL }
+set_property VERILOG_DEFINE $defines [get_filesets sim_1]
 foreach ip [get_ips] {
     if {[string match *hbm* $ip] || [string match *interconnect* $ip]} {
         puts "NM37_SIM_MODEL $ip allowed=[get_property ALLOWED_SIM_MODELS $ip] selected=[get_property SELECTED_SIM_MODEL $ip]"

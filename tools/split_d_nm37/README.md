@@ -50,3 +50,5 @@ vivado -mode batch -source tools/split_d_nm37/scripts/build_and_report.tcl \
 必须分别核对控制器unit、系统仿真、综合、实现setup/hold、CDC、DRC、bitstream和板测。成功创建工程或下载bitstream不等于数值验收。
 
 可追加官方HBM TLM功能对照：`simulate.tcl <新工程副本路径> hbm_tlm`。仅切换Vivado实际允许的HBM模型，FSA、自检、SmartConnect仍使用RTL，ROM、52事务、全部canary/位模式及复位测试不变。默认`rtl`流程保留。TLM结果不得作为实际HBM延迟、吞吐或物理时序证据。
+
+Vivado2024.2的官方HBM TLM在`hbm_sc.h`将APB和`apb_complete`声明为`xsc_stub_port`，不模拟校准。可选TLM功能对照仅在仿真宏下将BD内部`init_done`适配为clock_locked，日志显式标记FUNCTIONAL ONLY；普通RTL模式无此适配。TLM对照不证明HBM初始化/校准/复位恢复，不能替代默认RTL流程或板测。
