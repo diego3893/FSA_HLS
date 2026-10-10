@@ -1,4 +1,4 @@
-# Vivado2024.2: run.tcl <exported impl/verilog> <new output dir> <auto|regions>
+# Vivado2024.2: run.tcl <exported impl/verilog> <new output dir> <auto|auto_context|regions>
 # Regions reuse auto's synthesis checkpoint; the optional regions.tcl is
 # reviewed from the actual auto placement, never invented device coordinates.
 if {[llength $argv] != 3} { error "Expected RTL directory, output directory, mode" }
@@ -6,7 +6,7 @@ set rtl_dir [file normalize [lindex $argv 0]]
 set output_dir [file normalize [lindex $argv 1]]
 set mode [lindex $argv 2]
 set script_dir [file dirname [file normalize [info script]]]
-if {$mode ni {auto regions}} { error "Unknown mode: $mode" }
+if {$mode ni {auto auto_context regions}} { error "Unknown mode: $mode" }
 if {[file exists $output_dir]} { error "Use a new output directory: $output_dir" }
 file mkdir $output_dir
 cd $output_dir
@@ -33,6 +33,7 @@ if {$mode eq "auto"} {
     set auto_dir [file join [file dirname $output_dir] auto]
     open_checkpoint [file join $auto_dir synthesized.dcp]
 }
+source [file join $script_dir clock_context.tcl]
 opt_design
 if {$mode eq "regions"} { source [file join $script_dir regions.tcl] }
 write_checkpoint optimized.dcp

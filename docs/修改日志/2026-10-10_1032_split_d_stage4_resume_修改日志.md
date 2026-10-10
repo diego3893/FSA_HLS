@@ -61,3 +61,16 @@
 - 首次脚本a0b890d读取DCP及内部hold成功（最差+0.019ns），列出全部负hold；但`phys_opt_design -post_route -hold_fix`的-post_route不是2024.2合法选项，exit1。修正为`phys_opt_design -hold_fix`，工具依已路由design state识别post-route；保留失败目录，使用auto_hold_retry重试，属于同一轮命令修正。
 - 读取DCP时发现Timing38-242：未设HD.CLK_SRC，时钟偏斜估计受限。此前自动布局仅初步模型结果，不能作为完整物理验收。新增实际器件BUFGCE库存记录，后续以明确OOC时钟源假设重新固定自动/区域模型。周期/uncertainty及边界预算不放宽。
 - TSV初版误输出字面量反斜杠t；修复以后脚本的分隔符，原自动布局文件保持原始字节，分析读取时识别该分隔符。不覆盖既有证据。
+- 更正上一条：进一步读取原始字节，TSV分隔符实际为ASCII9（真正tab）；此前误把工具结果的转义显示当作文件内容。脚本对应替换没有产生run.tcl差异，原始TSV并未损坏，无需修复。
+
+### 第2轮分析闭环
+
+- a2d61f6的auto_hold_retry正常完成。以最终timing_summary.rpt为准：WNS0.371ns/TNS0、WHS−0.080ns/THS−34.418ns，721个负hold endpoint；内部hold仍+0.019ns。路由中间进度数字不能替代最终报告。
+- 修复前771个失败endpoint全部以顶层input为起点；包括三组RDATA各128、control WDATA对应275个endpoint、reset48等。没有内部寄存器起点。默认hold_fix减少了50个失败endpoint，未满足固定min0ns边界合同，不宣称验收通过。
+- 工具库存确认BUFGCE_X0Y48位于SLR0/X4Y2。初始auto及本轮诊断缺HD.CLK_SRC，仅作探索；需补齐一致的时钟模型后再比较区域布局。已完成分析闭环2轮。
+
+## 4 第3轮：固定时钟模型与区域对照
+
+- 不改HLS计算和正式IP，沿用b3e4957。新增clock_context.tcl明确BUFGCE_X0Y48为OOC假设（不是后续系统事实），周期、setup uncertainty和输入/输出预算不放宽。
+- auto_context和regions从同一个auto/synthesized.dcp开始，均设置HD.CLK_SRC，再执行同一opt/place/phys_opt/route流程。先完成auto_context；regions的位置范围从该次实际primitive位置重新提取，保持VU37P和SLR0，不强迫跨SLR。
+- 当前目标：验证时钟模型与内部/接口路径，并取得公平自动/区域对照。若边界min0ns仍不能满足，保留失败门槛，依据明确报告决定后续接口延迟修复或系统边界选择，不用放宽约束冒充通过。

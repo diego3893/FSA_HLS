@@ -6,6 +6,8 @@
 
 VU37P、100MHz，setup uncertainty为2.7ns。全部AXI/AXI-Lite输入（包括复位）视为同一时钟域的同步接口，input/output max delay为2ns、min delay为0ns；没有false path。Hold由实际时钟模型分析，未额外施加2.7ns hold uncertainty。外部器件的真实延迟、异步复位释放和HBM集成需要后续系统约束验证。
 
+时钟源假定为器件库存中实际存在的`BUFGCE_X0Y48`（SLR0、X4Y2），通过`HD.CLK_SRC`让工具估计OOC时钟延迟/偏斜。它不是后续完整系统的真实时钟位置；系统集成时必须替换为实际位置。初次未指定该属性的auto结果仅为探索基线，不能冒称完整物理验收。
+
 ## 2 自动布局
 
 在服务器仓库根目录执行（先显式加载`~/.bashrc`）：
