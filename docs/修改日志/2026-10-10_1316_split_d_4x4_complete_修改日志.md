@@ -101,3 +101,5 @@ Q完整覆盖`QUERY_BLOCK_COLS×QKV_WORDS_PER_TOKEN×DMA_ELEMS_PER_WORD`，K/V�
 继承只剩完整集成：ClockWizard必须显式CLKOUT2_USED，Processor System Reset按连接的ACTIVE_LOW推导C_EXT_RESET_HIGH并断言；不放宽时钟或误排除内部路径。准备自包含复制正式IP的交付生成器和相对路径config，随后真实HBM BD生成、52笔系统仿真、综合/route/setup/hold/CDC/DRC、bitstream及唯一VU37P板内自检。计算IP被测版本固定bf41d16，系统源码版本独立记录；脚本修正无需冒充新的HLS数值验收。
 
 - 第3轮本地自包含交付验证：首次复制ip.tmp中间目录触及Windows长路径，部分交付保留在ignored build供诊断；正式component不引用该临时目录，生成器排除ip.tmp且逐项校验component引用。新`build/nm37_delivery`成功，正式component SHA保持a64c7be…a26dc。交付复制不构成Vivado验证。
+
+- 35afc03工程生成15:44:19—15:45:25失败：clock第二输出连接已通过，进入module reference；Vivado明确拒绝SystemVerilog作为BD reference顶层。controller本身为Verilog-2001语法，修正该文件FILE_TYPE=Verilog，不改控制器语义；继续同一第3轮。原失败工程保留，新建目录重试。

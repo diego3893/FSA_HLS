@@ -13,6 +13,9 @@ set_property simulator_language Mixed [current_project]
 set_property ip_repo_paths [list $ip_repo] [current_project]
 update_ip_catalog
 add_files -norecurse [glob [file join $package_dir rtl *.sv]]
+# The controller uses Verilog-2001 syntax. BD module references reject a
+# SystemVerilog top file; set its parser type explicitly, preserving the RTL.
+set_property FILE_TYPE Verilog [get_files [file join $package_dir rtl split_d_selftest.sv]]
 add_files -norecurse [file join $package_dir data split_d_program.mem]
 add_files -fileset constrs_1 -norecurse [file join $package_dir constraints nm37.xdc]
 set core_budget [file join $package_dir constraints core_budget.xdc]
