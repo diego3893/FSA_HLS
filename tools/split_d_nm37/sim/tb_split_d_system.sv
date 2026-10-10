@@ -31,6 +31,14 @@ module tb_split_d_system;
         #1000 reset_n = 1;
         wait(clock_locked && init_done);
         repeat(20) @(posedge ctrl_clk);
+        // Reset the entire clock/reset/AXI/HBM system during an active write.
+        @(negedge ctrl_clk) run_test = 1;
+        wait(state==5);
+        @(negedge ctrl_clk) begin reset_n = 0; run_test = 0; end
+        #1000 reset_n = 1;
+        wait(clock_locked && init_done);
+        repeat(20) @(posedge ctrl_clk);
+        $display("SYSTEM RESET EXERCISE initialization restored");
         @(negedge ctrl_clk) run_test = 1;
         wait(done);
         if(!pass || fail || cases!=26) $fatal(1,"SYSTEM FAIL mode0 cases=%0d code=%h pc=%0d actual=%h",cases,code,pc,actual);
