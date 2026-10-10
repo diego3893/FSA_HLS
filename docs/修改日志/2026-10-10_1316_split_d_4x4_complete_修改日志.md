@@ -105,3 +105,5 @@ Q完整覆盖`QUERY_BLOCK_COLS×QKV_WORDS_PER_TOKEN×DMA_ELEMS_PER_WORD`，K/V�
 - 35afc03工程生成15:44:19—15:45:25失败：clock第二输出连接已通过，进入module reference；Vivado明确拒绝SystemVerilog作为BD reference顶层。controller本身为Verilog-2001语法，修正该文件FILE_TYPE=Verilog，不改控制器语义；继续同一第3轮。原失败工程保留，新建目录重试。
 
 - 00158f1工程生成16:04:02—16:05:10：Verilog module reference及5路AXI/HBM地址自动分配已执行；输出导出失败，make_bd_pins_external没有返回对象，旧脚本把空返回给set_property。改为按已核对宽度显式create_bd_port/connect_bd_net，同时加入系统逐事务progress打印；保持同一第3轮，尚未产生系统仿真。
+
+- 446bdab 16:15:06—16:16:50：BD时钟/低复位断言及HDL/IP生成已执行，HBM_MEM00在全部5个master明确映射0/256MB；仍不能验收：AXI-Lite Reg未分配（critical），最终地址报告调用redirect不属于Vivado Tcl而exit1。正式component实际声明Reg窗口64KB、7位local address；加入独立1×1 Control SmartConnect供地址窗口解码/适配，显式映射0/64KB并断言，保留原FSA接口；地址报告改report_property -file并导出CSV，依据AMD UG835 assign_bd_address/report_property。继续同一第3轮。

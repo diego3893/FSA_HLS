@@ -67,7 +67,12 @@ set fsa [create_bd_cell -type ip -vlnv xilinx.com:hls:fsa_stream_split_d:1.0 fsa
 set tester [create_bd_cell -type module -reference split_d_selftest selftest_0]
 connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins fsa_0/ap_clk] [get_bd_pins selftest_0/clk]
 connect_bd_net [get_bd_pins rst_100/peripheral_aresetn] [get_bd_pins fsa_0/ap_rst_n] [get_bd_pins selftest_0/reset_n]
-connect_bd_intf_net [get_bd_intf_pins selftest_0/M_AXIL] [get_bd_intf_pins fsa_0/s_axi_control]
+set control_sc [create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 control_interconnect]
+set_property -dict [list CONFIG.NUM_SI {1} CONFIG.NUM_MI {1}] $control_sc
+connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins control_interconnect/aclk]
+connect_bd_net [get_bd_pins rst_100/interconnect_aresetn] [get_bd_pins control_interconnect/aresetn]
+connect_bd_intf_net [get_bd_intf_pins selftest_0/M_AXIL] [get_bd_intf_pins control_interconnect/S00_AXI]
+connect_bd_intf_net [get_bd_intf_pins control_interconnect/M00_AXI] [get_bd_intf_pins fsa_0/s_axi_control]
 set ready [create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 memory_ready]
 set_property -dict [list CONFIG.C_OPERATION {and} CONFIG.C_SIZE {1}] $ready
 connect_bd_net [get_bd_pins hbm_0/apb_complete_0] [get_bd_pins memory_ready/Op1]
@@ -90,7 +95,12 @@ connect_bd_intf_net [get_bd_intf_pins selftest_0/M_AXI] [get_bd_intf_pins memory
 set hbm_intf [get_bd_intf_pins -quiet hbm_0/SAXI_00]
 if {[llength $hbm_intf]!=1} { set hbm_intf [get_bd_intf_pins hbm_0/AXI_00] }
 connect_bd_intf_net [get_bd_intf_pins memory_interconnect/M00_AXI] $hbm_intf
+# The formal IP advertises a 64KB register window, with seven local address
+# bits. Control SmartConnect supplies the window decode and address adaptation.
+assign_bd_address -offset 0 -range 64K -target_address_space [get_bd_addr_spaces selftest_0/M_AXIL] [get_bd_addr_segs fsa_0/s_axi_control/Reg]
 assign_bd_address
+set control_segments [get_bd_addr_segs -of_objects [get_bd_addr_spaces selftest_0/M_AXIL]]
+if {[llength $control_segments]!=1 || [get_property OFFSET $control_segments]!=0} { error "Control window must map at zero" }
 
 # Scalar debug connections go to top-level VIO/ILA; only board clock/reset
 # are physical ports. Exposing them from BD does not add FPGA package I/O.
@@ -140,6 +150,9 @@ set_property STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY none [get_runs synth_1]
 update_compile_order -fileset sources_1
 write_bd_tcl [file join $output_dir recreate_bd.tcl]
 report_ip_status -file [file join $output_dir ip_status.rpt]
-redirect -file [file join $output_dir address_map.txt] { report_property [get_bd_addr_segs] }
+set address_report [file join $output_dir address_map.txt]
+set f [open $address_report w]; close $f
+foreach segment [get_bd_addr_segs] { report_property -file $address_report -append $segment }
+assign_bd_address -export_to_file [file join $output_dir address_map.csv]
 puts "NM37_PROJECT_CREATED=[file join $output_dir project split_d_nm37.xpr]"
 close_project
