@@ -1,0 +1,177 @@
+
+
+================================================================
+== Vitis HLS Report for 'reciprocalColumns_Pipeline_VITIS_LOOP_369_1'
+================================================================
+* Date:           Sat Oct 10 14:20:43 2026
+
+* Version:        2024.2 (Build 5238294 on Nov  8 2024)
+* Project:        build
+* Solution:       solution1 (Vivado IP Flow Target)
+* Product family: virtexuplusHBM
+* Target device:  xcvu37p_CIV-fsvh2892-2-e
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing: 
+    * Summary: 
+    +--------+----------+----------+------------+
+    |  Clock |  Target  | Estimated| Uncertainty|
+    +--------+----------+----------+------------+
+    |ap_clk  |  10.00 ns|  2.788 ns|     2.70 ns|
+    +--------+----------+----------+------------+
+
++ Latency: 
+    * Summary: 
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+    |  Latency (cycles) |  Latency (absolute) |  Interval |                    Pipeline                    |
+    |   min   |   max   |    min   |    max   | min | max |                      Type                      |
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+    |       15|       15|  0.150 us|  0.150 us|   14|   14|  loop auto-rewind stp (delay=0 clock cycles(s))|
+    +---------+---------+----------+----------+-----+-----+------------------------------------------------+
+
+    + Detail: 
+        * Instance: 
+        N/A
+
+        * Loop: 
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+        |                    |  Latency (cycles) | Iteration|  Initiation Interval  | Trip |          |
+        |      Loop Name     |   min   |   max   |  Latency |  achieved |   target  | Count| Pipelined|
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+        |- VITIS_LOOP_369_1  |       13|       13|         1|          1|          1|    13|       yes|
+        +--------------------+---------+---------+----------+-----------+-----------+------+----------+
+
+
+
+================================================================
+== Utilization Estimates
+================================================================
+* Summary: 
++---------------------+---------+------+---------+---------+-----+
+|         Name        | BRAM_18K|  DSP |    FF   |   LUT   | URAM|
++---------------------+---------+------+---------+---------+-----+
+|DSP                  |        -|     -|        -|        -|    -|
+|Expression           |        -|     -|        0|      338|    -|
+|FIFO                 |        -|     -|        -|        -|    -|
+|Instance             |        -|     -|        -|        -|    -|
+|Memory               |        -|     -|        -|        -|    -|
+|Multiplexer          |        -|     -|        0|       68|    -|
+|Register             |        -|     -|       89|        -|    -|
++---------------------+---------+------+---------+---------+-----+
+|Total                |        0|     0|       89|      406|    0|
++---------------------+---------+------+---------+---------+-----+
+|Available SLR        |     1344|  3008|   869120|   434560|  320|
++---------------------+---------+------+---------+---------+-----+
+|Utilization SLR (%)  |        0|     0|       ~0|       ~0|    0|
++---------------------+---------+------+---------+---------+-----+
+|Available            |     4032|  9024|  2607360|  1303680|  960|
++---------------------+---------+------+---------+---------+-----+
+|Utilization (%)      |        0|     0|       ~0|       ~0|    0|
++---------------------+---------+------+---------+---------+-----+
+
++ Detail: 
+    * Instance: 
+    N/A
+
+    * DSP: 
+    N/A
+
+    * Memory: 
+    N/A
+
+    * FIFO: 
+    N/A
+
+    * Expression: 
+    +-----------------------------+----------+----+---+----+------------+------------+
+    |        Variable Name        | Operation| DSP| FF| LUT| Bitwidth P0| Bitwidth P1|
+    +-----------------------------+----------+----+---+----+------------+------------+
+    |iteration_4_fu_193_p2        |         +|   0|  0|  12|           4|           1|
+    |next_iter_count_4_fu_345_p2  |         +|   0|  0|  12|           4|           1|
+    |remainder_40_fu_220_p2       |         -|   0|  0|  31|          24|          24|
+    |remainder_42_fu_288_p2       |         -|   0|  0|  31|          24|          24|
+    |ap_condition_282             |       and|   0|  0|   2|           1|           1|
+    |ap_condition_285             |       and|   0|  0|   2|           1|           1|
+    |icmp_ln275_fu_339_p2         |      icmp|   0|  0|  12|           4|           4|
+    |icmp_ln370_fu_187_p2         |      icmp|   0|  0|  12|           4|           3|
+    |icmp_ln40_1_fu_283_p2        |      icmp|   0|  0|  32|          25|          25|
+    |icmp_ln40_fu_215_p2          |      icmp|   0|  0|  32|          25|          25|
+    |brmerge_i_fu_153_p2          |        or|   0|  0|   2|           1|           1|
+    |empty_213_fu_309_p3          |    select|   0|  0|  24|           1|          24|
+    |empty_fu_225_p3              |    select|   0|  0|  24|           1|          24|
+    |next_iter_count_5_fu_351_p3  |    select|   0|  0|   4|           1|           4|
+    |quotient_4_fu_301_p3         |    select|   0|  0|  26|           1|          26|
+    |quotient_7_fu_332_p3         |    select|   0|  0|  26|           1|          26|
+    |remainder_44_fu_325_p3       |    select|   0|  0|  25|           1|          25|
+    |select_ln258_fu_267_p3       |    select|   0|  0|  25|           1|          25|
+    |select_ln372_fu_359_p3       |    select|   0|  0|   2|           1|           2|
+    |ap_enable_pp0                |       xor|   0|  0|   2|           1|           2|
+    +-----------------------------+----------+----+---+----+------------+------------+
+    |Total                        |          |   0|  0| 338|         126|         268|
+    +-----------------------------+----------+----+---+----+------------+------------+
+
+    * Multiplexer: 
+    +-------------------------+----+-----------+-----+-----------+
+    |           Name          | LUT| Input Size| Bits| Total Bits|
+    +-------------------------+----+-----------+-----+-----------+
+    |ap_done_int              |   9|          2|    1|          2|
+    |ap_enable_reg_pp0_iter1  |   9|          2|    1|          2|
+    |iteration_fu_72          |   9|          2|    4|          8|
+    |next_iter_count_fu_84    |   9|          2|    4|          8|
+    |next_phase_fu_88         |  14|          3|    2|          6|
+    |quotient_fu_80           |   9|          2|   26|         52|
+    |remainder_fu_76          |   9|          2|   25|         50|
+    +-------------------------+----+-----------+-----+-----------+
+    |Total                    |  68|         15|   63|        128|
+    +-------------------------+----+-----------+-----+-----------+
+
+    * Register: 
+    +------------------------------+----+----+-----+-----------+
+    |             Name             | FF | LUT| Bits| Const Bits|
+    +------------------------------+----+----+-----+-----------+
+    |ap_CS_fsm                     |   1|   0|    1|          0|
+    |ap_done_reg                   |   1|   0|    1|          0|
+    |ap_enable_reg_pp0_iter1       |   1|   0|    1|          0|
+    |brmerge_i_reg_460             |   1|   0|    1|          0|
+    |conv3_i_i61_i_i_cast_reg_454  |  24|   0|   25|          1|
+    |iteration_fu_72               |   4|   0|    4|          0|
+    |next_iter_count_fu_84         |   4|   0|    4|          0|
+    |next_phase_fu_88              |   2|   0|    8|          6|
+    |quotient_fu_80                |  26|   0|   26|          0|
+    |remainder_fu_76               |  25|   0|   25|          0|
+    +------------------------------+----+----+-----+-----------+
+    |Total                         |  89|   0|   96|          7|
+    +------------------------------+----+----+-----+-----------+
+
+
+
+================================================================
+== Interface
+================================================================
+* Summary: 
++-----------------------------+-----+-----+------------+---------------------------------------------+--------------+
+|          RTL Ports          | Dir | Bits|  Protocol  |                Source Object                |    C Type    |
++-----------------------------+-----+-----+------------+---------------------------------------------+--------------+
+|ap_clk                       |   in|    1|  ap_ctrl_hs|  reciprocalColumns_Pipeline_VITIS_LOOP_369_1|  return value|
+|ap_rst                       |   in|    1|  ap_ctrl_hs|  reciprocalColumns_Pipeline_VITIS_LOOP_369_1|  return value|
+|ap_start                     |   in|    1|  ap_ctrl_hs|  reciprocalColumns_Pipeline_VITIS_LOOP_369_1|  return value|
+|ap_done                      |  out|    1|  ap_ctrl_hs|  reciprocalColumns_Pipeline_VITIS_LOOP_369_1|  return value|
+|ap_idle                      |  out|    1|  ap_ctrl_hs|  reciprocalColumns_Pipeline_VITIS_LOOP_369_1|  return value|
+|ap_ready                     |  out|    1|  ap_ctrl_hs|  reciprocalColumns_Pipeline_VITIS_LOOP_369_1|  return value|
+|state_quotient               |   in|   26|     ap_none|                               state_quotient|        scalar|
+|state_remainder              |   in|   25|     ap_none|                              state_remainder|        scalar|
+|conv3_i_i61_i_i              |   in|   24|     ap_none|                              conv3_i_i61_i_i|        scalar|
+|state_divisor                |   in|   24|     ap_none|                                state_divisor|        scalar|
+|next_special                 |   in|    1|     ap_none|                                 next_special|        scalar|
+|state_exact_power_of_two     |   in|    1|     ap_none|                     state_exact_power_of_two|        scalar|
+|next_quotient_5_out          |  out|   26|      ap_vld|                          next_quotient_5_out|       pointer|
+|next_quotient_5_out_ap_vld   |  out|    1|      ap_vld|                          next_quotient_5_out|       pointer|
+|next_remainder_5_out         |  out|   25|      ap_vld|                         next_remainder_5_out|       pointer|
+|next_remainder_5_out_ap_vld  |  out|    1|      ap_vld|                         next_remainder_5_out|       pointer|
+|next_phase_out               |  out|    8|      ap_vld|                               next_phase_out|       pointer|
+|next_phase_out_ap_vld        |  out|    1|      ap_vld|                               next_phase_out|       pointer|
++-----------------------------+-----+-----+------------+---------------------------------------------+--------------+
+

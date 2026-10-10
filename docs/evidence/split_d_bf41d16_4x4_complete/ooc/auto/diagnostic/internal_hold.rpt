@@ -1,0 +1,434 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+--------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version      : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
+| Date              : Sat Oct 10 15:06:02 2026
+| Host              : lenovo-ThinkStation-P920 running 64-bit Ubuntu 24.04.3 LTS
+| Command           : report_timing -from [all_registers] -to [all_registers] -delay_type min -max_paths 10 -file internal_hold.rpt
+| Design            : fsa_stream_split_d
+| Device            : xcvu37p_CIV-fsvh2892
+| Speed File        : -2  PRODUCTION 1.30 05-01-2022
+| Design State      : Routed
+| Temperature Grade : E
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             0.010ns  (arrival time - required time)
+  Source:                 grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runAccumulatorColumns_fu_512/prepared_integer_18_reg_759_reg[9]/C
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runAccumulatorColumns_fu_512/prepared_integer_18_reg_759_pp0_iter4_reg_reg[9]_srl2/D
+                            (rising edge-triggered cell SRL16E clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.157ns  (logic 0.061ns (38.854%)  route 0.096ns (61.147%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.092ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.556ns
+    Source Clock Delay      (SCD):    1.315ns
+    Clock Pessimism Removal (CPR):    0.149ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.315     1.315    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runAccumulatorColumns_fu_512/ap_clk
+    SLICE_X91Y167        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runAccumulatorColumns_fu_512/prepared_integer_18_reg_759_reg[9]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X91Y167        FDRE (Prop_DFF2_SLICEM_C_Q)
+                                                      0.061     1.376 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runAccumulatorColumns_fu_512/prepared_integer_18_reg_759_reg[9]/Q
+                         net (fo=1, routed)           0.096     1.472    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runAccumulatorColumns_fu_512/prepared_integer_18_reg_759[9]
+    SLICE_X91Y166        SRL16E                                       r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runAccumulatorColumns_fu_512/prepared_integer_18_reg_759_pp0_iter4_reg_reg[9]_srl2/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.556     1.556    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runAccumulatorColumns_fu_512/ap_clk
+    SLICE_X91Y166        SRL16E                                       r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runAccumulatorColumns_fu_512/prepared_integer_18_reg_759_pp0_iter4_reg_reg[9]_srl2/CLK
+                         clock pessimism             -0.149     1.407    
+    SLICE_X91Y166        SRL16E (Hold_B5LUT_SLICEM_CLK_D)
+                                                      0.055     1.462    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runAccumulatorColumns_fu_512/prepared_integer_18_reg_759_pp0_iter4_reg_reg[9]_srl2
+  -------------------------------------------------------------------
+                         required time                         -1.462    
+                         arrival time                           1.472    
+  -------------------------------------------------------------------
+                         slack                                  0.010    
+
+Slack (MET) :             0.010ns  (arrival time - required time)
+  Source:                 grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/ap_phi_reg_pp0_iter1_zero_68_reg_1856_reg[25]/C
+                            (rising edge-triggered cell FDSE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/ap_phi_reg_pp0_iter2_zero_68_reg_1856_reg[25]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.313ns  (logic 0.092ns (29.393%)  route 0.221ns (70.607%))
+  Logic Levels:           1  (LUT4=1)
+  Clock Path Skew:        0.243ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.447ns
+    Source Clock Delay      (SCD):    1.184ns
+    Clock Pessimism Removal (CPR):    0.020ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.184     1.184    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/ap_clk
+    SLICE_X145Y121       FDSE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/ap_phi_reg_pp0_iter1_zero_68_reg_1856_reg[25]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X145Y121       FDSE (Prop_FFF_SLICEM_C_Q)
+                                                      0.057     1.241 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/ap_phi_reg_pp0_iter1_zero_68_reg_1856_reg[25]/Q
+                         net (fo=1, routed)           0.185     1.426    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/ap_phi_reg_pp0_iter1_zero_68_reg_1856[25]
+    SLICE_X146Y115       LUT4 (Prop_D6LUT_SLICEM_I2_O)
+                                                      0.035     1.461 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/ap_phi_reg_pp0_iter2_zero_68_reg_1856[25]_i_1/O
+                         net (fo=1, routed)           0.036     1.497    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/ap_phi_reg_pp0_iter2_zero_68_reg_1856[25]_i_1_n_0
+    SLICE_X146Y115       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/ap_phi_reg_pp0_iter2_zero_68_reg_1856_reg[25]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.447     1.447    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/ap_clk
+    SLICE_X146Y115       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/ap_phi_reg_pp0_iter2_zero_68_reg_1856_reg[25]/C
+                         clock pessimism             -0.020     1.427    
+    SLICE_X146Y115       FDRE (Hold_DFF_SLICEM_C_D)
+                                                      0.060     1.487    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718/ap_phi_reg_pp0_iter2_zero_68_reg_1856_reg[25]
+  -------------------------------------------------------------------
+                         required time                         -1.487    
+                         arrival time                           1.497    
+  -------------------------------------------------------------------
+                         slack                                  0.010    
+
+Slack (MET) :             0.010ns  (arrival time - required time)
+  Source:                 o_gmem_m_axi_U/store_unit_0/tmp_len_reg[22]/C
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/data_p2_reg[86]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.175ns  (logic 0.059ns (33.790%)  route 0.116ns (66.210%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.102ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.597ns
+    Source Clock Delay      (SCD):    1.380ns
+    Clock Pessimism Removal (CPR):    0.114ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.380     1.380    o_gmem_m_axi_U/store_unit_0/ACLK
+    SLICE_X80Y220        FDRE                                         r  o_gmem_m_axi_U/store_unit_0/tmp_len_reg[22]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X80Y220        FDRE (Prop_EFF_SLICEL_C_Q)
+                                                      0.059     1.439 r  o_gmem_m_axi_U/store_unit_0/tmp_len_reg[22]/Q
+                         net (fo=2, routed)           0.116     1.555    o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/s_data[86]
+    SLICE_X81Y220        FDRE                                         r  o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/data_p2_reg[86]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.597     1.597    o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/clk
+    SLICE_X81Y220        FDRE                                         r  o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/data_p2_reg[86]/C
+                         clock pessimism             -0.114     1.482    
+    SLICE_X81Y220        FDRE (Hold_HFF2_SLICEM_C_D)
+                                                      0.062     1.544    o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/data_p2_reg[86]
+  -------------------------------------------------------------------
+                         required time                         -1.544    
+                         arrival time                           1.555    
+  -------------------------------------------------------------------
+                         slack                                  0.010    
+
+Slack (MET) :             0.010ns  (arrival time - required time)
+  Source:                 o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/data_p1_reg[72]/C
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            o_gmem_m_axi_U/bus_write/wreq_burst_conv/beat_len_reg[5]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.177ns  (logic 0.058ns (32.840%)  route 0.119ns (67.160%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.104ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.594ns
+    Source Clock Delay      (SCD):    1.375ns
+    Clock Pessimism Removal (CPR):    0.115ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.375     1.375    o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/clk
+    SLICE_X81Y216        FDRE                                         r  o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/data_p1_reg[72]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X81Y216        FDRE (Prop_HFF_SLICEM_C_Q)
+                                                      0.058     1.433 r  o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req/data_p1_reg[72]/Q
+                         net (fo=4, routed)           0.119     1.552    o_gmem_m_axi_U/bus_write/wreq_burst_conv/rs_req_n_24
+    SLICE_X79Y218        FDRE                                         r  o_gmem_m_axi_U/bus_write/wreq_burst_conv/beat_len_reg[5]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.594     1.594    o_gmem_m_axi_U/bus_write/wreq_burst_conv/clk
+    SLICE_X79Y218        FDRE                                         r  o_gmem_m_axi_U/bus_write/wreq_burst_conv/beat_len_reg[5]/C
+                         clock pessimism             -0.115     1.479    
+    SLICE_X79Y218        FDRE (Hold_GFF2_SLICEL_C_D)
+                                                      0.062     1.541    o_gmem_m_axi_U/bus_write/wreq_burst_conv/beat_len_reg[5]
+  -------------------------------------------------------------------
+                         required time                         -1.541    
+                         arrival time                           1.552    
+  -------------------------------------------------------------------
+                         slack                                  0.010    
+
+Slack (MET) :             0.010ns  (arrival time - required time)
+  Source:                 grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/fsub_32ns_32ns_32_3_full_dsp_1_U476/din1_buf1_reg[28]/C
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            <hidden>
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.247ns  (logic 0.060ns (24.264%)  route 0.187ns (75.736%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.175ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.462ns
+    Source Clock Delay      (SCD):    1.267ns
+    Clock Pessimism Removal (CPR):    0.020ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.267     1.267    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/fsub_32ns_32ns_32_3_full_dsp_1_U476/clk
+    SLICE_X100Y115       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/fsub_32ns_32ns_32_3_full_dsp_1_U476/din1_buf1_reg[28]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X100Y115       FDRE (Prop_EFF2_SLICEM_C_Q)
+                                                      0.060     1.327 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/fsub_32ns_32ns_32_3_full_dsp_1_U476/din1_buf1_reg[28]/Q
+                         net (fo=7, routed)           0.187     1.514    <hidden>
+    SLICE_X101Y120       FDRE                                         r  <hidden>
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.462     1.462    <hidden>
+    SLICE_X101Y120       FDRE                                         r  <hidden>
+                         clock pessimism             -0.020     1.442    
+    SLICE_X101Y120       FDRE (Hold_GFF2_SLICEL_C_D)
+                                                      0.062     1.504    <hidden>
+  -------------------------------------------------------------------
+                         required time                         -1.504    
+                         arrival time                           1.514    
+  -------------------------------------------------------------------
+                         slack                                  0.010    
+
+Slack (MET) :             0.011ns  (arrival time - required time)
+  Source:                 q_gmem_m_axi_U/load_unit_0/tmp_addr_reg[45]/C
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            q_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p2_reg[45]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.129ns  (logic 0.059ns (45.658%)  route 0.070ns (54.342%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.057ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.555ns
+    Source Clock Delay      (SCD):    1.345ns
+    Clock Pessimism Removal (CPR):    0.153ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.345     1.345    q_gmem_m_axi_U/load_unit_0/ACLK
+    SLICE_X90Y220        FDRE                                         r  q_gmem_m_axi_U/load_unit_0/tmp_addr_reg[45]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X90Y220        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.059     1.404 r  q_gmem_m_axi_U/load_unit_0/tmp_addr_reg[45]/Q
+                         net (fo=2, routed)           0.070     1.474    q_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/s_data[45]
+    SLICE_X90Y222        FDRE                                         r  q_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p2_reg[45]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.555     1.555    q_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/clk
+    SLICE_X90Y222        FDRE                                         r  q_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p2_reg[45]/C
+                         clock pessimism             -0.153     1.402    
+    SLICE_X90Y222        FDRE (Hold_DFF2_SLICEL_C_D)
+                                                      0.062     1.464    q_gmem_m_axi_U/bus_read/rreq_burst_conv/rs_req/data_p2_reg[45]
+  -------------------------------------------------------------------
+                         required time                         -1.464    
+                         arrival time                           1.474    
+  -------------------------------------------------------------------
+                         slack                                  0.011    
+
+Slack (MET) :             0.011ns  (arrival time - required time)
+  Source:                 grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/conv553_3_1_reg_3048_reg[13]/C
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/pe_reg_24_reg_3095_reg[13]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.135ns  (logic 0.059ns (43.704%)  route 0.076ns (56.296%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.062ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.344ns
+    Source Clock Delay      (SCD):    1.146ns
+    Clock Pessimism Removal (CPR):    0.136ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.146     1.146    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/ap_clk
+    SLICE_X130Y148       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/conv553_3_1_reg_3048_reg[13]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X130Y148       FDRE (Prop_BFF_SLICEL_C_Q)
+                                                      0.059     1.205 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/conv553_3_1_reg_3048_reg[13]/Q
+                         net (fo=1, routed)           0.076     1.281    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/conv553_3_1_reg_3048[13]
+    SLICE_X130Y147       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/pe_reg_24_reg_3095_reg[13]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.344     1.344    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/ap_clk
+    SLICE_X130Y147       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/pe_reg_24_reg_3095_reg[13]/C
+                         clock pessimism             -0.136     1.208    
+    SLICE_X130Y147       FDRE (Hold_EFF2_SLICEL_C_D)
+                                                      0.062     1.270    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/pe_reg_24_reg_3095_reg[13]
+  -------------------------------------------------------------------
+                         required time                         -1.270    
+                         arrival time                           1.281    
+  -------------------------------------------------------------------
+                         slack                                  0.011    
+
+Slack (MET) :             0.011ns  (arrival time - required time)
+  Source:                 control_s_axi_U/int_q_address_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            q_address_read_reg_244_reg[4]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.133ns  (logic 0.059ns (44.227%)  route 0.074ns (55.773%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.061ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.592ns
+    Source Clock Delay      (SCD):    1.375ns
+    Clock Pessimism Removal (CPR):    0.156ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.375     1.375    control_s_axi_U/ACLK
+    SLICE_X84Y201        FDRE                                         r  control_s_axi_U/int_q_address_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X84Y201        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.059     1.434 r  control_s_axi_U/int_q_address_reg[4]/Q
+                         net (fo=3, routed)           0.074     1.508    q_address[4]
+    SLICE_X84Y200        FDRE                                         r  q_address_read_reg_244_reg[4]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.592     1.592    ap_clk
+    SLICE_X84Y200        FDRE                                         r  q_address_read_reg_244_reg[4]/C
+                         clock pessimism             -0.156     1.436    
+    SLICE_X84Y200        FDRE (Hold_EFF2_SLICEL_C_D)
+                                                      0.062     1.498    q_address_read_reg_244_reg[4]
+  -------------------------------------------------------------------
+                         required time                         -1.498    
+                         arrival time                           1.508    
+  -------------------------------------------------------------------
+                         slack                                  0.011    
+
+Slack (MET) :             0.011ns  (arrival time - required time)
+  Source:                 grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/header1_U/U_fsa_stream_split_d_fifo_w129_d2_S_ShiftReg/SRL_SIG_reg[0][20]/C
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/header1_U/U_fsa_stream_split_d_fifo_w129_d2_S_ShiftReg/SRL_SIG_reg[1][20]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.135ns  (logic 0.057ns (42.222%)  route 0.078ns (57.778%))
+  Logic Levels:           0  
+  Clock Path Skew:        0.062ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.581ns
+    Source Clock Delay      (SCD):    1.366ns
+    Clock Pessimism Removal (CPR):    0.153ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.366     1.366    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/header1_U/U_fsa_stream_split_d_fifo_w129_d2_S_ShiftReg/clk
+    SLICE_X76Y179        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/header1_U/U_fsa_stream_split_d_fifo_w129_d2_S_ShiftReg/SRL_SIG_reg[0][20]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X76Y179        FDRE (Prop_FFF_SLICEM_C_Q)
+                                                      0.057     1.423 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/header1_U/U_fsa_stream_split_d_fifo_w129_d2_S_ShiftReg/SRL_SIG_reg[0][20]/Q
+                         net (fo=2, routed)           0.078     1.501    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/header1_U/U_fsa_stream_split_d_fifo_w129_d2_S_ShiftReg/SRL_SIG_reg[0][20]
+    SLICE_X76Y178        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/header1_U/U_fsa_stream_split_d_fifo_w129_d2_S_ShiftReg/SRL_SIG_reg[1][20]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.581     1.581    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/header1_U/U_fsa_stream_split_d_fifo_w129_d2_S_ShiftReg/clk
+    SLICE_X76Y178        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/header1_U/U_fsa_stream_split_d_fifo_w129_d2_S_ShiftReg/SRL_SIG_reg[1][20]/C
+                         clock pessimism             -0.153     1.428    
+    SLICE_X76Y178        FDRE (Hold_GFF2_SLICEM_C_D)
+                                                      0.062     1.490    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/header1_U/U_fsa_stream_split_d_fifo_w129_d2_S_ShiftReg/SRL_SIG_reg[1][20]
+  -------------------------------------------------------------------
+                         required time                         -1.490    
+                         arrival time                           1.501    
+  -------------------------------------------------------------------
+                         slack                                  0.011    
+
+Slack (MET) :             0.011ns  (arrival time - required time)
+  Source:                 grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/k_tile_24_U/q0_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_fu_588/operand_b_8_reg_1432_reg[4]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.167ns  (logic 0.080ns (47.904%)  route 0.087ns (52.096%))
+  Logic Levels:           1  (LUT6=1)
+  Clock Path Skew:        0.096ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.459ns
+    Source Clock Delay      (SCD):    1.262ns
+    Clock Pessimism Removal (CPR):    0.101ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.262     1.262    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/k_tile_24_U/clk
+    SLICE_X102Y105       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/k_tile_24_U/q0_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+    SLICE_X102Y105       FDRE (Prop_CFF_SLICEM_C_Q)
+                                                      0.058     1.320 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/k_tile_24_U/q0_reg[4]/Q
+                         net (fo=1, routed)           0.063     1.383    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_fu_588/k_tile_24_q0[4]
+    SLICE_X101Y105       LUT6 (Prop_C6LUT_SLICEL_I0_O)
+                                                      0.022     1.405 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_fu_588/operand_b_8_reg_1432[4]_i_1/O
+                         net (fo=1, routed)           0.024     1.429    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_fu_588/operand_b_8_reg_1432[4]_i_1_n_0
+    SLICE_X101Y105       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_fu_588/operand_b_8_reg_1432_reg[4]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.459     1.459    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_fu_588/ap_clk
+    SLICE_X101Y105       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_fu_588/operand_b_8_reg_1432_reg[4]/C
+                         clock pessimism             -0.101     1.358    
+    SLICE_X101Y105       FDRE (Hold_CFF_SLICEL_C_D)
+                                                      0.060     1.418    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_fu_588/operand_b_8_reg_1432_reg[4]
+  -------------------------------------------------------------------
+                         required time                         -1.418    
+                         arrival time                           1.429    
+  -------------------------------------------------------------------
+                         slack                                  0.011    
+
+
+
+

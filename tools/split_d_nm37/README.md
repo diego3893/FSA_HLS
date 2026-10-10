@@ -41,6 +41,8 @@ vivado -mode batch -source tools/split_d_nm37/scripts/build_and_report.tcl \
   -tclargs build/split_d_nm37_<commit>/project/split_d_nm37.xpr
 ```
 
+自包含交付由`python3 tools/split_d_nm37/package.py <正式IP目录> <新交付目录>`生成，包含正式IP、ROM、RTL、约束和相对路径`config/project_config.tcl`。上传后直接执行`vivado -mode batch -source scripts/create_packaged_project.tcl`，不需要修改绝对路径。
+
 控制器unit fixture只验证错开AW/W、响应背压、错误字检测、超时及忙中复位；小型行为存储只用于这个unit test，不是系统HBM的替代。`unit_test.tcl`应从新的隔离目录执行。
 
 完整系统testbench使用同一个HBM/SmartConnect/FSA/selftest BD，绕过的只有封装时钟输入缓冲和JTAG调试核。普通模式和stress模式各跑26笔，存在有限仿真超时。AMD说明XSIM使用HBM internal responder模型；真实HBM行为仍须板测确认：[PG276 Simulation](https://docs.amd.com/r/en-US/pg276-axi-hbm/Simulation)。

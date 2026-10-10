@@ -1,0 +1,1227 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+--------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version      : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
+| Date              : Sat Oct 10 14:52:23 2026
+| Host              : lenovo-ThinkStation-P920 running 64-bit Ubuntu 24.04.3 LTS
+| Command           : report_timing -delay_type min -max_paths 30 -path_type full_clock_expanded -file hold_paths.rpt
+| Design            : fsa_stream_split_d
+| Device            : xcvu37p_CIV-fsvh2892
+| Speed File        : -2  PRODUCTION 1.30 05-01-2022
+| Design State      : Routed
+| Temperature Grade : E
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (VIOLATED) :        -1.650ns  (arrival time - required time)
+  Source:                 s_axi_control_AWADDR[6]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/waddr_reg[6]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.016ns  (logic 0.000ns (0.000%)  route 0.016ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.606ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.606ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_AWADDR[6] (IN)
+                         net (fo=0)                   0.016     0.016    control_s_axi_U/AWADDR[6]
+    SLICE_X81Y195        FDRE                                         r  control_s_axi_U/waddr_reg[6]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.606     1.606    control_s_axi_U/ACLK
+    SLICE_X81Y195        FDRE                                         r  control_s_axi_U/waddr_reg[6]/C
+                         clock pessimism              0.000     1.606    
+    SLICE_X81Y195        FDRE (Hold_DFF_SLICEM_C_D)
+                                                      0.060     1.666    control_s_axi_U/waddr_reg[6]
+  -------------------------------------------------------------------
+                         required time                         -1.666    
+                         arrival time                           0.016    
+  -------------------------------------------------------------------
+                         slack                                 -1.650    
+
+Slack (VIOLATED) :        -1.647ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[0]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_ier_reg[0]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.011ns  (logic 0.000ns (0.000%)  route 0.011ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.596ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.596ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[0] (IN)
+                         net (fo=13, unset)           0.011     0.011    control_s_axi_U/WDATA[0]
+    SLICE_X83Y196        FDRE                                         r  control_s_axi_U/int_ier_reg[0]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.596     1.596    control_s_axi_U/ACLK
+    SLICE_X83Y196        FDRE                                         r  control_s_axi_U/int_ier_reg[0]/C
+                         clock pessimism              0.000     1.596    
+    SLICE_X83Y196        FDRE (Hold_HFF2_SLICEL_C_D)
+                                                      0.062     1.658    control_s_axi_U/int_ier_reg[0]
+  -------------------------------------------------------------------
+                         required time                         -1.658    
+                         arrival time                           0.011    
+  -------------------------------------------------------------------
+                         slack                                 -1.647    
+
+Slack (VIOLATED) :        -1.646ns  (arrival time - required time)
+  Source:                 s_axi_control_AWADDR[2]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/waddr_reg[2]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.011ns  (logic 0.000ns (0.000%)  route 0.011ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.595ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.595ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_AWADDR[2] (IN)
+                         net (fo=0)                   0.011     0.011    control_s_axi_U/AWADDR[2]
+    SLICE_X83Y197        FDRE                                         r  control_s_axi_U/waddr_reg[2]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.595     1.595    control_s_axi_U/ACLK
+    SLICE_X83Y197        FDRE                                         r  control_s_axi_U/waddr_reg[2]/C
+                         clock pessimism              0.000     1.595    
+    SLICE_X83Y197        FDRE (Hold_HFF2_SLICEL_C_D)
+                                                      0.062     1.657    control_s_axi_U/waddr_reg[2]
+  -------------------------------------------------------------------
+                         required time                         -1.657    
+                         arrival time                           0.011    
+  -------------------------------------------------------------------
+                         slack                                 -1.646    
+
+Slack (VIOLATED) :        -1.646ns  (arrival time - required time)
+  Source:                 s_axi_control_AWADDR[3]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/waddr_reg[3]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.011ns  (logic 0.000ns (0.000%)  route 0.011ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.595ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.595ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_AWADDR[3] (IN)
+                         net (fo=0)                   0.011     0.011    control_s_axi_U/AWADDR[3]
+    SLICE_X83Y197        FDRE                                         r  control_s_axi_U/waddr_reg[3]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.595     1.595    control_s_axi_U/ACLK
+    SLICE_X83Y197        FDRE                                         r  control_s_axi_U/waddr_reg[3]/C
+                         clock pessimism              0.000     1.595    
+    SLICE_X83Y197        FDRE (Hold_GFF2_SLICEL_C_D)
+                                                      0.062     1.657    control_s_axi_U/waddr_reg[3]
+  -------------------------------------------------------------------
+                         required time                         -1.657    
+                         arrival time                           0.011    
+  -------------------------------------------------------------------
+                         slack                                 -1.646    
+
+Slack (VIOLATED) :        -1.645ns  (arrival time - required time)
+  Source:                 s_axi_control_AWADDR[4]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/waddr_reg[4]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.012ns  (logic 0.000ns (0.000%)  route 0.012ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.595ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.595ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_AWADDR[4] (IN)
+                         net (fo=0)                   0.012     0.012    control_s_axi_U/AWADDR[4]
+    SLICE_X83Y197        FDRE                                         r  control_s_axi_U/waddr_reg[4]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.595     1.595    control_s_axi_U/ACLK
+    SLICE_X83Y197        FDRE                                         r  control_s_axi_U/waddr_reg[4]/C
+                         clock pessimism              0.000     1.595    
+    SLICE_X83Y197        FDRE (Hold_FFF2_SLICEL_C_D)
+                                                      0.062     1.657    control_s_axi_U/waddr_reg[4]
+  -------------------------------------------------------------------
+                         required time                         -1.657    
+                         arrival time                           0.012    
+  -------------------------------------------------------------------
+                         slack                                 -1.645    
+
+Slack (VIOLATED) :        -1.645ns  (arrival time - required time)
+  Source:                 s_axi_control_AWADDR[5]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/waddr_reg[5]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.012ns  (logic 0.000ns (0.000%)  route 0.012ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.595ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.595ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_AWADDR[5] (IN)
+                         net (fo=0)                   0.012     0.012    control_s_axi_U/AWADDR[5]
+    SLICE_X83Y197        FDRE                                         r  control_s_axi_U/waddr_reg[5]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.595     1.595    control_s_axi_U/ACLK
+    SLICE_X83Y197        FDRE                                         r  control_s_axi_U/waddr_reg[5]/C
+                         clock pessimism              0.000     1.595    
+    SLICE_X83Y197        FDRE (Hold_EFF2_SLICEL_C_D)
+                                                      0.062     1.657    control_s_axi_U/waddr_reg[5]
+  -------------------------------------------------------------------
+                         required time                         -1.657    
+                         arrival time                           0.012    
+  -------------------------------------------------------------------
+                         slack                                 -1.645    
+
+Slack (VIOLATED) :        -1.643ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[1]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_ier_reg[1]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.014ns  (logic 0.000ns (0.000%)  route 0.014ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.597ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.597ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[1] (IN)
+                         net (fo=10, unset)           0.014     0.014    control_s_axi_U/WDATA[1]
+    SLICE_X83Y195        FDRE                                         r  control_s_axi_U/int_ier_reg[1]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.597     1.597    control_s_axi_U/ACLK
+    SLICE_X83Y195        FDRE                                         r  control_s_axi_U/int_ier_reg[1]/C
+                         clock pessimism              0.000     1.597    
+    SLICE_X83Y195        FDRE (Hold_HFF_SLICEL_C_D)
+                                                      0.060     1.657    control_s_axi_U/int_ier_reg[1]
+  -------------------------------------------------------------------
+                         required time                         -1.657    
+                         arrival time                           0.014    
+  -------------------------------------------------------------------
+                         slack                                 -1.643    
+
+Slack (VIOLATED) :        -1.643ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            v_gmem_m_axi_U/bus_read/rreq_burst_conv/last_sect_reg/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.044ns  (logic 0.022ns (50.000%)  route 0.022ns (50.000%))
+  Logic Levels:           1  (LUT6=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.627ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.627ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.000     0.000    v_gmem_m_axi_U/bus_read/rreq_burst_conv/reset
+    SLICE_X67Y186        LUT6 (Prop_D6LUT_SLICEL_I5_O)
+                                                      0.022     0.022 r  v_gmem_m_axi_U/bus_read/rreq_burst_conv/last_sect_i_1/O
+                         net (fo=1, routed)           0.022     0.044    v_gmem_m_axi_U/bus_read/rreq_burst_conv/last_sect_i_1_n_0
+    SLICE_X67Y186        FDRE                                         r  v_gmem_m_axi_U/bus_read/rreq_burst_conv/last_sect_reg/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.627     1.627    v_gmem_m_axi_U/bus_read/rreq_burst_conv/clk
+    SLICE_X67Y186        FDRE                                         r  v_gmem_m_axi_U/bus_read/rreq_burst_conv/last_sect_reg/C
+                         clock pessimism              0.000     1.627    
+    SLICE_X67Y186        FDRE (Hold_DFF_SLICEL_C_D)
+                                                      0.060     1.687    v_gmem_m_axi_U/bus_read/rreq_burst_conv/last_sect_reg
+  -------------------------------------------------------------------
+                         required time                         -1.687    
+                         arrival time                           0.044    
+  -------------------------------------------------------------------
+                         slack                                 -1.643    
+
+Slack (VIOLATED) :        -1.634ns  (arrival time - required time)
+  Source:                 m_axi_v_gmem_ARREADY
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            v_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.burst_valid_reg/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.053ns  (logic 0.023ns (43.396%)  route 0.030ns (56.604%))
+  Logic Levels:           1  (LUT4=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.627ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.627ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  m_axi_v_gmem_ARREADY (IN)
+                         net (fo=4, unset)            0.000     0.000    v_gmem_m_axi_U/bus_read/rreq_burst_conv/in_BURST_READY
+    SLICE_X74Y183        LUT4 (Prop_H6LUT_SLICEM_I3_O)
+                                                      0.023     0.023 r  v_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.burst_valid_i_1/O
+                         net (fo=1, routed)           0.030     0.053    v_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.burst_valid_i_1_n_0
+    SLICE_X74Y183        FDRE                                         r  v_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.burst_valid_reg/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.627     1.627    v_gmem_m_axi_U/bus_read/rreq_burst_conv/clk
+    SLICE_X74Y183        FDRE                                         r  v_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.burst_valid_reg/C
+                         clock pessimism              0.000     1.627    
+    SLICE_X74Y183        FDRE (Hold_HFF_SLICEM_C_D)
+                                                      0.060     1.687    v_gmem_m_axi_U/bus_read/rreq_burst_conv/could_multi_bursts.burst_valid_reg
+  -------------------------------------------------------------------
+                         required time                         -1.687    
+                         arrival time                           0.053    
+  -------------------------------------------------------------------
+                         slack                                 -1.634    
+
+Slack (VIOLATED) :        -1.634ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            v_gmem_m_axi_U/load_unit_0/fifo_rreq/full_n_reg/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.052ns  (logic 0.022ns (42.308%)  route 0.030ns (57.692%))
+  Logic Levels:           1  (LUT6=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.626ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.626ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.000     0.000    v_gmem_m_axi_U/load_unit_0/fifo_rreq/reset
+    SLICE_X74Y187        LUT6 (Prop_G6LUT_SLICEM_I5_O)
+                                                      0.022     0.022 r  v_gmem_m_axi_U/load_unit_0/fifo_rreq/full_n_i_1/O
+                         net (fo=1, routed)           0.030     0.052    v_gmem_m_axi_U/load_unit_0/fifo_rreq/full_n_i_1_n_0
+    SLICE_X74Y187        FDRE                                         r  v_gmem_m_axi_U/load_unit_0/fifo_rreq/full_n_reg/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.626     1.626    v_gmem_m_axi_U/load_unit_0/fifo_rreq/clk
+    SLICE_X74Y187        FDRE                                         r  v_gmem_m_axi_U/load_unit_0/fifo_rreq/full_n_reg/C
+                         clock pessimism              0.000     1.626    
+    SLICE_X74Y187        FDRE (Hold_GFF_SLICEM_C_D)
+                                                      0.060     1.686    v_gmem_m_axi_U/load_unit_0/fifo_rreq/full_n_reg
+  -------------------------------------------------------------------
+                         required time                         -1.686    
+                         arrival time                           0.052    
+  -------------------------------------------------------------------
+                         slack                                 -1.634    
+
+Slack (VIOLATED) :        -1.632ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[10]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_v_address_reg[42]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.043ns  (logic 0.034ns (79.070%)  route 0.009ns (20.930%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.613ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.613ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[10] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[10]
+    SLICE_X76Y200        LUT3 (Prop_H5LUT_SLICEM_I2_O)
+                                                      0.034     0.034 r  control_s_axi_U/int_v_address[42]_i_1/O
+                         net (fo=1, routed)           0.009     0.043    control_s_axi_U/int_v_address_reg0[10]
+    SLICE_X76Y200        FDRE                                         r  control_s_axi_U/int_v_address_reg[42]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.613     1.613    control_s_axi_U/ACLK
+    SLICE_X76Y200        FDRE                                         r  control_s_axi_U/int_v_address_reg[42]/C
+                         clock pessimism              0.000     1.613    
+    SLICE_X76Y200        FDRE (Hold_HFF2_SLICEM_C_D)
+                                                      0.062     1.675    control_s_axi_U/int_v_address_reg[42]
+  -------------------------------------------------------------------
+                         required time                         -1.675    
+                         arrival time                           0.043    
+  -------------------------------------------------------------------
+                         slack                                 -1.632    
+
+Slack (VIOLATED) :        -1.631ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[14]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_v_address_reg[46]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.043ns  (logic 0.034ns (79.070%)  route 0.009ns (20.930%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.612ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.612ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[14] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[14]
+    SLICE_X76Y201        LUT3 (Prop_H5LUT_SLICEM_I2_O)
+                                                      0.034     0.034 r  control_s_axi_U/int_v_address[46]_i_1/O
+                         net (fo=1, routed)           0.009     0.043    control_s_axi_U/int_v_address_reg0[14]
+    SLICE_X76Y201        FDRE                                         r  control_s_axi_U/int_v_address_reg[46]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.612     1.612    control_s_axi_U/ACLK
+    SLICE_X76Y201        FDRE                                         r  control_s_axi_U/int_v_address_reg[46]/C
+                         clock pessimism              0.000     1.612    
+    SLICE_X76Y201        FDRE (Hold_HFF2_SLICEM_C_D)
+                                                      0.062     1.674    control_s_axi_U/int_v_address_reg[46]
+  -------------------------------------------------------------------
+                         required time                         -1.674    
+                         arrival time                           0.043    
+  -------------------------------------------------------------------
+                         slack                                 -1.631    
+
+Slack (VIOLATED) :        -1.631ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[18]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_v_address_reg[50]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.041ns  (logic 0.032ns (78.049%)  route 0.009ns (21.951%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.610ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.610ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[18] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[18]
+    SLICE_X75Y201        LUT3 (Prop_H5LUT_SLICEL_I2_O)
+                                                      0.032     0.032 r  control_s_axi_U/int_v_address[50]_i_1/O
+                         net (fo=1, routed)           0.009     0.041    control_s_axi_U/int_v_address_reg0[18]
+    SLICE_X75Y201        FDRE                                         r  control_s_axi_U/int_v_address_reg[50]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.610     1.610    control_s_axi_U/ACLK
+    SLICE_X75Y201        FDRE                                         r  control_s_axi_U/int_v_address_reg[50]/C
+                         clock pessimism              0.000     1.610    
+    SLICE_X75Y201        FDRE (Hold_HFF2_SLICEL_C_D)
+                                                      0.062     1.672    control_s_axi_U/int_v_address_reg[50]
+  -------------------------------------------------------------------
+                         required time                         -1.672    
+                         arrival time                           0.041    
+  -------------------------------------------------------------------
+                         slack                                 -1.631    
+
+Slack (VIOLATED) :        -1.630ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[8]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_o_address_reg[8]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.041ns  (logic 0.032ns (78.049%)  route 0.009ns (21.951%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.609ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.609ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[8] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[8]
+    SLICE_X75Y202        LUT3 (Prop_H5LUT_SLICEL_I2_O)
+                                                      0.032     0.032 r  control_s_axi_U/int_o_address[8]_i_1/O
+                         net (fo=1, routed)           0.009     0.041    control_s_axi_U/int_o_address_reg01_out[8]
+    SLICE_X75Y202        FDRE                                         r  control_s_axi_U/int_o_address_reg[8]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.609     1.609    control_s_axi_U/ACLK
+    SLICE_X75Y202        FDRE                                         r  control_s_axi_U/int_o_address_reg[8]/C
+                         clock pessimism              0.000     1.609    
+    SLICE_X75Y202        FDRE (Hold_HFF2_SLICEL_C_D)
+                                                      0.062     1.671    control_s_axi_U/int_o_address_reg[8]
+  -------------------------------------------------------------------
+                         required time                         -1.671    
+                         arrival time                           0.041    
+  -------------------------------------------------------------------
+                         slack                                 -1.630    
+
+Slack (VIOLATED) :        -1.630ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[14]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_o_address_reg[46]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.043ns  (logic 0.034ns (79.070%)  route 0.009ns (20.930%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.611ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.611ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[14] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[14]
+    SLICE_X76Y202        LUT3 (Prop_H5LUT_SLICEM_I2_O)
+                                                      0.034     0.034 r  control_s_axi_U/int_o_address[46]_i_1/O
+                         net (fo=1, routed)           0.009     0.043    control_s_axi_U/int_o_address_reg0[14]
+    SLICE_X76Y202        FDRE                                         r  control_s_axi_U/int_o_address_reg[46]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.611     1.611    control_s_axi_U/ACLK
+    SLICE_X76Y202        FDRE                                         r  control_s_axi_U/int_o_address_reg[46]/C
+                         clock pessimism              0.000     1.611    
+    SLICE_X76Y202        FDRE (Hold_HFF2_SLICEM_C_D)
+                                                      0.062     1.673    control_s_axi_U/int_o_address_reg[46]
+  -------------------------------------------------------------------
+                         required time                         -1.673    
+                         arrival time                           0.043    
+  -------------------------------------------------------------------
+                         slack                                 -1.630    
+
+Slack (VIOLATED) :        -1.629ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[18]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_o_address_reg[50]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.043ns  (logic 0.034ns (79.070%)  route 0.009ns (20.930%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.610ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.610ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[18] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[18]
+    SLICE_X74Y205        LUT3 (Prop_H5LUT_SLICEM_I2_O)
+                                                      0.034     0.034 r  control_s_axi_U/int_o_address[50]_i_1/O
+                         net (fo=1, routed)           0.009     0.043    control_s_axi_U/int_o_address_reg0[18]
+    SLICE_X74Y205        FDRE                                         r  control_s_axi_U/int_o_address_reg[50]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.610     1.610    control_s_axi_U/ACLK
+    SLICE_X74Y205        FDRE                                         r  control_s_axi_U/int_o_address_reg[50]/C
+                         clock pessimism              0.000     1.610    
+    SLICE_X74Y205        FDRE (Hold_HFF2_SLICEM_C_D)
+                                                      0.062     1.672    control_s_axi_U/int_o_address_reg[50]
+  -------------------------------------------------------------------
+                         required time                         -1.672    
+                         arrival time                           0.043    
+  -------------------------------------------------------------------
+                         slack                                 -1.629    
+
+Slack (VIOLATED) :        -1.629ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[8]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_v_address_reg[8]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.041ns  (logic 0.032ns (78.049%)  route 0.009ns (21.951%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.608ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.608ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[8] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[8]
+    SLICE_X75Y198        LUT3 (Prop_D5LUT_SLICEL_I2_O)
+                                                      0.032     0.032 r  control_s_axi_U/int_v_address[8]_i_1/O
+                         net (fo=1, routed)           0.009     0.041    control_s_axi_U/int_v_address_reg03_out[8]
+    SLICE_X75Y198        FDRE                                         r  control_s_axi_U/int_v_address_reg[8]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.608     1.608    control_s_axi_U/ACLK
+    SLICE_X75Y198        FDRE                                         r  control_s_axi_U/int_v_address_reg[8]/C
+                         clock pessimism              0.000     1.608    
+    SLICE_X75Y198        FDRE (Hold_DFF2_SLICEL_C_D)
+                                                      0.062     1.670    control_s_axi_U/int_v_address_reg[8]
+  -------------------------------------------------------------------
+                         required time                         -1.670    
+                         arrival time                           0.041    
+  -------------------------------------------------------------------
+                         slack                                 -1.629    
+
+Slack (VIOLATED) :        -1.628ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[16]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_v_address_reg[48]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.046ns  (logic 0.035ns (76.087%)  route 0.011ns (23.913%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.612ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.612ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[16] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[16]
+    SLICE_X76Y201        LUT3 (Prop_G5LUT_SLICEM_I2_O)
+                                                      0.035     0.035 r  control_s_axi_U/int_v_address[48]_i_1/O
+                         net (fo=1, routed)           0.011     0.046    control_s_axi_U/int_v_address_reg0[16]
+    SLICE_X76Y201        FDRE                                         r  control_s_axi_U/int_v_address_reg[48]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.612     1.612    control_s_axi_U/ACLK
+    SLICE_X76Y201        FDRE                                         r  control_s_axi_U/int_v_address_reg[48]/C
+                         clock pessimism              0.000     1.612    
+    SLICE_X76Y201        FDRE (Hold_GFF2_SLICEM_C_D)
+                                                      0.062     1.674    control_s_axi_U/int_v_address_reg[48]
+  -------------------------------------------------------------------
+                         required time                         -1.674    
+                         arrival time                           0.046    
+  -------------------------------------------------------------------
+                         slack                                 -1.628    
+
+Slack (VIOLATED) :        -1.628ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[3]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_v_address_reg[35]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.043ns  (logic 0.034ns (79.070%)  route 0.009ns (20.930%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.609ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.609ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[3] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[3]
+    SLICE_X77Y199        LUT3 (Prop_H5LUT_SLICEM_I2_O)
+                                                      0.034     0.034 r  control_s_axi_U/int_v_address[35]_i_1/O
+                         net (fo=1, routed)           0.009     0.043    control_s_axi_U/int_v_address_reg0[3]
+    SLICE_X77Y199        FDRE                                         r  control_s_axi_U/int_v_address_reg[35]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.609     1.609    control_s_axi_U/ACLK
+    SLICE_X77Y199        FDRE                                         r  control_s_axi_U/int_v_address_reg[35]/C
+                         clock pessimism              0.000     1.609    
+    SLICE_X77Y199        FDRE (Hold_HFF2_SLICEM_C_D)
+                                                      0.062     1.671    control_s_axi_U/int_v_address_reg[35]
+  -------------------------------------------------------------------
+                         required time                         -1.671    
+                         arrival time                           0.043    
+  -------------------------------------------------------------------
+                         slack                                 -1.628    
+
+Slack (VIOLATED) :        -1.627ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[12]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_v_address_reg[44]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.043ns  (logic 0.034ns (79.070%)  route 0.009ns (20.930%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.608ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.608ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[12] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[12]
+    SLICE_X77Y200        LUT3 (Prop_H5LUT_SLICEM_I2_O)
+                                                      0.034     0.034 r  control_s_axi_U/int_v_address[44]_i_1/O
+                         net (fo=1, routed)           0.009     0.043    control_s_axi_U/int_v_address_reg0[12]
+    SLICE_X77Y200        FDRE                                         r  control_s_axi_U/int_v_address_reg[44]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.608     1.608    control_s_axi_U/ACLK
+    SLICE_X77Y200        FDRE                                         r  control_s_axi_U/int_v_address_reg[44]/C
+                         clock pessimism              0.000     1.608    
+    SLICE_X77Y200        FDRE (Hold_HFF2_SLICEM_C_D)
+                                                      0.062     1.670    control_s_axi_U/int_v_address_reg[44]
+  -------------------------------------------------------------------
+                         required time                         -1.670    
+                         arrival time                           0.043    
+  -------------------------------------------------------------------
+                         slack                                 -1.627    
+
+Slack (VIOLATED) :        -1.625ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[16]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_o_address_reg[48]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.041ns  (logic 0.032ns (78.049%)  route 0.009ns (21.951%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.604ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.604ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[16] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[16]
+    SLICE_X75Y202        LUT3 (Prop_D5LUT_SLICEL_I2_O)
+                                                      0.032     0.032 r  control_s_axi_U/int_o_address[48]_i_1/O
+                         net (fo=1, routed)           0.009     0.041    control_s_axi_U/int_o_address_reg0[16]
+    SLICE_X75Y202        FDRE                                         r  control_s_axi_U/int_o_address_reg[48]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.604     1.604    control_s_axi_U/ACLK
+    SLICE_X75Y202        FDRE                                         r  control_s_axi_U/int_o_address_reg[48]/C
+                         clock pessimism              0.000     1.604    
+    SLICE_X75Y202        FDRE (Hold_DFF2_SLICEL_C_D)
+                                                      0.062     1.666    control_s_axi_U/int_o_address_reg[48]
+  -------------------------------------------------------------------
+                         required time                         -1.666    
+                         arrival time                           0.041    
+  -------------------------------------------------------------------
+                         slack                                 -1.625    
+
+Slack (VIOLATED) :        -1.623ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[1]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_v_address_reg[1]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.043ns  (logic 0.034ns (79.070%)  route 0.009ns (20.930%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.604ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.604ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[1] (IN)
+                         net (fo=10, unset)           0.000     0.000    control_s_axi_U/WDATA[1]
+    SLICE_X81Y196        LUT3 (Prop_H5LUT_SLICEM_I2_O)
+                                                      0.034     0.034 r  control_s_axi_U/int_v_address[1]_i_1/O
+                         net (fo=1, routed)           0.009     0.043    control_s_axi_U/int_v_address_reg03_out[1]
+    SLICE_X81Y196        FDRE                                         r  control_s_axi_U/int_v_address_reg[1]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.604     1.604    control_s_axi_U/ACLK
+    SLICE_X81Y196        FDRE                                         r  control_s_axi_U/int_v_address_reg[1]/C
+                         clock pessimism              0.000     1.604    
+    SLICE_X81Y196        FDRE (Hold_HFF2_SLICEM_C_D)
+                                                      0.062     1.666    control_s_axi_U/int_v_address_reg[1]
+  -------------------------------------------------------------------
+                         required time                         -1.666    
+                         arrival time                           0.043    
+  -------------------------------------------------------------------
+                         slack                                 -1.623    
+
+Slack (VIOLATED) :        -1.623ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[11]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_v_address_reg[43]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.041ns  (logic 0.032ns (78.049%)  route 0.009ns (21.951%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.602ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.602ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[11] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[11]
+    SLICE_X80Y198        LUT3 (Prop_H5LUT_SLICEL_I2_O)
+                                                      0.032     0.032 r  control_s_axi_U/int_v_address[43]_i_1/O
+                         net (fo=1, routed)           0.009     0.041    control_s_axi_U/int_v_address_reg0[11]
+    SLICE_X80Y198        FDRE                                         r  control_s_axi_U/int_v_address_reg[43]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.602     1.602    control_s_axi_U/ACLK
+    SLICE_X80Y198        FDRE                                         r  control_s_axi_U/int_v_address_reg[43]/C
+                         clock pessimism              0.000     1.602    
+    SLICE_X80Y198        FDRE (Hold_HFF2_SLICEL_C_D)
+                                                      0.062     1.664    control_s_axi_U/int_v_address_reg[43]
+  -------------------------------------------------------------------
+                         required time                         -1.664    
+                         arrival time                           0.041    
+  -------------------------------------------------------------------
+                         slack                                 -1.623    
+
+Slack (VIOLATED) :        -1.622ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[10]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_o_address_reg[42]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.041ns  (logic 0.032ns (78.049%)  route 0.009ns (21.951%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.601ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.601ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[10] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[10]
+    SLICE_X78Y202        LUT3 (Prop_H5LUT_SLICEL_I2_O)
+                                                      0.032     0.032 r  control_s_axi_U/int_o_address[42]_i_1/O
+                         net (fo=1, routed)           0.009     0.041    control_s_axi_U/int_o_address_reg0[10]
+    SLICE_X78Y202        FDRE                                         r  control_s_axi_U/int_o_address_reg[42]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.601     1.601    control_s_axi_U/ACLK
+    SLICE_X78Y202        FDRE                                         r  control_s_axi_U/int_o_address_reg[42]/C
+                         clock pessimism              0.000     1.601    
+    SLICE_X78Y202        FDRE (Hold_HFF2_SLICEL_C_D)
+                                                      0.062     1.663    control_s_axi_U/int_o_address_reg[42]
+  -------------------------------------------------------------------
+                         required time                         -1.663    
+                         arrival time                           0.041    
+  -------------------------------------------------------------------
+                         slack                                 -1.622    
+
+Slack (VIOLATED) :        -1.622ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[5]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_v_address_reg[37]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.041ns  (logic 0.032ns (78.049%)  route 0.009ns (21.951%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.601ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.601ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[5] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[5]
+    SLICE_X79Y199        LUT3 (Prop_H5LUT_SLICEL_I2_O)
+                                                      0.032     0.032 r  control_s_axi_U/int_v_address[37]_i_1/O
+                         net (fo=1, routed)           0.009     0.041    control_s_axi_U/int_v_address_reg0[5]
+    SLICE_X79Y199        FDRE                                         r  control_s_axi_U/int_v_address_reg[37]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.601     1.601    control_s_axi_U/ACLK
+    SLICE_X79Y199        FDRE                                         r  control_s_axi_U/int_v_address_reg[37]/C
+                         clock pessimism              0.000     1.601    
+    SLICE_X79Y199        FDRE (Hold_HFF2_SLICEL_C_D)
+                                                      0.062     1.663    control_s_axi_U/int_v_address_reg[37]
+  -------------------------------------------------------------------
+                         required time                         -1.663    
+                         arrival time                           0.041    
+  -------------------------------------------------------------------
+                         slack                                 -1.622    
+
+Slack (VIOLATED) :        -1.622ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[6]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_v_address_reg[6]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.051ns  (logic 0.038ns (74.510%)  route 0.013ns (25.490%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.612ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.612ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[6] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[6]
+    SLICE_X77Y197        LUT3 (Prop_D5LUT_SLICEM_I2_O)
+                                                      0.038     0.038 r  control_s_axi_U/int_v_address[6]_i_1/O
+                         net (fo=1, routed)           0.013     0.051    control_s_axi_U/int_v_address_reg03_out[6]
+    SLICE_X77Y197        FDRE                                         r  control_s_axi_U/int_v_address_reg[6]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.612     1.612    control_s_axi_U/ACLK
+    SLICE_X77Y197        FDRE                                         r  control_s_axi_U/int_v_address_reg[6]/C
+                         clock pessimism              0.000     1.612    
+    SLICE_X77Y197        FDRE (Hold_DFF2_SLICEM_C_D)
+                                                      0.061     1.673    control_s_axi_U/int_v_address_reg[6]
+  -------------------------------------------------------------------
+                         required time                         -1.673    
+                         arrival time                           0.051    
+  -------------------------------------------------------------------
+                         slack                                 -1.622    
+
+Slack (VIOLATED) :        -1.621ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[3]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_v_address_reg[3]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.041ns  (logic 0.032ns (78.049%)  route 0.009ns (21.951%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.600ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.600ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[3] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[3]
+    SLICE_X80Y195        LUT3 (Prop_D5LUT_SLICEL_I2_O)
+                                                      0.032     0.032 r  control_s_axi_U/int_v_address[3]_i_1/O
+                         net (fo=1, routed)           0.009     0.041    control_s_axi_U/int_v_address_reg03_out[3]
+    SLICE_X80Y195        FDRE                                         r  control_s_axi_U/int_v_address_reg[3]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.600     1.600    control_s_axi_U/ACLK
+    SLICE_X80Y195        FDRE                                         r  control_s_axi_U/int_v_address_reg[3]/C
+                         clock pessimism              0.000     1.600    
+    SLICE_X80Y195        FDRE (Hold_DFF2_SLICEL_C_D)
+                                                      0.062     1.662    control_s_axi_U/int_v_address_reg[3]
+  -------------------------------------------------------------------
+                         required time                         -1.662    
+                         arrival time                           0.041    
+  -------------------------------------------------------------------
+                         slack                                 -1.621    
+
+Slack (VIOLATED) :        -1.621ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[7]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_v_address_reg[7]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.041ns  (logic 0.032ns (78.049%)  route 0.009ns (21.951%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.600ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.600ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[7] (IN)
+                         net (fo=9, unset)            0.000     0.000    control_s_axi_U/WDATA[7]
+    SLICE_X80Y195        LUT3 (Prop_C5LUT_SLICEL_I2_O)
+                                                      0.032     0.032 r  control_s_axi_U/int_v_address[7]_i_1/O
+                         net (fo=1, routed)           0.009     0.041    control_s_axi_U/int_v_address_reg03_out[7]
+    SLICE_X80Y195        FDRE                                         r  control_s_axi_U/int_v_address_reg[7]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.600     1.600    control_s_axi_U/ACLK
+    SLICE_X80Y195        FDRE                                         r  control_s_axi_U/int_v_address_reg[7]/C
+                         clock pessimism              0.000     1.600    
+    SLICE_X80Y195        FDRE (Hold_CFF2_SLICEL_C_D)
+                                                      0.062     1.662    control_s_axi_U/int_v_address_reg[7]
+  -------------------------------------------------------------------
+                         required time                         -1.662    
+                         arrival time                           0.041    
+  -------------------------------------------------------------------
+                         slack                                 -1.621    
+
+Slack (VIOLATED) :        -1.621ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[13]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_v_address_reg[45]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.043ns  (logic 0.034ns (79.070%)  route 0.009ns (20.930%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.602ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.602ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[13] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[13]
+    SLICE_X81Y198        LUT3 (Prop_H5LUT_SLICEM_I2_O)
+                                                      0.034     0.034 r  control_s_axi_U/int_v_address[45]_i_1/O
+                         net (fo=1, routed)           0.009     0.043    control_s_axi_U/int_v_address_reg0[13]
+    SLICE_X81Y198        FDRE                                         r  control_s_axi_U/int_v_address_reg[45]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.602     1.602    control_s_axi_U/ACLK
+    SLICE_X81Y198        FDRE                                         r  control_s_axi_U/int_v_address_reg[45]/C
+                         clock pessimism              0.000     1.602    
+    SLICE_X81Y198        FDRE (Hold_HFF2_SLICEM_C_D)
+                                                      0.062     1.664    control_s_axi_U/int_v_address_reg[45]
+  -------------------------------------------------------------------
+                         required time                         -1.664    
+                         arrival time                           0.043    
+  -------------------------------------------------------------------
+                         slack                                 -1.621    
+
+Slack (VIOLATED) :        -1.620ns  (arrival time - required time)
+  Source:                 s_axi_control_WDATA[4]
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            control_s_axi_U/int_o_address_reg[4]/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.041ns  (logic 0.032ns (78.049%)  route 0.009ns (21.951%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        1.599ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    1.599ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  s_axi_control_WDATA[4] (IN)
+                         net (fo=8, unset)            0.000     0.000    control_s_axi_U/WDATA[4]
+    SLICE_X79Y201        LUT3 (Prop_H5LUT_SLICEL_I2_O)
+                                                      0.032     0.032 r  control_s_axi_U/int_o_address[4]_i_1/O
+                         net (fo=1, routed)           0.009     0.041    control_s_axi_U/int_o_address_reg01_out[4]
+    SLICE_X79Y201        FDRE                                         r  control_s_axi_U/int_o_address_reg[4]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=32157, unset)        1.599     1.599    control_s_axi_U/ACLK
+    SLICE_X79Y201        FDRE                                         r  control_s_axi_U/int_o_address_reg[4]/C
+                         clock pessimism              0.000     1.599    
+    SLICE_X79Y201        FDRE (Hold_HFF2_SLICEL_C_D)
+                                                      0.062     1.661    control_s_axi_U/int_o_address_reg[4]
+  -------------------------------------------------------------------
+                         required time                         -1.661    
+                         arrival time                           0.041    
+  -------------------------------------------------------------------
+                         slack                                 -1.620    
+
+
+
+

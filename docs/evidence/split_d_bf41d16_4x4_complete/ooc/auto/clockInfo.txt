@@ -1,0 +1,39 @@
+-------------------------------------
+| Tool Version : Vivado v.2024.2
+| Date         : Sat Oct 10 14:43:03 2026
+| Host         : lenovo-ThinkStation-P920
+| Design       : design_1
+| Device       : xcvu37p_CIV-fsvh2892-2-E-
+-------------------------------------
+
+For more information on clockInfo.txt clock routing debug file see https://support.xilinx.com/s/article/000035660?language=en_US
+
+***********************
+Running Pre-CRP Checker
+***********************
+Number of global clocks: 1
+	Number of BUFGCE: 1
+	Number of BUFGCE_HDIO: 0
+	Number of BUFG_CTRL: 0
+	Number of BUFGCE_DIV: 0
+	Number of BUFG_GT: 0
+	Number of BUFG_PS: 0
+	Number of BUFG_FABRIC: 0
+Pre-CRP Checker took 0 secs
+
+********************************
+Clock Net Route Info (CRP Input)
+********************************
+Clock 1: ap_clk
+	Clock source type: BUFGCE fixed to track 0
+	Clock source region: X4Y2
+	initial rect ((0, 1), (6, 3))
+
+
+
+*****************
+User Constraints:
+*****************
+No user constraints found
+
+

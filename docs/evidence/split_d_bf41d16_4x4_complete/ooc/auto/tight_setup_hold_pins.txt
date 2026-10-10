@@ -1,0 +1,10 @@
++====================+===================+=========================================================================+
+| Launch Setup Clock | Launch Hold Clock | Pin                                                                     |
++====================+===================+=========================================================================+
+| ap_clk             | ap_clk            | v_gmem_m_axi_U/load_unit_0/buff_rdata/full_n_reg/D                      |
+| ap_clk             | ap_clk            | v_gmem_m_axi_U/load_unit_0/buff_rdata/U_fifo_mem/mem_reg_bram_1/ENBWREN |
+| ap_clk             | ap_clk            | v_gmem_m_axi_U/load_unit_0/buff_rdata/U_fifo_mem/mem_reg_bram_0/ENBWREN |
+| ap_clk             | ap_clk            | k_gmem_m_axi_U/load_unit_0/buff_rdata/U_fifo_mem/mem_reg_bram_0/ENBWREN |
+| ap_clk             | ap_clk            | k_gmem_m_axi_U/load_unit_0/buff_rdata/U_fifo_mem/mem_reg_bram_1/ENBWREN |
+| ap_clk             | ap_clk            | k_gmem_m_axi_U/load_unit_0/buff_rdata/full_n_reg/D                      |
++--------------------+-------------------+-------------------------------------------------------------------------+

@@ -3,7 +3,7 @@
 ## 1 本次调用信息
 
 - 开始时间：2026-10-10 13:16+08:00。
-- 当前状态：进行中，第2轮。
+- 当前状态：进行中，第3轮。
 - 本地仓库：`C:/Users/30130/Desktop/workstation/FlashAttention/FSA_HLS`。
 - 远端：`FSA-FPGA-NM37-tailBox:/home/zhangchenxuan/FSA_HLS`。
 - 分支：`fsa_split_D`；起始commit：`de03998070c004388bd0ba34fa9d7759ce7700c5`。
@@ -33,7 +33,8 @@
 | 轮次 | 被测commit | 修改 | 本地 | 远端 | 状态 |
 |---:|---|---|---|---|---|
 | 1 | 4934747 | 删除Q/K/V重复初始化 | 数学24/24，严格19/24 | HLS/IP通过；OOC内部通过 | 已分析，存储问题仍在 |
-| 2 | 待提交 | 四lane feature分bank＋真实HBM集成包 | 待执行 | 待执行 | 进行中 |
+| 2 | bf41d16 | 四lane feature分bank＋真实HBM集成包 | 数学24/24、严格19/24 | HLS/IP及内部OOC通过；unit通过，BD配置失败 | 已分析，保留存储方案 |
+| 3 | 待提交 | 修复系统工程配置并真实HBM验收 | 待执行 | 待执行 | 进行中 |
 
 ## 5 逐轮记录
 
@@ -78,3 +79,25 @@ Q完整覆盖`QUERY_BLOCK_COLS×QKV_WORDS_PER_TOKEN×DMA_ELEMS_PER_WORD`，K/V�
 新增包静态审查修复：超时不取消VALID，当前事务排空后停止repeat/poll，禁止发送下一beat；unit fixture加入排空验证。core_clock在impl重新获取，避免引用已关闭synth设计对象。HBM reference按既有真实example使用raw IBUFDS输出。
 
 - 第2轮本地正式同入口检查：编译成功，数学24/24、严格19/24（同基线5项宿主stub位差），exit1；完整日志`build/local_split_d_check/complete_round2.txt`。新增被动core FSM起始→done周期观测，与包含预装载/检查的last_case_cycles区分。
+
+- bf41d1602d5c59d35033b74c2ab82fddc232a528标准HLS14:17:29—14:30:55 exit0，数学/严格24/24（CSim、CoSim前/后共3处）、26CoSim、24有效O/输入及2非法canary保持，完整O SHA不变。16PE/4Acc/两阵列，II5/5/1/1、7.300ns、DSP40/FF45889/LUT129412/BRAM8；总72696cycles，较493多189（0.261%），较b3少9.404%。70源文件Git blob与服务器一致。OOC14:36:06—14:53:20完成，物理报告正在归档，尚未关闭本轮分析。
+- 控制器unit于14:20:47—14:21:34：正常26事务、注入错误字检测02、超时检测ff并保持/排空VALID、忙中复位后26事务，4项全部PASS。unit小RAM不算HBM系统测试。
+- NM37 BD生成（包bf41d16、IP493快照）14:21:30—14:22:16失败：clk_out2未生成；复位C_EXT_RESET_HIGH只读，不能直接配置。实际安装版bd.tcl确认由ext_reset_in的POLARITY推导。已修正CLKOUT2_USED=true、删除直接设置并加validate后低极性断言；该修正仍属第2轮集成调试，不额外计一轮。
+- 两次只读SSH自动审批超时未启动；用户再次明确“允许继续重试并推进”，继续站立授权。OOC和HLS已运行的任务未重复启动。
+- 只读JTAG发现两个target：210017937722A为唯一xcvu37p_CIV，210017401888A为xczu5+arm_dap。没有program/reset动作，真实HBM板测尚未执行。
+
+#### 第2轮分析闭环（15:12+08）
+
+- 已解决：按4 DMA lane cyclic feature分bank，将tile RAMB18从40降为0，AXI缓冲仍7RAMB36。实际LUTRAM320→960，LUT49091→50432（+1341）、FF26441→28058（+1617）；DSP40不变。内部setup+0.330ns、hold+0.010ns，77088 nets全部route，DRC无Error/Critical，黑盒0、所有check_timing计数0。
+- 已保持：位模式/实例/II/HLS时钟合格，周期仅比493增加0.261%，因此接受存储分bank。没有另加BIND_STORAGE或改变QK/PV数学链。
+- 剩余：min0ns边界hold4575（reset3752）、WHS−1.650ns/THS−6684.096，full_ooc_gate仍false；必须在完整系统关闭。unit4项通过，真实HBM BD首次配置失败，尚无系统仿真/实现/板测。
+- 判据：工作包1存储与工作包2正式全流程/内部OOC已合格；工作包3未完成，整体任务未验收。
+- 下一修改：发布已准备的clock/reset配置修正，并完善自包含交付；使用bf41d16正式IP继续真实HBM集成，计算源码保持已验收。
+
+### 第3轮
+
+#### 修改前判断与计划
+
+继承只剩完整集成：ClockWizard必须显式CLKOUT2_USED，Processor System Reset按连接的ACTIVE_LOW推导C_EXT_RESET_HIGH并断言；不放宽时钟或误排除内部路径。准备自包含复制正式IP的交付生成器和相对路径config，随后真实HBM BD生成、52笔系统仿真、综合/route/setup/hold/CDC/DRC、bitstream及唯一VU37P板内自检。计算IP被测版本固定bf41d16，系统源码版本独立记录；脚本修正无需冒充新的HLS数值验收。
+
+- 第3轮本地自包含交付验证：首次复制ip.tmp中间目录触及Windows长路径，部分交付保留在ignored build供诊断；正式component不引用该临时目录，生成器排除ip.tmp且逐项校验component引用。新`build/nm37_delivery`成功，正式component SHA保持a64c7be…a26dc。交付复制不构成Vivado验证。

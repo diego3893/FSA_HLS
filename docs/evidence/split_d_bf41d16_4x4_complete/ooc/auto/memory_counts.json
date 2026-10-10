@@ -1,0 +1,13 @@
+{
+  "AXI/other RAM32X1D": 256,
+  "AXI/other RAMD32": 512,
+  "k_tile RAM32X1S": 512,
+  "k_tile RAMS32": 512,
+  "v_tile RAM32X1S": 512,
+  "v_tile RAMS32": 512,
+  "AXI/other RAM32X1S": 128,
+  "AXI/other RAMS32": 128,
+  "q_tile RAM32X1S": 256,
+  "q_tile RAMS32": 256,
+  "AXI/other RAMB36E2": 7
+}

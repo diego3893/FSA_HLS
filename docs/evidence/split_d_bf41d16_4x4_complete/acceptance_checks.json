@@ -1,0 +1,37 @@
+{
+  "tested_commit": "bf41d1602d5c59d35033b74c2ab82fddc232a528",
+  "PE": 16,
+  "Acc": 4,
+  "PE_arrays": 2,
+  "loops": {
+    "block0_QK": 5,
+    "block0_ROW_SUM": 5,
+    "block0_PWL": 1,
+    "block0_PV": 1,
+    "block1_QK": 5,
+    "block1_ROW_SUM": 5,
+    "block1_PWL": 1,
+    "block1_PV": 1
+  },
+  "resources": {
+    "BRAM_18K": 8,
+    "DSP": 40,
+    "FF": 45889,
+    "LUT": 129412,
+    "URAM": 0
+  },
+  "HLS_estimated_ns": 7.3,
+  "CoSim_transactions": 26,
+  "CoSim_cycles": 72696,
+  "cycle_change_vs_b3e4957_percent": -9.404052740460111,
+  "forbidden_warning_counts": {
+    "200-880": 0,
+    "200-875": 0,
+    "214-114": 0,
+    "200-471": 0,
+    "too complicated": 0
+  },
+  "formal_IP_SHA256": "caad67889705c738fd6b977e228d9f9af1116b3b9e29c8c44708541cb43e5b8c",
+  "formal_component_SHA256": "a64c7be2ae2cc026bd4164cd347004a67287aba3688a93d703bbfc065a3a26dc",
+  "physical_implementation_verified": false
+}

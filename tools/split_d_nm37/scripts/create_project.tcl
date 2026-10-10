@@ -27,7 +27,7 @@ set reset [create_bd_port -dir I -type rst reset_n]
 set_property CONFIG.POLARITY ACTIVE_LOW $reset
 set clk [create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz_0]
 set_property -dict [list CONFIG.PRIM_SOURCE {No_buffer} CONFIG.PRIM_IN_FREQ {100.000} \
-    CONFIG.NUM_OUT_CLKS {2} CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100.000} \
+    CONFIG.NUM_OUT_CLKS {2} CONFIG.CLKOUT2_USED {true} CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100.000} \
     CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {225.000} CONFIG.USE_LOCKED {true} \
     CONFIG.USE_RESET {true} CONFIG.RESET_TYPE {ACTIVE_LOW}] $clk
 connect_bd_net $sys_clk [get_bd_pins clk_wiz_0/clk_in1]
@@ -36,7 +36,6 @@ set zero [create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 zero]
 set_property -dict [list CONFIG.CONST_WIDTH {1} CONFIG.CONST_VAL {0}] $zero
 foreach domain {100 225} {
     set rst [create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_$domain]
-    set_property CONFIG.C_EXT_RESET_HIGH 0 $rst
     set clock_pin [expr {$domain==100 ? "clk_out1" : "clk_out2"}]
     connect_bd_net [get_bd_pins clk_wiz_0/$clock_pin] [get_bd_pins rst_$domain/slowest_sync_clk]
     connect_bd_net $reset [get_bd_pins rst_$domain/ext_reset_in]
@@ -106,6 +105,11 @@ foreach {name pin} {ctrl_clk clk_wiz_0/clk_out1 clock_locked clk_wiz_0/locked in
     set_property name $name $p
 }
 validate_bd_design
+foreach domain {100 225} {
+    if {[get_property CONFIG.C_EXT_RESET_HIGH [get_bd_cells rst_$domain]]!=0} {
+        error "Reset polarity did not propagate ACTIVE_LOW in domain $domain"
+    }
+}
 save_bd_design
 set bd [get_files split_d_system.bd]
 set wrapper [make_wrapper -files $bd -top]
