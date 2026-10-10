@@ -83,7 +83,8 @@ namespace detail{
         const unsigned offset = (unsigned)(BLOCK_ID*QUERY_BLOCK_COLS);
         const unsigned remaining = header.active_queries>offset ? header.active_queries-offset : 0U;
         const unsigned active_queries = remaining<(unsigned)QUERY_BLOCK_COLS ? remaining : (unsigned)QUERY_BLOCK_COLS;
-        elem_t q_tile[QUERY_BLOCK_COLS][HEAD_DIM]{};
+        // 装载循环覆盖全部feature，尾部query也消费零填充，不需要先清零。
+        elem_t q_tile[QUERY_BLOCK_COLS][HEAD_DIM];
         #pragma HLS ARRAY_PARTITION variable=q_tile complete dim=1
         for(int col=0; col<QUERY_BLOCK_COLS; ++col){
             for(int word=0; word<QKV_WORDS_PER_TOKEN; ++word){
@@ -120,8 +121,9 @@ namespace detail{
                 remaining_keys<(unsigned)PE_DIM
                     ? remaining_keys : (unsigned)PE_DIM;
 
-            elem_t k_tile[PE_DIM][HEAD_DIM]{};
-            elem_t v_tile[PE_DIM][HEAD_DIM]{};
+            // 每个key tile先完整装载再计算；保留无效row的零填充写入。
+            elem_t k_tile[PE_DIM][HEAD_DIM];
+            elem_t v_tile[PE_DIM][HEAD_DIM];
             PeState pe[PE_DIM][QUERY_BLOCK_COLS]{};
             elem_t operand_b[PE_DIM][QUERY_BLOCK_COLS]{};
             acc_t operand_c[PE_DIM][QUERY_BLOCK_COLS]{};
