@@ -41,8 +41,9 @@ for block in (0, 1):
               f'create_pblock query_block_{block}',
               f'add_cells_to_pblock [get_pblocks query_block_{block}] $worker',
               f'resize_pblock [get_pblocks query_block_{block}] -add {{{regions}}}',
-              f'set_property IS_SOFT false [get_pblocks query_block_{block}]',
-              f'set_property CONTAIN_ROUTING false [get_pblocks query_block_{block}]']
+              f'set_property CONTAIN_ROUTING 0 [get_pblocks query_block_{block}]',
+              f'set_property IS_SOFT 0 [get_pblocks query_block_{block}]',
+              f'if {{[get_property IS_SOFT [get_pblocks query_block_{block}]] != 0}} {{ error "Hard Pblock not applied" }}']
 args.tcl.write_text('\n'.join(lines)+'\n', encoding='utf-8')
 args.plan.write_text(json.dumps(summary, indent=2)+'\n', encoding='utf-8')
 print(json.dumps(summary))

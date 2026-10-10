@@ -105,3 +105,9 @@
 - 主要假设：两个Pblock属性存在设置顺序联动；先从routed DCP只在内存中probe，记录每次赋值后的实际属性，再修正生成脚本并在实现前后断言硬约束。工具按tile调整的实际范围也要归档。
 - HDOOC-4需要控制已插入BUFG的实际位置，保留其用途/接线，依据实际site固定LOC；不得屏蔽DRC。修正后重做同模型硬区域对照，原失败目录保留。
 - hold aggressive选项仅本地准备，尚未执行，不算已验证；边界min0ns仍保持，用户选择待回复。
+
+### 第5轮合同澄清与实际修正
+
+- 用户明确选择“内部与通信先验收，边界hold留完整系统集成”。本次保留input/output min0ns及全部接口失败报告；新增范围内内部验收门槛，完整OOC gate仍不能写成true。撤回仅本地准备、从未执行的aggressive hold选项。
+- 748e5cb只读property probe在12:32:30—12:33:43 exit0，证明设置CONTAIN_ROUTING=0会把IS_SOFT从0改回1；改为先CONTAIN_ROUTING后IS_SOFT，并在创建及route后断言0。保存实现前及最终XDC供实际tile范围核对。
+- 对placer已经选定的BUFG site在route后显式固定LOC，并检查IS_LOC_FIXED，消除HDOOC-4的真实约束问题。auto_context另从原routed DCP仅更新LOC元数据，前后时序/资源对照，不重布线。硬区域使用新regions_hard目录，失败soft区域证据保留。

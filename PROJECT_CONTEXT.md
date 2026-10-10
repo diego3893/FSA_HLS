@@ -17,7 +17,7 @@
 - **基线及新证据已归档**：旧`9c49789`20项未改输入/O/周期在新官方流程逐项一致；新24个有效事务全部QKV/O、非法canary和26事务周期存于`docs/evidence/split_d_25d6dda_4x4/`。完整C/RTL O逐字节一致；阶段3已将全部24项期望内嵌，分块130c778全部24项及完整C/RTL输出SHA与其一致。
 - **阶段3已完成（2026-10-10）**：三轮迭代在130c778f5878b34ed998c6be6adcf3e64579c0ea收敛。官方数学24/24、严格24/24、26/26 CoSim；两个独立4×2 worker，总PE16/Acc4/恢复除法循环4（倒数wrapper内begin/normalize共享）；7.300ns、DSP40/FF45091/LUT129592/BRAM8、II5/5/1/1。总80242cycles，比25d6dda少14.78%；FF增41.25%、LUT增3.57%。原始DMA字广播/worker内解包修复前两轮RTL数值失败；具体缓存/调度根因未最小化证明。此为阶段3结束状态；随后用户“继续4”授权阶段4，见下条。死代码未清理。
 
-- **阶段4进行中（2026-10-10）**：b3e4957正式HLS/IP通过，24/24数学/严格、26事务80242cycles，资源/II保持130c778。官方profiling已证明QK177次窗口完全重叠（14160cycles）。补齐BUFGCE_X0Y48模型的auto_context（b3776dc）已完成：setup+0.230ns、内部hold+0.010ns，接口hold−1.582ns/THS−6287.366ns，4560失败endpoint全部起于input（reset3771）；未物理验收。当前最差setup为分发icmp→V AXI读缓冲BRAM使能，6.477ns（route5.937）。3c9a58c的regions对照及只读diagnostic_retry运行中。日志1032已闭环3轮、第4轮进行中。用户边界合同选择待回复，期间min0ns保持。完整集成后续，不进入16×16/bitstream/板测。
+- **阶段4进行中（2026-10-10）**：b3e4957正式HLS/IP及profiling通过；auto_context内部setup+0.230ns/hold+0.010ns。第4轮regions实际为soft且有2条HDOOC-4，失败证据已归档；第5轮probe证明CONTAIN_ROUTING赋值重置IS_SOFT，已修正顺序并增加实际BUFG LOC固定，待regions_hard实现。用户明确“内部与通信先验收，边界hold留完整系统集成”；保留min0ns和4560个input hold失败，完整OOC gate为false，不再做aggressive输入修复。完整系统/16×16/bitstream/板测后续。日志1032闭环4轮、第5轮进行中。
 
 ## 2 硬约束
 
@@ -234,7 +234,7 @@ Q/K/V AXI
 
 第二次核查已修订方案：保留D/H和全局索引、K/V读取量及现有量化链；补倒数通路、位模式基线、广播/汇聚等待关系、IP导出与OOC/全系统时序等级。范围以方案第13节为准，不声称所有独立模块已逐行审计。失败构建读取对应失败归档；当前成功目录为130c778，不得误引用旧HEAD。
 
-**2026-10-10最新状态（覆盖以上）：**b3e4957正式HLS/IP通过，24/24数学/严格、26事务80242cycles，资源/II保持130c778。官方profiling已证明QK177次窗口完全重叠（14160cycles）。补齐BUFGCE_X0Y48模型的auto_context（b3776dc）已完成：setup+0.230ns、内部hold+0.010ns，接口hold−1.582ns/THS−6287.366ns，4560失败endpoint全部起于input（reset3771）；未物理验收。当前最差setup为分发icmp→V AXI读缓冲BRAM使能，6.477ns（route5.937）。3c9a58c的regions对照及只读diagnostic_retry运行中。日志1032已闭环3轮、第4轮进行中。用户边界合同选择待回复，期间min0ns保持。完整集成后续，不进入16×16/bitstream/板测。
+**2026-10-10最新状态（覆盖以上）：**b3e4957正式HLS/IP及profiling通过；auto_context内部setup+0.230ns/hold+0.010ns。第4轮regions实际为soft且有2条HDOOC-4，失败证据已归档；第5轮probe证明CONTAIN_ROUTING赋值重置IS_SOFT，已修正顺序并增加实际BUFG LOC固定，待regions_hard实现。用户明确“内部与通信先验收，边界hold留完整系统集成”；保留min0ns和4560个input hold失败，完整OOC gate为false，不再做aggressive输入修复。完整系统/16×16/bitstream/板测后续。日志1032闭环4轮、第5轮进行中。
 
 ## 11.1 本地git推送的环境坑（2026-09-30，已修复）
 
