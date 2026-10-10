@@ -53,7 +53,11 @@ module tb_split_d_system;
         $finish;
     end
     initial begin
-        #3000000000;
+        #10000;
+        $display("SYSTEM CLOCK DIAGNOSTIC time=%t ctrl_clk=%b locked=%b init_done=%b reset_n=%b",$time,ctrl_clk,clock_locked,init_done,reset_n);
+    end
+    initial begin
+        #(64'd3000000000);
         $fatal(1,"SYSTEM TIMEOUT busy=%b done=%b cases=%0d pc=%0d state=%0d",busy,done,cases,pc,state);
     end
 endmodule

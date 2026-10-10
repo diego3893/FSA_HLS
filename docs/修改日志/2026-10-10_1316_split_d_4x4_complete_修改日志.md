@@ -109,3 +109,8 @@ Q完整覆盖`QUERY_BLOCK_COLS×QKV_WORDS_PER_TOKEN×DMA_ELEMS_PER_WORD`，K/V�
 - 446bdab 16:15:06—16:16:50：BD时钟/低复位断言及HDL/IP生成已执行，HBM_MEM00在全部5个master明确映射0/256MB；仍不能验收：AXI-Lite Reg未分配（critical），最终地址报告调用redirect不属于Vivado Tcl而exit1。正式component实际声明Reg窗口64KB、7位local address；加入独立1×1 Control SmartConnect供地址窗口解码/适配，显式映射0/64KB并断言，保留原FSA接口；地址报告改report_property -file并导出CSV，依据AMD UG835 assign_bd_address/report_property。继续同一第3轮。
 
 - a37d2e0完整工程16:25:54—16:27:39成功创建，control映射/ACTIVE_LOW断言、全部BD/IP生成、地址CSV输出完成，日志无Critical Warning/Error。尚未系统仿真。系统TB补整体clock/reset/AXI/HBM忙中复位：首写已进入等待B后断言整体reset，重新等待clock_locked与init_done，再普通/stress各26完整事务；这与unit局部reset区分。
+
+- a0c4329源码同步成功、bf41 component SHA复核；系统仿真16:38:54启动，真实HBM BD＋整体忙中复位＋52事务，日志`/tmp/codex_nm37_a0c4329_system_sim_20261010.log`。独立复制project到`build/split_d_nm37_a37d2e0_ipbf_impl/project`，16:39:42启动系统综合/实现，日志`/tmp/codex_nm37_a0c4329_system_impl_20261010.log`；两流程不同project，尚未结束，不声称通过。
+
+- a0c4329系统仿真16:38:54—16:52:57结束，外层严格要求两处PASS，实际exit98。Fatal为SYSTEM TIMEOUT，busy/done/state均X；进一步查原始日志明确Time=0ps/Iteration1，不是HBM运行3s后死锁。原因是TB的无尺寸3000000000延迟超出32-bit signed，XSIM把它落在0时刻。修正为显式64位延迟，保持原本3s超时合同，加入10us clock诊断。计算核与硬件不改；保留失败，不用Vivado进程exit0当作仿真PASS。
+- 系统综合已成功产出顶层DCP（16:47:24），控制器ROM实际1个/30RAMB36；独立实现继续routing，尚无完整timing/CDC结果。
