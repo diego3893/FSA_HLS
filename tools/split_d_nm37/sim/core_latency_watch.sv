@@ -16,6 +16,3 @@ module core_latency_watch(input wire clk, reset_n, start, idle, done);
         end
     end
 endmodule
-bind fsa_stream_split_d core_latency_watch latency_watch(
-    .clk(ap_clk),.reset_n(ap_rst_n),.start(ap_start),.idle(ap_idle),.done(ap_done)
-);

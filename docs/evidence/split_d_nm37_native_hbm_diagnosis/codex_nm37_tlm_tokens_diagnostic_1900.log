@@ -1,0 +1,177 @@
+
+****** xsim v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sat Oct 10 19:07:04 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source xsim.dir/tb_split_d_system_behav/xsim_script.tcl
+# xsim {tb_split_d_system_behav} -autoloadwcfg -tclbatch {diagnostic_tokens.tcl}
+
+Info: (I804) /IEEE_Std_1666/deprecated: sc_object::get_parent() is deprecated, use get_parent_object() instead
+
+Info: (I804) /IEEE_Std_1666/deprecated: sc_sensitive_pos is deprecated use sc_sensitive << with pos() instead
+Time resolution is 1 ps
+source diagnostic_tokens.tcl
+## run 100 us
+HBM TLM FUNCTIONAL ONLY: APB initialization is unmodeled; readiness adapter enabled
+SYSTEM RESET EXERCISE initialization restored
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+SYSTEM CLOCK DIAGNOSTIC time=            10000000 ctrl_clk=1 locked=1 init_done=1 reset_n=1
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+SYSTEM HEARTBEAT time=            50000000 locked=1 apb0=0 apb1=0 reset100=1 state=11 pc=24 cases=0
+SYSTEM HEARTBEAT time=           100000000 locked=1 apb0=0 apb1=0 reset100=1 state=11 pc=24 cases=0
+run: Time (s): cpu = 00:00:00.04 ; elapsed = 00:00:10 . Memory (MB): peak = 1396.695 ; gain = 0.000 ; free physical = 15910 ; free virtual = 33526
+## set root /tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142
+## foreach scope [list $root/distributeQueryTile_U0 $root/runQueryBlock_0_U0 $root/runQueryBlock_1_U0 $root/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168 $root/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172] {
+##  puts "SCOPE $scope"
+##  foreach p [get_objects $scope/*] {
+##   if {[regexp {/(ap_CS_fsm|ap_done|ap_ready|header.*reg_.*|key.*reg_.*|active.*reg_.*|.*_ap_start|.*_ap_done|kv.*empty_n|.*load.*reg_.*)$} $p]} { puts "$p = [get_value $p]" }
+##  }
+## }
+SCOPE /tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/distributeQueryTile_U0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/distributeQueryTile_U0/ap_ready = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/distributeQueryTile_U0/ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/distributeQueryTile_U0/ap_CS_fsm = 8000000000000000000
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/distributeQueryTile_U0/header_length_read_reg_413 = 00000001
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/distributeQueryTile_U0/header_key_tiles_read_reg_419 = 00000001
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/distributeQueryTile_U0/header_active_queries_read_reg_424 = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/distributeQueryTile_U0/grp_distributeQueryTile_Pipeline_VITIS_LOOP_489_1_VITIS_LOOP_490_2_fu_208_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/distributeQueryTile_U0/grp_distributeQueryTile_Pipeline_VITIS_LOOP_489_1_VITIS_LOOP_490_2_fu_208_ap_done = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/distributeQueryTile_U0/grp_distributeQueryTile_Pipeline_VITIS_LOOP_501_3_VITIS_LOOP_506_4_VITIS_LOOP_507_5_fu_220_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/distributeQueryTile_U0/grp_distributeQueryTile_Pipeline_VITIS_LOOP_501_3_VITIS_LOOP_506_4_VITIS_LOOP_507_5_fu_220_ap_done = 0
+SCOPE /tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/kv0_empty_n = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/ap_ready = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/ap_CS_fsm = 010
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/header_query_base_reg_445 = 00000000
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/header_key_tiles_reg_456 = 00000001
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/header_length_reg_461 = 00000001
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/header_causal_reg_466 = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/active_queries_reg_476 = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_reciprocalColumns_fu_201_ap_done = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_90_1_VITIS_LOOP_91_2_fu_142_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_90_1_VITIS_LOOP_91_2_fu_142_ap_done = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Pipeline_2_fu_156_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Pipeline_2_fu_156_ap_done = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Pipeline_13_fu_162_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Pipeline_13_fu_162_ap_done = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168_ap_start = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_reciprocalColumns_fu_201_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_451_40_fu_207_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_451_40_fu_207_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_474_43_VITIS_LOOP_475_44_fu_221_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_474_43_VITIS_LOOP_475_44_fu_221_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runAccumulatorColumns_fu_512_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runAccumulatorColumns_fu_512_ap_done = 0
+SCOPE /tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/kv1_empty_n = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/ap_ready = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/ap_CS_fsm = 010
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/header_query_base_reg_479 = 00000000
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/header_key_tiles_reg_485 = 00000001
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/header_length_reg_490 = 00000001
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/header_causal_reg_495 = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/active_queries_reg_510 = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_205_ap_done = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_90_1_VITIS_LOOP_91_2_fu_146_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_90_1_VITIS_LOOP_91_2_fu_146_ap_done = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Pipeline_2_fu_160_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Pipeline_2_fu_160_ap_done = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Pipeline_13_fu_166_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Pipeline_13_fu_166_ap_done = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172_ap_start = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_205_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_451_40_fu_211_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_451_40_fu_211_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_474_43_VITIS_LOOP_475_44_fu_225_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_474_43_VITIS_LOOP_475_44_fu_225_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_551_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_551_ap_done = 0
+SCOPE /tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/kv0_empty_n = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/ap_ready = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/ap_CS_fsm = 000000004
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/active_keys_reg_2676 = X
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/dc_load_reg_2809 = XXXXXXXX
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/dc_12_load_reg_2814 = XXXXXXXX
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_4_fu_546_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_4_fu_546_ap_done = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_144_6_VITIS_LOOP_145_7_fu_550_ap_start = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_144_6_VITIS_LOOP_145_7_fu_550_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_fu_588_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_fu_588_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_190_12_fu_639_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_190_12_fu_639_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_190_122_fu_653_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_190_122_fu_653_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_242_15_fu_667_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_242_15_fu_667_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runAccumulatorColumns_fu_697_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_300_25_fu_772_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_828_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runPeArray_fu_718_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runPeArray_fu_718_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_300_25_fu_772_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_828_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_369_33_fu_842_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_117_5_fu_168/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_369_33_fu_842_ap_done = 0
+SCOPE /tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/kv1_empty_n = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/ap_ready = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/ap_CS_fsm = 000000004
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/active_keys_reg_2676 = X
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/dc_load_reg_2809 = XXXXXXXX
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/dc_5_load_reg_2814 = XXXXXXXX
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_4_fu_546_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_4_fu_546_ap_done = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_144_6_VITIS_LOOP_145_7_fu_550_ap_start = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_144_6_VITIS_LOOP_145_7_fu_550_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_fu_588_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_fu_588_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_190_12_fu_639_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_190_12_fu_639_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_190_121_fu_653_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_190_121_fu_653_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_242_15_fu_667_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_242_15_fu_667_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runAccumulatorColumns_fu_697_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_300_25_fu_772_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_162_1_fu_828_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runPeArray_fu_718_ap_done = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_300_25_fu_772_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_162_1_fu_828_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_369_33_fu_842_ap_start = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0/inst/grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_117_5_fu_172/grp_runQueryBlock_1_Pipeline_VITIS_LOOP_369_33_fu_842_ap_done = 0
+## quit
+INFO: xsimkernel Simulation Memory Usage: 389468 KB (Peak: 455004 KB), Simulation CPU Usage: 11210 ms
+INFO: [Common 17-206] Exiting xsim at Sat Oct 10 19:07:18 2026...

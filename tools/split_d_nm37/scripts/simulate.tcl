@@ -23,7 +23,6 @@ foreach ip [get_ips] {
 }
 add_files -fileset sim_1 -norecurse [file join $package_dir sim tb_split_d_system.sv]
 add_files -fileset sim_1 -norecurse [file join $package_dir sim axi_watch.sv]
-add_files -fileset sim_1 -norecurse [file join $package_dir sim bind_axi_watch.sv]
 add_files -fileset sim_1 -norecurse [file join $package_dir sim core_latency_watch.sv]
 set_property top tb_split_d_system [get_filesets sim_1]
 set_property xsim.simulate.runtime {all} [get_filesets sim_1]

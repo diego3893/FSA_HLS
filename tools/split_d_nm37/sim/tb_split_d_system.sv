@@ -103,4 +103,94 @@ module tb_split_d_system;
             end
         end
     end
+    // Explicit passive instances: Vivado omits standalone bind files from
+    // automatic simulation compile order. No memory responses are driven.
+    axi_watch #(.NAME("q")) watch_q(
+        .clk(dut.split_d_system_i.fsa_0.inst.ap_clk),
+        .reset_n(dut.split_d_system_i.fsa_0.inst.ap_rst_n),
+        .awvalid(dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_AWVALID),
+        .awready(dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_AWREADY),
+        .wvalid(dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_WVALID),
+        .wready(dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_WREADY),
+        .bvalid(dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_BVALID),
+        .bready(dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_BREADY),
+        .arvalid(dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_ARVALID),
+        .arready(dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_ARREADY),
+        .rvalid(dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_RVALID),
+        .rready(dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_RREADY),
+        .bresp(dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_BRESP),
+        .rresp(dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_RRESP),
+        .awpayload({dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_AWADDR,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_AWID,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_AWLEN,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_AWSIZE,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_AWBURST,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_AWLOCK,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_AWCACHE,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_AWPROT,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_AWQOS,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_AWREGION,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_AWUSER}),
+        .arpayload({dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_ARADDR,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_ARID,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_ARLEN,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_ARSIZE,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_ARBURST,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_ARLOCK,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_ARCACHE,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_ARPROT,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_ARQOS,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_ARREGION,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_ARUSER}),
+        .wpayload({dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_WDATA,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_WSTRB,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_WLAST,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_WID,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_WUSER}),
+        .rpayload({dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_RDATA,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_RRESP,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_RLAST,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_RID,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_RUSER}),
+        .bpayload({dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_BRESP,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_BID,dut.split_d_system_i.fsa_0.inst.m_axi_q_gmem_BUSER})
+    );
+    axi_watch #(.NAME("k")) watch_k(
+        .clk(dut.split_d_system_i.fsa_0.inst.ap_clk),
+        .reset_n(dut.split_d_system_i.fsa_0.inst.ap_rst_n),
+        .awvalid(dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_AWVALID),
+        .awready(dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_AWREADY),
+        .wvalid(dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_WVALID),
+        .wready(dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_WREADY),
+        .bvalid(dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_BVALID),
+        .bready(dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_BREADY),
+        .arvalid(dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_ARVALID),
+        .arready(dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_ARREADY),
+        .rvalid(dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_RVALID),
+        .rready(dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_RREADY),
+        .bresp(dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_BRESP),
+        .rresp(dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_RRESP),
+        .awpayload({dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_AWADDR,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_AWID,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_AWLEN,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_AWSIZE,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_AWBURST,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_AWLOCK,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_AWCACHE,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_AWPROT,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_AWQOS,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_AWREGION,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_AWUSER}),
+        .arpayload({dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_ARADDR,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_ARID,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_ARLEN,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_ARSIZE,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_ARBURST,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_ARLOCK,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_ARCACHE,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_ARPROT,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_ARQOS,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_ARREGION,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_ARUSER}),
+        .wpayload({dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_WDATA,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_WSTRB,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_WLAST,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_WID,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_WUSER}),
+        .rpayload({dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_RDATA,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_RRESP,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_RLAST,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_RID,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_RUSER}),
+        .bpayload({dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_BRESP,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_BID,dut.split_d_system_i.fsa_0.inst.m_axi_k_gmem_BUSER})
+    );
+    axi_watch #(.NAME("v")) watch_v(
+        .clk(dut.split_d_system_i.fsa_0.inst.ap_clk),
+        .reset_n(dut.split_d_system_i.fsa_0.inst.ap_rst_n),
+        .awvalid(dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_AWVALID),
+        .awready(dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_AWREADY),
+        .wvalid(dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_WVALID),
+        .wready(dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_WREADY),
+        .bvalid(dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_BVALID),
+        .bready(dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_BREADY),
+        .arvalid(dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_ARVALID),
+        .arready(dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_ARREADY),
+        .rvalid(dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_RVALID),
+        .rready(dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_RREADY),
+        .bresp(dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_BRESP),
+        .rresp(dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_RRESP),
+        .awpayload({dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_AWADDR,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_AWID,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_AWLEN,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_AWSIZE,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_AWBURST,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_AWLOCK,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_AWCACHE,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_AWPROT,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_AWQOS,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_AWREGION,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_AWUSER}),
+        .arpayload({dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_ARADDR,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_ARID,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_ARLEN,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_ARSIZE,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_ARBURST,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_ARLOCK,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_ARCACHE,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_ARPROT,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_ARQOS,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_ARREGION,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_ARUSER}),
+        .wpayload({dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_WDATA,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_WSTRB,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_WLAST,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_WID,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_WUSER}),
+        .rpayload({dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_RDATA,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_RRESP,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_RLAST,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_RID,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_RUSER}),
+        .bpayload({dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_BRESP,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_BID,dut.split_d_system_i.fsa_0.inst.m_axi_v_gmem_BUSER})
+    );
+    axi_watch #(.NAME("o")) watch_o(
+        .clk(dut.split_d_system_i.fsa_0.inst.ap_clk),
+        .reset_n(dut.split_d_system_i.fsa_0.inst.ap_rst_n),
+        .awvalid(dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_AWVALID),
+        .awready(dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_AWREADY),
+        .wvalid(dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_WVALID),
+        .wready(dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_WREADY),
+        .bvalid(dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_BVALID),
+        .bready(dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_BREADY),
+        .arvalid(dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_ARVALID),
+        .arready(dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_ARREADY),
+        .rvalid(dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_RVALID),
+        .rready(dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_RREADY),
+        .bresp(dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_BRESP),
+        .rresp(dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_RRESP),
+        .awpayload({dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_AWADDR,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_AWID,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_AWLEN,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_AWSIZE,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_AWBURST,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_AWLOCK,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_AWCACHE,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_AWPROT,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_AWQOS,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_AWREGION,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_AWUSER}),
+        .arpayload({dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_ARADDR,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_ARID,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_ARLEN,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_ARSIZE,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_ARBURST,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_ARLOCK,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_ARCACHE,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_ARPROT,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_ARQOS,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_ARREGION,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_ARUSER}),
+        .wpayload({dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_WDATA,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_WSTRB,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_WLAST,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_WID,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_WUSER}),
+        .rpayload({dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_RDATA,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_RRESP,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_RLAST,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_RID,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_RUSER}),
+        .bpayload({dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_BRESP,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_BID,dut.split_d_system_i.fsa_0.inst.m_axi_o_gmem_BUSER})
+    );
+    core_latency_watch latency_watch(
+        .clk(ctrl_clk),.reset_n(dut.split_d_system_i.fsa_0.inst.ap_rst_n),
+        .start(dut.split_d_system_i.fsa_0.inst.ap_start),.idle(dut.split_d_system_i.fsa_0.inst.ap_idle),.done(dut.split_d_system_i.fsa_0.inst.ap_done)
+    );
 endmodule

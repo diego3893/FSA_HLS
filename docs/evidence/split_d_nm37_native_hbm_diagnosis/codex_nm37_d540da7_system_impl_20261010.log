@@ -1,0 +1,1139 @@
+
+****** Vivado v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sat Oct 10 19:05:39 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source tools/split_d_nm37/scripts/build_and_report.tcl
+# if {[llength $argv] != 1} { error "Expected project path" }
+# source [file join [file dirname [info script]] check_clocks.tcl]
+## proc check_nm37_clocks {} {
+##     foreach port {board_clk_p board_clk_n} {
+##         set p [get_ports $port]
+##         if {[llength $p]!=1 || [get_property IOSTANDARD $p] ne "DIFF_SSTL12" ||
+##             [get_property ODT $p] ne "RTT_48"} {
+##             error "NM37 AC-coupled clock requires DIFF_SSTL12 split ODT RTT_48"
+##         }
+##     }
+##     foreach stack {0 1} {
+##         set pin [get_pins u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_$stack]
+##         if {[llength $pin]!=1} { error "Expected one HBM reference per stack" }
+##         set clk [get_clocks -of_objects $pin]
+##         if {[llength $clk]!=1 || ![get_property IS_GENERATED $clk] ||
+##             [get_property MASTER_CLOCK $clk] ne "board_clk_100" ||
+##             abs([get_property PERIOD $clk]-10.0)>0.001} {
+##             error "HBM reference must derive from the 100MHz board clock"
+##         }
+##     }
+##     set pin [get_pins u_bd/split_d_system_i/fsa_0/ap_clk]
+##     if {[llength $pin]!=1} { error "Expected one FSA clock pin" }
+##     set clk [get_clocks -of_objects $pin]
+##     if {[llength $clk]!=1 || abs([get_property PERIOD $clk]-10.0)>0.001} {
+##         error "FSA clock must remain 100MHz"
+##     }
+##     puts "NM37_CLOCK_ASSERTIONS_PASS core=$clk"
+##     return $clk
+## }
+# open_project [file normalize [lindex $argv 0]]
+Scanning sources...
+Finished scanning sources
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1/impl/ip'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/opt/Xilinx_2024.2/Vivado/2024.2/data/ip'.
+INFO: [Project 1-5579] Found utility IPs instantiated in one or more block designs which have equivalent inline hdl with improved performance and reduced diskspace. It is recommended to migrate these utility IPs to inline hdl using the command upgrade_project -migrate_to_inline_hdl. The utility IPs may be deprecated in future releases. More information on inline hdl is available in UG994.
+open_project: Time (s): cpu = 00:00:13 ; elapsed = 00:00:15 . Memory (MB): peak = 1577.867 ; gain = 218.574 ; free physical = 39037 ; free virtual = 56616
+# set report_dir [file normalize [file join [get_property DIRECTORY [current_project]] .. reports]]
+# file mkdir $report_dir
+# set_param general.maxThreads 8
+# launch_runs synth_1 -jobs 8
+INFO: [IP_Flow 19-6924] IPCACHE: Running cache check for IP inst: split_d_ila
+INFO: [IP_Flow 19-6924] IPCACHE: Running cache check for IP inst: split_d_vio
+INFO: [IP_Flow 19-6930] IPCACHE: runCacheChecks() number of threads = 8
+INFO: [IP_Flow 19-6921] IPCACHE: Adding cache check func to thread queue for IP split_d_system_clk_wiz_0_0
+INFO: [IP_Flow 19-6921] IPCACHE: Adding cache check func to thread queue for IP split_d_system_control_interconnect_0
+INFO: [IP_Flow 19-6921] IPCACHE: Adding cache check func to thread queue for IP split_d_system_fsa_0_0
+INFO: [IP_Flow 19-6921] IPCACHE: Adding cache check func to thread queue for IP split_d_system_hbm_0_0
+INFO: [IP_Flow 19-6921] IPCACHE: Adding cache check func to thread queue for IP split_d_system_memory_interconnect_0
+INFO: [IP_Flow 19-6921] IPCACHE: Adding cache check func to thread queue for IP split_d_system_memory_ready_0
+INFO: [IP_Flow 19-6921] IPCACHE: Adding cache check func to thread queue for IP split_d_system_rst_100_0
+INFO: [IP_Flow 19-6921] IPCACHE: Adding cache check func to thread queue for IP split_d_system_rst_225_0
+INFO: [IP_Flow 19-8020] IPCACHE: runCacheChecks() calling threadPool finishWork()
+INFO: [IP_Flow 19-6924] IPCACHE: Running cache check for IP inst: split_d_system_clk_wiz_0_0
+INFO: [IP_Flow 19-6924] IPCACHE: Running cache check for IP inst: split_d_system_control_interconnect_0
+INFO: [IP_Flow 19-6924] IPCACHE: Running cache check for IP inst: split_d_system_fsa_0_0
+INFO: [IP_Flow 19-6924] IPCACHE: Running cache check for IP inst: split_d_system_hbm_0_0
+INFO: [IP_Flow 19-6924] IPCACHE: Running cache check for IP inst: split_d_system_memory_interconnect_0
+INFO: [IP_Flow 19-6924] IPCACHE: Running cache check for IP inst: split_d_system_memory_ready_0
+INFO: [IP_Flow 19-6924] IPCACHE: Running cache check for IP inst: split_d_system_rst_100_0
+INFO: [IP_Flow 19-6924] IPCACHE: Running cache check for IP inst: split_d_system_rst_225_0
+WARNING: [Vivado 12-7122] Auto Incremental Compile:: No reference checkpoint was found in run synth_1. Auto-incremental flow will not be run, the standard flow will be run instead.
+[Sat Oct 10 19:06:17 2026] Launched split_d_ila_synth_1, split_d_vio_synth_1, split_d_system_clk_wiz_0_0_synth_1, split_d_system_rst_100_0_synth_1, split_d_system_rst_225_0_synth_1, split_d_system_hbm_0_0_synth_1, split_d_system_fsa_0_0_synth_1, split_d_system_selftest_0_0_synth_1, split_d_system_control_interconnect_0_synth_1, split_d_system_memory_ready_0_synth_1, split_d_system_memory_interconnect_0_synth_1...
+Run output will be captured here:
+split_d_ila_synth_1: /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/split_d_ila_synth_1/runme.log
+split_d_vio_synth_1: /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/split_d_vio_synth_1/runme.log
+split_d_system_clk_wiz_0_0_synth_1: /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/split_d_system_clk_wiz_0_0_synth_1/runme.log
+split_d_system_rst_100_0_synth_1: /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/split_d_system_rst_100_0_synth_1/runme.log
+split_d_system_rst_225_0_synth_1: /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/split_d_system_rst_225_0_synth_1/runme.log
+split_d_system_hbm_0_0_synth_1: /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/split_d_system_hbm_0_0_synth_1/runme.log
+split_d_system_fsa_0_0_synth_1: /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/split_d_system_fsa_0_0_synth_1/runme.log
+split_d_system_selftest_0_0_synth_1: /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/split_d_system_selftest_0_0_synth_1/runme.log
+split_d_system_control_interconnect_0_synth_1: /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/split_d_system_control_interconnect_0_synth_1/runme.log
+split_d_system_memory_ready_0_synth_1: /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/split_d_system_memory_ready_0_synth_1/runme.log
+split_d_system_memory_interconnect_0_synth_1: /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/split_d_system_memory_interconnect_0_synth_1/runme.log
+[Sat Oct 10 19:06:17 2026] Launched synth_1...
+Run output will be captured here: /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/runme.log
+launch_runs: Time (s): cpu = 00:00:08 ; elapsed = 00:00:07 . Memory (MB): peak = 1893.223 ; gain = 315.355 ; free physical = 38863 ; free virtual = 56445
+# wait_on_run synth_1
+[Sat Oct 10 19:06:17 2026] Waiting for synth_1 to finish...
+
+*** Running vivado
+    with args -log split_d_nm37_top.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source split_d_nm37_top.tcl
+
+
+****** Vivado v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sat Oct 10 19:12:10 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source split_d_nm37_top.tcl -notrace
+create_project: Time (s): cpu = 00:00:08 ; elapsed = 00:00:10 . Memory (MB): peak = 1485.098 ; gain = 125.840 ; free physical = 37968 ; free virtual = 55942
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1/impl/ip'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/opt/Xilinx_2024.2/Vivado/2024.2/data/ip'.
+INFO: [Project 1-5578] Found utility IPs instantiated in block design /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.srcs/sources_1/bd/split_d_system/split_d_system.bd which have equivalent inline hdl with improved performance and reduced diskspace.
+It is recommended to migrate these utility IPs to inline hdl  using the command upgrade_project -migrate_to_inline_hdl.  The utility IPs may be deprecated in future releases.
+More information on inline hdl is available in UG994. 
+Command: synth_design -top split_d_nm37_top -part xcvu37p_CIV-fsvh2892-2-e -flatten_hierarchy none
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xcvu37p_CIV'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xcvu37p_CIV'
+INFO: [Device 21-403] Loading part xcvu37p_CIV-fsvh2892-2-e
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 7 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 1715604
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:04 ; elapsed = 00:00:04 . Memory (MB): peak = 3273.805 ; gain = 265.773 ; free physical = 35928 ; free virtual = 53907
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'split_d_nm37_top' [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/rtl/split_d_nm37_top.sv:2]
+INFO: [Synth 8-6157] synthesizing module 'IBUFDS' [/opt/Xilinx_2024.2/Vivado/2024.2/scripts/rt/data/unisim_comp.v:75840]
+INFO: [Synth 8-6155] done synthesizing module 'IBUFDS' (0#1) [/opt/Xilinx_2024.2/Vivado/2024.2/scripts/rt/data/unisim_comp.v:75840]
+INFO: [Synth 8-6157] synthesizing module 'split_d_system_wrapper' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/hdl/split_d_system_wrapper.v:13]
+INFO: [Synth 8-6157] synthesizing module 'split_d_system' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:13]
+INFO: [Synth 8-6157] synthesizing module 'split_d_system_clk_wiz_0_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_clk_wiz_0_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_system_clk_wiz_0_0' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_clk_wiz_0_0_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'split_d_system_control_interconnect_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_control_interconnect_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_system_control_interconnect_0' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_control_interconnect_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'M00_AXI_awprot' of module 'split_d_system_control_interconnect_0' is unconnected for instance 'control_interconnect' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:246]
+WARNING: [Synth 8-7071] port 'M00_AXI_arprot' of module 'split_d_system_control_interconnect_0' is unconnected for instance 'control_interconnect' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:246]
+WARNING: [Synth 8-7023] instance 'control_interconnect' of module 'split_d_system_control_interconnect_0' has 40 connections declared, but only 38 given [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:246]
+INFO: [Synth 8-6157] synthesizing module 'split_d_system_fsa_0_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_fsa_0_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_system_fsa_0_0' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_fsa_0_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'interrupt' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_ARREGION' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_AWADDR' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_AWBURST' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_AWCACHE' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_AWID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_AWLEN' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_AWLOCK' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_AWPROT' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_AWQOS' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_AWREGION' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_AWSIZE' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_AWVALID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_BREADY' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_WDATA' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_WID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_WLAST' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_WSTRB' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_q_gmem_WVALID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_ARREGION' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_AWADDR' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_AWBURST' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_AWCACHE' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_AWID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_AWLEN' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_AWLOCK' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_AWPROT' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_AWQOS' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_AWREGION' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_AWSIZE' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_AWVALID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_BREADY' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_WDATA' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_WID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_WLAST' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_WSTRB' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_k_gmem_WVALID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_ARREGION' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_AWADDR' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_AWBURST' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_AWCACHE' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_AWID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_AWLEN' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_AWLOCK' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_AWPROT' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_AWQOS' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_AWREGION' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_AWSIZE' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_AWVALID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_BREADY' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_WDATA' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_WID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_WLAST' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_WSTRB' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_v_gmem_WVALID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_o_gmem_ARADDR' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_o_gmem_ARBURST' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_o_gmem_ARCACHE' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_o_gmem_ARID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_o_gmem_ARLEN' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_o_gmem_ARLOCK' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_o_gmem_ARPROT' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_o_gmem_ARQOS' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_o_gmem_ARREGION' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_o_gmem_ARSIZE' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_o_gmem_ARVALID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_o_gmem_AWREGION' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_o_gmem_RREADY' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7071] port 'm_axi_o_gmem_WID' of module 'split_d_system_fsa_0_0' is unconnected for instance 'fsa_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+WARNING: [Synth 8-7023] instance 'fsa_0' of module 'split_d_system_fsa_0_0' has 180 connections declared, but only 111 given [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:285]
+INFO: [Synth 8-6157] synthesizing module 'split_d_system_hbm_0_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_hbm_0_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_system_hbm_0_0' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_hbm_0_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'AXI_00_RDATA_PARITY' of module 'split_d_system_hbm_0_0' is unconnected for instance 'hbm_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:397]
+WARNING: [Synth 8-7071] port 'AXI_00_RID' of module 'split_d_system_hbm_0_0' is unconnected for instance 'hbm_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:397]
+WARNING: [Synth 8-7071] port 'AXI_00_BID' of module 'split_d_system_hbm_0_0' is unconnected for instance 'hbm_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:397]
+WARNING: [Synth 8-7071] port 'DRAM_0_STAT_CATTRIP' of module 'split_d_system_hbm_0_0' is unconnected for instance 'hbm_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:397]
+WARNING: [Synth 8-7071] port 'DRAM_0_STAT_TEMP' of module 'split_d_system_hbm_0_0' is unconnected for instance 'hbm_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:397]
+WARNING: [Synth 8-7071] port 'DRAM_1_STAT_CATTRIP' of module 'split_d_system_hbm_0_0' is unconnected for instance 'hbm_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:397]
+WARNING: [Synth 8-7071] port 'DRAM_1_STAT_TEMP' of module 'split_d_system_hbm_0_0' is unconnected for instance 'hbm_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:397]
+WARNING: [Synth 8-7023] instance 'hbm_0' of module 'split_d_system_hbm_0_0' has 45 connections declared, but only 38 given [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:397]
+INFO: [Synth 8-6157] synthesizing module 'split_d_system_memory_interconnect_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_memory_interconnect_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_system_memory_interconnect_0' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_memory_interconnect_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'M00_AXI_awlock' of module 'split_d_system_memory_interconnect_0' is unconnected for instance 'memory_interconnect' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:436]
+WARNING: [Synth 8-7071] port 'M00_AXI_awcache' of module 'split_d_system_memory_interconnect_0' is unconnected for instance 'memory_interconnect' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:436]
+WARNING: [Synth 8-7071] port 'M00_AXI_awprot' of module 'split_d_system_memory_interconnect_0' is unconnected for instance 'memory_interconnect' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:436]
+WARNING: [Synth 8-7071] port 'M00_AXI_awqos' of module 'split_d_system_memory_interconnect_0' is unconnected for instance 'memory_interconnect' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:436]
+WARNING: [Synth 8-7071] port 'M00_AXI_arlock' of module 'split_d_system_memory_interconnect_0' is unconnected for instance 'memory_interconnect' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:436]
+WARNING: [Synth 8-7071] port 'M00_AXI_arcache' of module 'split_d_system_memory_interconnect_0' is unconnected for instance 'memory_interconnect' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:436]
+WARNING: [Synth 8-7071] port 'M00_AXI_arprot' of module 'split_d_system_memory_interconnect_0' is unconnected for instance 'memory_interconnect' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:436]
+WARNING: [Synth 8-7071] port 'M00_AXI_arqos' of module 'split_d_system_memory_interconnect_0' is unconnected for instance 'memory_interconnect' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:436]
+WARNING: [Synth 8-7023] instance 'memory_interconnect' of module 'split_d_system_memory_interconnect_0' has 140 connections declared, but only 132 given [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:436]
+INFO: [Synth 8-6157] synthesizing module 'split_d_system_memory_ready_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_memory_ready_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_system_memory_ready_0' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_memory_ready_0_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'split_d_system_rst_100_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_rst_100_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_system_rst_100_0' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_rst_100_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'mb_reset' of module 'split_d_system_rst_100_0' is unconnected for instance 'rst_100' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:573]
+WARNING: [Synth 8-7071] port 'bus_struct_reset' of module 'split_d_system_rst_100_0' is unconnected for instance 'rst_100' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:573]
+WARNING: [Synth 8-7071] port 'peripheral_reset' of module 'split_d_system_rst_100_0' is unconnected for instance 'rst_100' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:573]
+WARNING: [Synth 8-7023] instance 'rst_100' of module 'split_d_system_rst_100_0' has 10 connections declared, but only 7 given [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:573]
+INFO: [Synth 8-6157] synthesizing module 'split_d_system_rst_225_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_rst_225_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_system_rst_225_0' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_rst_225_0_stub.v:6]
+WARNING: [Synth 8-7071] port 'mb_reset' of module 'split_d_system_rst_225_0' is unconnected for instance 'rst_225' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:581]
+WARNING: [Synth 8-7071] port 'bus_struct_reset' of module 'split_d_system_rst_225_0' is unconnected for instance 'rst_225' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:581]
+WARNING: [Synth 8-7071] port 'peripheral_reset' of module 'split_d_system_rst_225_0' is unconnected for instance 'rst_225' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:581]
+WARNING: [Synth 8-7071] port 'interconnect_aresetn' of module 'split_d_system_rst_225_0' is unconnected for instance 'rst_225' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:581]
+WARNING: [Synth 8-7023] instance 'rst_225' of module 'split_d_system_rst_225_0' has 10 connections declared, but only 6 given [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:581]
+INFO: [Synth 8-6157] synthesizing module 'split_d_system_selftest_0_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_selftest_0_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_system_selftest_0_0' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_system_selftest_0_0_stub.v:6]
+INFO: [Synth 8-6157] synthesizing module 'split_d_system_zero_0' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_zero_0/synth/split_d_system_zero_0.v:53]
+INFO: [Synth 8-6157] synthesizing module 'xlconstant_v1_1_9_xlconstant' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ipshared/e2d2/hdl/xlconstant_v1_1_vl_rfs.v:68]
+INFO: [Synth 8-6155] done synthesizing module 'xlconstant_v1_1_9_xlconstant' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ipshared/e2d2/hdl/xlconstant_v1_1_vl_rfs.v:68]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_system_zero_0' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_zero_0/synth/split_d_system_zero_0.v:53]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_system' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v:13]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_system_wrapper' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/hdl/split_d_system_wrapper.v:13]
+INFO: [Synth 8-6157] synthesizing module 'split_d_vio' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_vio_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_vio' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_vio_stub.v:6]
+WARNING: [Synth 8-4446] all outputs are unconnected for this instance and logic may be removed [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/rtl/split_d_nm37_top.sv:31]
+INFO: [Synth 8-6157] synthesizing module 'split_d_ila' [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_ila_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_ila' (0#1) [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/.Xil/Vivado-1715552-lenovo-ThinkStation-P920/realtime/split_d_ila_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'split_d_nm37_top' (0#1) [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/rtl/split_d_nm37_top.sv:2]
+INFO: [Synth 8-6071] Mark debug on the nets applies keep_hierarchy on instance 'u_vio'. This will prevent further optimization [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/rtl/split_d_nm37_top.sv:26]
+INFO: [Synth 8-6071] Mark debug on the nets applies keep_hierarchy on instance 'u_bd'. This will prevent further optimization [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/rtl/split_d_nm37_top.sv:18]
+INFO: [Synth 8-6071] Mark debug on the nets applies keep_hierarchy on instance 'u_ila'. This will prevent further optimization [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/rtl/split_d_nm37_top.sv:31]
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:05 ; elapsed = 00:00:06 . Memory (MB): peak = 3355.742 ; gain = 347.711 ; free physical = 35818 ; free virtual = 53798
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:05 ; elapsed = 00:00:06 . Memory (MB): peak = 3364.648 ; gain = 356.617 ; free physical = 35818 ; free virtual = 53798
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:05 ; elapsed = 00:00:06 . Memory (MB): peak = 3364.648 ; gain = 356.617 ; free physical = 35818 ; free virtual = 53798
+---------------------------------------------------------------------------------
+Netlist sorting complete. Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 3375.617 ; gain = 0.000 ; free physical = 35817 ; free virtual = 53798
+INFO: [Netlist 29-17] Analyzing 1 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0_in_context.xdc] for cell 'u_bd/split_d_system_i/clk_wiz_0'
+create_generated_clock: Time (s): cpu = 00:00:05 ; elapsed = 00:00:05 . Memory (MB): peak = 3427.574 ; gain = 3.031 ; free physical = 35797 ; free virtual = 53778
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0_in_context.xdc] for cell 'u_bd/split_d_system_i/clk_wiz_0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_100_0/split_d_system_rst_100_0/split_d_system_rst_100_0_in_context.xdc] for cell 'u_bd/split_d_system_i/rst_100'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_100_0/split_d_system_rst_100_0/split_d_system_rst_100_0_in_context.xdc] for cell 'u_bd/split_d_system_i/rst_100'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_225_0/split_d_system_rst_225_0/split_d_system_rst_225_0_in_context.xdc] for cell 'u_bd/split_d_system_i/rst_225'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_225_0/split_d_system_rst_225_0/split_d_system_rst_225_0_in_context.xdc] for cell 'u_bd/split_d_system_i/rst_225'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_hbm_0_0/split_d_system_hbm_0_0/split_d_system_hbm_0_0_in_context.xdc] for cell 'u_bd/split_d_system_i/hbm_0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_hbm_0_0/split_d_system_hbm_0_0/split_d_system_hbm_0_0_in_context.xdc] for cell 'u_bd/split_d_system_i/hbm_0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_fsa_0_0/split_d_system_fsa_0_0/split_d_system_fsa_0_0_in_context.xdc] for cell 'u_bd/split_d_system_i/fsa_0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_fsa_0_0/split_d_system_fsa_0_0/split_d_system_fsa_0_0_in_context.xdc] for cell 'u_bd/split_d_system_i/fsa_0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_selftest_0_0/split_d_system_selftest_0_0/split_d_system_selftest_0_0_in_context.xdc] for cell 'u_bd/split_d_system_i/selftest_0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_selftest_0_0/split_d_system_selftest_0_0/split_d_system_selftest_0_0_in_context.xdc] for cell 'u_bd/split_d_system_i/selftest_0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/split_d_system_control_interconnect_0/split_d_system_control_interconnect_0_in_context.xdc] for cell 'u_bd/split_d_system_i/control_interconnect'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/split_d_system_control_interconnect_0/split_d_system_control_interconnect_0_in_context.xdc] for cell 'u_bd/split_d_system_i/control_interconnect'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_ready_0/split_d_system_memory_ready_0/split_d_system_memory_ready_0_in_context.xdc] for cell 'u_bd/split_d_system_i/memory_ready'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_ready_0/split_d_system_memory_ready_0/split_d_system_memory_ready_0_in_context.xdc] for cell 'u_bd/split_d_system_i/memory_ready'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/split_d_system_memory_interconnect_0/split_d_system_memory_interconnect_0_in_context.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/split_d_system_memory_interconnect_0/split_d_system_memory_interconnect_0_in_context.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_ila/split_d_ila/split_d_ila_in_context.xdc] for cell 'u_ila'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_ila/split_d_ila/split_d_ila_in_context.xdc] for cell 'u_ila'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_vio/split_d_vio/split_d_vio_in_context.xdc] for cell 'u_vio'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_vio/split_d_vio/split_d_vio_in_context.xdc] for cell 'u_vio'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/nm37.xdc]
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/nm37.xdc]
+INFO: [Project 1-236] Implementation specific constraints were found while reading constraint file [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/nm37.xdc]. These constraints will be ignored for synthesis but will be used in implementation. Impacted constraints are listed in the file [.Xil/split_d_nm37_top_propImpl.xdc].
+Resolution: To avoid this warning, move constraints listed in [.Xil/split_d_nm37_top_propImpl.xdc] to another XDC file and exclude this new file from synthesis with the used_in_synthesis property (File Properties dialog in GUI) and re-run elaboration/synthesis.
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/dont_touch.xdc]
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/dont_touch.xdc]
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc]
+WARNING: [Vivado 12-508] No pins matched 'u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_0'. [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc:6]
+WARNING: [Vivado 12-508] No pins matched 'u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_1'. [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc:9]
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc]
+WARNING: [Project 1-498] One or more constraints failed evaluation while reading constraint file [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc] and the design contains unresolved black boxes. These constraints will be read post-synthesis (as long as their source constraint file is marked as used_in_implementation) and should be applied correctly then. You should review the constraints listed in the file [.Xil/split_d_nm37_top_propImpl.xdc] and check the run log file to verify that these constraints were correctly applied.
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3427.574 ; gain = 0.000 ; free physical = 35801 ; free virtual = 53782
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 1 instances were transformed.
+  IBUFDS => IBUFDS (DIFFINBUF, IBUFCTRL): 1 instance 
+
+Constraint Validation Runtime : Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.02 . Memory (MB): peak = 3427.574 ; gain = 0.000 ; free physical = 35801 ; free virtual = 53782
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:17 ; elapsed = 00:00:19 . Memory (MB): peak = 3427.574 ; gain = 419.543 ; free physical = 35839 ; free virtual = 53821
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xcvu37p_CIV-fsvh2892-2-e
+INFO: [Synth 8-6742] Reading net delay rules and data
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:17 ; elapsed = 00:00:19 . Memory (MB): peak = 3435.578 ; gain = 427.547 ; free physical = 35839 ; free virtual = 53821
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying 'set_property' XDC Constraints
+---------------------------------------------------------------------------------
+Applied set_property KEEP_HIERARCHY = SOFT for u_bd/split_d_system_i. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for u_bd/split_d_system_i/clk_wiz_0. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for u_bd/split_d_system_i/zero. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for u_bd/split_d_system_i/rst_100. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for u_bd/split_d_system_i/rst_225. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for u_bd/split_d_system_i/hbm_0. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for u_bd/split_d_system_i/fsa_0. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for u_bd/split_d_system_i/selftest_0. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for u_bd/split_d_system_i/control_interconnect. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for u_bd/split_d_system_i/memory_ready. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for u_bd/split_d_system_i/memory_interconnect. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for u_ila. (constraint file  auto generated constraint).
+Applied set_property KEEP_HIERARCHY = SOFT for u_vio. (constraint file  auto generated constraint).
+---------------------------------------------------------------------------------
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:17 ; elapsed = 00:00:19 . Memory (MB): peak = 3435.578 ; gain = 427.547 ; free physical = 35838 ; free virtual = 53820
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:18 ; elapsed = 00:00:19 . Memory (MB): peak = 3435.578 ; gain = 427.547 ; free physical = 35836 ; free virtual = 53820
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 9024 (col length:94)
+BRAMs: 4032 (col length: RAMB18 288 RAMB36 144)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+WARNING: [Synth 8-7080] Parallel synthesis criteria is not met
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:19 ; elapsed = 00:00:21 . Memory (MB): peak = 3435.578 ; gain = 427.547 ; free physical = 35839 ; free virtual = 53827
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying XDC Timing Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:26 ; elapsed = 00:00:28 . Memory (MB): peak = 3924.418 ; gain = 916.387 ; free physical = 35410 ; free virtual = 53400
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:00:26 ; elapsed = 00:00:28 . Memory (MB): peak = 3924.418 ; gain = 916.387 ; free physical = 35411 ; free virtual = 53401
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:00:26 ; elapsed = 00:00:28 . Memory (MB): peak = 3935.426 ; gain = 927.395 ; free physical = 35403 ; free virtual = 53393
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:00:30 ; elapsed = 00:00:32 . Memory (MB): peak = 4097.238 ; gain = 1089.207 ; free physical = 35272 ; free virtual = 53263
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:30 ; elapsed = 00:00:32 . Memory (MB): peak = 4097.238 ; gain = 1089.207 ; free physical = 35272 ; free virtual = 53263
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:30 ; elapsed = 00:00:32 . Memory (MB): peak = 4097.238 ; gain = 1089.207 ; free physical = 35272 ; free virtual = 53263
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+Report BlackBoxes: 
++------+--------------------------------------+----------+
+|      |BlackBox name                         |Instances |
++------+--------------------------------------+----------+
+|1     |split_d_system_clk_wiz_0_0            |         1|
+|2     |split_d_system_control_interconnect_0 |         1|
+|3     |split_d_system_fsa_0_0                |         1|
+|4     |split_d_system_hbm_0_0                |         1|
+|5     |split_d_system_memory_interconnect_0  |         1|
+|6     |split_d_system_memory_ready_0         |         1|
+|7     |split_d_system_rst_100_0              |         1|
+|8     |split_d_system_rst_225_0              |         1|
+|9     |split_d_system_selftest_0_0           |         1|
+|10    |split_d_vio                           |         1|
+|11    |split_d_ila                           |         1|
++------+--------------------------------------+----------+
+
+Report Cell Usage: 
++------+------------------------------------+------+
+|      |Cell                                |Count |
++------+------------------------------------+------+
+|1     |split_d_ila                         |     1|
+|2     |split_d_system_clk_wiz_0            |     1|
+|3     |split_d_system_control_interconnect |     1|
+|4     |split_d_system_fsa_0                |     1|
+|5     |split_d_system_hbm_0                |     1|
+|6     |split_d_system_memory_interconnect  |     1|
+|7     |split_d_system_memory_ready         |     1|
+|8     |split_d_system_rst_100              |     1|
+|9     |split_d_system_rst_225              |     1|
+|10    |split_d_system_selftest_0           |     1|
+|11    |split_d_vio                         |     1|
+|12    |IBUF                                |     1|
+|13    |IBUFDS                              |     1|
++------+------------------------------------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:30 ; elapsed = 00:00:32 . Memory (MB): peak = 4097.238 ; gain = 1089.207 ; free physical = 35272 ; free virtual = 53263
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 1 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:23 ; elapsed = 00:00:24 . Memory (MB): peak = 4097.238 ; gain = 1026.281 ; free physical = 35267 ; free virtual = 53258
+Synthesis Optimization Complete : Time (s): cpu = 00:00:30 ; elapsed = 00:00:32 . Memory (MB): peak = 4097.238 ; gain = 1089.207 ; free physical = 35267 ; free virtual = 53258
+INFO: [Project 1-571] Translating synthesized netlist
+Netlist sorting complete. Time (s): cpu = 00:00:03 ; elapsed = 00:00:00.01 . Memory (MB): peak = 4097.238 ; gain = 0.000 ; free physical = 35429 ; free virtual = 53420
+INFO: [Netlist 29-17] Analyzing 2 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 4097.238 ; gain = 0.000 ; free physical = 35439 ; free virtual = 53430
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 2 instances were transformed.
+  IBUF => IBUF (IBUFCTRL, INBUF): 1 instance 
+  IBUFDS => IBUFDS (DIFFINBUF, IBUFCTRL): 1 instance 
+
+Synth Design complete | Checksum: 59c4f4c9
+INFO: [Common 17-83] Releasing license: Synthesis
+59 Infos, 104 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:00:46 ; elapsed = 00:00:49 . Memory (MB): peak = 4097.238 ; gain = 2502.844 ; free physical = 35439 ; free virtual = 53430
+INFO: [Common 17-2834] synth_design peak Physical Memory [PSS] (MB): overall = 3284.223; main = 3114.299; forked = 223.068
+INFO: [Common 17-2834] synth_design peak Virtual Memory [VSS] (MB): overall = 4946.969; main = 4069.504; forked = 918.539
+Write ShapeDB Complete: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 4097.238 ; gain = 0.000 ; free physical = 35439 ; free virtual = 53430
+INFO: [Common 17-1381] The checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/synth_1/split_d_nm37_top.dcp' has been generated.
+INFO: [Vivado 12-24828] Executing command : report_utilization -file split_d_nm37_top_utilization_synth.rpt -pb split_d_nm37_top_utilization_synth.pb
+INFO: [Common 17-206] Exiting Vivado at Sat Oct 10 19:13:33 2026...
+[Sat Oct 10 19:13:36 2026] synth_1 finished
+wait_on_runs: Time (s): cpu = 00:25:05 ; elapsed = 00:07:19 . Memory (MB): peak = 1893.223 ; gain = 0.000 ; free physical = 38468 ; free virtual = 56453
+# if {[get_property PROGRESS [get_runs synth_1]] ne "100%"} { error "Synthesis failed" }
+# open_run synth_1
+Design is defaulting to impl run constrset: constrs_1
+Design is defaulting to synth run part: xcvu37p_CIV-fsvh2892-2-e
+INFO: [Device 21-403] Loading part xcvu37p_CIV-fsvh2892-2-e
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_ila/split_d_ila.dcp' for cell 'u_ila'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_vio/split_d_vio.dcp' for cell 'u_vio'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0.dcp' for cell 'u_bd/split_d_system_i/clk_wiz_0'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/split_d_system_control_interconnect_0.dcp' for cell 'u_bd/split_d_system_i/control_interconnect'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_fsa_0_0/split_d_system_fsa_0_0.dcp' for cell 'u_bd/split_d_system_i/fsa_0'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_hbm_0_0/split_d_system_hbm_0_0.dcp' for cell 'u_bd/split_d_system_i/hbm_0'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/split_d_system_memory_interconnect_0.dcp' for cell 'u_bd/split_d_system_i/memory_interconnect'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_ready_0/split_d_system_memory_ready_0.dcp' for cell 'u_bd/split_d_system_i/memory_ready'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_100_0/split_d_system_rst_100_0.dcp' for cell 'u_bd/split_d_system_i/rst_100'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_225_0/split_d_system_rst_225_0.dcp' for cell 'u_bd/split_d_system_i/rst_225'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_selftest_0_0/split_d_system_selftest_0_0.dcp' for cell 'u_bd/split_d_system_i/selftest_0'
+Netlist sorting complete. Time (s): cpu = 00:00:01 ; elapsed = 00:00:01 . Memory (MB): peak = 3109.336 ; gain = 0.000 ; free physical = 36938 ; free virtual = 54927
+INFO: [Netlist 29-17] Analyzing 4257 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 1 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2024.2
+INFO: [Project 1-570] Preparing netlist for logic optimization
+WARNING: [Opt 31-32] Removing redundant IBUF since it is not being driven by a top-level port. u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_HBM_REF_CLK_IBUF_0 
+Resolution: The tool has removed redundant IBUF. To resolve this warning, check for redundant IBUF in the input design.
+WARNING: [Opt 31-32] Removing redundant IBUF since it is not being driven by a top-level port. u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_HBM_REF_CLK_IBUF_1 
+Resolution: The tool has removed redundant IBUF. To resolve this warning, check for redundant IBUF in the input design.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'u_bd/split_d_system_i/hbm_0/HBM_REF_CLK_0' is not directly connected to top level port. 'IBUF_LOW_PWR' is ignored for synthesis but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'u_bd/split_d_system_i/hbm_0/HBM_REF_CLK_1' is not directly connected to top level port. 'IBUF_LOW_PWR' is ignored for synthesis but preserved for implementation.
+INFO: [Chipscope 16-324] Core: u_bd/split_d_system_i/hbm_0 UUID: 12dc8007-a090-5c1b-84bf-a4bfa8ce25dc 
+INFO: [Chipscope 16-324] Core: u_ila UUID: c30a8330-47ba-5203-8dbc-7e3e3214d902 
+INFO: [Chipscope 16-324] Core: u_vio UUID: 407d14e8-1cc9-58ef-8c2e-354d7bf170fd 
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_1/bd_4794_psr0_0_board.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr0/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_1/bd_4794_psr0_0_board.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr0/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_vio/split_d_vio.xdc] for cell 'u_vio'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_vio/split_d_vio.xdc] for cell 'u_vio'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_ila/ila_v6_2/constraints/ila.xdc] for cell 'u_ila/inst'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_ila/ila_v6_2/constraints/ila.xdc] for cell 'u_ila/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_ila/ila_v6_2/constraints/ila_impl.xdc] for cell 'u_ila/inst'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_ila/ila_v6_2/constraints/ila_impl.xdc] for cell 'u_ila/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst'
+WARNING: [Vivado_Tcl 4-919] Waiver ID 'CDC-1' -from list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:2]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:3]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:4]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:5]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:6]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:7]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:8]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:9]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:10]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:11]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:12]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:14]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:15]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:18]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:19]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:20]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:21]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:22]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:23]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:24]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:26]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:28]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:29]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:30]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:32]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:36]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:37]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-2' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:38]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-2' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:39]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-2' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:40]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-10' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:41]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-10' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:42]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-10' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:43]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-4' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:44]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-4' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:45]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-4' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:46]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-13' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:47]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-13' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:48]
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_3/bd_4794_psr_aclk1_0.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk1/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_3/bd_4794_psr_aclk1_0.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk1/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_3/bd_4794_psr_aclk1_0_board.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk1/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_3/bd_4794_psr_aclk1_0_board.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk1/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_2/bd_4794_psr_aclk_0.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_2/bd_4794_psr_aclk_0.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_2/bd_4794_psr_aclk_0_board.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_2/bd_4794_psr_aclk_0_board.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_1/bd_4794_psr0_0.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr0/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_1/bd_4794_psr0_0.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr0/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0_board.xdc] for cell 'u_bd/split_d_system_i/clk_wiz_0/inst'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0_board.xdc] for cell 'u_bd/split_d_system_i/clk_wiz_0/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/smartconnect.xdc] for cell 'u_bd/split_d_system_i/control_interconnect/inst'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/smartconnect.xdc] for cell 'u_bd/split_d_system_i/control_interconnect/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/bd_0/ip/ip_1/bd_a1ee_psr_aclk_0.xdc] for cell 'u_bd/split_d_system_i/control_interconnect/inst/clk_map/psr_aclk/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/bd_0/ip/ip_1/bd_a1ee_psr_aclk_0.xdc] for cell 'u_bd/split_d_system_i/control_interconnect/inst/clk_map/psr_aclk/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/bd_0/ip/ip_1/bd_a1ee_psr_aclk_0_board.xdc] for cell 'u_bd/split_d_system_i/control_interconnect/inst/clk_map/psr_aclk/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/bd_0/ip/ip_1/bd_a1ee_psr_aclk_0_board.xdc] for cell 'u_bd/split_d_system_i/control_interconnect/inst/clk_map/psr_aclk/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_hbm_0_0/hdl/par/hbm_ip.xdc] for cell 'u_bd/split_d_system_i/hbm_0/inst'
+create_clock: Time (s): cpu = 00:00:05 ; elapsed = 00:00:05 . Memory (MB): peak = 3756.660 ; gain = 35.781 ; free physical = 39495 ; free virtual = 57484
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_hbm_0_0/hdl/par/hbm_ip.xdc] for cell 'u_bd/split_d_system_i/hbm_0/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_225_0/split_d_system_rst_225_0.xdc] for cell 'u_bd/split_d_system_i/rst_225/U0'
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-11' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_225_0/split_d_system_rst_225_0.xdc:50]
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_225_0/split_d_system_rst_225_0.xdc] for cell 'u_bd/split_d_system_i/rst_225/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_225_0/split_d_system_rst_225_0_board.xdc] for cell 'u_bd/split_d_system_i/rst_225/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_225_0/split_d_system_rst_225_0_board.xdc] for cell 'u_bd/split_d_system_i/rst_225/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_100_0/split_d_system_rst_100_0.xdc] for cell 'u_bd/split_d_system_i/rst_100/U0'
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-11' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_100_0/split_d_system_rst_100_0.xdc:50]
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_100_0/split_d_system_rst_100_0.xdc] for cell 'u_bd/split_d_system_i/rst_100/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_100_0/split_d_system_rst_100_0_board.xdc] for cell 'u_bd/split_d_system_i/rst_100/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_100_0/split_d_system_rst_100_0_board.xdc] for cell 'u_bd/split_d_system_i/rst_100/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0.xdc] for cell 'u_bd/split_d_system_i/clk_wiz_0/inst'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0.xdc] for cell 'u_bd/split_d_system_i/clk_wiz_0/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/nm37.xdc]
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/nm37.xdc]
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0_late.xdc] for cell 'u_bd/split_d_system_i/clk_wiz_0/inst'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0_late.xdc] for cell 'u_bd/split_d_system_i/clk_wiz_0/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc]
+WARNING: [Constraints 18-619] A clock with name 'u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_0' already exists, overwriting the previous clock with the same name. [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc:6]
+WARNING: [Constraints 18-619] A clock with name 'u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_1' already exists, overwriting the previous clock with the same name. [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc:9]
+INFO: [Timing 38-35] Done setting XDC timing constraints. [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc:12]
+INFO: [Timing 38-2] Deriving generated clocks [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc:12]
+get_clocks: Time (s): cpu = 00:00:18 ; elapsed = 00:00:08 . Memory (MB): peak = 4395.125 ; gain = 574.434 ; free physical = 38980 ; free virtual = 56970
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc]
+INFO: [Project 1-1714] 115 XPM XDC files have been applied to the design.
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+INFO: [Project 1-1687] 47 scoped IP constraints or related sub-commands were skipped due to synthesis logic optimizations usually triggered by constant connectivity or unconnected output pins. To review the skipped constraints and messages, run the command 'set_param netlist.IPMsgFiltering false' before opening the design.
+Netlist sorting complete. Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 4395.125 ; gain = 0.000 ; free physical = 38981 ; free virtual = 56972
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 2090 instances were transformed.
+  CFGLUT5 => CFGLUT5 (SRL16E, SRLC32E): 104 instances
+  DSP48E1 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 16 instances
+  DSP48E2 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 24 instances
+  HBM_TWO_STACK_INTF => HBM_TWO_STACK_INTF (HBM_REF_CLK(x2), HBM_SNGLBLI_INTF_APB(x2), HBM_SNGLBLI_INTF_AXI(x32)): 1 instance 
+  IBUF => IBUF (IBUFCTRL, INBUF): 1 instance 
+  IBUFDS => IBUFDS (DIFFINBUF, IBUFCTRL): 1 instance 
+  RAM16X1D => RAM32X1D (RAMD32(x2)): 258 instances
+  RAM16X1S => RAM32X1S (RAMS32): 1440 instances
+  RAM32M => RAM32M (RAMD32(x6), RAMS32(x2)): 6 instances
+  RAM32M16 => RAM32M16 (RAMD32(x14), RAMS32(x2)): 238 instances
+  RAM32X1D => RAM32X1D (RAMD32(x2)): 1 instance 
+
+open_run: Time (s): cpu = 00:01:13 ; elapsed = 00:01:05 . Memory (MB): peak = 4395.125 ; gain = 2501.902 ; free physical = 38981 ; free virtual = 56972
+# check_nm37_clocks
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+NM37_CLOCK_ASSERTIONS_PASS core=clk_out1_split_d_system_clk_wiz_0_0
+# set fsa_clock_pin [get_pins -hier -filter {NAME =~ */fsa_0/ap_clk}]
+# if {[llength $fsa_clock_pin]!=1} { error "Cannot identify unique FSA clock pin: $fsa_clock_pin" }
+# set core_clock [get_clocks -of_objects $fsa_clock_pin]
+# if {[llength $core_clock]!=1 || abs([get_property PERIOD $core_clock]-10.0)>0.001} {
+#     error "FSA clock must remain 100MHz: $core_clock"
+# }
+# report_utilization -hierarchical -file [file join $report_dir synthesis_utilization.rpt]
+# close_design
+# launch_runs impl_1 -to_step route_design -jobs 8
+[Sat Oct 10 19:14:51 2026] Launched impl_1...
+Run output will be captured here: /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/impl_1/runme.log
+# wait_on_run impl_1
+[Sat Oct 10 19:14:51 2026] Waiting for impl_1 to finish...
+
+*** Running vivado
+    with args -log split_d_nm37_top.vdi -applog -m64 -product Vivado -messageDb vivado.pb -mode batch -source split_d_nm37_top.tcl -notrace
+
+
+****** Vivado v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sat Oct 10 19:14:54 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source split_d_nm37_top.tcl -notrace
+create_project: Time (s): cpu = 00:00:08 ; elapsed = 00:00:09 . Memory (MB): peak = 1486.133 ; gain = 126.840 ; free physical = 38412 ; free virtual = 56410
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1/impl/ip'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/opt/Xilinx_2024.2/Vivado/2024.2/data/ip'.
+Command: link_design -top split_d_nm37_top -part xcvu37p_CIV-fsvh2892-2-e
+Design is defaulting to srcset: sources_1
+Design is defaulting to constrset: constrs_1
+INFO: [Device 21-403] Loading part xcvu37p_CIV-fsvh2892-2-e
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_ila/split_d_ila.dcp' for cell 'u_ila'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_vio/split_d_vio.dcp' for cell 'u_vio'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0.dcp' for cell 'u_bd/split_d_system_i/clk_wiz_0'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/split_d_system_control_interconnect_0.dcp' for cell 'u_bd/split_d_system_i/control_interconnect'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_fsa_0_0/split_d_system_fsa_0_0.dcp' for cell 'u_bd/split_d_system_i/fsa_0'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_hbm_0_0/split_d_system_hbm_0_0.dcp' for cell 'u_bd/split_d_system_i/hbm_0'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/split_d_system_memory_interconnect_0.dcp' for cell 'u_bd/split_d_system_i/memory_interconnect'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_ready_0/split_d_system_memory_ready_0.dcp' for cell 'u_bd/split_d_system_i/memory_ready'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_100_0/split_d_system_rst_100_0.dcp' for cell 'u_bd/split_d_system_i/rst_100'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_225_0/split_d_system_rst_225_0.dcp' for cell 'u_bd/split_d_system_i/rst_225'
+INFO: [Project 1-454] Reading design checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_selftest_0_0/split_d_system_selftest_0_0.dcp' for cell 'u_bd/split_d_system_i/selftest_0'
+Netlist sorting complete. Time (s): cpu = 00:00:01 ; elapsed = 00:00:01 . Memory (MB): peak = 3059.477 ; gain = 0.000 ; free physical = 36767 ; free virtual = 54770
+INFO: [Netlist 29-17] Analyzing 4257 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 1 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2024.2
+INFO: [Project 1-570] Preparing netlist for logic optimization
+WARNING: [Opt 31-32] Removing redundant IBUF since it is not being driven by a top-level port. u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_HBM_REF_CLK_IBUF_0 
+Resolution: The tool has removed redundant IBUF. To resolve this warning, check for redundant IBUF in the input design.
+WARNING: [Opt 31-32] Removing redundant IBUF since it is not being driven by a top-level port. u_bd/split_d_system_i/hbm_0/inst/TWO_STACK.u_HBM_REF_CLK_IBUF_1 
+Resolution: The tool has removed redundant IBUF. To resolve this warning, check for redundant IBUF in the input design.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'u_bd/split_d_system_i/hbm_0/HBM_REF_CLK_0' is not directly connected to top level port. 'IBUF_LOW_PWR' is ignored for synthesis but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'u_bd/split_d_system_i/hbm_0/HBM_REF_CLK_1' is not directly connected to top level port. 'IBUF_LOW_PWR' is ignored for synthesis but preserved for implementation.
+INFO: [Chipscope 16-324] Core: u_bd/split_d_system_i/hbm_0 UUID: 12dc8007-a090-5c1b-84bf-a4bfa8ce25dc 
+INFO: [Chipscope 16-324] Core: u_ila UUID: c30a8330-47ba-5203-8dbc-7e3e3214d902 
+INFO: [Chipscope 16-324] Core: u_vio UUID: 407d14e8-1cc9-58ef-8c2e-354d7bf170fd 
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_1/bd_4794_psr0_0_board.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr0/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_1/bd_4794_psr0_0_board.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr0/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_vio/split_d_vio.xdc] for cell 'u_vio'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_vio/split_d_vio.xdc] for cell 'u_vio'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_ila/ila_v6_2/constraints/ila.xdc] for cell 'u_ila/inst'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_ila/ila_v6_2/constraints/ila.xdc] for cell 'u_ila/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_ila/ila_v6_2/constraints/ila_impl.xdc] for cell 'u_ila/inst'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_ila/ila_v6_2/constraints/ila_impl.xdc] for cell 'u_ila/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst'
+WARNING: [Vivado_Tcl 4-919] Waiver ID 'CDC-1' -from list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:2]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:3]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:4]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:5]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:6]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:7]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:8]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:9]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:10]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:11]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:12]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:14]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:15]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:18]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:19]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:20]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:21]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:22]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:23]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:24]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:26]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:28]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:29]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:30]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:32]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:36]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-1' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:37]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-2' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:38]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-2' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:39]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-2' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:40]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-10' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:41]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-10' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:42]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-10' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:43]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-4' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:44]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-4' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:45]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-4' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:46]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-13' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:47]
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-13' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc:48]
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/smartconnect.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_3/bd_4794_psr_aclk1_0.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk1/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_3/bd_4794_psr_aclk1_0.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk1/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_3/bd_4794_psr_aclk1_0_board.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk1/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_3/bd_4794_psr_aclk1_0_board.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk1/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_2/bd_4794_psr_aclk_0.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_2/bd_4794_psr_aclk_0.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_2/bd_4794_psr_aclk_0_board.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_2/bd_4794_psr_aclk_0_board.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr_aclk/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_1/bd_4794_psr0_0.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr0/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/ip/ip_1/bd_4794_psr0_0.xdc] for cell 'u_bd/split_d_system_i/memory_interconnect/inst/clk_map/psr0/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0_board.xdc] for cell 'u_bd/split_d_system_i/clk_wiz_0/inst'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0_board.xdc] for cell 'u_bd/split_d_system_i/clk_wiz_0/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/smartconnect.xdc] for cell 'u_bd/split_d_system_i/control_interconnect/inst'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/smartconnect.xdc] for cell 'u_bd/split_d_system_i/control_interconnect/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/bd_0/ip/ip_1/bd_a1ee_psr_aclk_0.xdc] for cell 'u_bd/split_d_system_i/control_interconnect/inst/clk_map/psr_aclk/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/bd_0/ip/ip_1/bd_a1ee_psr_aclk_0.xdc] for cell 'u_bd/split_d_system_i/control_interconnect/inst/clk_map/psr_aclk/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/bd_0/ip/ip_1/bd_a1ee_psr_aclk_0_board.xdc] for cell 'u_bd/split_d_system_i/control_interconnect/inst/clk_map/psr_aclk/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/bd_0/ip/ip_1/bd_a1ee_psr_aclk_0_board.xdc] for cell 'u_bd/split_d_system_i/control_interconnect/inst/clk_map/psr_aclk/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_hbm_0_0/hdl/par/hbm_ip.xdc] for cell 'u_bd/split_d_system_i/hbm_0/inst'
+create_clock: Time (s): cpu = 00:00:05 ; elapsed = 00:00:05 . Memory (MB): peak = 3730.785 ; gain = 34.750 ; free physical = 36271 ; free virtual = 54280
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_hbm_0_0/hdl/par/hbm_ip.xdc] for cell 'u_bd/split_d_system_i/hbm_0/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_225_0/split_d_system_rst_225_0.xdc] for cell 'u_bd/split_d_system_i/rst_225/U0'
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-11' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_225_0/split_d_system_rst_225_0.xdc:50]
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_225_0/split_d_system_rst_225_0.xdc] for cell 'u_bd/split_d_system_i/rst_225/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_225_0/split_d_system_rst_225_0_board.xdc] for cell 'u_bd/split_d_system_i/rst_225/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_225_0/split_d_system_rst_225_0_board.xdc] for cell 'u_bd/split_d_system_i/rst_225/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_100_0/split_d_system_rst_100_0.xdc] for cell 'u_bd/split_d_system_i/rst_100/U0'
+WARNING: [Vivado_Tcl 4-921] Waiver ID 'CDC-11' -to list should not be empty. [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_100_0/split_d_system_rst_100_0.xdc:50]
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_100_0/split_d_system_rst_100_0.xdc] for cell 'u_bd/split_d_system_i/rst_100/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_100_0/split_d_system_rst_100_0_board.xdc] for cell 'u_bd/split_d_system_i/rst_100/U0'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_rst_100_0/split_d_system_rst_100_0_board.xdc] for cell 'u_bd/split_d_system_i/rst_100/U0'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0.xdc] for cell 'u_bd/split_d_system_i/clk_wiz_0/inst'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0.xdc] for cell 'u_bd/split_d_system_i/clk_wiz_0/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/nm37.xdc]
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/nm37.xdc]
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0_late.xdc] for cell 'u_bd/split_d_system_i/clk_wiz_0/inst'
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_clk_wiz_0_0/split_d_system_clk_wiz_0_0_late.xdc] for cell 'u_bd/split_d_system_i/clk_wiz_0/inst'
+Parsing XDC File [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc]
+WARNING: [Constraints 18-619] A clock with name 'u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_0' already exists, overwriting the previous clock with the same name. [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc:6]
+WARNING: [Constraints 18-619] A clock with name 'u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_1' already exists, overwriting the previous clock with the same name. [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc:9]
+INFO: [Timing 38-35] Done setting XDC timing constraints. [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc:12]
+INFO: [Timing 38-2] Deriving generated clocks [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc:12]
+get_clocks: Time (s): cpu = 00:00:19 ; elapsed = 00:00:08 . Memory (MB): peak = 4378.570 ; gain = 583.754 ; free physical = 35742 ; free virtual = 53752
+Finished Parsing XDC File [/home/zhangchenxuan/FSA_HLS/tools/split_d_nm37/constraints/core_budget.xdc]
+INFO: [Project 1-1714] 115 XPM XDC files have been applied to the design.
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+INFO: [Project 1-1687] 47 scoped IP constraints or related sub-commands were skipped due to synthesis logic optimizations usually triggered by constant connectivity or unconnected output pins. To review the skipped constraints and messages, run the command 'set_param netlist.IPMsgFiltering false' before opening the design.
+Netlist sorting complete. Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 4378.570 ; gain = 0.000 ; free physical = 35745 ; free virtual = 53755
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 2090 instances were transformed.
+  CFGLUT5 => CFGLUT5 (SRL16E, SRLC32E): 104 instances
+  DSP48E1 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 16 instances
+  DSP48E2 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 24 instances
+  HBM_TWO_STACK_INTF => HBM_TWO_STACK_INTF (HBM_REF_CLK(x2), HBM_SNGLBLI_INTF_APB(x2), HBM_SNGLBLI_INTF_AXI(x32)): 1 instance 
+  IBUF => IBUF (IBUFCTRL, INBUF): 1 instance 
+  IBUFDS => IBUFDS (DIFFINBUF, IBUFCTRL): 1 instance 
+  RAM16X1D => RAM32X1D (RAMD32(x2)): 258 instances
+  RAM16X1S => RAM32X1S (RAMS32): 1440 instances
+  RAM32M => RAM32M (RAMD32(x6), RAMS32(x2)): 6 instances
+  RAM32M16 => RAM32M16 (RAMD32(x14), RAMS32(x2)): 238 instances
+  RAM32X1D => RAM32X1D (RAMD32(x2)): 1 instance 
+
+28 Infos, 46 Warnings, 0 Critical Warnings and 0 Errors encountered.
+link_design completed successfully
+link_design: Time (s): cpu = 00:01:14 ; elapsed = 00:01:05 . Memory (MB): peak = 4378.570 ; gain = 2782.297 ; free physical = 35745 ; free virtual = 53755
+Command: opt_design
+Attempting to get a license for feature 'Implementation' and/or device 'xcvu37p_CIV'
+INFO: [Common 17-349] Got license for feature 'Implementation' and/or device 'xcvu37p_CIV'
+Running DRC as a precondition to command opt_design
+
+Starting DRC Task
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Project 1-461] DRC finished with 0 Errors
+INFO: [Project 1-462] Please refer to the DRC report (report_drc) for more information.
+
+Time (s): cpu = 00:00:05 ; elapsed = 00:00:01 . Memory (MB): peak = 4386.574 ; gain = 0.000 ; free physical = 35721 ; free virtual = 53732
+
+Starting Cache Timing Information Task
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+Ending Cache Timing Information Task | Checksum: 20173c991
+
+Time (s): cpu = 00:00:13 ; elapsed = 00:00:04 . Memory (MB): peak = 4386.574 ; gain = 0.000 ; free physical = 35710 ; free virtual = 53721
+
+Starting Logic Optimization Task
+
+Phase 1 Initialization
+
+Phase 1.1 Core Generation And Design Setup
+
+Phase 1.1.1 Generate And Synthesize Debug Cores
+INFO: [Chipscope 16-329] Generating Script for core instance : dbg_hub 
+INFO: [IP_Flow 19-3806] Processing IP xilinx.com:ip:xsdbm:3.0 for cell dbg_hub_CV.
+Done building netlist checker database: Time (s): cpu = 00:00:00.05 ; elapsed = 00:00:00.05 . Memory (MB): peak = 4716.402 ; gain = 0.000 ; free physical = 35322 ; free virtual = 53357
+Netlist sorting complete. Time (s): cpu = 00:00:00.06 ; elapsed = 00:00:00.06 . Memory (MB): peak = 4716.402 ; gain = 0.000 ; free physical = 35329 ; free virtual = 53365
+Phase 1.1.1 Generate And Synthesize Debug Cores | Checksum: 262f5990c
+
+Time (s): cpu = 00:01:42 ; elapsed = 00:01:58 . Memory (MB): peak = 4716.402 ; gain = 19.844 ; free physical = 35329 ; free virtual = 53365
+Phase 1.1 Core Generation And Design Setup | Checksum: 262f5990c
+
+Time (s): cpu = 00:01:42 ; elapsed = 00:01:58 . Memory (MB): peak = 4716.402 ; gain = 19.844 ; free physical = 35329 ; free virtual = 53365
+
+Phase 1.2 Setup Constraints And Sort Netlist
+Phase 1.2 Setup Constraints And Sort Netlist | Checksum: 262f5990c
+
+Time (s): cpu = 00:01:43 ; elapsed = 00:01:58 . Memory (MB): peak = 4716.402 ; gain = 19.844 ; free physical = 35329 ; free virtual = 53365
+Phase 1 Initialization | Checksum: 262f5990c
+
+Time (s): cpu = 00:01:43 ; elapsed = 00:01:58 . Memory (MB): peak = 4716.402 ; gain = 19.844 ; free physical = 35329 ; free virtual = 53365
+
+Phase 2 Timer Update And Timing Data Collection
+
+Phase 2.1 Timer Update
+Phase 2.1 Timer Update | Checksum: 262f5990c
+
+Time (s): cpu = 00:01:50 ; elapsed = 00:02:00 . Memory (MB): peak = 4716.402 ; gain = 19.844 ; free physical = 35324 ; free virtual = 53360
+
+Phase 2.2 Timing Data Collection
+Phase 2.2 Timing Data Collection | Checksum: 262f5990c
+
+Time (s): cpu = 00:01:51 ; elapsed = 00:02:00 . Memory (MB): peak = 4748.402 ; gain = 51.844 ; free physical = 35308 ; free virtual = 53344
+Phase 2 Timer Update And Timing Data Collection | Checksum: 262f5990c
+
+Time (s): cpu = 00:01:51 ; elapsed = 00:02:00 . Memory (MB): peak = 4748.402 ; gain = 51.844 ; free physical = 35308 ; free virtual = 53344
+
+Phase 3 Retarget
+INFO: [Opt 31-1851] Number of loadless carry chains removed were: 0
+INFO: [Opt 31-1834] Total Chains To Be Transformed Were: 0 AND Number of Transformed insts Created are: 0
+INFO: [Opt 31-1566] Pulled 258 inverters resulting in an inversion of 1722 pins
+INFO: [Opt 31-138] Pushed 152 inverter(s) to 5553 load pin(s).
+INFO: [Opt 31-422] The CLOCK_DOMAINS attribute on the BRAM cell u_ila/inst/ila_core_inst/ila_trace_memory_inst/SUBCORE_RAM_BLK_MEM_1.trace_block_memory/inst_blk_mem_gen/gnbram.gnativebmg.native_blk_mem_gen/valid.cstr/ramloop[0].ram.r/prim_noinit.ram/DEVICE_8SERIES.NO_BMM_INFO.SDP.SIMPLE_PRIM36.ram has been changed from INDEPENDENT to COMMON to match the clocking topology used for the BRAM.
+INFO: [Opt 31-422] The CLOCK_DOMAINS attribute on the BRAM cell u_ila/inst/ila_core_inst/ila_trace_memory_inst/SUBCORE_RAM_BLK_MEM_1.trace_block_memory/inst_blk_mem_gen/gnbram.gnativebmg.native_blk_mem_gen/valid.cstr/ramloop[1].ram.r/prim_noinit.ram/DEVICE_8SERIES.NO_BMM_INFO.SDP.SIMPLE_PRIM36.ram has been changed from INDEPENDENT to COMMON to match the clocking topology used for the BRAM.
+INFO: [Opt 31-422] The CLOCK_DOMAINS attribute on the BRAM cell u_ila/inst/ila_core_inst/ila_trace_memory_inst/SUBCORE_RAM_BLK_MEM_1.trace_block_memory/inst_blk_mem_gen/gnbram.gnativebmg.native_blk_mem_gen/valid.cstr/ramloop[2].ram.r/prim_noinit.ram/DEVICE_8SERIES.NO_BMM_INFO.SDP.SIMPLE_PRIM36.ram has been changed from INDEPENDENT to COMMON to match the clocking topology used for the BRAM.
+INFO: [Opt 31-422] The CLOCK_DOMAINS attribute on the BRAM cell u_ila/inst/ila_core_inst/ila_trace_memory_inst/SUBCORE_RAM_BLK_MEM_1.trace_block_memory/inst_blk_mem_gen/gnbram.gnativebmg.native_blk_mem_gen/valid.cstr/ramloop[3].ram.r/prim_noinit.ram/DEVICE_8SERIES.NO_BMM_INFO.SDP.SIMPLE_PRIM36.ram has been changed from INDEPENDENT to COMMON to match the clocking topology used for the BRAM.
+INFO: [Opt 31-49] Retargeted 0 cell(s).
+Phase 3 Retarget | Checksum: 1478a43c0
+
+Time (s): cpu = 00:01:54 ; elapsed = 00:02:03 . Memory (MB): peak = 4748.402 ; gain = 51.844 ; free physical = 35303 ; free virtual = 53340
+Retarget | Checksum: 1478a43c0
+INFO: [Opt 31-389] Phase Retarget created 539 cells and removed 1181 cells
+INFO: [Opt 31-1021] In phase Retarget, 288 netlist objects are constrained preventing optimization. Please run opt_design with -debug_log to get more detail. 
+
+Phase 4 Constant propagation
+INFO: [Opt 31-138] Pushed 11 inverter(s) to 20 load pin(s).
+Phase 4 Constant propagation | Checksum: 1cafd7bf9
+
+Time (s): cpu = 00:01:55 ; elapsed = 00:02:04 . Memory (MB): peak = 4748.402 ; gain = 51.844 ; free physical = 35304 ; free virtual = 53341
+Constant propagation | Checksum: 1cafd7bf9
+INFO: [Opt 31-389] Phase Constant propagation created 477 cells and removed 2285 cells
+INFO: [Opt 31-1021] In phase Constant propagation, 272 netlist objects are constrained preventing optimization. Please run opt_design with -debug_log to get more detail. 
+
+Phase 5 Sweep
+INFO: [Constraints 18-11670] Building netlist checker database with flags, 0x8
+Done building netlist checker database: Time (s): cpu = 00:00:00.05 ; elapsed = 00:00:00.05 . Memory (MB): peak = 4748.402 ; gain = 0.000 ; free physical = 35306 ; free virtual = 53343
+INFO: [Constraints 18-11670] Building netlist checker database with flags, 0x8
+Done building netlist checker database: Time (s): cpu = 00:00:00.04 ; elapsed = 00:00:00.04 . Memory (MB): peak = 4748.402 ; gain = 0.000 ; free physical = 35312 ; free virtual = 53353
+Phase 5 Sweep | Checksum: 1d92a8c6e
+
+Time (s): cpu = 00:02:22 ; elapsed = 00:02:32 . Memory (MB): peak = 4748.402 ; gain = 51.844 ; free physical = 35313 ; free virtual = 53355
+Sweep | Checksum: 1d92a8c6e
+INFO: [Opt 31-389] Phase Sweep created 0 cells and removed 1040 cells
+INFO: [Opt 31-1021] In phase Sweep, 2533 netlist objects are constrained preventing optimization. Please run opt_design with -debug_log to get more detail. 
+
+Phase 6 BUFG optimization
+INFO: [Opt 31-1077] Phase BUFG optimization inserted 0 global clock buffer(s) for CLOCK_LOW_FANOUT.
+Phase 6 BUFG optimization | Checksum: 1c2fd3a38
+
+Time (s): cpu = 00:02:25 ; elapsed = 00:02:33 . Memory (MB): peak = 4780.418 ; gain = 83.859 ; free physical = 35313 ; free virtual = 53355
+BUFG optimization | Checksum: 1c2fd3a38
+INFO: [Opt 31-662] Phase BUFG optimization created 1 cells of which 1 are BUFGs and removed 2 cells.
+
+Phase 7 Shift Register Optimization
+INFO: [Opt 31-1064] SRL Remap converted 0 SRLs to 0 registers and converted 0 registers of register chains to 0 SRLs
+Phase 7 Shift Register Optimization | Checksum: 1c2fd3a38
+
+Time (s): cpu = 00:02:25 ; elapsed = 00:02:33 . Memory (MB): peak = 4780.418 ; gain = 83.859 ; free physical = 35315 ; free virtual = 53356
+Shift Register Optimization | Checksum: 1c2fd3a38
+INFO: [Opt 31-389] Phase Shift Register Optimization created 0 cells and removed 0 cells
+
+Phase 8 Post Processing Netlist
+Phase 8 Post Processing Netlist | Checksum: 1e5f22eb8
+
+Time (s): cpu = 00:02:25 ; elapsed = 00:02:34 . Memory (MB): peak = 4780.418 ; gain = 83.859 ; free physical = 35315 ; free virtual = 53357
+Post Processing Netlist | Checksum: 1e5f22eb8
+INFO: [Opt 31-389] Phase Post Processing Netlist created 0 cells and removed 0 cells
+INFO: [Opt 31-1021] In phase Post Processing Netlist, 280 netlist objects are constrained preventing optimization. Please run opt_design with -debug_log to get more detail. 
+
+Phase 9 Finalization
+
+Phase 9.1 Finalizing Design Cores and Updating Shapes
+Phase 9.1 Finalizing Design Cores and Updating Shapes | Checksum: 21c95faea
+
+Time (s): cpu = 00:02:28 ; elapsed = 00:02:36 . Memory (MB): peak = 4780.418 ; gain = 83.859 ; free physical = 35315 ; free virtual = 53357
+
+Phase 9.2 Verifying Netlist Connectivity
+
+Starting Connectivity Check Task
+
+Time (s): cpu = 00:00:00.2 ; elapsed = 00:00:00.22 . Memory (MB): peak = 4780.418 ; gain = 0.000 ; free physical = 35315 ; free virtual = 53357
+Phase 9.2 Verifying Netlist Connectivity | Checksum: 21c95faea
+
+Time (s): cpu = 00:02:28 ; elapsed = 00:02:36 . Memory (MB): peak = 4780.418 ; gain = 83.859 ; free physical = 35315 ; free virtual = 53357
+Phase 9 Finalization | Checksum: 21c95faea
+
+Time (s): cpu = 00:02:28 ; elapsed = 00:02:36 . Memory (MB): peak = 4780.418 ; gain = 83.859 ; free physical = 35315 ; free virtual = 53357
+Opt_design Change Summary
+=========================
+
+
+-------------------------------------------------------------------------------------------------------------------------
+|  Phase                        |  #Cells created  |  #Cells Removed  |  #Constrained objects preventing optimizations  |
+-------------------------------------------------------------------------------------------------------------------------
+|  Retarget                     |             539  |            1181  |                                            288  |
+|  Constant propagation         |             477  |            2285  |                                            272  |
+|  Sweep                        |               0  |            1040  |                                           2533  |
+|  BUFG optimization            |               1  |               2  |                                              0  |
+|  Shift Register Optimization  |               0  |               0  |                                              0  |
+|  Post Processing Netlist      |               0  |               0  |                                            280  |
+-------------------------------------------------------------------------------------------------------------------------
+
+
+Ending Logic Optimization Task | Checksum: 21c95faea
+
+Time (s): cpu = 00:02:28 ; elapsed = 00:02:36 . Memory (MB): peak = 4780.418 ; gain = 83.859 ; free physical = 35315 ; free virtual = 53357
+
+Starting Power Optimization Task
+INFO: [Pwropt 34-132] Skipping clock gating for clocks with a period < 2.00 ns.
+INFO: [Pwropt 34-9] Applying IDT optimizations ...
+INFO: [Pwropt 34-10] Applying ODC optimizations ...
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+Running Vector-less Activity Propagation...
+
+Finished Running Vector-less Activity Propagation
+
+
+Starting PowerOpt Patch Enables Task
+INFO: [Pwropt 34-162] WRITE_MODE attribute of 0 BRAM(s) out of a total of 45 has been updated to save power. Run report_power_opt to get a complete listing of the BRAMs updated.
+INFO: [Pwropt 34-201] Structural ODC has moved 6 WE to EN ports
+Number of BRAM Ports augmented: 36 newly gated: 6 Total Ports: 90
+Ending PowerOpt Patch Enables Task | Checksum: 1447a16d5
+
+Time (s): cpu = 00:00:00.65 ; elapsed = 00:00:00.56 . Memory (MB): peak = 5435.555 ; gain = 0.000 ; free physical = 34798 ; free virtual = 52843
+Ending Power Optimization Task | Checksum: 1447a16d5
+
+Time (s): cpu = 00:00:44 ; elapsed = 00:00:16 . Memory (MB): peak = 5435.555 ; gain = 655.137 ; free physical = 34798 ; free virtual = 52843
+
+Starting Final Cleanup Task
+
+Starting Logic Optimization Task
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+Ending Logic Optimization Task | Checksum: 177e38b8e
+
+Time (s): cpu = 00:00:22 ; elapsed = 00:00:07 . Memory (MB): peak = 5435.555 ; gain = 0.000 ; free physical = 34785 ; free virtual = 52832
+Ending Final Cleanup Task | Checksum: 177e38b8e
+
+Time (s): cpu = 00:00:25 ; elapsed = 00:00:10 . Memory (MB): peak = 5435.555 ; gain = 0.000 ; free physical = 34785 ; free virtual = 52832
+
+Starting Netlist Obfuscation Task
+Netlist sorting complete. Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 5435.555 ; gain = 0.000 ; free physical = 34785 ; free virtual = 52832
+Ending Netlist Obfuscation Task | Checksum: 177e38b8e
+
+Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.02 . Memory (MB): peak = 5435.555 ; gain = 0.000 ; free physical = 34785 ; free virtual = 52832
+INFO: [Common 17-83] Releasing license: Implementation
+71 Infos, 46 Warnings, 0 Critical Warnings and 0 Errors encountered.
+opt_design completed successfully
+opt_design: Time (s): cpu = 00:03:57 ; elapsed = 00:03:09 . Memory (MB): peak = 5435.555 ; gain = 1056.984 ; free physical = 34785 ; free virtual = 52832
+INFO: [Vivado 12-24828] Executing command : report_drc -file split_d_nm37_top_drc_opted.rpt -pb split_d_nm37_top_drc_opted.pb -rpx split_d_nm37_top_drc_opted.rpx
+Command: report_drc -file split_d_nm37_top_drc_opted.rpt -pb split_d_nm37_top_drc_opted.pb -rpx split_d_nm37_top_drc_opted.rpx
+INFO: [IP_Flow 19-1839] IP Catalog is up to date.
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Vivado_Tcl 2-168] The results of DRC are in file /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/impl_1/split_d_nm37_top_drc_opted.rpt.
+report_drc completed successfully
+report_drc: Time (s): cpu = 00:01:04 ; elapsed = 00:00:29 . Memory (MB): peak = 5778.289 ; gain = 342.734 ; free physical = 34320 ; free virtual = 52372
+generate_parallel_reports: Time (s): cpu = 00:01:04 ; elapsed = 00:00:29 . Memory (MB): peak = 5778.289 ; gain = 342.734 ; free physical = 34320 ; free virtual = 52372
+INFO: [Timing 38-480] Writing timing data to binary archive.
+Wrote PlaceDB: Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00 . Memory (MB): peak = 5778.289 ; gain = 0.000 ; free physical = 34320 ; free virtual = 52373
+Wrote PulsedLatchDB: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 5778.289 ; gain = 0.000 ; free physical = 34320 ; free virtual = 52373
+Writing XDEF routing.
+Writing XDEF routing logical nets.
+Write ShapeDB Complete: Time (s): cpu = 00:00:00.9 ; elapsed = 00:00:00.19 . Memory (MB): peak = 5778.289 ; gain = 0.000 ; free physical = 34297 ; free virtual = 52363
+Writing XDEF routing special nets.
+Wrote RouteStorage: Time (s): cpu = 00:00:01 ; elapsed = 00:00:00.28 . Memory (MB): peak = 5778.289 ; gain = 0.000 ; free physical = 34291 ; free virtual = 52361
+Wrote Netlist Cache: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 5778.289 ; gain = 0.000 ; free physical = 34291 ; free virtual = 52361
+Wrote Device Cache: Time (s): cpu = 00:00:00.05 ; elapsed = 00:00:00.02 . Memory (MB): peak = 5778.289 ; gain = 0.000 ; free physical = 34291 ; free virtual = 52365
+Write Physdb Complete: Time (s): cpu = 00:00:01 ; elapsed = 00:00:00.31 . Memory (MB): peak = 5778.289 ; gain = 0.000 ; free physical = 34290 ; free virtual = 52364
+INFO: [Common 17-1381] The checkpoint '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_d540da7_ipbf/project/split_d_nm37.runs/impl_1/split_d_nm37_top_opt.dcp' has been generated.
+write_checkpoint: Time (s): cpu = 00:00:11 ; elapsed = 00:00:08 . Memory (MB): peak = 5778.289 ; gain = 0.000 ; free physical = 34242 ; free virtual = 52321
+INFO: [Chipscope 16-240] Debug cores have already been implemented
+Command: place_design
+Attempting to get a license for feature 'Implementation' and/or device 'xcvu37p_CIV'
+INFO: [Common 17-349] Got license for feature 'Implementation' and/or device 'xcvu37p_CIV'
+INFO: [Common 17-83] Releasing license: Implementation
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Vivado_Tcl 4-198] DRC finished with 0 Errors, 2 Advisories
+INFO: [Vivado_Tcl 4-199] Please refer to the DRC report (report_drc) for more information.
+Running DRC as a precondition to command place_design
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Vivado_Tcl 4-198] DRC finished with 0 Errors, 2 Advisories
+INFO: [Vivado_Tcl 4-199] Please refer to the DRC report (report_drc) for more information.
+INFO: [Place 30-611] Multithreading enabled for place_design using a maximum of 8 CPUs
+
+Starting Placer Task
+
+Phase 1 Placer Initialization
+
+Phase 1.1 Placer Initialization Netlist Sorting
+Netlist sorting complete. Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.02 . Memory (MB): peak = 5778.289 ; gain = 0.000 ; free physical = 34243 ; free virtual = 52323
+Phase 1.1 Placer Initialization Netlist Sorting | Checksum: 172151d99
+
+Time (s): cpu = 00:00:00.08 ; elapsed = 00:00:00.08 . Memory (MB): peak = 5778.289 ; gain = 0.000 ; free physical = 34247 ; free virtual = 52326
+Netlist sorting complete. Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.02 . Memory (MB): peak = 5778.289 ; gain = 0.000 ; free physical = 34247 ; free virtual = 52326
+
+Phase 1.2 IO Placement/ Clock Placement/ Build Placer Device
+Phase 1.2 IO Placement/ Clock Placement/ Build Placer Device | Checksum: f19799ec
+
+Time (s): cpu = 00:00:15 ; elapsed = 00:00:10 . Memory (MB): peak = 5778.289 ; gain = 0.000 ; free physical = 34256 ; free virtual = 52337
+
+Phase 1.3 Build Placer Netlist Model
+Phase 1.3 Build Placer Netlist Model | Checksum: 14c901e93
+
+Time (s): cpu = 00:00:57 ; elapsed = 00:00:31 . Memory (MB): peak = 6100.305 ; gain = 322.016 ; free physical = 33938 ; free virtual = 52023
+
+Phase 1.4 Constrain Clocks/Macros
+Phase 1.4 Constrain Clocks/Macros | Checksum: 14c901e93
+
+Time (s): cpu = 00:00:57 ; elapsed = 00:00:31 . Memory (MB): peak = 6100.305 ; gain = 322.016 ; free physical = 33938 ; free virtual = 52023
+Phase 1 Placer Initialization | Checksum: 14c901e93
+
+Time (s): cpu = 00:00:58 ; elapsed = 00:00:31 . Memory (MB): peak = 6100.305 ; gain = 322.016 ; free physical = 33938 ; free virtual = 52022
+
+Phase 2 Global Placement
+
+Phase 2.1 Floorplanning
+
+Phase 2.1.1 Partition Driven Placement
+
+Phase 2.1.1.1 PBP: Partition Driven Placement
+Phase 2.1.1.1 PBP: Partition Driven Placement | Checksum: 100017d75
+
+Time (s): cpu = 00:02:12 ; elapsed = 00:01:02 . Memory (MB): peak = 6179.797 ; gain = 401.508 ; free physical = 34013 ; free virtual = 52104
+
+Phase 2.1.1.2 PBP: Clock Region Placement
+Phase 2.1.1.2 PBP: Clock Region Placement | Checksum: 100017d75
+
+Time (s): cpu = 00:02:16 ; elapsed = 00:01:07 . Memory (MB): peak = 6245.711 ; gain = 467.422 ; free physical = 33948 ; free virtual = 52039
+
+Phase 2.1.1.3 PBP: Compute Congestion
+Phase 2.1.1.3 PBP: Compute Congestion | Checksum: 100017d75
+
+Time (s): cpu = 00:02:47 ; elapsed = 00:01:16 . Memory (MB): peak = 6669.711 ; gain = 891.422 ; free physical = 33467 ; free virtual = 51560
+
+Phase 2.1.1.4 PBP: UpdateTiming
+Phase 2.1.1.4 PBP: UpdateTiming | Checksum: 1e914344a
+
+Time (s): cpu = 00:02:56 ; elapsed = 00:01:19 . Memory (MB): peak = 6701.727 ; gain = 923.438 ; free physical = 33439 ; free virtual = 51532
+
+Phase 2.1.1.5 PBP: Add part constraints
+Phase 2.1.1.5 PBP: Add part constraints | Checksum: 1e914344a
+
+Time (s): cpu = 00:02:57 ; elapsed = 00:01:20 . Memory (MB): peak = 6701.727 ; gain = 923.438 ; free physical = 33439 ; free virtual = 51533
+Phase 2.1.1 Partition Driven Placement | Checksum: 1e914344a
+
+Time (s): cpu = 00:02:57 ; elapsed = 00:01:20 . Memory (MB): peak = 6701.727 ; gain = 923.438 ; free physical = 33440 ; free virtual = 51533
+Phase 2.1 Floorplanning | Checksum: 181b919a4
+
+Time (s): cpu = 00:02:57 ; elapsed = 00:01:20 . Memory (MB): peak = 6701.727 ; gain = 923.438 ; free physical = 33440 ; free virtual = 51534
+
+Phase 2.2 Physical Synthesis After Floorplan
+INFO: [Physopt 32-775] End 1 Pass. Optimized 0 net or cell. Created 0 new cell, deleted 0 existing cell and moved 0 existing cell
+Netlist sorting complete. Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.02 . Memory (MB): peak = 6701.727 ; gain = 0.000 ; free physical = 33438 ; free virtual = 51531
+
+Summary of Physical Synthesis Optimizations
+============================================
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+|  Optimization                         |  Added Cells  |  Removed Cells  |  Optimized Cells/Nets  |  Dont Touch  |  Iterations  |  Elapsed   |
+-----------------------------------------------------------------------------------------------------------------------------------------------
+|  PSIP Post Floorplan SLR Replication  |            0  |              0  |                     0  |           0  |           1  |  00:00:01  |
+|  Total                                |            0  |              0  |                     0  |           0  |           1  |  00:00:01  |
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Phase 2.2 Physical Synthesis After Floorplan | Checksum: 181b919a4
+
+Time (s): cpu = 00:02:59 ; elapsed = 00:01:21 . Memory (MB): peak = 6701.727 ; gain = 923.438 ; free physical = 33439 ; free virtual = 51532
+
+Phase 2.3 Update Timing before SLR Path Opt
+Phase 2.3 Update Timing before SLR Path Opt | Checksum: 181b919a4
+
+Time (s): cpu = 00:02:59 ; elapsed = 00:01:21 . Memory (MB): peak = 6701.727 ; gain = 923.438 ; free physical = 33439 ; free virtual = 51533
+
+Phase 2.4 Post-Processing in Floorplanning
+Phase 2.4 Post-Processing in Floorplanning | Checksum: 181b919a4
+
+Time (s): cpu = 00:02:59 ; elapsed = 00:01:22 . Memory (MB): peak = 6701.727 ; gain = 923.438 ; free physical = 33440 ; free virtual = 51533
+
+Phase 2.5 Global Place Phase1
+Terminated

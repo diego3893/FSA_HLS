@@ -1,0 +1,151 @@
+
+****** xsim v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sat Oct 10 19:15:27 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source xsim.dir/tb_split_d_system_behav/xsim_script.tcl
+# xsim {tb_split_d_system_behav} -autoloadwcfg -tclbatch {diagnostic_hbm_nets.tcl}
+
+Info: (I804) /IEEE_Std_1666/deprecated: sc_object::get_parent() is deprecated, use get_parent_object() instead
+
+Info: (I804) /IEEE_Std_1666/deprecated: sc_sensitive_pos is deprecated use sc_sensitive << with pos() instead
+Time resolution is 1 ps
+source diagnostic_hbm_nets.tcl
+## run 100 us
+HBM TLM FUNCTIONAL ONLY: APB initialization is unmodeled; readiness adapter enabled
+SYSTEM RESET EXERCISE initialization restored
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+SYSTEM CLOCK DIAGNOSTIC time=            10000000 ctrl_clk=1 locked=1 init_done=1 reset_n=1
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+INFO::[ .tb_split_d_system.dut.split_d_system_i.hbm_0.inst.hbmIp.channel_0.processTrans ] SPECIFICATION DEVIANCE: HBM IP only supports burst size as 32 Bytes(AxSize=3'b101) but Tx received has burst size as 8
+SYSTEM HEARTBEAT time=            50000000 locked=1 apb0=0 apb1=0 reset100=1 state=11 pc=24 cases=0
+SYSTEM HEARTBEAT time=           100000000 locked=1 apb0=0 apb1=0 reset100=1 state=11 pc=24 cases=0
+run: Time (s): cpu = 00:00:00.03 ; elapsed = 00:00:10 . Memory (MB): peak = 1396.695 ; gain = 0.000 ; free physical = 36497 ; free virtual = 54499
+## puts "BD_HBM_NETS"
+BD_HBM_NETS
+## foreach p [get_objects /tb_split_d_system/dut/split_d_system_i/*] {
+##  if {[regexp {_(AR|AW)(SIZE|ADDR|LEN|ID|VALID|READY)|_(RVALID|RREADY|RID|RRESP|BVALID|BREADY|WSTRB)} $p]} { puts "$p = [get_value $p]" }
+## }
+/tb_split_d_system/dut/split_d_system_i/control_interconnect_M00_AXI_ARADDR = 00
+/tb_split_d_system/dut/split_d_system_i/control_interconnect_M00_AXI_ARREADY = 1
+/tb_split_d_system/dut/split_d_system_i/control_interconnect_M00_AXI_ARVALID = 1
+/tb_split_d_system/dut/split_d_system_i/control_interconnect_M00_AXI_AWADDR = 00
+/tb_split_d_system/dut/split_d_system_i/control_interconnect_M00_AXI_AWREADY = 1
+/tb_split_d_system/dut/split_d_system_i/control_interconnect_M00_AXI_AWVALID = 0
+/tb_split_d_system/dut/split_d_system_i/control_interconnect_M00_AXI_BREADY = 1
+/tb_split_d_system/dut/split_d_system_i/control_interconnect_M00_AXI_BVALID = 0
+/tb_split_d_system/dut/split_d_system_i/control_interconnect_M00_AXI_RREADY = 1
+/tb_split_d_system/dut/split_d_system_i/control_interconnect_M00_AXI_RRESP = 0
+/tb_split_d_system/dut/split_d_system_i/control_interconnect_M00_AXI_RVALID = 0
+/tb_split_d_system/dut/split_d_system_i/control_interconnect_M00_AXI_WSTRB = f
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_k_gmem_ARADDR = 0000000000100000
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_k_gmem_ARID = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_k_gmem_ARLEN = 03
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_k_gmem_ARREADY = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_k_gmem_ARSIZE = 3
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_k_gmem_ARVALID = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_k_gmem_RID = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_k_gmem_RREADY = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_k_gmem_RRESP = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_k_gmem_RVALID = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_o_gmem_AWADDR = XXXXXXXXXXXXXXXX
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_o_gmem_AWID = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_o_gmem_AWLEN = XX
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_o_gmem_AWREADY = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_o_gmem_AWSIZE = 3
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_o_gmem_AWVALID = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_o_gmem_BREADY = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_o_gmem_BVALID = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_o_gmem_WSTRB = 00
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_q_gmem_ARADDR = 0000000000000000
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_q_gmem_ARID = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_q_gmem_ARLEN = 03
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_q_gmem_ARREADY = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_q_gmem_ARSIZE = 3
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_q_gmem_ARVALID = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_q_gmem_RID = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_q_gmem_RREADY = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_q_gmem_RRESP = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_q_gmem_RVALID = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_v_gmem_ARADDR = 0000000000200000
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_v_gmem_ARID = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_v_gmem_ARLEN = 03
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_v_gmem_ARREADY = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_v_gmem_ARSIZE = 3
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_v_gmem_ARVALID = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_v_gmem_RID = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_v_gmem_RREADY = 1
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_v_gmem_RRESP = 0
+/tb_split_d_system/dut/split_d_system_i/fsa_0_m_axi_v_gmem_RVALID = 0
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_ARADDR = 000200000
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_ARLEN = 0
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_ARREADY = 1
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_ARSIZE = 5
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_ARVALID = 0
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_AWADDR = 000300040
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_AWLEN = 0
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_AWREADY = 1
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_AWSIZE = 3
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_AWVALID = 0
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_BREADY = 1
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_BVALID = 0
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_RREADY = 1
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_RRESP = 0
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_RVALID = 0
+/tb_split_d_system/dut/split_d_system_i/memory_interconnect_M00_AXI_WSTRB = 000000ff
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXIL_ARADDR = 00000000
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXIL_ARREADY = 0
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXIL_ARVALID = 0
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXIL_AWADDR = 00000000
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXIL_AWREADY = 1
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXIL_AWVALID = 0
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXIL_BREADY = 0
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXIL_BVALID = 0
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXIL_RREADY = 1
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXIL_RRESP = 0
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXIL_RVALID = 0
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXIL_WSTRB = f
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_ARADDR = 00000000
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_ARLEN = 00
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_ARREADY = 1
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_ARSIZE = 3
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_ARVALID = 0
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_AWADDR = 00000000
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_AWLEN = 00
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_AWREADY = 1
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_AWSIZE = 3
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_AWVALID = 0
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_BREADY = 0
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_BVALID = 0
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_RREADY = 0
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_RRESP = 0
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_RVALID = 0
+/tb_split_d_system/dut/split_d_system_i/selftest_0_M_AXI_WSTRB = ff
+## puts "HBM_SCOPES [get_scopes /tb_split_d_system/dut/split_d_system_i/hbm_0/*]"
+HBM_SCOPES /tb_split_d_system/dut/split_d_system_i/hbm_0/inst /tb_split_d_system/dut/split_d_system_i/hbm_0/SAXI_00_transactor /tb_split_d_system/dut/split_d_system_i/hbm_0/AXI_00_ARLEN_converter /tb_split_d_system/dut/split_d_system_i/hbm_0/AXI_00_AWLEN_converter
+## quit
+INFO: xsimkernel Simulation Memory Usage: 389468 KB (Peak: 455004 KB), Simulation CPU Usage: 11060 ms
+INFO: [Common 17-206] Exiting xsim at Sat Oct 10 19:15:41 2026...

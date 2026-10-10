@@ -1,0 +1,21 @@
+{
+  "purpose": "Old SIZE3 controller failure and protocol evidence; not acceptance",
+  "formal_compute_commit": "bf41d1602d5c59d35033b74c2ab82fddc232a528",
+  "system_rtl_pass": false,
+  "tlm_pass": false,
+  "d540_implementation_complete": false,
+  "board_gate": false,
+  "files": {
+    "codex_nm37_a0e137a_system_sim_20261010.log": "05d912d59acb20144a63d2baa23aed43602cc6efbc2634dbe26ea628282a07d5",
+    "codex_nm37_d540da7_system_impl_20261010.log": "010229b3c48f92abd5747213a0c31bc83df1bcd5862538b22189518b2e58b029",
+    "codex_nm37_f2dacc7_tlm_sim_20261010.log": "e8140854f68a1957f28f2f04d1ad233e5f64caad734faf490dc02c58684203ac",
+    "codex_nm37_hbm_nets_diagnostic_1900.log": "1a053058eb08b438bad243b50ae41b8f39c37829ed30634aea2d504dc98c0e2c",
+    "codex_nm37_tlm_tokens_diagnostic_1900.log": "2a88d74a0c7bc74057333f2977785a49373a10d97f9ed1901d8b0577843c34ba",
+    "473a4f9_100us_traffic_analysis.txt": "8f7924cf36f490798f807a8b17b04fdfe71d84e3921e94fdcebf3947e3ae7c15",
+    "473a4f9_native_traffic_100us.vcd.gz": "2b6a7355918acba61bcdf3348d5e85aaf887304175fd23e77eb20ad920232995"
+  },
+  "native_vcd_uncompressed_sha256": "fefdbe60a8ccc4bae791a08bbe4c41841789eb020b3863a0ad5a684b13ac4b9b",
+  "native_vcd_compute_commit": "bf41d1602d5c59d35033b74c2ab82fddc232a528",
+  "native_vcd_system_commit": "473a4f910728d28d9375d91afd7e99d9ad9450b1",
+  "native_vcd_end_ps": 100000000
+}

@@ -1,0 +1,125 @@
+VCD_BYTES 15723182 END_PS 100000000
+EVENTS qAR count 1
+{"time_ps": 13695000, "ARADDR": "0x0", "ARLEN": "0x3", "ARSIZE": "0x3"}
+EVENTS hbmAR count 3
+{"time_ps": 13807222, "ARADDR": "0x0", "ARLEN": "0x0", "ARSIZE": "0x5"}
+{"time_ps": 14740555, "ARADDR": "0x100000", "ARLEN": "0x0", "ARSIZE": "0x5"}
+{"time_ps": 14749444, "ARADDR": "0x200000", "ARLEN": "0x0", "ARSIZE": "0x5"}
+EVENTS hbmR count 2
+{"time_ps": 13918333, "RDATA": "0xb552b5c035ba3567290fb77f2c00ae2caf74adab338a3757b7f1b7e0b24c3798", "RLAST": "0x1", "RRESP": "0x0"}
+{"time_ps": 14851666, "RDATA": "0xa91529b4ae1d379bb10ab47eb757b0e3b67e28b53202b6df377526cf36ce3443", "RLAST": "0x1", "RRESP": "0x0"}
+EVENTS qR count 4
+{"time_ps": 14045000, "RDATA": "0xb7f1b7e0b24c3798", "RLAST": "0x0", "RRESP": "0x0"}
+{"time_ps": 14055000, "RDATA": "0xaf74adab338a3757", "RLAST": "0x0", "RRESP": "0x0"}
+{"time_ps": 14065000, "RDATA": "0x290fb77f2c00ae2c", "RLAST": "0x0", "RRESP": "0x0"}
+{"time_ps": 14075000, "RDATA": "0xb552b5c035ba3567", "RLAST": "0x1", "RRESP": "0x0"}
+EVENTS kAR count 1
+{"time_ps": 14625000, "ARADDR": "0x100000", "ARLEN": "0x3", "ARSIZE": "0x3"}
+EVENTS vAR count 1
+{"time_ps": 14625000, "ARADDR": "0x200000", "ARLEN": "0x3", "ARSIZE": "0x3"}
+EVENTS kR count 4
+{"time_ps": 14975000, "RDATA": "0x377526cf36ce3443", "RLAST": "0x0", "RRESP": "0x0"}
+{"time_ps": 14985000, "RDATA": "0xb67e28b53202b6df", "RLAST": "0x0", "RRESP": "0x0"}
+{"time_ps": 14995000, "RDATA": "0xb10ab47eb757b0e3", "RLAST": "0x0", "RRESP": "0x0"}
+{"time_ps": 15005000, "RDATA": "0xa91529b4ae1d379b", "RLAST": "0x1", "RRESP": "0x0"}
+PIPE ap_done 0
+PIPE ap_ready 0
+PIPE kv0_full_n 1
+PIPE kv1_full_n 1
+PIPE ap_predicate_op163_readreq_state3 0
+PIPE ap_predicate_op164_readreq_state3 0
+PIPE ap_block_state3_io 0
+PIPE ap_predicate_op306_read_state74 1
+PIPE ap_predicate_op307_read_state74 1
+PIPE ap_block_state74_pp0_stage0_iter73 1
+PIPE ap_block_state75_pp0_stage0_iter74 0
+PIPE ap_block_pp0_stage0_subdone 1
+PIPE ap_loop_exit_ready 0
+PIPE ap_ready_int 0
+PIPE ap_block_pp0_stage0 0
+PIPE ap_block_pp0_stage0_11001 1
+PIPE k_gmem_addr_read_reg_722 11011101110101001001101100111100110110110011100011010001000011
+PIPE v_gmem_addr_read_reg_727 0
+PIPE ap_block_pp0_stage0_01001 1
+PIPE ap_done_reg 0
+PIPE ap_done_int 0
+PIPE ap_loop_exit_ready_pp0_iter2_reg 0
+PIPE ap_loop_exit_ready_pp0_iter3_reg 0
+PIPE ap_loop_exit_ready_pp0_iter4_reg 0
+PIPE ap_loop_exit_ready_pp0_iter5_reg 0
+PIPE ap_loop_exit_ready_pp0_iter6_reg 0
+PIPE ap_loop_exit_ready_pp0_iter7_reg 0
+PIPE ap_loop_exit_ready_pp0_iter8_reg 0
+PIPE ap_loop_exit_ready_pp0_iter9_reg 0
+PIPE ap_loop_exit_ready_pp0_iter10_reg 0
+PIPE ap_loop_exit_ready_pp0_iter11_reg 0
+PIPE ap_loop_exit_ready_pp0_iter12_reg 0
+PIPE ap_loop_exit_ready_pp0_iter13_reg 0
+PIPE ap_loop_exit_ready_pp0_iter14_reg 0
+PIPE ap_loop_exit_ready_pp0_iter15_reg 0
+PIPE ap_loop_exit_ready_pp0_iter16_reg 0
+PIPE ap_loop_exit_ready_pp0_iter17_reg 0
+PIPE ap_loop_exit_ready_pp0_iter18_reg 0
+PIPE ap_loop_exit_ready_pp0_iter19_reg 0
+PIPE ap_loop_exit_ready_pp0_iter20_reg 0
+PIPE ap_loop_exit_ready_pp0_iter21_reg 0
+PIPE ap_loop_exit_ready_pp0_iter22_reg 0
+PIPE ap_loop_exit_ready_pp0_iter23_reg 0
+PIPE ap_loop_exit_ready_pp0_iter24_reg 0
+PIPE ap_loop_exit_ready_pp0_iter25_reg 0
+PIPE ap_loop_exit_ready_pp0_iter26_reg 0
+PIPE ap_loop_exit_ready_pp0_iter27_reg 0
+PIPE ap_loop_exit_ready_pp0_iter28_reg 0
+PIPE ap_loop_exit_ready_pp0_iter29_reg 0
+PIPE ap_loop_exit_ready_pp0_iter30_reg 0
+PIPE ap_loop_exit_ready_pp0_iter31_reg 0
+PIPE ap_loop_exit_ready_pp0_iter32_reg 0
+PIPE ap_loop_exit_ready_pp0_iter33_reg 0
+PIPE ap_loop_exit_ready_pp0_iter34_reg 0
+PIPE ap_loop_exit_ready_pp0_iter35_reg 0
+PIPE ap_loop_exit_ready_pp0_iter36_reg 0
+PIPE ap_loop_exit_ready_pp0_iter37_reg 0
+PIPE ap_loop_exit_ready_pp0_iter38_reg 0
+PIPE ap_loop_exit_ready_pp0_iter39_reg 0
+PIPE ap_loop_exit_ready_pp0_iter40_reg 0
+PIPE ap_loop_exit_ready_pp0_iter41_reg 0
+PIPE ap_loop_exit_ready_pp0_iter42_reg 0
+PIPE ap_loop_exit_ready_pp0_iter43_reg 0
+PIPE ap_loop_exit_ready_pp0_iter44_reg 0
+PIPE ap_loop_exit_ready_pp0_iter45_reg 0
+PIPE ap_loop_exit_ready_pp0_iter46_reg 0
+PIPE ap_loop_exit_ready_pp0_iter47_reg 0
+PIPE ap_loop_exit_ready_pp0_iter48_reg 0
+PIPE ap_loop_exit_ready_pp0_iter49_reg 0
+PIPE ap_loop_exit_ready_pp0_iter50_reg 0
+PIPE ap_loop_exit_ready_pp0_iter51_reg 0
+PIPE ap_loop_exit_ready_pp0_iter52_reg 0
+PIPE ap_loop_exit_ready_pp0_iter53_reg 0
+PIPE ap_loop_exit_ready_pp0_iter54_reg 0
+PIPE ap_loop_exit_ready_pp0_iter55_reg 0
+PIPE ap_loop_exit_ready_pp0_iter56_reg 0
+PIPE ap_loop_exit_ready_pp0_iter57_reg 1
+PIPE ap_loop_exit_ready_pp0_iter58_reg 0
+PIPE ap_loop_exit_ready_pp0_iter59_reg 0
+PIPE ap_loop_exit_ready_pp0_iter60_reg 0
+PIPE ap_loop_exit_ready_pp0_iter61_reg 0
+PIPE ap_loop_exit_ready_pp0_iter62_reg 0
+PIPE ap_loop_exit_ready_pp0_iter63_reg 0
+PIPE ap_loop_exit_ready_pp0_iter64_reg 0
+PIPE ap_loop_exit_ready_pp0_iter65_reg 0
+PIPE ap_loop_exit_ready_pp0_iter66_reg 0
+PIPE ap_loop_exit_ready_pp0_iter67_reg 0
+PIPE ap_loop_exit_ready_pp0_iter68_reg 0
+PIPE ap_loop_exit_ready_pp0_iter69_reg 0
+PIPE ap_loop_exit_ready_pp0_iter70_reg 0
+PIPE ap_loop_exit_ready_pp0_iter71_reg 0
+PIPE ap_loop_exit_ready_pp0_iter72_reg 0
+PIPE ap_loop_exit_ready_pp0_iter73_reg 0
+PIPE ap_ready_sig 0
+PIPE ap_done_sig 0
+PIPE ap_ready 0
+PIPE ap_ready_int 0
+PIPE ap_done_int 0
+PIPE ap_done 0
+PIPE ap_done_cache 0
+PIPE ap_loop_exit_ready 0
