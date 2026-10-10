@@ -1,0 +1,56 @@
+{
+  "timing": {
+    "wns": 0.23,
+    "tns": 0.0,
+    "setup_failing_endpoints": 0,
+    "setup_total_endpoints": 67267,
+    "whs": -1.582,
+    "ths": -6287.366,
+    "hold_failing_endpoints": 4560,
+    "hold_total_endpoints": 67267,
+    "wpws": 4.458,
+    "tpws": 0.0,
+    "pulse_failing_endpoints": 0,
+    "pulse_total_endpoints": 29099
+  },
+  "check_timing": {
+    "no_clock": 0,
+    "constant_clock": 0,
+    "pulse_width_clock": 0,
+    "unconstrained_internal_endpoints": 0,
+    "no_input_delay": 0,
+    "no_output_delay": 0,
+    "multiple_clock": 0,
+    "generated_clocks": 0,
+    "loops": 0,
+    "partial_input_delay": 0,
+    "partial_output_delay": 0,
+    "latch_loops": 0
+  },
+  "fully_routed_nets": 76206,
+  "routing_errors": 0,
+  "drc_counts": {
+    "Warning": 141,
+    "Advisory": 10
+  },
+  "timing_and_route_gate": false,
+  "drc_error_gate": true,
+  "sha256": {
+    "clockInfo.txt": "a80b238b1cc9e54ece8be54ed0933f8c6dcf78a73637e89c998c77cb4c922c1b",
+    "congestion.rpt": "3d584c52007e803f64ee8812cca67812144b3e344119c55e373459ebbf1becb5",
+    "drc.rpt": "5a4455809231f67f377e44a3e76e39c1c3dccf37714253d71015bbd80907c169",
+    "effective_constraints.xdc": "2afbb5bbe1c2c64a7a9236c32ceb5b03362c5c4ec4faece2b73764c6a809035b",
+    "exceptions.rpt": "ad19bba0a44a74d703eb8141feaeafe4d31b732e3d8cf09e63734195d9496b21",
+    "fanout.rpt": "029ae67ad35fb9cb056a474014d120e30718a13102fd1356c96c72d12cc55719",
+    "hold_paths.rpt": "337da501f76102de29c0e7ac51eec9bece3f03d4e12a00d3a6421f3f09c73ecf",
+    "iter_3_CongestedCLBsAndNets.txt": "863ca80f7799514fe5d8d058719125d45a69123fe8a1b1b777f01686c931a5e1",
+    "methodology.rpt": "8a132bb9068d908f5c58922c682666d0fab8a5b30a75fcbc181cb923bb01f9de",
+    "physical_metrics.txt": "7392654d724ca541a9c3cadbc38736c02b235c18e7627a95db1a8bb2f723768c",
+    "primitive_locations.tsv": "c8dc786ddbdf23629dae25c174552e2ed60ee13bd65f8037d5485bd01c228e51",
+    "route_status.rpt": "934930a953c4a7a7763c686f7422abd989c045c71b9bd1ec84195dea1da8c677",
+    "setup_paths.rpt": "d7f61dcb3f9de57bbf3d3874b1873b68f3d3c4c301d0b907e7412a762da57722",
+    "tight_setup_hold_pins.txt": "d71026f7d8d81f130996d4aacf3ccc3a364b912d0a369c86f810b2dcea52bab4",
+    "timing_summary.rpt": "3861c787e1f7bd5f57e903fbe15145b5fb093cf45f041e7c7695a8149ffa7e06",
+    "utilization.rpt": "fefe9fc4403d523ecf7718795ee503621fdf4b36b74f6c172577f203817ca484"
+  }
+}

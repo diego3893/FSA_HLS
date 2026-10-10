@@ -77,3 +77,16 @@
 - b3776dc6c43dafd8b54ea4bb800540d6025acff8已推送/服务器ff-only核对后运行auto_context。首次直接PowerShell SSH字符串转义导致test参数错误，未启动Vivado；改为Python传递固定SSH参数后正常运行，同一轮基础设施命令纠正，不重复构建。日志`/tmp/codex_split_d_b3e4957_ooc_auto_context_20261010.log`。
 - 新增inspect.tcl用于只读核对内部路径及全部失败endpoint，analyze.py从最终报告取值并归档SHA；本地两份真实auto/auto_hold_retry报告抽取值已与报告核对。读取程序成功不代表物理gate通过；初次Python经Select-Object -First管道输出截断返回非零，改为完整输出/文件，不掩盖实际验证状态。
 - 更新PROJECT_CONTEXT当前状态和独立阶段4报告，纠正“未分析并行时标”“优先按HLS FF优化广播”的旧结论。用户AGENTS.md及旧未跟踪文件仍不纳入提交。区域范围待auto_context真实位置，不提交旧auto派生候选。
+
+### 第3轮分析闭环
+
+- b3776dc auto_context在11:52:20—12:05:55执行，exit0；实际HD.CLK_SRC属性写入XDC，Timing38-242消失。最终setup+0.230ns/TNS0、hold−1.582ns/THS−6287.366ns，4560失败endpoint；76206条net全部完成、route error0、12项check_timing均0。DRC141Warning/10Advisory，无Error/Critical Warning。资源LUT49368/FF26415/RAMB36=7/RAMB18=40/DSP40。
+- 新模型全部4560负hold仍起于顶层输入，其中reset3771；内部hold+0.010ns，内部setup+0.230ns。最差setup已变为分发循环icmp→V AXI读缓冲BRAM ENBWREN：6.477ns（logic0.540/route5.937，91.7%布线），clock skew−0.215ns。不能继续把旧auto的块内减法称为当前最差路径。
+- 63b22e3的只读diagnostic已成功输出内部路径和全部负hold清单；最后查询clock.SETUP_UNCERTAINTY失败（2024.2不存在该属性），整体exit1。改为保存实际XDC及合法时钟属性，新diagnostic_retry目录重试；不覆盖失败目录，不影响已完成auto_context。
+- 已依据新primitive位置产生两个hard Pblock（IS_SOFT=false、CONTAIN_ROUTING=false）。worker0 SLICE61..116/84..238、worker1 SLICE94..156/44..233；DSP/RAMB边界也逐类来自位置数据。区域可重叠，不代表互斥物理分区，不强迫跨SLR。新增make_regions.py可从归档位置TSV复现，记录其SHA。
+- 已向用户提出边界设计选择：继续严格min0ns物理延迟修复，或内部/通信先验收、边界hold留完整系统。等待选择期间固定合同不变，独立区域对照继续。已闭环3轮；阶段4未验收。
+
+## 5 第4轮：同模型区域约束
+
+- 继承第3轮4560接口hold失败、内部setup/hold通过。主要假设：限制两个query worker在其真实资源范围是否改善控制/数据路由；同一正式IP、综合DCP、BUFGCE_X0Y48、100MHz/2.7ns及min0ns预算，唯一实现变化为两个Pblock。
+- 本地生成区域后核对所有位置均SLR0、两处实例各匹配一个；运行regions，不改变HLS或事务。只读诊断属性修复作为第3轮命令重试同批同步，不改变布局算法。用户边界选择未收到前，不放宽hold门槛。

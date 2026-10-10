@@ -1,0 +1,58 @@
+{
+  "basis": "build\\stage4_b3e4957\\auto_context\\primitive_locations.tsv",
+  "basis_sha256": "c8dc786ddbdf23629dae25c174552e2ed60ee13bd65f8037d5485bd01c228e51",
+  "workers": {
+    "worker0": {
+      "primitive_count": 39029,
+      "SLR_counts": {
+        "SLR0": 38457
+      },
+      "bounds": {
+        "SLICE": [
+          61,
+          84,
+          116,
+          238
+        ],
+        "DSP48E2": [
+          9,
+          50,
+          16,
+          86
+        ],
+        "RAMB18": [
+          5,
+          70,
+          7,
+          81
+        ]
+      }
+    },
+    "worker1": {
+      "primitive_count": 39152,
+      "SLR_counts": {
+        "SLR0": 38578
+      },
+      "bounds": {
+        "SLICE": [
+          94,
+          44,
+          156,
+          233
+        ],
+        "DSP48E2": [
+          16,
+          30,
+          19,
+          73
+        ],
+        "RAMB18": [
+          7,
+          56,
+          8,
+          74
+        ]
+      }
+    }
+  }
+}

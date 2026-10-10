@@ -18,8 +18,8 @@ close $f
 set f [open context_properties.txt w]
 puts $f "clock_source=[get_property HD.CLK_SRC [get_ports ap_clk]]"
 puts $f "clock_period=[get_property PERIOD [get_clocks ap_clk]]"
-puts $f "clock_setup_uncertainty=[get_property SETUP_UNCERTAINTY [get_clocks ap_clk]]"
 puts $f "black_boxes=[llength [get_cells -hier -filter {IS_BLACKBOX == 1}]]"
 close $f
+write_xdc diagnostic_constraints.xdc
 puts "OOC_READ_ONLY_DIAGNOSTICS_COMPLETE"
 close_design
