@@ -98,14 +98,18 @@ foreach name {run_test stress_enable} {
     set p [create_bd_port -dir I $name]
     connect_bd_net $p [get_bd_pins selftest_0/$name]
 }
-foreach name {test_busy test_done test_pass test_fail fail_code cases_done last_case_cycles debug_pc debug_state actual_word} {
+foreach {name width} {test_busy 1 test_done 1 test_pass 1 test_fail 1 fail_code 8 cases_done 6 last_case_cycles 32 debug_pc 13 debug_state 4 actual_word 64} {
     set pin [get_bd_pins selftest_0/$name]
-    set p [make_bd_pins_external $pin]
-    set_property name $name $p
+    if {$width==1} { set p [create_bd_port -dir O $name] } else {
+        set p [create_bd_port -dir O -from [expr {$width-1}] -to 0 $name]
+    }
+    connect_bd_net $pin $p
 }
 foreach {name pin} {ctrl_clk clk_wiz_0/clk_out1 clock_locked clk_wiz_0/locked init_done memory_ready/Res} {
-    set p [make_bd_pins_external [get_bd_pins $pin]]
-    set_property name $name $p
+    if {$name eq "ctrl_clk"} { set p [create_bd_port -dir O -type clk $name] } else {
+        set p [create_bd_port -dir O $name]
+    }
+    connect_bd_net $p [get_bd_pins $pin]
 }
 validate_bd_design
 foreach domain {100 225} {

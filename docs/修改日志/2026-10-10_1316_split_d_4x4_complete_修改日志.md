@@ -103,3 +103,5 @@ Q完整覆盖`QUERY_BLOCK_COLS×QKV_WORDS_PER_TOKEN×DMA_ELEMS_PER_WORD`，K/V�
 - 第3轮本地自包含交付验证：首次复制ip.tmp中间目录触及Windows长路径，部分交付保留在ignored build供诊断；正式component不引用该临时目录，生成器排除ip.tmp且逐项校验component引用。新`build/nm37_delivery`成功，正式component SHA保持a64c7be…a26dc。交付复制不构成Vivado验证。
 
 - 35afc03工程生成15:44:19—15:45:25失败：clock第二输出连接已通过，进入module reference；Vivado明确拒绝SystemVerilog作为BD reference顶层。controller本身为Verilog-2001语法，修正该文件FILE_TYPE=Verilog，不改控制器语义；继续同一第3轮。原失败工程保留，新建目录重试。
+
+- 00158f1工程生成16:04:02—16:05:10：Verilog module reference及5路AXI/HBM地址自动分配已执行；输出导出失败，make_bd_pins_external没有返回对象，旧脚本把空返回给set_property。改为按已核对宽度显式create_bd_port/connect_bd_net，同时加入系统逐事务progress打印；保持同一第3轮，尚未产生系统仿真。

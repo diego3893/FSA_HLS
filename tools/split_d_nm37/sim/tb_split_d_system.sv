@@ -12,6 +12,14 @@ module tb_split_d_system;
     wire [3:0] state;
     wire [31:0] last_cycles;
     wire [63:0] actual;
+    reg [5:0] previous_cases = 0;
+    always @(posedge ctrl_clk) begin
+        if(!reset_n) previous_cases <= 0;
+        else if(cases!=previous_cases) begin
+            if(cases!=0) $display("SYSTEM PROGRESS mode=%b completed=%0d full_case_cycles=%0d",stress_enable,cases,last_cycles);
+            previous_cases <= cases;
+        end
+    end
     split_d_system_wrapper dut(
         .sys_clk_100(clk),.reset_n(reset_n),.run_test(run_test),.stress_enable(stress_enable),
         .ctrl_clk(ctrl_clk),.clock_locked(clock_locked),.init_done(init_done),
