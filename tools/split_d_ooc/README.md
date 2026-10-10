@@ -20,8 +20,20 @@ vivado -mode batch -source tools/split_d_ooc/run.tcl -tclargs \
 
 脚本读取正式导出的RTL及HLS生成的floating-point IP配置Tcl，保留层次以辨认两个worker；直接OOC综合整个模块，不连接小RAM测试载体。输出路径必须不存在，避免覆盖证据。输出synthesis/routed checkpoint、setup/hold、DRC、路由、拥塞、扇出及全部primitive位置。IP ZIP和component.xml的SHA与被测版本须另行归档。
 
+本次旧auto在补齐时钟假设前已生成；`auto_context`模式打开同级`auto/synthesized.dcp`，设置当前时钟假设后重新实现，不重做综合。对照使用auto_context，旧auto仅作探索。新目录必须不存在。
+
 ## 3 区域对照
 
 读取自动布局的实际primitive位置、关键路径和资源分布后，生成并审查同目录下`regions.tcl`。通过`regions`模式从同一个auto/synthesized.dcp开始，保留相同约束与实现directive；所有区域必须解释其实际资源来源。不预先强制两个worker跨SLR。区域实现目录与auto同级，例如`build/split_d_ooc_b3e4957/regions`。
 
 只有真实长连接成为瓶颈时才修改通信流水，并重新执行正式HLS全流程及新的OOC对照。若瓶颈在块内算术，记录该规模下通信插级缺乏依据，不为制造收益而插级。
+
+## 4 报告复核
+
+`inspect.tcl <routed.dcp> <new diagnostic dir>`只读检查内部setup/hold、全部负hold endpoint及时钟源、blackbox，不改变约束或网表。可把诊断文件与对应实现报告合并在本地归档目录，再执行：
+
+```bash
+python tools/split_d_ooc/analyze.py <report directory> --output <summary.json>
+```
+
+脚本抽取setup/hold/pulse、12项check_timing、route和DRC，同时记录原始报告SHA。它成功运行只代表读取成功，JSON中的gate才表示验收状态。即使退出码0，负WHS仍为失败；时钟源假设及未执行的完整系统验收须人工核对。

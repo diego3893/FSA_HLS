@@ -1,0 +1,55 @@
+{
+  "timing": {
+    "wns": 0.371,
+    "tns": 0.0,
+    "setup_failing_endpoints": 0,
+    "setup_total_endpoints": 67215,
+    "whs": -0.08,
+    "ths": -36.648,
+    "hold_failing_endpoints": 771,
+    "hold_total_endpoints": 67215,
+    "wpws": 4.458,
+    "tpws": 0.0,
+    "pulse_failing_endpoints": 0,
+    "pulse_total_endpoints": 29141
+  },
+  "check_timing": {
+    "no_clock": 0,
+    "constant_clock": 0,
+    "pulse_width_clock": 0,
+    "unconstrained_internal_endpoints": 0,
+    "no_input_delay": 0,
+    "no_output_delay": 0,
+    "multiple_clock": 0,
+    "generated_clocks": 0,
+    "loops": 0,
+    "partial_input_delay": 0,
+    "partial_output_delay": 0,
+    "latch_loops": 0
+  },
+  "fully_routed_nets": 77220,
+  "routing_errors": 0,
+  "drc_counts": {
+    "Warning": 143,
+    "Advisory": 10
+  },
+  "timing_and_route_gate": false,
+  "drc_error_gate": true,
+  "sha256": {
+    "clockInfo.txt": "ad2c31a005ed784fe89383738f7c147b58ad499e46eaf7ab52ea884a09684441",
+    "congestion.rpt": "6eb1cb7e864a09365e45ee986406b171d978235d756f79d4856e35a697b1e057",
+    "drc.rpt": "737acfe953f8c29eafe167111006389fa0f7d4ac2bd51b504e1a4564da74b7af",
+    "effective_constraints.xdc": "4ae4de2aeda1fab8547aba7de38a8e5e057f9696e4d804d21bd23be2574c5b33",
+    "exceptions.rpt": "adade76ddac6ed6dd01a12e16022286435d077c5aba2dee11be9d0d7a295e999",
+    "fanout.rpt": "c09c1ea5db58c6a210928142d2b585bff66de79b559da93c716f065bb74de161",
+    "hold_paths.rpt": "0f397f26af006d2ae094cf305d028f7a93784b54f57389e9b62c7550537d8e15",
+    "methodology.rpt": "cfa163ec293a5e508440f6e3ed73010f74f58921debda32d648e3f9dbdee06fb",
+    "physical_metrics.txt": "18d7bdf5c3d354ed5f128f28ffb08a3dcd2d2a99fcf055920fd78bd91ad6643b",
+    "primitive_locations.tsv": "ef0bee0d4a3bbc14812bda10f598f19ba8462bf63828614d19ae9c8e224d8dba",
+    "route_status.rpt": "3a496f7f27856dc3f8b01f8eb85a58dccff8fa4459cf3f2743cb919e50b89860",
+    "setup_paths.rpt": "8e582ac50604517d0e542c77ea6ac3c50a1aff0b9d155c21d8d54c3f4ef3e4e4",
+    "synthesis_utilization.rpt": "b447ab4b7921382b7818f8cd9db80c4eccfd1178f3cb1ded19a40b5ad9d4a9e4",
+    "timing_summary.rpt": "64b1474c225bc141ea09656a0199083ab8d586a8c496695c87a156dc098e29cd",
+    "utilization.rpt": "18c8a422a3b7a70600ed96bff33d6ecde3d471c9976adfe86112b06032e5a759"
+  }
+}

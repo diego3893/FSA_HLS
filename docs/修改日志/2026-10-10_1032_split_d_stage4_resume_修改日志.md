@@ -74,3 +74,6 @@
 - 不改HLS计算和正式IP，沿用b3e4957。新增clock_context.tcl明确BUFGCE_X0Y48为OOC假设（不是后续系统事实），周期、setup uncertainty和输入/输出预算不放宽。
 - auto_context和regions从同一个auto/synthesized.dcp开始，均设置HD.CLK_SRC，再执行同一opt/place/phys_opt/route流程。先完成auto_context；regions的位置范围从该次实际primitive位置重新提取，保持VU37P和SLR0，不强迫跨SLR。
 - 当前目标：验证时钟模型与内部/接口路径，并取得公平自动/区域对照。若边界min0ns仍不能满足，保留失败门槛，依据明确报告决定后续接口延迟修复或系统边界选择，不用放宽约束冒充通过。
+- b3776dc6c43dafd8b54ea4bb800540d6025acff8已推送/服务器ff-only核对后运行auto_context。首次直接PowerShell SSH字符串转义导致test参数错误，未启动Vivado；改为Python传递固定SSH参数后正常运行，同一轮基础设施命令纠正，不重复构建。日志`/tmp/codex_split_d_b3e4957_ooc_auto_context_20261010.log`。
+- 新增inspect.tcl用于只读核对内部路径及全部失败endpoint，analyze.py从最终报告取值并归档SHA；本地两份真实auto/auto_hold_retry报告抽取值已与报告核对。读取程序成功不代表物理gate通过；初次Python经Select-Object -First管道输出截断返回非零，改为完整输出/文件，不掩盖实际验证状态。
+- 更新PROJECT_CONTEXT当前状态和独立阶段4报告，纠正“未分析并行时标”“优先按HLS FF优化广播”的旧结论。用户AGENTS.md及旧未跟踪文件仍不纳入提交。区域范围待auto_context真实位置，不提交旧auto派生候选。

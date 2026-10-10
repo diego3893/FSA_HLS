@@ -1,0 +1,51 @@
+{
+  "timing": {
+    "wns": 0.371,
+    "tns": 0.0,
+    "setup_failing_endpoints": 0,
+    "setup_total_endpoints": 67215,
+    "whs": -0.08,
+    "ths": -34.418,
+    "hold_failing_endpoints": 721,
+    "hold_total_endpoints": 67215,
+    "wpws": 4.458,
+    "tpws": 0.0,
+    "pulse_failing_endpoints": 0,
+    "pulse_total_endpoints": 29141
+  },
+  "check_timing": {
+    "no_clock": 0,
+    "constant_clock": 0,
+    "pulse_width_clock": 0,
+    "unconstrained_internal_endpoints": 0,
+    "no_input_delay": 0,
+    "no_output_delay": 0,
+    "multiple_clock": 0,
+    "generated_clocks": 0,
+    "loops": 0,
+    "partial_input_delay": 0,
+    "partial_output_delay": 0,
+    "latch_loops": 0
+  },
+  "fully_routed_nets": 77320,
+  "routing_errors": 0,
+  "drc_counts": {
+    "Warning": 143,
+    "Advisory": 10
+  },
+  "timing_and_route_gate": false,
+  "drc_error_gate": true,
+  "sha256": {
+    "clock_sites.tsv": "df39584a6b2be6b9916c0166a66ef5633c92df61597b58bb5fd0f773b2aa2c67",
+    "drc.rpt": "4df35f6db859b673efa7de9cde0a5e6b1248dd0eac8c90b239a0fbcc79490c06",
+    "effective_constraints.xdc": "4ae4de2aeda1fab8547aba7de38a8e5e057f9696e4d804d21bd23be2574c5b33",
+    "hold_paths.rpt": "8c070f8e6d7463dc90df8dca34e30234da23dcfdd5f271ee2bd1a43de573b7f3",
+    "hold_violators_before.tsv": "58532635d313d77a855046ed968a5f6a704f3e6ac7b1d0b8643c6b0c7bed8615",
+    "internal_hold_after.rpt": "cabdf908f8cd3ac84f44507636d081cfff3c83eb669737d66b56414c7d5fc823",
+    "internal_hold_before.rpt": "483131f8850590ad834f9e7c5b056a64cdaa8c635fea81568536b2d925ab718f",
+    "route_status.rpt": "f2ce94e8eeb96af41fce0454be1d7a33ed1428d453d6c624ca05b14c6cfd08d3",
+    "setup_paths.rpt": "6e27039bb5aaee1e5ee48d6fb4c3109bc7e5e4bf0e230839f6b96accd50d4310",
+    "timing_summary.rpt": "3db04de1fcb74f2de4844e3feb8869d1d09153ebec2a21735f1531d61ff69a9e",
+    "utilization.rpt": "52bf00a13b4a1e11f34d1e5a76d1fd30ee890717ef38e6614fec74bf74d57672"
+  }
+}
