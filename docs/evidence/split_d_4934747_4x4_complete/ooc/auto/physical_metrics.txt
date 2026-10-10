@@ -1,0 +1,5 @@
+Vivado=2024.2
+mode=auto
+setup_slack=0.26664003729820251
+hold_slack=-2.32796478271484375
+clock_period=10.00000000000000000

@@ -1,0 +1,1179 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+--------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version      : Vivado v.2024.2 (lin64) Build 5239630 Fri Nov 08 22:34:34 MST 2024
+| Date              : Sat Oct 10 13:55:53 2026
+| Host              : lenovo-ThinkStation-P920 running 64-bit Ubuntu 24.04.3 LTS
+| Command           : report_timing -delay_type min -max_paths 30 -path_type full_clock_expanded -file hold_paths.rpt
+| Design            : fsa_stream_split_d
+| Device            : xcvu37p_CIV-fsvh2892
+| Speed File        : -2  PRODUCTION 1.30 05-01-2022
+| Design State      : Routed
+| Temperature Grade : E
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (VIOLATED) :        -2.328ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_297_25_fu_668/ap_enable_reg_pp0_iter5_reg/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.058ns  (logic 0.022ns (37.931%)  route 0.036ns (62.069%))
+  Logic Levels:           1  (LUT3=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.326ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.326ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.000     0.000    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_297_25_fu_668/ap_rst
+    SLICE_X149Y125       LUT3 (Prop_D6LUT_SLICEM_I2_O)
+                                                      0.022     0.022 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_297_25_fu_668/ap_enable_reg_pp0_iter5_i_1/O
+                         net (fo=1, routed)           0.036     0.058    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_297_25_fu_668/ap_enable_reg_pp0_iter5_i_1_n_0
+    SLICE_X149Y125       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_297_25_fu_668/ap_enable_reg_pp0_iter5_reg/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.326     2.326    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_297_25_fu_668/ap_clk
+    SLICE_X149Y125       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_297_25_fu_668/ap_enable_reg_pp0_iter5_reg/C
+                         clock pessimism              0.000     2.326    
+    SLICE_X149Y125       FDRE (Hold_DFF_SLICEM_C_D)
+                                                      0.060     2.386    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_297_25_fu_668/ap_enable_reg_pp0_iter5_reg
+  -------------------------------------------------------------------
+                         required time                         -2.386    
+                         arrival time                           0.058    
+  -------------------------------------------------------------------
+                         slack                                 -2.328    
+
+Slack (VIOLATED) :        -2.310ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_enable_reg_pp0_iter1_reg/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.044ns  (logic 0.022ns (50.000%)  route 0.022ns (50.000%))
+  Logic Levels:           1  (LUT6=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.294ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.294ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.000     0.000    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_rst
+    SLICE_X155Y115       LUT6 (Prop_D6LUT_SLICEL_I5_O)
+                                                      0.022     0.022 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_enable_reg_pp0_iter1_i_1/O
+                         net (fo=1, routed)           0.022     0.044    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_enable_reg_pp0_iter1_i_1_n_0
+    SLICE_X155Y115       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_enable_reg_pp0_iter1_reg/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.294     2.294    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_clk
+    SLICE_X155Y115       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_enable_reg_pp0_iter1_reg/C
+                         clock pessimism              0.000     2.294    
+    SLICE_X155Y115       FDRE (Hold_DFF_SLICEL_C_D)
+                                                      0.060     2.354    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_enable_reg_pp0_iter1_reg
+  -------------------------------------------------------------------
+                         required time                         -2.354    
+                         arrival time                           0.044    
+  -------------------------------------------------------------------
+                         slack                                 -2.310    
+
+Slack (VIOLATED) :        -2.278ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_enable_reg_pp0_iter1_reg/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.046ns  (logic 0.022ns (47.826%)  route 0.024ns (52.174%))
+  Logic Levels:           1  (LUT6=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.264ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.264ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.000     0.000    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_rst
+    SLICE_X151Y104       LUT6 (Prop_C6LUT_SLICEL_I5_O)
+                                                      0.022     0.022 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_enable_reg_pp0_iter1_i_1/O
+                         net (fo=1, routed)           0.024     0.046    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_enable_reg_pp0_iter1_i_1_n_0
+    SLICE_X151Y104       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_enable_reg_pp0_iter1_reg/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.264     2.264    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_clk
+    SLICE_X151Y104       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_enable_reg_pp0_iter1_reg/C
+                         clock pessimism              0.000     2.264    
+    SLICE_X151Y104       FDRE (Hold_CFF_SLICEL_C_D)
+                                                      0.060     2.324    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_enable_reg_pp0_iter1_reg
+  -------------------------------------------------------------------
+                         required time                         -2.324    
+                         arrival time                           0.046    
+  -------------------------------------------------------------------
+                         slack                                 -2.278    
+
+Slack (VIOLATED) :        -2.270ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_CS_fsm_reg[7]/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.017ns  (logic 0.000ns (0.000%)  route 0.017ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.302ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.302ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.017     0.017    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_rst
+    SLICE_X156Y105       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_CS_fsm_reg[7]/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.302     2.302    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_clk
+    SLICE_X156Y105       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_CS_fsm_reg[7]/C
+                         clock pessimism              0.000     2.302    
+    SLICE_X156Y105       FDRE (Hold_EFF_SLICEM_C_R)
+                                                     -0.015     2.287    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_CS_fsm_reg[7]
+  -------------------------------------------------------------------
+                         required time                         -2.287    
+                         arrival time                           0.017    
+  -------------------------------------------------------------------
+                         slack                                 -2.270    
+
+Slack (VIOLATED) :        -2.269ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_187_122_fu_549_ap_start_reg_reg/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.015ns  (logic 0.000ns (0.000%)  route 0.015ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.299ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.299ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.015     0.015    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_rst
+    SLICE_X155Y115       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_187_122_fu_549_ap_start_reg_reg/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.299     2.299    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_clk
+    SLICE_X155Y115       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_187_122_fu_549_ap_start_reg_reg/C
+                         clock pessimism              0.000     2.299    
+    SLICE_X155Y115       FDRE (Hold_HFF_SLICEL_C_R)
+                                                     -0.015     2.284    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_187_122_fu_549_ap_start_reg_reg
+  -------------------------------------------------------------------
+                         required time                         -2.284    
+                         arrival time                           0.015    
+  -------------------------------------------------------------------
+                         slack                                 -2.269    
+
+Slack (VIOLATED) :        -2.269ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_enable_reg_pp0_iter2_reg/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.015ns  (logic 0.000ns (0.000%)  route 0.015ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.299ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.299ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.015     0.015    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_rst
+    SLICE_X155Y115       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_enable_reg_pp0_iter2_reg/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.299     2.299    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_clk
+    SLICE_X155Y115       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_enable_reg_pp0_iter2_reg/C
+                         clock pessimism              0.000     2.299    
+    SLICE_X155Y115       FDRE (Hold_EFF_SLICEL_C_R)
+                                                     -0.015     2.284    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_enable_reg_pp0_iter2_reg
+  -------------------------------------------------------------------
+                         required time                         -2.284    
+                         arrival time                           0.015    
+  -------------------------------------------------------------------
+                         slack                                 -2.269    
+
+Slack (VIOLATED) :        -2.269ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_enable_reg_pp0_iter3_reg/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.015ns  (logic 0.000ns (0.000%)  route 0.015ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.299ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.299ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.015     0.015    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_rst
+    SLICE_X155Y115       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_enable_reg_pp0_iter3_reg/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.299     2.299    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_clk
+    SLICE_X155Y115       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_enable_reg_pp0_iter3_reg/C
+                         clock pessimism              0.000     2.299    
+    SLICE_X155Y115       FDRE (Hold_EFF2_SLICEL_C_R)
+                                                     -0.015     2.284    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563/ap_enable_reg_pp0_iter3_reg
+  -------------------------------------------------------------------
+                         required time                         -2.284    
+                         arrival time                           0.015    
+  -------------------------------------------------------------------
+                         slack                                 -2.269    
+
+Slack (VIOLATED) :        -2.269ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563_ap_start_reg_reg/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.015ns  (logic 0.000ns (0.000%)  route 0.015ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.299ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.299ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.015     0.015    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_rst
+    SLICE_X155Y115       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563_ap_start_reg_reg/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.299     2.299    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_clk
+    SLICE_X155Y115       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563_ap_start_reg_reg/C
+                         clock pessimism              0.000     2.299    
+    SLICE_X155Y115       FDRE (Hold_HFF2_SLICEL_C_R)
+                                                     -0.015     2.284    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_239_15_fu_563_ap_start_reg_reg
+  -------------------------------------------------------------------
+                         required time                         -2.284    
+                         arrival time                           0.015    
+  -------------------------------------------------------------------
+                         slack                                 -2.269    
+
+Slack (VIOLATED) :        -2.262ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_CS_fsm_reg[6]/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.015ns  (logic 0.000ns (0.000%)  route 0.015ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.292ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.292ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.015     0.015    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_rst
+    SLICE_X155Y109       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_CS_fsm_reg[6]/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.292     2.292    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_clk
+    SLICE_X155Y109       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_CS_fsm_reg[6]/C
+                         clock pessimism              0.000     2.292    
+    SLICE_X155Y109       FDRE (Hold_DFF_SLICEL_C_R)
+                                                     -0.015     2.277    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_CS_fsm_reg[6]
+  -------------------------------------------------------------------
+                         required time                         -2.277    
+                         arrival time                           0.015    
+  -------------------------------------------------------------------
+                         slack                                 -2.262    
+
+Slack (VIOLATED) :        -2.252ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/flow_control_loop_pipe_sequential_init_U/ap_done_cache_reg/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.055ns  (logic 0.035ns (63.636%)  route 0.020ns (36.364%))
+  Logic Levels:           1  (LUT4=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.245ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.245ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.000     0.000    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/flow_control_loop_pipe_sequential_init_U/ap_rst
+    SLICE_X47Y127        LUT4 (Prop_D6LUT_SLICEL_I3_O)
+                                                      0.035     0.035 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/flow_control_loop_pipe_sequential_init_U/ap_done_cache_i_1/O
+                         net (fo=1, routed)           0.020     0.055    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/flow_control_loop_pipe_sequential_init_U/ap_done_cache_i_1_n_0
+    SLICE_X47Y127        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/flow_control_loop_pipe_sequential_init_U/ap_done_cache_reg/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.245     2.245    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/flow_control_loop_pipe_sequential_init_U/ap_clk
+    SLICE_X47Y127        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/flow_control_loop_pipe_sequential_init_U/ap_done_cache_reg/C
+                         clock pessimism              0.000     2.245    
+    SLICE_X47Y127        FDRE (Hold_DFF2_SLICEL_C_D)
+                                                      0.062     2.307    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/flow_control_loop_pipe_sequential_init_U/ap_done_cache_reg
+  -------------------------------------------------------------------
+                         required time                         -2.307    
+                         arrival time                           0.055    
+  -------------------------------------------------------------------
+                         slack                                 -2.252    
+
+Slack (VIOLATED) :        -2.251ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter2_reg/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.015ns  (logic 0.000ns (0.000%)  route 0.015ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.281ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.281ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.015     0.015    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_rst
+    SLICE_X43Y184        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter2_reg/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.281     2.281    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_clk
+    SLICE_X43Y184        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter2_reg/C
+                         clock pessimism              0.000     2.281    
+    SLICE_X43Y184        FDRE (Hold_EFF_SLICEL_C_R)
+                                                     -0.015     2.266    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter2_reg
+  -------------------------------------------------------------------
+                         required time                         -2.266    
+                         arrival time                           0.015    
+  -------------------------------------------------------------------
+                         slack                                 -2.251    
+
+Slack (VIOLATED) :        -2.251ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter3_reg/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.015ns  (logic 0.000ns (0.000%)  route 0.015ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.281ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.281ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.015     0.015    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_rst
+    SLICE_X43Y184        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter3_reg/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.281     2.281    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_clk
+    SLICE_X43Y184        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter3_reg/C
+                         clock pessimism              0.000     2.281    
+    SLICE_X43Y184        FDRE (Hold_EFF2_SLICEL_C_R)
+                                                     -0.015     2.266    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter3_reg
+  -------------------------------------------------------------------
+                         required time                         -2.266    
+                         arrival time                           0.015    
+  -------------------------------------------------------------------
+                         slack                                 -2.251    
+
+Slack (VIOLATED) :        -2.251ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter4_reg/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.015ns  (logic 0.000ns (0.000%)  route 0.015ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.281ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.281ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.015     0.015    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_rst
+    SLICE_X43Y184        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter4_reg/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.281     2.281    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_clk
+    SLICE_X43Y184        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter4_reg/C
+                         clock pessimism              0.000     2.281    
+    SLICE_X43Y184        FDRE (Hold_FFF_SLICEL_C_R)
+                                                     -0.015     2.266    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter4_reg
+  -------------------------------------------------------------------
+                         required time                         -2.266    
+                         arrival time                           0.015    
+  -------------------------------------------------------------------
+                         slack                                 -2.251    
+
+Slack (VIOLATED) :        -2.251ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter5_reg/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.015ns  (logic 0.000ns (0.000%)  route 0.015ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.281ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.281ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.015     0.015    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_rst
+    SLICE_X43Y184        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter5_reg/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.281     2.281    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_clk
+    SLICE_X43Y184        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter5_reg/C
+                         clock pessimism              0.000     2.281    
+    SLICE_X43Y184        FDRE (Hold_FFF2_SLICEL_C_R)
+                                                     -0.015     2.266    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runAccumulatorColumns_fu_527/ap_enable_reg_pp0_iter5_reg
+  -------------------------------------------------------------------
+                         required time                         -2.266    
+                         arrival time                           0.015    
+  -------------------------------------------------------------------
+                         slack                                 -2.251    
+
+Slack (VIOLATED) :        -2.247ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[0]/S
+                            (rising edge-triggered cell FDSE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.017ns  (logic 0.000ns (0.000%)  route 0.017ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.279ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.279ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.017     0.017    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_rst
+    SLICE_X152Y104       FDSE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[0]/S  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.279     2.279    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_clk
+    SLICE_X152Y104       FDSE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[0]/C
+                         clock pessimism              0.000     2.279    
+    SLICE_X152Y104       FDSE (Hold_DFF_SLICEM_C_S)
+                                                     -0.015     2.264    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[0]
+  -------------------------------------------------------------------
+                         required time                         -2.264    
+                         arrival time                           0.017    
+  -------------------------------------------------------------------
+                         slack                                 -2.247    
+
+Slack (VIOLATED) :        -2.247ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[1]/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.017ns  (logic 0.000ns (0.000%)  route 0.017ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.279ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.279ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.017     0.017    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_rst
+    SLICE_X152Y104       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[1]/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.279     2.279    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_clk
+    SLICE_X152Y104       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[1]/C
+                         clock pessimism              0.000     2.279    
+    SLICE_X152Y104       FDRE (Hold_CFF_SLICEM_C_R)
+                                                     -0.015     2.264    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[1]
+  -------------------------------------------------------------------
+                         required time                         -2.264    
+                         arrival time                           0.017    
+  -------------------------------------------------------------------
+                         slack                                 -2.247    
+
+Slack (VIOLATED) :        -2.247ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[2]/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.017ns  (logic 0.000ns (0.000%)  route 0.017ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.279ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.279ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.017     0.017    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_rst
+    SLICE_X152Y104       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[2]/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.279     2.279    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_clk
+    SLICE_X152Y104       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[2]/C
+                         clock pessimism              0.000     2.279    
+    SLICE_X152Y104       FDRE (Hold_AFF_SLICEM_C_R)
+                                                     -0.015     2.264    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[2]
+  -------------------------------------------------------------------
+                         required time                         -2.264    
+                         arrival time                           0.017    
+  -------------------------------------------------------------------
+                         slack                                 -2.247    
+
+Slack (VIOLATED) :        -2.247ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[3]/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.017ns  (logic 0.000ns (0.000%)  route 0.017ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.279ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.279ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.017     0.017    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_rst
+    SLICE_X152Y104       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[3]/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.279     2.279    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_clk
+    SLICE_X152Y104       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[3]/C
+                         clock pessimism              0.000     2.279    
+    SLICE_X152Y104       FDRE (Hold_AFF2_SLICEM_C_R)
+                                                     -0.015     2.264    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[3]
+  -------------------------------------------------------------------
+                         required time                         -2.264    
+                         arrival time                           0.017    
+  -------------------------------------------------------------------
+                         slack                                 -2.247    
+
+Slack (VIOLATED) :        -2.247ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[4]/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.017ns  (logic 0.000ns (0.000%)  route 0.017ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.279ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.279ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.017     0.017    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_rst
+    SLICE_X152Y104       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[4]/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.279     2.279    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_clk
+    SLICE_X152Y104       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[4]/C
+                         clock pessimism              0.000     2.279    
+    SLICE_X152Y104       FDRE (Hold_BFF_SLICEM_C_R)
+                                                     -0.015     2.264    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_CS_fsm_reg[4]
+  -------------------------------------------------------------------
+                         required time                         -2.264    
+                         arrival time                           0.017    
+  -------------------------------------------------------------------
+                         slack                                 -2.247    
+
+Slack (VIOLATED) :        -2.244ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724_ap_start_reg_reg/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.017ns  (logic 0.000ns (0.000%)  route 0.017ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.276ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.276ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.017     0.017    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_rst
+    SLICE_X150Y106       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724_ap_start_reg_reg/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.276     2.276    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_clk
+    SLICE_X150Y106       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724_ap_start_reg_reg/C
+                         clock pessimism              0.000     2.276    
+    SLICE_X150Y106       FDRE (Hold_BFF_SLICEM_C_R)
+                                                     -0.015     2.261    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724_ap_start_reg_reg
+  -------------------------------------------------------------------
+                         required time                         -2.261    
+                         arrival time                           0.017    
+  -------------------------------------------------------------------
+                         slack                                 -2.244    
+
+Slack (VIOLATED) :        -2.242ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_enable_reg_pp0_iter0_reg_reg/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.098ns  (logic 0.084ns (85.714%)  route 0.014ns (14.286%))
+  Logic Levels:           1  (LUT5=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.278ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.278ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.000     0.000    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_rst
+    SLICE_X152Y104       LUT5 (Prop_F5LUT_SLICEM_I4_O)
+                                                      0.084     0.084 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_enable_reg_pp0_iter0_reg_i_1/O
+                         net (fo=1, routed)           0.014     0.098    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_enable_reg_pp0_iter0_reg_i_1_n_0
+    SLICE_X152Y104       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_enable_reg_pp0_iter0_reg_reg/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.278     2.278    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_clk
+    SLICE_X152Y104       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_enable_reg_pp0_iter0_reg_reg/C
+                         clock pessimism              0.000     2.278    
+    SLICE_X152Y104       FDRE (Hold_FFF2_SLICEM_C_D)
+                                                      0.062     2.340    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_fu_724/ap_enable_reg_pp0_iter0_reg_reg
+  -------------------------------------------------------------------
+                         required time                         -2.340    
+                         arrival time                           0.098    
+  -------------------------------------------------------------------
+                         slack                                 -2.242    
+
+Slack (VIOLATED) :        -2.229ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_366_33_fu_738/ap_enable_reg_pp0_iter9_reg/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.017ns  (logic 0.000ns (0.000%)  route 0.017ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.261ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.261ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.017     0.017    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_366_33_fu_738/ap_rst
+    SLICE_X150Y93        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_366_33_fu_738/ap_enable_reg_pp0_iter9_reg/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.261     2.261    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_366_33_fu_738/ap_clk
+    SLICE_X150Y93        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_366_33_fu_738/ap_enable_reg_pp0_iter9_reg/C
+                         clock pessimism              0.000     2.261    
+    SLICE_X150Y93        FDRE (Hold_EFF_SLICEM_C_R)
+                                                     -0.015     2.246    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_366_33_fu_738/ap_enable_reg_pp0_iter9_reg
+  -------------------------------------------------------------------
+                         required time                         -2.246    
+                         arrival time                           0.017    
+  -------------------------------------------------------------------
+                         slack                                 -2.229    
+
+Slack (VIOLATED) :        -2.228ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_297_25_fu_668/ap_enable_reg_pp0_iter4_reg/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.017ns  (logic 0.000ns (0.000%)  route 0.017ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.260ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.260ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.017     0.017    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_297_25_fu_668/ap_rst
+    SLICE_X145Y125       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_297_25_fu_668/ap_enable_reg_pp0_iter4_reg/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.260     2.260    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_297_25_fu_668/ap_clk
+    SLICE_X145Y125       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_297_25_fu_668/ap_enable_reg_pp0_iter4_reg/C
+                         clock pessimism              0.000     2.260    
+    SLICE_X145Y125       FDRE (Hold_EFF_SLICEM_C_R)
+                                                     -0.015     2.245    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/grp_runQueryBlock_0_Pipeline_VITIS_LOOP_297_25_fu_668/ap_enable_reg_pp0_iter4_reg
+  -------------------------------------------------------------------
+                         required time                         -2.245    
+                         arrival time                           0.017    
+  -------------------------------------------------------------------
+                         slack                                 -2.228    
+
+Slack (VIOLATED) :        -2.225ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_13_fu_125/ap_enable_reg_pp0_iter1_reg/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.081ns  (logic 0.057ns (70.370%)  route 0.024ns (29.630%))
+  Logic Levels:           1  (LUT4=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.246ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.246ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.000     0.000    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_13_fu_125/ap_rst
+    SLICE_X49Y126        LUT4 (Prop_H6LUT_SLICEL_I1_O)
+                                                      0.057     0.057 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_13_fu_125/ap_enable_reg_pp0_iter1_i_1/O
+                         net (fo=1, routed)           0.024     0.081    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_13_fu_125/ap_enable_reg_pp0_iter1_i_1_n_0
+    SLICE_X49Y126        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_13_fu_125/ap_enable_reg_pp0_iter1_reg/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.246     2.246    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_13_fu_125/ap_clk
+    SLICE_X49Y126        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_13_fu_125/ap_enable_reg_pp0_iter1_reg/C
+                         clock pessimism              0.000     2.246    
+    SLICE_X49Y126        FDRE (Hold_HFF_SLICEL_C_D)
+                                                      0.060     2.306    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_13_fu_125/ap_enable_reg_pp0_iter1_reg
+  -------------------------------------------------------------------
+                         required time                         -2.306    
+                         arrival time                           0.081    
+  -------------------------------------------------------------------
+                         slack                                 -2.225    
+
+Slack (VIOLATED) :        -2.224ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/ap_enable_reg_pp0_iter1_reg/D
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.081ns  (logic 0.057ns (70.370%)  route 0.024ns (29.630%))
+  Logic Levels:           1  (LUT4=1)
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.245ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.245ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 r  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.000     0.000    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/ap_rst
+    SLICE_X47Y127        LUT4 (Prop_C6LUT_SLICEL_I1_O)
+                                                      0.057     0.057 r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/ap_enable_reg_pp0_iter1_i_1/O
+                         net (fo=1, routed)           0.024     0.081    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/ap_enable_reg_pp0_iter1_i_1_n_0
+    SLICE_X47Y127        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/ap_enable_reg_pp0_iter1_reg/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.245     2.245    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/ap_clk
+    SLICE_X47Y127        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/ap_enable_reg_pp0_iter1_reg/C
+                         clock pessimism              0.000     2.245    
+    SLICE_X47Y127        FDRE (Hold_CFF_SLICEL_C_D)
+                                                      0.060     2.305    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102/ap_enable_reg_pp0_iter1_reg
+  -------------------------------------------------------------------
+                         required time                         -2.305    
+                         arrival time                           0.081    
+  -------------------------------------------------------------------
+                         slack                                 -2.224    
+
+Slack (VIOLATED) :        -2.220ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/ap_CS_fsm_reg[3]/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.015ns  (logic 0.000ns (0.000%)  route 0.015ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.250ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.250ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.015     0.015    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/ap_rst
+    SLICE_X47Y127        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/ap_CS_fsm_reg[3]/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.250     2.250    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/ap_clk
+    SLICE_X47Y127        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/ap_CS_fsm_reg[3]/C
+                         clock pessimism              0.000     2.250    
+    SLICE_X47Y127        FDRE (Hold_HFF_SLICEL_C_R)
+                                                     -0.015     2.235    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/ap_CS_fsm_reg[3]
+  -------------------------------------------------------------------
+                         required time                         -2.235    
+                         arrival time                           0.015    
+  -------------------------------------------------------------------
+                         slack                                 -2.220    
+
+Slack (VIOLATED) :        -2.220ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/ap_CS_fsm_reg[4]/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.015ns  (logic 0.000ns (0.000%)  route 0.015ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.250ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.250ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.015     0.015    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/ap_rst
+    SLICE_X47Y127        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/ap_CS_fsm_reg[4]/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.250     2.250    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/ap_clk
+    SLICE_X47Y127        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/ap_CS_fsm_reg[4]/C
+                         clock pessimism              0.000     2.250    
+    SLICE_X47Y127        FDRE (Hold_HFF2_SLICEL_C_R)
+                                                     -0.015     2.235    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/ap_CS_fsm_reg[4]
+  -------------------------------------------------------------------
+                         required time                         -2.235    
+                         arrival time                           0.015    
+  -------------------------------------------------------------------
+                         slack                                 -2.220    
+
+Slack (VIOLATED) :        -2.220ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102_ap_start_reg_reg/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.015ns  (logic 0.000ns (0.000%)  route 0.015ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.250ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.250ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.015     0.015    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/ap_rst
+    SLICE_X47Y127        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102_ap_start_reg_reg/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.250     2.250    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/ap_clk
+    SLICE_X47Y127        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102_ap_start_reg_reg/C
+                         clock pessimism              0.000     2.250    
+    SLICE_X47Y127        FDRE (Hold_GFF_SLICEL_C_R)
+                                                     -0.015     2.235    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_reciprocalColumns_Pipeline_VITIS_LOOP_369_1_fu_102_ap_start_reg_reg
+  -------------------------------------------------------------------
+                         required time                         -2.235    
+                         arrival time                           0.015    
+  -------------------------------------------------------------------
+                         slack                                 -2.220    
+
+Slack (VIOLATED) :        -2.219ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_CS_fsm_reg[23]/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.017ns  (logic 0.000ns (0.000%)  route 0.017ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.251ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.251ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.017     0.017    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_rst
+    SLICE_X141Y135       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_CS_fsm_reg[23]/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.251     2.251    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_clk
+    SLICE_X141Y135       FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_CS_fsm_reg[23]/C
+                         clock pessimism              0.000     2.251    
+    SLICE_X141Y135       FDRE (Hold_EFF_SLICEM_C_R)
+                                                     -0.015     2.236    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_116_5_fu_148/ap_CS_fsm_reg[23]
+  -------------------------------------------------------------------
+                         required time                         -2.236    
+                         arrival time                           0.017    
+  -------------------------------------------------------------------
+                         slack                                 -2.219    
+
+Slack (VIOLATED) :        -2.219ns  (arrival time - required time)
+  Source:                 ap_rst_n
+                            (input port clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_p_anonymous_namespace_begin_reciprocal_fu_97/ap_return_3_preg_reg[2]/R
+                            (rising edge-triggered cell FDRE clocked by ap_clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             ap_clk
+  Path Type:              Hold (Min at Slow Process Corner)
+  Requirement:            0.000ns  (ap_clk rise@0.000ns - ap_clk rise@0.000ns)
+  Data Path Delay:        0.017ns  (logic 0.000ns (0.000%)  route 0.017ns (100.000%))
+  Logic Levels:           0  
+  Input Delay:            0.000ns
+  Clock Path Skew:        2.251ns (DCD - SCD - CPR)
+    Destination Clock Delay (DCD):    2.251ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    -0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                         input delay                  0.000     0.000    
+                                                      0.000     0.000 f  ap_rst_n (IN)
+                         net (fo=3748, unset)         0.017     0.017    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_p_anonymous_namespace_begin_reciprocal_fu_97/ap_rst
+    SLICE_X46Y134        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_p_anonymous_namespace_begin_reciprocal_fu_97/ap_return_3_preg_reg[2]/R  (IS_INVERTED)
+  -------------------------------------------------------------------    -------------------
+
+                         (clock ap_clk rise edge)     0.000     0.000 r  
+                                                      0.000     0.000 r  ap_clk (IN)
+                         net (fo=29344, unset)        2.251     2.251    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_p_anonymous_namespace_begin_reciprocal_fu_97/ap_clk
+    SLICE_X46Y134        FDRE                                         r  grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_p_anonymous_namespace_begin_reciprocal_fu_97/ap_return_3_preg_reg[2]/C
+                         clock pessimism              0.000     2.251    
+    SLICE_X46Y134        FDRE (Hold_EFF_SLICEM_C_R)
+                                                     -0.015     2.236    grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_reciprocalColumns_fu_181/grp_p_anonymous_namespace_begin_reciprocal_fu_97/ap_return_3_preg_reg[2]
+  -------------------------------------------------------------------
+                         required time                         -2.236    
+                         arrival time                           0.017    
+  -------------------------------------------------------------------
+                         slack                                 -2.219    
+
+
+
+

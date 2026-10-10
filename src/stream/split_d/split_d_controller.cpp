@@ -86,6 +86,7 @@ namespace detail{
         // 装载循环覆盖全部feature，尾部query也消费零填充，不需要先清零。
         elem_t q_tile[QUERY_BLOCK_COLS][HEAD_DIM];
         #pragma HLS ARRAY_PARTITION variable=q_tile complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=q_tile cyclic factor=DMA_ELEMS_PER_WORD dim=2
         for(int col=0; col<QUERY_BLOCK_COLS; ++col){
             for(int word=0; word<QKV_WORDS_PER_TOKEN; ++word){
                 #pragma HLS PIPELINE II=1
@@ -131,6 +132,8 @@ namespace detail{
             bool score_valid[PE_DIM][QUERY_BLOCK_COLS]{};
             #pragma HLS ARRAY_PARTITION variable=k_tile complete dim=1
             #pragma HLS ARRAY_PARTITION variable=v_tile complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=k_tile cyclic factor=DMA_ELEMS_PER_WORD dim=2
+            #pragma HLS ARRAY_PARTITION variable=v_tile cyclic factor=DMA_ELEMS_PER_WORD dim=2
             #pragma HLS ARRAY_PARTITION variable=pe complete dim=0
             #pragma HLS ARRAY_PARTITION variable=operand_b complete dim=0
             #pragma HLS ARRAY_PARTITION variable=operand_c complete dim=0

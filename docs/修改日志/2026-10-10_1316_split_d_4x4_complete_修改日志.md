@@ -3,7 +3,7 @@
 ## 1 本次调用信息
 
 - 开始时间：2026-10-10 13:16+08:00。
-- 当前状态：进行中，第1轮。
+- 当前状态：进行中，第2轮。
 - 本地仓库：`C:/Users/30130/Desktop/workstation/FlashAttention/FSA_HLS`。
 - 远端：`FSA-FPGA-NM37-tailBox:/home/zhangchenxuan/FSA_HLS`。
 - 分支：`fsa_split_D`；起始commit：`de03998070c004388bd0ba34fa9d7759ce7700c5`。
@@ -32,7 +32,8 @@
 
 | 轮次 | 被测commit | 修改 | 本地 | 远端 | 状态 |
 |---:|---|---|---|---|---|
-| 1 | 待提交 | 删除Q/K/V重复初始化 | 待执行 | 待执行 | 进行中 |
+| 1 | 4934747 | 删除Q/K/V重复初始化 | 数学24/24，严格19/24 | HLS/IP通过；OOC内部通过 | 已分析，存储问题仍在 |
+| 2 | 待提交 | 四lane feature分bank＋真实HBM集成包 | 待执行 | 待执行 | 进行中 |
 
 ## 5 逐轮记录
 
@@ -48,3 +49,32 @@ Q完整覆盖`QUERY_BLOCK_COLS×QKV_WORDS_PER_TOKEN×DMA_ELEMS_PER_WORD`，K/V�
 - 本地`cmd /c tools\local_split_d_check.cmd 4 16`：编译成功，数学24/24、严格19/24、exit1；与基线相同5项宿主数学stub位差，不作为正式通过。证据`build/local_split_d_check/complete_round1.txt`。
 - 正式远端标准入口即将运行，默认4×4/head16、完整CSim/CSynth/CoSim/IP；不更改正式流程。
 
+
+- 被测commit：4934747d8a453a76f79a007cf28de23a22852ebe；push及远端ff-only pull成功，tracked干净且HEAD精确匹配。正式入口于13:20:46+08开始，日志`/tmp/codex_split_d_4934747_complete_hls_20261010.log`。13:24读取CSim数学/严格均24/24，CSynth仍进行，CoSim/IP未结束。
+
+- 正式流程13:20:46—13:34:22+08，exit0；CSim与CoSim前/后数学和严格均24/24，CoSim26/26 PASS，IP导出成功。新CSynth：7.300ns、DSP40、FF45051、LUT127976、BRAM18K8，较b3e4957 FF−40/LUT−1616。Q RAM仍有两写端口，不能把初始化认作唯一原因。
+- 读取进行中构建时第一次误读已归档旧`*_build`（报告时间10:48），立即更正到当前`build/solution1`（13:24）；旧报告不纳入本轮结论。官方入口结束才将build改名。
+- OOC在13:37:35+08启动，同器件/10ns/2.7ns/HD.CLK_SRC48，输出`build/split_d_ooc_4934747/auto`；尚未出实现结果。证据归档正在传输。
+- 独立准备NM37真实HBM集成：由服务器现有HBM_test.bd核实双stack/8GB、SAXI_00、225MHz AXI、100MHz APB/reference；SmartConnect连接四路原FSA master与自检master，100/225MHz转换。程序6745指令、8192×128bit ROM，26事务寄存器配置及全部非法O canary计数已静态核对。该新增系统包尚未提交/远端验证，不能声称集成通过。
+- 后续存储方向依据AMD UG1399的cyclic分区/存储绑定文档：按4个DMA lane分feature bank，需实际检查single-write映射及LUT/BRAM收益，保留全覆盖装载与真实计算反馈。来源：https://docs.amd.com/r/2024.1-English/ug1399-vitis-hls/Array-Partitioning 。
+
+- HLS证据已归档`docs/evidence/split_d_4934747_4x4_complete/`：24有效输入/O全部与25d6dda原始word一致，完整C/RTL O SHA保持73dd80b…bd0；2非法完整canary通过；16PE/4Acc/两块阵列，两块II均5/5/1/1、禁止warning均0。总72507cycles，较80242减少7735（9.64%），仍待OOC结果闭环。正式IP SHA56999c10…defde。
+
+- 13:51用户明确选择“采用真实HBM与板内自检控制器”；系统目标已确定，不加入PCIe主机链路。参考clock按已实现NM37 example使用IBUFDS原始输出，避免驱动HBM内部reference BUFG时级联全局buffer。
+
+#### 第1轮分析闭环（14:03+08）
+
+- 已解决：冗余清零消除，24有效原始位模式/26事务保持、总周期−9.64%，结构/II/HLS预算不变。OOC13:37:35—13:56:51 exit0，内部setup+0.267ns/hold+0.010ns，DSP40、LUT49091、FF26441、RAMB36=7/RAMB18=40；75848/75848 nets routed、DRC无Error/Critical。
+- 剩余：40个tile RAMB18仍在，Q两端口同拍分别写DMA lane0/2与lane1/3；初始化不是唯一原因。外部min0ns hold4985个（reset3922），WHS−2.328ns/THS−8855.124ns；内部全部通过但full_ooc_gate=false，必须由已授权真实系统关闭。
+- 判据：本轮HLS/IP、内部OOC合格；存储优化及完整集成尚未合格。报告见新evidence/ooc/auto。
+- 下一修改：仅改变Q/K/V feature banking为cyclic factor4（每DMA lane独立），不同时绑定存储类型；实际端口与primitive收益由新构建判断。
+
+### 第2轮
+
+#### 修改前判断与计划
+
+继承问题：tile两写端口、小容量却40RAMB18，以及真实边界/系统验收未完成。依据装载四lane同拍写入，添加Q/K/V dim2 cyclic factor=DMA_ELEMS_PER_WORD，保留dim1空间partition、全部计算路径和时钟合同。独立集成包固定真实HBM＋板内自检；controller先跑错开AW/W、背压、错误字、超时保持/排空、忙中复位单元检查，再执行真实HBM BD仿真/实现。单元小memory不得当成系统验收。
+
+新增包静态审查修复：超时不取消VALID，当前事务排空后停止repeat/poll，禁止发送下一beat；unit fixture加入排空验证。core_clock在impl重新获取，避免引用已关闭synth设计对象。HBM reference按既有真实example使用raw IBUFDS输出。
+
+- 第2轮本地正式同入口检查：编译成功，数学24/24、严格19/24（同基线5项宿主stub位差），exit1；完整日志`build/local_split_d_check/complete_round2.txt`。新增被动core FSM起始→done周期观测，与包含预装载/检查的last_case_cycles区分。

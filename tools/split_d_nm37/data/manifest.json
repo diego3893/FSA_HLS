@@ -1,0 +1,250 @@
+{
+  "baseline_commit": "25d6dda678104d8a856292b83c1c48607a1148fd",
+  "baseline_sha256": "f7cda598edb76945d559ee30cfe485c348cf95068f2dfaa12c7f119a9936c3d4",
+  "program_sha256": "6e087144e121bce523d6843e18f2dc23c21a39c693e2450e46848f7c1114f1ca",
+  "commands": 6745,
+  "rom_depth": 8192,
+  "bases": {
+    "q": 0,
+    "k": 1048576,
+    "v": 2097152,
+    "o": 3145728
+  },
+  "cases": [
+    {
+      "name": "single-key-first",
+      "length": 1,
+      "causal": false,
+      "first_pc": 0,
+      "last_pc": 48,
+      "output_words_checked": 8,
+      "valid": true
+    },
+    {
+      "name": "two-key-ones-v",
+      "length": 2,
+      "causal": false,
+      "first_pc": 49,
+      "last_pc": 129,
+      "output_words_checked": 16,
+      "valid": true
+    },
+    {
+      "name": "two-key-basis-v",
+      "length": 2,
+      "causal": false,
+      "first_pc": 130,
+      "last_pc": 210,
+      "output_words_checked": 16,
+      "valid": true
+    },
+    {
+      "name": "two-key-basis-v-last-feature",
+      "length": 2,
+      "causal": false,
+      "first_pc": 211,
+      "last_pc": 291,
+      "output_words_checked": 16,
+      "valid": true
+    },
+    {
+      "name": "primary-noncausal",
+      "length": 7,
+      "causal": false,
+      "first_pc": 292,
+      "last_pc": 532,
+      "output_words_checked": 56,
+      "valid": true
+    },
+    {
+      "name": "primary-causal",
+      "length": 7,
+      "causal": true,
+      "first_pc": 533,
+      "last_pc": 773,
+      "output_words_checked": 56,
+      "valid": true
+    },
+    {
+      "name": "full-tile-noncausal",
+      "length": 16,
+      "causal": false,
+      "first_pc": 774,
+      "last_pc": 1302,
+      "output_words_checked": 128,
+      "valid": true
+    },
+    {
+      "name": "full-tile-causal",
+      "length": 16,
+      "causal": true,
+      "first_pc": 1303,
+      "last_pc": 1831,
+      "output_words_checked": 128,
+      "valid": true
+    },
+    {
+      "name": "boundary-noncausal",
+      "length": 3,
+      "causal": false,
+      "first_pc": 1832,
+      "last_pc": 1944,
+      "output_words_checked": 24,
+      "valid": true
+    },
+    {
+      "name": "boundary-causal",
+      "length": 3,
+      "causal": true,
+      "first_pc": 1945,
+      "last_pc": 2057,
+      "output_words_checked": 24,
+      "valid": true
+    },
+    {
+      "name": "boundary-noncausal",
+      "length": 4,
+      "causal": false,
+      "first_pc": 2058,
+      "last_pc": 2202,
+      "output_words_checked": 32,
+      "valid": true
+    },
+    {
+      "name": "boundary-causal",
+      "length": 4,
+      "causal": true,
+      "first_pc": 2203,
+      "last_pc": 2347,
+      "output_words_checked": 32,
+      "valid": true
+    },
+    {
+      "name": "boundary-noncausal",
+      "length": 5,
+      "causal": false,
+      "first_pc": 2348,
+      "last_pc": 2524,
+      "output_words_checked": 40,
+      "valid": true
+    },
+    {
+      "name": "boundary-causal",
+      "length": 5,
+      "causal": true,
+      "first_pc": 2525,
+      "last_pc": 2701,
+      "output_words_checked": 40,
+      "valid": true
+    },
+    {
+      "name": "boundary-noncausal",
+      "length": 8,
+      "causal": false,
+      "first_pc": 2702,
+      "last_pc": 2974,
+      "output_words_checked": 64,
+      "valid": true
+    },
+    {
+      "name": "boundary-causal",
+      "length": 8,
+      "causal": true,
+      "first_pc": 2975,
+      "last_pc": 3247,
+      "output_words_checked": 64,
+      "valid": true
+    },
+    {
+      "name": "boundary-noncausal",
+      "length": 9,
+      "causal": false,
+      "first_pc": 3248,
+      "last_pc": 3552,
+      "output_words_checked": 72,
+      "valid": true
+    },
+    {
+      "name": "boundary-causal",
+      "length": 9,
+      "causal": true,
+      "first_pc": 3553,
+      "last_pc": 3857,
+      "output_words_checked": 72,
+      "valid": true
+    },
+    {
+      "name": "rescale-second-tile",
+      "length": 9,
+      "causal": false,
+      "first_pc": 3858,
+      "last_pc": 4162,
+      "output_words_checked": 72,
+      "valid": true
+    },
+    {
+      "name": "rescale-second-tile-causal",
+      "length": 9,
+      "causal": true,
+      "first_pc": 4163,
+      "last_pc": 4467,
+      "output_words_checked": 72,
+      "valid": true
+    },
+    {
+      "name": "zero-qk-ones-v",
+      "length": 9,
+      "causal": false,
+      "first_pc": 4468,
+      "last_pc": 4772,
+      "output_words_checked": 72,
+      "valid": true
+    },
+    {
+      "name": "zero-qk-ones-v-causal",
+      "length": 9,
+      "causal": true,
+      "first_pc": 4773,
+      "last_pc": 5077,
+      "output_words_checked": 72,
+      "valid": true
+    },
+    {
+      "name": "pwl-boundary-noncausal",
+      "length": 25,
+      "causal": false,
+      "first_pc": 5078,
+      "last_pc": 5894,
+      "output_words_checked": 200,
+      "valid": true
+    },
+    {
+      "name": "pwl-boundary-causal",
+      "length": 25,
+      "causal": true,
+      "first_pc": 5895,
+      "last_pc": 6711,
+      "output_words_checked": 200,
+      "valid": true
+    },
+    {
+      "name": "invalid-length-zero",
+      "length": 0,
+      "causal": false,
+      "first_pc": 6712,
+      "last_pc": 6727,
+      "output_words_checked": 32768,
+      "valid": false
+    },
+    {
+      "name": "invalid-length-over-max",
+      "length": 4097,
+      "causal": false,
+      "first_pc": 6728,
+      "last_pc": 6743,
+      "output_words_checked": 32768,
+      "valid": false
+    }
+  ],
+  "scope": "24 exact Vitis vectors, 2 invalid lengths with all 32768 O words and guards; HBM system tests supplement official HLS tests"
+}
