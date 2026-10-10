@@ -1,0 +1,37 @@
+{
+  "scope": "User: internal timing and communication first; boundary hold deferred to full-system integration",
+  "ip_commit": "b3e4957e7454989198f58345e9ebcff1dac536d3",
+  "auto_script_commit": "b3776dc6c43dafd8b54ea4bb800540d6025acff8",
+  "metadata_and_hard_script_commit": "dbaec019d19fe61b48ab03d31b28e4d6439bae63",
+  "selected_implementation": "auto_context/locked_buffers/routed.dcp",
+  "selected_internal_ooc_gate": true,
+  "communication_test_gate": true,
+  "CoSim_transactions": 26,
+  "mathematical_and_bit_cases": [
+    24,
+    24
+  ],
+  "QK_overlap_cycles": 14160,
+  "floorplan_comparison_completed": true,
+  "hard_candidate_internal_ooc_gate": false,
+  "hard_candidate_rejected_reason": "Final setup WNS -0.081ns/TNS -0.273ns, four endpoints; auto setup +0.230ns",
+  "hard_placement_and_drc_gate": true,
+  "setup_margin_delta_ns": -0.311,
+  "boundary_hold_deferred": true,
+  "full_ooc_gate": false,
+  "full_system_verified": false,
+  "board_verified": false,
+  "extra_distance_pipeline_tested": false,
+  "scope_gate": true,
+  "whole_stage4_research_plan_completed": false,
+  "raw_archive_sha256": {
+    "auto/raw_reports.tar.gz": "680a26669e9945eb5d7e87e28c5c496a5d85f9a3a71029aeb0b280fa4be1898c",
+    "auto_context/raw_reports.tar.gz": "f5858aace2eaa8c1d1b1f4275d05f79590255e44d94b9c3265c17df34bdbd508",
+    "auto_hold_retry/raw_reports.tar.gz": "7764468bca61684c07de8a5333f59ffec659f289f039e153c9f3b896ae7194ba",
+    "metadata_probe/raw_reports.tar.gz": "8ba6ace7f8199ed46f43ddd4796d5255e3f619dc25f7fe186cbeba38456b29cd",
+    "regions/raw_reports.tar.gz": "fe73f030f972eef694709817885a468342075e3d86d2d862726233e3a6097de7",
+    "regions_hard/raw_reports.tar.gz": "c5e98cd0b8de29aa742f7a458291a512285ec0c89908abf51193aac0b6cf6e90"
+  },
+  "selected_checkpoint_internal_verified_after_LOC": true,
+  "old_soft_LOC_fix_verified": true
+}

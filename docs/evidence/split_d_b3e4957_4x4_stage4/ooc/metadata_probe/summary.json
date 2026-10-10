@@ -1,0 +1,56 @@
+{
+  "tested_script_commit": "dbaec019d19fe61b48ab03d31b28e4d6439bae63",
+  "changes": "Only LOC metadata on already placed BUFGs; no opt/place/route",
+  "timing_unchanged": true,
+  "hierarchical_resources_unchanged": true,
+  "hierarchy_rows_compared": 1579,
+  "bufg_loc_fixed": 2,
+  "full_boundary_hold_pass": false,
+  "sha256": {
+    "regions_property_probe/property_probe.txt": "7084b176d656fab57b8d5f51ec5f1fde33c45eea56c9a6b9530dba280cf3ce18",
+    "regions_property_probe/property_probe_constraints.xdc": "240b7e33734b1b2b05c62b14a508c8ab2e005c34f1c7977afef129de81f5a435",
+    "auto_context/locked_buffers/after_utilization.rpt": "33fdf79e8fce38435b16494baf500647c52b34e162edd326252d16c60cea2744",
+    "auto_context/locked_buffers/before_utilization.rpt": "e5fd89045f67377714694503ec6336d49a781d428a610f9f5f1164c2a4a49804",
+    "auto_context/locked_buffers/buffer_locations.tsv": "80814a4a662dbed5d989f618c48caead691ef57491bf4491c4b6fa1dbccdbe43",
+    "auto_context/locked_buffers/drc.rpt": "38c456dfe953b12471d12067f84a09aea2ff7293a7da2c5316f4f68269097fba",
+    "auto_context/locked_buffers/effective_constraints.xdc": "46cdd41455110137447266a3ea7de70ffd14c413143453208c73f63c524e381f",
+    "auto_context/locked_buffers/metadata_comparison.txt": "407497d851975e803bfebb65aacdf42ea30909baaf838db32b07f46acaaab246",
+    "auto_context/locked_buffers/diagnostic/context_properties.txt": "aad6cb9ad33bb33ca7ee6372f1182b95906223a6969dfb0cc181fbb2ab05541e",
+    "auto_context/locked_buffers/diagnostic/diagnostic_constraints.xdc": "619282642d1e23bf3e85990fbfe603deb96e5ce92c56a3dba4bc1b96a443d8f3",
+    "auto_context/locked_buffers/diagnostic/hold_violators.tsv": "5d099c379af839b65e2fd019414b763e5846756459b4965feb4a9cc065c2ee75",
+    "auto_context/locked_buffers/diagnostic/internal_hold.rpt": "25c29fdd3aff69ed14f24fe15e7ed33aac0738a7d266fb0ab6faed5ecaab8a30",
+    "auto_context/locked_buffers/diagnostic/internal_setup.rpt": "285494f770a6401c16a3352c08dd102aa93c4c8575d38d8929658fa05dd8b701",
+    "regions/locked_buffers/after_utilization.rpt": "67aa63698b83b6be51f8d6d3c95e36104ee9867ddf5fd12460eeaa83cdfe718b",
+    "regions/locked_buffers/before_utilization.rpt": "0bfb3de4d9392947ba64ab4c794dc802f4fa7898a857ea6653ba09687802a893",
+    "regions/locked_buffers/buffer_locations.tsv": "c3851f5822be5b74c199c3e24f6ee84e4c577f69bf28d47861cb0a2f4a4b231d",
+    "regions/locked_buffers/drc.rpt": "6022e46780a67f86614dadaeaa1ac449fbaf70aef03f0b78058a69efb53bf0d7",
+    "regions/locked_buffers/effective_constraints.xdc": "ecf7cd1ac21ffbf1f9699b4964a4f3c7ea705013918c6141dd159fbf074bd31c",
+    "regions/locked_buffers/metadata_comparison.txt": "79337a030a68914c30a6b47294a2c0d1bb9e9a36faa9170d6bda4f1a3ef3105d"
+  },
+  "old_soft_LOC_fix": {
+    "before_HDOOC4_critical": 2,
+    "after_HDOOC4_critical": 0,
+    "drc_counts": {
+      "Warning": 145,
+      "Advisory": 10
+    },
+    "timing_unchanged": true,
+    "resources_unchanged": true,
+    "still_soft_and_rejected": true,
+    "setup_ns": 0.111,
+    "hold_ns": -1.565,
+    "tested_script_commit": "dbaec019d19fe61b48ab03d31b28e4d6439bae63"
+  },
+  "selected_checkpoint_diagnostic": {
+    "internal_setup_ns": 0.23,
+    "internal_hold_ns": 0.01,
+    "hold_violators": 4560,
+    "all_negative_hold_start_at_input": true,
+    "context": {
+      "clock_source": "BUFGCE_X0Y48",
+      "clock_period": "10.000",
+      "black_boxes": "0"
+    },
+    "tested_script_commit": "dbaec019d19fe61b48ab03d31b28e4d6439bae63"
+  }
+}

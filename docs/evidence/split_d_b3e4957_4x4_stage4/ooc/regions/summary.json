@@ -28,6 +28,7 @@
     "latch_loops": 0
   },
   "fully_routed_nets": 76252,
+  "routable_nets": 76252,
   "routing_errors": 0,
   "drc_counts": {
     "Critical Warning": 2,
@@ -46,6 +47,7 @@
     "DSP": 40
   },
   "DSP_gate": true,
+  "route_gate": true,
   "worst_setup_path": {
     "source": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runAccumulatorColumns_fu_520/icmp_ln123_1_reg_6576_reg[0]/C",
     "destination": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runAccumulatorColumns_fu_520/significand_60_reg_6694_reg[48]/D",
@@ -94,10 +96,13 @@
     "s_axi_control_ARVALID": 2,
     "s_axi_control_WVALID": 2
   },
+  "hold_classification_complete_gate": true,
   "timing_and_route_gate": false,
   "drc_error_gate": false,
   "ooc_model_gate": true,
   "full_ooc_gate": false,
+  "boundary_hold_status": "deferred_to_system_integration",
+  "internal_ooc_gate": false,
   "sha256": {
     "clockInfo.txt": "c58b2bfe6676f1a365ab690963bdb8095ac3b51d3676fb58387e71ac230a4622",
     "congestion.rpt": "067a2df0e2b734807dbd4323747a4158a1f65b9fc1c6f271a7559eaff5d92741",
@@ -780,6 +785,95 @@
         "slr": "SLR0"
       }
     ],
+    "hard_properties": {
+      "worker0": false,
+      "worker1": false
+    },
+    "seed_bounds": {
+      "worker0": {
+        "SLICE": [
+          61,
+          84,
+          116,
+          238
+        ],
+        "DSP48E2": [
+          9,
+          50,
+          16,
+          86
+        ],
+        "RAMB18": [
+          5,
+          70,
+          7,
+          81
+        ]
+      },
+      "worker1": {
+        "SLICE": [
+          94,
+          44,
+          156,
+          233
+        ],
+        "DSP48E2": [
+          16,
+          30,
+          19,
+          73
+        ],
+        "RAMB18": [
+          7,
+          56,
+          8,
+          74
+        ]
+      }
+    },
+    "effective_bounds": {
+      "worker0": {
+        "SLICE": [
+          61,
+          84,
+          116,
+          238
+        ],
+        "DSP48E2": [
+          9,
+          50,
+          16,
+          87
+        ],
+        "RAMB18": [
+          5,
+          70,
+          7,
+          81
+        ]
+      },
+      "worker1": {
+        "SLICE": [
+          94,
+          44,
+          156,
+          233
+        ],
+        "DSP48E2": [
+          16,
+          30,
+          19,
+          73
+        ],
+        "RAMB18": [
+          7,
+          56,
+          8,
+          75
+        ]
+      }
+    },
+    "tile_expansion_gate": true,
     "gate": false
   }
 }

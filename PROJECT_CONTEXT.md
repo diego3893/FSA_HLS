@@ -17,7 +17,7 @@
 - **基线及新证据已归档**：旧`9c49789`20项未改输入/O/周期在新官方流程逐项一致；新24个有效事务全部QKV/O、非法canary和26事务周期存于`docs/evidence/split_d_25d6dda_4x4/`。完整C/RTL O逐字节一致；阶段3已将全部24项期望内嵌，分块130c778全部24项及完整C/RTL输出SHA与其一致。
 - **阶段3已完成（2026-10-10）**：三轮迭代在130c778f5878b34ed998c6be6adcf3e64579c0ea收敛。官方数学24/24、严格24/24、26/26 CoSim；两个独立4×2 worker，总PE16/Acc4/恢复除法循环4（倒数wrapper内begin/normalize共享）；7.300ns、DSP40/FF45091/LUT129592/BRAM8、II5/5/1/1。总80242cycles，比25d6dda少14.78%；FF增41.25%、LUT增3.57%。原始DMA字广播/worker内解包修复前两轮RTL数值失败；具体缓存/调度根因未最小化证明。此为阶段3结束状态；随后用户“继续4”授权阶段4，见下条。死代码未清理。
 
-- **阶段4进行中（2026-10-10）**：b3e4957正式HLS/IP及profiling通过；auto_context内部setup+0.230ns/hold+0.010ns。第4轮regions实际为soft且有2条HDOOC-4，失败证据已归档；第5轮probe证明CONTAIN_ROUTING赋值重置IS_SOFT，已修正顺序并增加实际BUFG LOC固定，待regions_hard实现。用户明确“内部与通信先验收，边界hold留完整系统集成”；保留min0ns和4560个input hold失败，完整OOC gate为false，不再做aggressive输入修复。完整系统/16×16/bitstream/板测后续。日志1032闭环4轮、第5轮进行中。
+- **阶段4本次OOC对照收敛（2026-10-10）**：保留auto_context：内部setup+0.230ns/hold+0.010ns，正式HLS/IP及通信profiling通过。实际hard区域dbaec01位置越界0、无DRC Error/Critical，但setup−0.081ns/TNS−0.273ns、4个内部endpoint失败，比auto差0.311ns，明确弃用；不把区域实验失败改写成通过。属性顺序已确认，旧soft仅固定BUFG LOC后HDOOC-4由2降0且QoR不变；最终所选自动检查点内部时序/全部负hold已复核。用户指定边界hold留完整系统；min0ns及auto的4560个input失败保持，full_ooc_gate=false。本次未新增距离感知流水，四组完整研究对照/系统/16×16/bitstream/板测未完成。正式IP仍b3e4957，计算仍130c778；日志1032已闭环5轮，本次OOC工作包结束；完整阶段4研究计划尚未全部执行。
 
 ## 2 硬约束
 
@@ -102,7 +102,7 @@ Q/K/V AXI
 - `score_acc`只属于PE本地状态；P驻留`PE.reg`。
 - Accumulator按列展开，默认4列共4个FP32 RawFMA，每个使用2 DSP。
 - causal判断使用全局query/key索引。
-- 阶段3候选将上图逻辑阵列沿query列拆为两个4×2块，各有本地Q/max/L/O/PV反馈；分发器的K/V外存读取次数保持原值，广播给两块，单汇聚器按全局query写O。块内接口为D×B，D/H及token/feature步长不变。130c778的实例/启动控制、资源与26事务活性已验收。新增tile缓存4096bits，用户FIFO4100bits＋隐式scalar361bits；分发K/V流水latency74、Register10111FF为当前开销。阶段4已有探索物理证据：分发器实际综合918FF，最差setup在块内；缺时钟源的初始auto不能作为完整验收。
+- 阶段3候选将上图逻辑阵列沿query列拆为两个4×2块，各有本地Q/max/L/O/PV反馈；分发器的K/V外存读取次数保持原值，广播给两块，单汇聚器按全局query写O。块内接口为D×B，D/H及token/feature步长不变。130c778的实例/启动控制、资源与26事务活性已验收。新增tile缓存4096bits，用户FIFO4100bits＋隐式scalar361bits；分发K/V流水latency74、Register10111FF为HLS估算；阶段4分发器实际综合918FF。补齐时钟模型后最差setup在分发icmp到V AXI读缓冲BRAM使能，route占91.7%；旧auto块内最差仅为探索记录。
 
 ### 4.2 生产基线
 
@@ -153,24 +153,24 @@ Q/K/V AXI
 - 当前分阶段方案：`docs/Split-D修正与TAPA启发的分阶段修改验收方案_20261009.md`；旧20260930计划与DeepSeek交接用于历史参考，冲突处以新方案的核查结果为准。
 - Split-D历史交接：`docs/split_d_implementation_plan_20260923/PROJECT_CONTEXT.md`（停止维护，不作为当前状态来源）
 - Split-D迁移交接：`docs/Split-D_FSA_DeepSeek迁移交接_20260929.md`（当前任务的第2优先级来源）
-- 服务器`hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1`：现为b3e4957正式HLS/IP成功生成物，10:45:01—10:59:11，本地完整报告/TV/IP归档`build/stage4_b3e4957/ip_snapshot.tar.gz`，精简证据`docs/evidence/split_d_b3e4957_4x4_stage4/`。130c778阶段3旧成功完整归档仍在`build/stage3_130c778/full_snapshot.tar.gz`。OOC探索auto/auto_hold_retry和正式时钟模型auto_context已结束，regions/diagnostic_retry进行中；目录均在服务器`build/split_d_ooc_b3e4957/`，日志`/tmp/codex_split_d_b3e4957_ooc_<mode>_20261010.log`。
+- 服务器`hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1`为b3e4957正式HLS/IP生成物；本地完整归档`build/stage4_b3e4957/ip_snapshot.tar.gz`，精简证据`docs/evidence/split_d_b3e4957_4x4_stage4/`。实际自动/失败soft/失败hard OOC均保留在远端`build/split_d_ooc_b3e4957/`；选择`auto_context/locked_buffers/routed.dcp`。对照JSON位于evidence/ooc/comparison.json，完整DCP/WDB留服务器。
 - 本地`build/fsa_stream_split_d_build/solution1/`是**拆分前**的旧生成物（最新`csynth.rpt`为2026-09-28 16:51，仍含已删除的`peArrayTask`/`accumulatorTask`/`KPN`模块），只能作为历史基线，**不得**用于描述当前源码。
 
 默认参数为`FSA_SPLIT_D_PE_DIM=4`、`FSA_SPLIT_D_HEAD_DIM=16`；目标参数为`16/128`。
 
 ## 8 下一步
 
-1. 阶段1/2/3已完成。读取regions同模型对照及诊断，分别验收内部与接口时序；用户未改变合同前，min0ns接口hold保持失败状态。通信插级必须由实际瓶颈及反馈/背压审查决定。
+1. 阶段1/2/3已完成；阶段4本次OOC对照选择auto_context，硬区域候选因setup失败弃用。后续完整系统先声明真实AXI接口延迟、clock位置/布线及reset同步释放合同，再闭环边界hold和背压；未授权执行完整系统或阶段5。
 2. 保留每块唯一PE/Acc共享层级和真实distance8反馈。源码状态复用不等于物理阶段寄存器完全复用。低风险死代码清理需独立范围和新4×4验证；stageAccumulatorResult仍被调用。
 3. 实际分发器综合918FF；新模型最差setup为分发icmp→V AXI读缓冲BRAM使能（6.477ns、91.7%route），setup+0.230ns已满足100MHz。纯数据广播未证明是首要瓶颈；不按HLS10724FF盲目插级。当前是HLS后物理反馈，不是自动物理感知HLS调度。
-4. 当前物理验证已授权，采用OOC载体并声明边界预算。比较自动布局、粗粒度区域约束，通信插级由实测路径决定；核对AXI、反馈、背压、setup/hold、DRC及端到端时间，不外推板测。
+4. 本次授权的OOC对照已经结束，区域候选失败且保留auto。后续物理实验继续固定器件/时钟/接口并声明边界；通信插级由实测路径和反馈/背压审查决定，完整系统及板测属于新的工作范围。
 5. 16×16仍暂缓。恢复时先检查当前单元II配置、15/16/17/32/33边界和物理分块，详见新方案阶段5。H=128的QK是128次逐feature求值，旧64拍估算漏算lane，作废。
 
 ## 9 验证状态
 
 ### 已完成
 
-- 阶段4正式HLS/IP、实际QK并行、补齐时钟模型的auto_context已补证；内部时序通过、接口hold失败，regions对照进行中。详见阶段4报告及1032日志。
+- 阶段4本次正式HLS/IP、实际QK并行、通信等待关系及所选auto内部setup/hold均通过；实际hard区域对照完成但setup失败，弃用。用户范围与完整OOC gate分开，见阶段4报告及1032日志。
 
 - 阶段3在130c778官方全流程通过：24/24数学/严格、26/26事务、相同C/RTL O SHA；两个worker独立启动/调度结构，总16PE/4Acc/4恢复除法循环，7.300ns/DSP40/II5/5/1/1。FF45091/LUT129592/BRAM8，总80242cycles；容量及额外寄存器开销已记录。用户未设轮数上限，三轮收敛后停止。
 
@@ -212,9 +212,9 @@ Q/K/V AXI
 
 ### 未完成
 
-- 阶段3前两轮缓存/RTL调度根因未最小化证明；阶段4官方profiling已补实际QK重叠证据。5项本地stub位差归因、跨阶段寄存器复用优化、完整系统/板测未完成；IP已导出，OOC hold未验收。
+- 阶段3前两轮缓存/RTL调度根因未最小化证明；阶段4官方profiling已补实际QK重叠证据。5项本地stub位差归因、跨阶段寄存器复用优化、完整系统/板测未完成；IP及所选auto内部时序已验收，边界hold按用户选择留完整系统。
 - **16×16/128 的目标II与完整验收：暂时搁置**（用户2026-10-09指示只做4×4）。
-- 4×4 Split-D IP已正式导出；Vivado实现后时序、完整系统、板测尚未验收。16×16未导出/实现。
+- 4×4 Split-D IP已正式导出，所选auto的内部实现时序通过；完整边界hold、完整系统、板测未验收。硬区域setup失败已拒绝。16×16未导出/实现。
 - 生产基线 IP 导出、Vivado 实现后时序和板测。
 - 代码清理：`peBankMacUnit` 在 P3a 后已无调用点（定义在 `split_d_compute.cpp:51`），需清理或复用；`PE_ARRAY_II` 在16×16仍为5，是否改1待16×16恢复后按是否复发`204-65`决定。
 
@@ -234,7 +234,7 @@ Q/K/V AXI
 
 第二次核查已修订方案：保留D/H和全局索引、K/V读取量及现有量化链；补倒数通路、位模式基线、广播/汇聚等待关系、IP导出与OOC/全系统时序等级。范围以方案第13节为准，不声称所有独立模块已逐行审计。失败构建读取对应失败归档；当前成功目录为130c778，不得误引用旧HEAD。
 
-**2026-10-10最新状态（覆盖以上）：**b3e4957正式HLS/IP及profiling通过；auto_context内部setup+0.230ns/hold+0.010ns。第4轮regions实际为soft且有2条HDOOC-4，失败证据已归档；第5轮probe证明CONTAIN_ROUTING赋值重置IS_SOFT，已修正顺序并增加实际BUFG LOC固定，待regions_hard实现。用户明确“内部与通信先验收，边界hold留完整系统集成”；保留min0ns和4560个input hold失败，完整OOC gate为false，不再做aggressive输入修复。完整系统/16×16/bitstream/板测后续。日志1032闭环4轮、第5轮进行中。
+**2026-10-10最新状态（覆盖以上）：**阶段4本次OOC对照收敛，保留auto_context：内部setup+0.230ns/hold+0.010ns，正式HLS/IP及通信profiling通过。实际hard区域dbaec01位置越界0、无DRC Error/Critical，但setup−0.081ns/TNS−0.273ns、4个内部endpoint失败，比auto差0.311ns，明确弃用；不把区域实验失败改写成通过。属性顺序已确认，旧soft仅固定BUFG LOC后HDOOC-4由2降0且QoR不变；最终所选自动检查点内部时序/全部负hold已复核。用户指定边界hold留完整系统；min0ns及auto的4560个input失败保持，full_ooc_gate=false。本次未新增距离感知流水，四组完整研究对照/系统/16×16/bitstream/板测未完成。正式IP仍b3e4957，计算仍130c778；日志1032已闭环5轮，本次OOC工作包结束；完整阶段4研究计划尚未全部执行。
 
 ## 11.1 本地git推送的环境坑（2026-09-30，已修复）
 

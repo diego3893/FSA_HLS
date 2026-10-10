@@ -111,3 +111,32 @@
 - 用户明确选择“内部与通信先验收，边界hold留完整系统集成”。本次保留input/output min0ns及全部接口失败报告；新增范围内内部验收门槛，完整OOC gate仍不能写成true。撤回仅本地准备、从未执行的aggressive hold选项。
 - 748e5cb只读property probe在12:32:30—12:33:43 exit0，证明设置CONTAIN_ROUTING=0会把IS_SOFT从0改回1；改为先CONTAIN_ROUTING后IS_SOFT，并在创建及route后断言0。保存实现前及最终XDC供实际tile范围核对。
 - 对placer已经选定的BUFG site在route后显式固定LOC，并检查IS_LOC_FIXED，消除HDOOC-4的真实约束问题。auto_context另从原routed DCP仅更新LOC元数据，前后时序/资源对照，不重布线。硬区域使用新regions_hard目录，失败soft区域证据保留。
+
+- dbaec019d19fe61b48ab03d31b28e4d6439bae63已推送并精确核对，regions_hard于12:39:56启动。auto_context LOC元数据核对12:40:27—12:42:13 exit0；前后setup0.230ns、hold−1.582ns完全相同，层次资源表逐行一致，两BUFG IS_LOC_FIXED=1，无Error/Critical Warning；没有opt/place/route。property probe与LOC前后原报告已一起归档metadata_probe。
+- 本地抽取程序保留原full_ooc_gate；新增internal_ooc_gate响应用户范围，实际soft regions仍被属性/越界/DRC三项判false，auto_context内部为true。位置核对使用最终XDC的真实tile对齐范围，仅允许已观测的一格上界扩展，不能任意放宽坐标。
+
+- 静态再核对当前通信协议：每块Q8字、每key tile KV16包、输出32个acc；尾tile/causal保持消费计数。输出发生于全部key输入以后，固定汇聚不会反向阻断仍需输入的worker。CoSim数学/严格24/24、完整位模式及官方QK177次重叠再次从归档核对；src/include/tests从130c778到b3e4957无差异。
+- 新抽取程序要求全部可路由net完成、全部负hold分类数与最终endpoint数一致，并保留全部12项check_timing。真实auto内部通过、真实soft区域失败的回归已通过；Python语法检查及git diff --check通过。未因为Tcl/报告改动重跑相同C++测试。
+
+### 第5轮最终结果与分析闭环
+
+- dbaec01 regions_hard于12:39:56—12:56:54 exit0；只读diagnostic于12:56:18—12:57:53 exit0。最终WNS−0.081ns/TNS−0.273ns，4个内部setup endpoint失败；内部hold+0.010ns，4398负hold全部input（reset3668），WHS−1.570ns/THS−5982.450ns。route中间+0.037ns不能替代最终报告。
+- 实际两个IS_SOFT=FALSE；worker0/1检查38456/38623条SLICE/DSP/RAMB primitive记录，越界0，全部SLR0。两处资源上界按tile各扩一格，与原seed同时保留。route76265/76265、error0，12项check_timing均0；DRC145Warning/10Advisory，无Error/Critical。LUT49220/FF26461/RAMB36=7/RAMB18=40/DSP40。硬区域原始压缩报告2024291bytes。
+- 最差setup在分发ap_enable→K AXI读缓冲BRAM ENBWREN，7.049ns（logic0.777/route6.272）。内部setup比auto_context少0.311ns，候选不采用；不是靠放宽时钟或删gate获得通过。实际hard未插入BUFG，因此不能将其HDOOC-4消失单独归功于LOC规则。
+- 为直接证明修复，旧soft仅对已有两个BUFG固定LOC，13:04:52—13:06:55 exit0：HDOOC-4从2降0，setup0.111/hold−1.565及全部层次资源不变，无opt/place/route。旧soft属性和越界仍失败，原始routed DCP/报告不覆盖。
+- 最终选择auto_context/locked_buffers/routed.dcp；13:02:40—13:04:19只读核对内部setup+0.230/hold+0.010ns、HD.CLK_SRC、blackbox0，全部4560负hold均起于input。与原自动布局全局时序/1579行资源表一致，两个BUF LOC固定。新诊断及LOC单因素证据合并归档metadata_probe（136693bytes）。
+- 已解决：正式HLS/IP及数值保持、真实QK重叠/通信等待证据、OOC时钟模型、硬属性顺序/实际位置、BUFG LOC缺失及验收口径。
+- 仍存在：边界input min0ns hold失败；硬区域setup失败且弃用；未新增距离感知流水、未完成四组完整研究对照、任意AXI背压证明、完整系统及16×16。无新增硬件改动来掩盖这些结果。
+- 验收标准状态：用户明确的内部与通信范围由所选auto通过；同条件硬区域对照已完成，失败候选保留。完整OOC gate仍false。原方案允许4×4物理感知收益不明显，不要求采纳失败floorplan，因此保留自动布局，不另设轮数上限，也不为制造收益盲目插级。
+- 下一轮修改：本次OOC工作包无需新轮。后续完整系统需另明确范围，先建立真实AXI发起端延迟、时钟位置/布线及同步reset释放合同，再闭环边界hold和背压。TAPA后续物理划分还须纳入分发器/AXI缓冲控制，不能只限制worker。阶段5继续暂缓。
+- 本轮闭环状态：已完成。
+
+## 7 调用结束总结
+
+- 状态：本次OOC/内部/通信范围收敛，保留自动布局；完整边界时序及整个研究计划不宣称完成。已完成分析闭环5轮，用户未设置上限，无未完成轮和运行中的远端任务。
+- 正式HLS/IP被测b3e4957e7454989198f58345e9ebcff1dac536d3，计算130c778；最终物理脚本被测dbaec019d19fe61b48ab03d31b28e4d6439bae63。后续证据抽取/报告提交未重新运行HLS或OOC。
+- 数学/严格24/24、CoSim26事务80242cycles、HLS7.300ns/DSP40/II5/5/1/1、正式IP导出及SHA、两个QK循环177次窗口完全重叠。所选auto内部setup/hold+0.230/+0.010ns；区域候选最终setup−0.081ns弃用；min0ns边界失败保留给系统集成。
+- 独立报告：docs/综合报告/Split-D阶段4物理对照_20261010.md；对照验收JSON：docs/evidence/split_d_b3e4957_4x4_stage4/ooc/comparison.json。根PROJECT_CONTEXT与执行方案当前状态已同步。
+- 最终记录随本节所在Git提交发布，精确hash由Git记录；用户AGENTS.md、.tmprun和旧未跟踪stub日志仍保留且不提交。
+
+- 结束前复核：全部原始压缩报告SHA与comparison.json一致，DCP未提交；IP component.xml确认四路AXI RDATA/WDATA均64-bit。所有远端任务已退出，最终发布仅涉及工具/证据/文档，无src/include/tests变化。证据分析结束时间：2026-10-10T13:10:22+08:00。

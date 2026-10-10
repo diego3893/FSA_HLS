@@ -1,0 +1,227 @@
+{
+  "timing": {
+    "wns": -0.081,
+    "tns": -0.273,
+    "setup_failing_endpoints": 4,
+    "setup_total_endpoints": 67217,
+    "whs": -1.57,
+    "ths": -5982.45,
+    "hold_failing_endpoints": 4398,
+    "hold_total_endpoints": 67217,
+    "wpws": 4.458,
+    "tpws": 0.0,
+    "pulse_failing_endpoints": 0,
+    "pulse_total_endpoints": 29143
+  },
+  "check_timing": {
+    "no_clock": 0,
+    "constant_clock": 0,
+    "pulse_width_clock": 0,
+    "unconstrained_internal_endpoints": 0,
+    "no_input_delay": 0,
+    "no_output_delay": 0,
+    "multiple_clock": 0,
+    "generated_clocks": 0,
+    "loops": 0,
+    "partial_input_delay": 0,
+    "partial_output_delay": 0,
+    "latch_loops": 0
+  },
+  "fully_routed_nets": 76265,
+  "routable_nets": 76265,
+  "routing_errors": 0,
+  "drc_counts": {
+    "Warning": 145,
+    "Advisory": 10
+  },
+  "resources": {
+    "LUT": 49220,
+    "logic_LUT": 47330,
+    "LUTRAM": 320,
+    "SRL": 1570,
+    "FF": 26461,
+    "RAMB36": 7,
+    "RAMB18": 40,
+    "URAM": 0,
+    "DSP": 40
+  },
+  "DSP_gate": true,
+  "route_gate": true,
+  "worst_setup_path": {
+    "source": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/distributeQueryTile_U0/grp_distributeQueryTile_Pipeline_VITIS_LOOP_496_3_VITIS_LOOP_501_4_VITIS_LOOP_502_5_fu_220/ap_enable_reg_pp0_iter2_reg/C",
+    "destination": "k_gmem_m_axi_U/load_unit_0/buff_rdata/U_fifo_mem/mem_reg_bram_0/ENBWREN",
+    "data_ns": 7.049,
+    "logic_ns": 0.777,
+    "route_ns": 6.272
+  },
+  "worst_hold_path": {
+    "source": "ap_rst_n",
+    "destination": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/grp_runPeArray_fu_642/ap_enable_reg_pp0_iter1_reg/R",
+    "data_ns": 0.015,
+    "logic_ns": 0.0,
+    "route_ns": 0.015
+  },
+  "diagnostic_source": "diagnostic",
+  "context": {
+    "clock_source": "BUFGCE_X0Y48",
+    "clock_period": "10.000",
+    "black_boxes": "0"
+  },
+  "internal_hold_slack": 0.01,
+  "internal_setup_slack": -0.081,
+  "hold_violator_count": 4398,
+  "hold_startpoint_groups": {
+    "ap_rst_n": 3668,
+    "m_axi_k_gmem_RDATA": 128,
+    "m_axi_v_gmem_RDATA": 128,
+    "m_axi_k_gmem_RLAST": 2,
+    "m_axi_v_gmem_RLAST": 2,
+    "m_axi_k_gmem_RVALID": 5,
+    "m_axi_v_gmem_RVALID": 5,
+    "s_axi_control_WDATA": 278,
+    "m_axi_v_gmem_ARREADY": 2,
+    "s_axi_control_AWADDR": 5,
+    "s_axi_control_ARADDR": 5,
+    "m_axi_q_gmem_RDATA": 128,
+    "m_axi_q_gmem_RLAST": 2,
+    "s_axi_control_BREADY": 1,
+    "m_axi_q_gmem_ARREADY": 2,
+    "m_axi_o_gmem_BVALID": 5,
+    "s_axi_control_RREADY": 2,
+    "s_axi_control_WSTRB": 17,
+    "s_axi_control_WVALID": 1,
+    "m_axi_k_gmem_ARREADY": 2,
+    "m_axi_o_gmem_AWREADY": 5,
+    "m_axi_q_gmem_RVALID": 5
+  },
+  "hold_classification_complete_gate": true,
+  "timing_and_route_gate": false,
+  "drc_error_gate": true,
+  "ooc_model_gate": true,
+  "full_ooc_gate": false,
+  "boundary_hold_status": "deferred_to_system_integration",
+  "internal_ooc_gate": false,
+  "sha256": {
+    "buffer_locations.tsv": "597f5bef2dfe696d775d0e4067fa547e13b04b89dfdc67157697e3e46b14dd89",
+    "clockInfo.txt": "14ab246b89efb01c038ab81a88f4a7763d5203fad2d7f61df2fd8956b4453695",
+    "congestion.rpt": "a2b6ace947f7e1cf4d2d99ab76d568dc819b7f2ab2ce0667c4fae65cf6e41870",
+    "drc.rpt": "5026a2f7f415b26bd79198ee693960f798f9b51f3157c02aeb65e0b27b42ea47",
+    "effective_constraints.xdc": "10d65217bbf919c231a6179c50ccbc2ff0b0a6bc97ee317a3af3723e68842a4c",
+    "exceptions.rpt": "947f56170e635b0fd0e03613c9de2fa83774fb7d8c9e2515863f3c796b000a41",
+    "fanout.rpt": "7cab8c2f5f796bf255ead7173cd41fc3c05c4f61c9210a4947d3205b676ec87a",
+    "hold_paths.rpt": "074c1a95d1d5b77d783bf37729f7aba90098a9f9bcd39902077a9a649da53280",
+    "methodology.rpt": "1c1169b16b35dee834716582a326d32d4af16f7149486546d6c551d3223a192a",
+    "physical_metrics.txt": "17e4288597ad7d1426fd55e9cd8427698cebed121008c464332b963ff886d902",
+    "planned_constraints.xdc": "9cac965a2e6e221454cad5694cbce371f56aabf1b5850c66fed1ed64be77710d",
+    "primitive_locations.tsv": "142142a9c0035afc25a1f3bce016a2de80400ccf07e924c2d105fa1674d54ca8",
+    "route_status.rpt": "cf53cbc5536fffa4084645d34439c793ab61a4fded2abae2c5f9de9ee4d5faa4",
+    "setup_paths.rpt": "2c229d4a69fa4100f35fe8f704cb819249f7a8765bc2d7d1fc62571be3b7a0cc",
+    "timing_summary.rpt": "247f0dc95a4be0966794335f6d208d0841d452416f7ea3bc0b1543319853f84b",
+    "utilization.rpt": "7f210426834b17e54e90b62b4c274d063dde8bbb9e1a41c36277929a531c94e4",
+    "diagnostic/context_properties.txt": "aad6cb9ad33bb33ca7ee6372f1182b95906223a6969dfb0cc181fbb2ab05541e",
+    "diagnostic/diagnostic_constraints.xdc": "d66902bb3f4044eded4577652832fbe5ced4773178eb8d9b253b55a9c67499ab",
+    "diagnostic/hold_violators.tsv": "15d530f44681f55402411b3ce65a413463d517d9a0b0f6d0f52baa70b1b3df68",
+    "diagnostic/internal_hold.rpt": "1fd6fd0ae2ab20721f5a79d2bea2ddba68a932d1db4458c0d74515b5d13e297e",
+    "diagnostic/internal_setup.rpt": "3b4cb8044329e3830ed16330d066f2e80909c285d3712d31ee13004d2317be14"
+  },
+  "region_placement": {
+    "checked_placed_primitives": {
+      "worker0": 38456,
+      "worker1": 38623
+    },
+    "outside": [],
+    "hard_properties": {
+      "worker0": true,
+      "worker1": true
+    },
+    "seed_bounds": {
+      "worker0": {
+        "SLICE": [
+          61,
+          84,
+          116,
+          238
+        ],
+        "DSP48E2": [
+          9,
+          50,
+          16,
+          86
+        ],
+        "RAMB18": [
+          5,
+          70,
+          7,
+          81
+        ]
+      },
+      "worker1": {
+        "SLICE": [
+          94,
+          44,
+          156,
+          233
+        ],
+        "DSP48E2": [
+          16,
+          30,
+          19,
+          73
+        ],
+        "RAMB18": [
+          7,
+          56,
+          8,
+          74
+        ]
+      }
+    },
+    "effective_bounds": {
+      "worker0": {
+        "SLICE": [
+          61,
+          84,
+          116,
+          238
+        ],
+        "DSP48E2": [
+          9,
+          50,
+          16,
+          87
+        ],
+        "RAMB18": [
+          5,
+          70,
+          7,
+          81
+        ]
+      },
+      "worker1": {
+        "SLICE": [
+          94,
+          44,
+          156,
+          233
+        ],
+        "DSP48E2": [
+          16,
+          30,
+          19,
+          73
+        ],
+        "RAMB18": [
+          7,
+          56,
+          8,
+          75
+        ]
+      }
+    },
+    "tile_expansion_gate": true,
+    "gate": true
+  },
+  "BUFG_primitives": 0,
+  "tested_script_commit": "dbaec019d19fe61b48ab03d31b28e4d6439bae63",
+  "ip_commit": "b3e4957e7454989198f58345e9ebcff1dac536d3"
+}
