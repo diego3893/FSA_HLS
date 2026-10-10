@@ -1,0 +1,131 @@
+
+****** Vivado v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sat Oct 10 17:18:54 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source /tmp/codex_nm37_clock_model_diag.tcl
+# open_checkpoint /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf_impl/reports/routed.dcp
+Command: open_checkpoint /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf_impl/reports/routed.dcp
+
+Starting open_checkpoint Task
+
+Time (s): cpu = 00:00:00.04 ; elapsed = 00:00:00.05 . Memory (MB): peak = 1358.230 ; gain = 0.000 ; free physical = 18546 ; free virtual = 46071
+INFO: [Device 21-403] Loading part xcvu37p_CIV-fsvh2892-2-e
+Netlist sorting complete. Time (s): cpu = 00:00:01 ; elapsed = 00:00:01 . Memory (MB): peak = 2952.367 ; gain = 0.000 ; free physical = 16840 ; free virtual = 44374
+INFO: [Netlist 29-17] Analyzing 4164 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 1 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2024.2
+INFO: [Project 1-570] Preparing netlist for logic optimization
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'u_bd/split_d_system_i/hbm_0/HBM_REF_CLK_0' is not directly connected to top level port. 'IBUF_LOW_PWR' is ignored for synthesis but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'u_bd/split_d_system_i/hbm_0/HBM_REF_CLK_1' is not directly connected to top level port. 'IBUF_LOW_PWR' is ignored for synthesis but preserved for implementation.
+Read ShapeDB Complete: Time (s): cpu = 00:00:00.27 ; elapsed = 00:00:00.29 . Memory (MB): peak = 3277.461 ; gain = 35.719 ; free physical = 16558 ; free virtual = 44083
+INFO: [Timing 38-478] Restoring timing data from binary archive.
+INFO: [Timing 38-479] Binary timing data restore complete.
+INFO: [Project 1-856] Restoring constraints from binary archive.
+INFO: [Project 1-853] Binary constraint restore complete.
+INFO: [Designutils 20-5722] Start Reading Physical Databases.
+Reading placement.
+Read Netlist Cache: Time (s): cpu = 00:00:00.11 ; elapsed = 00:00:00.12 . Memory (MB): peak = 3879.535 ; gain = 0.000 ; free physical = 15893 ; free virtual = 43418
+Reading placer database...
+Read Device Cache: Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.02 . Memory (MB): peak = 3879.535 ; gain = 0.000 ; free physical = 15893 ; free virtual = 43418
+Read PlaceDB: Time (s): cpu = 00:00:03 ; elapsed = 00:00:03 . Memory (MB): peak = 3943.574 ; gain = 64.039 ; free physical = 15953 ; free virtual = 43479
+Read PulsedLatchDB: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3943.574 ; gain = 0.000 ; free physical = 15953 ; free virtual = 43479
+Reading routing.
+Read RouteStorage: Time (s): cpu = 00:00:09 ; elapsed = 00:00:07 . Memory (MB): peak = 4316.973 ; gain = 373.398 ; free physical = 15558 ; free virtual = 43087
+Read Physdb Files: Time (s): cpu = 00:00:12 ; elapsed = 00:00:11 . Memory (MB): peak = 4316.973 ; gain = 437.438 ; free physical = 15558 ; free virtual = 43087
+Restored from archive | CPU: 12.780000 secs | Memory: 388.832520 MB |
+Finished XDEF File Restore: Time (s): cpu = 00:00:12 ; elapsed = 00:00:11 . Memory (MB): peak = 4316.973 ; gain = 437.438 ; free physical = 15558 ; free virtual = 43087
+Netlist sorting complete. Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.01 . Memory (MB): peak = 4316.973 ; gain = 0.000 ; free physical = 15570 ; free virtual = 43099
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 2080 instances were transformed.
+  CFGLUT5 => CFGLUT5 (SRL16E, SRLC32E): 104 instances
+  DSP48E1 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 16 instances
+  DSP48E2 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 24 instances
+  HBM_TWO_STACK_INTF => HBM_TWO_STACK_INTF (HBM_REF_CLK(x2), HBM_SNGLBLI_INTF_APB(x2), HBM_SNGLBLI_INTF_AXI(x32)): 1 instance 
+  IBUF => IBUF (IBUFCTRL, INBUF): 1 instance 
+  IBUFDS => IBUFDS (DIFFINBUF, IBUFCTRL): 1 instance 
+  RAM16X1D => RAM32X1D (RAMD32(x2)): 258 instances
+  RAM16X1S => RAM32X1S (RAMS32): 1440 instances
+  RAM32M16 => RAM32M16 (RAMD32(x14), RAMS32(x2)): 230 instances
+  RAM32X1D => RAM32X1D (RAMD32(x2)): 5 instances
+
+INFO: [Project 1-604] Checkpoint was created with Vivado v2024.2 (64-bit) build 5239630
+WARNING: [Vivado 12-23575] Critical violations of the methodology design rules detected. Critical violations may contribute to timing failures or cause functional issues in hardware. Run report_methodology for more information.
+open_checkpoint: Time (s): cpu = 00:00:53 ; elapsed = 00:00:57 . Memory (MB): peak = 4316.973 ; gain = 2958.742 ; free physical = 15571 ; free virtual = 43101
+# set out /home/zhangchenxuan/FSA_HLS/build/nm37_clock_model_diagnosis
+# file mkdir $out
+# report_clocks -file $out/clocks_before.rpt
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+# foreach idx {0 1} {
+#  set pin [get_pins -hier -filter "NAME =~ */hbm_0/inst/HBM_REF_CLK_$idx"]
+#  if {[llength $pin]!=1} {error "Unexpected HBM ref pin: $pin"}
+#  set old [get_clocks -of_objects $pin]
+#  puts "HBM_REF_BEFORE idx=$idx clocks=$old"
+#  create_generated_clock -name [get_property NAME $pin] -source [get_ports board_clk_p] -divide_by 1 -combinational $pin
+#  set clk [get_clocks -of_objects $pin]
+#  report_property $clk
+# }
+HBM_REF_BEFORE idx=0 clocks=u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_0
+WARNING: [Constraints 18-619] A clock with name 'u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_0' already exists, overwriting the previous clock with the same name.
+Property           Type     Read-only  Value
+CLASS              string   true       clock
+DIVIDE_BY          int      true       1
+INPUT_JITTER       double   true       0.000
+IS_GENERATED       bool     true       1
+IS_INVERTED        bool     true       0
+IS_PROPAGATED      bool     true       1
+IS_RENAMED         bool     true       0
+IS_USER_GENERATED  bool     true       1
+IS_VIRTUAL         bool     true       0
+MASTER_CLOCK       clock    true       board_clk_100
+NAME               string   true       u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_0
+PERIOD             double   true       10.000
+SOURCE             port     true       board_clk_p
+SOURCE_PINS        string*  true       u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_0
+SYSTEM_JITTER      double   true       0.050
+WAVEFORM           double*  true       0.000 5.000
+HBM_REF_BEFORE idx=1 clocks=u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_1
+WARNING: [Constraints 18-619] A clock with name 'u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_1' already exists, overwriting the previous clock with the same name.
+Property           Type     Read-only  Value
+CLASS              string   true       clock
+DIVIDE_BY          int      true       1
+INPUT_JITTER       double   true       0.000
+IS_GENERATED       bool     true       1
+IS_INVERTED        bool     true       0
+IS_PROPAGATED      bool     true       1
+IS_RENAMED         bool     true       0
+IS_USER_GENERATED  bool     true       1
+IS_VIRTUAL         bool     true       0
+MASTER_CLOCK       clock    true       board_clk_100
+NAME               string   true       u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_1
+PERIOD             double   true       10.000
+SOURCE             port     true       board_clk_p
+SOURCE_PINS        string*  true       u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_1
+SYSTEM_JITTER      double   true       0.050
+WAVEFORM           double*  true       0.000 5.000
+# report_clocks -file $out/clocks_after.rpt
+# report_methodology -file $out/methodology.rpt
+Command: report_methodology -file /home/zhangchenxuan/FSA_HLS/build/nm37_clock_model_diagnosis/methodology.rpt
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [DRC 23-133] Running Methodology with 8 threads
+INFO: [Vivado_Tcl 2-1520] The results of Report Methodology are in file /home/zhangchenxuan/FSA_HLS/build/nm37_clock_model_diagnosis/methodology.rpt.
+report_methodology completed successfully
+report_methodology: Time (s): cpu = 00:01:29 ; elapsed = 00:00:17 . Memory (MB): peak = 4770.988 ; gain = 429.562 ; free physical = 15253 ; free virtual = 42737
+# report_timing_summary -delay_type min_max -check_timing_verbose -report_unconstrained -file $out/timing_summary.rpt
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [Timing 38-91] UpdateTimingParams: Speed grade: -2, Temperature grade: E, Delay Type: min_max.
+INFO: [Timing 38-191] Multithreading enabled for timing update using a maximum of 8 CPUs
+WARNING: [Timing 38-436] There are set_bus_skew constraint(s) in this design. Please run report_bus_skew to ensure that bus skew requirements are met.
+report_timing_summary: Time (s): cpu = 00:00:26 ; elapsed = 00:00:07 . Memory (MB): peak = 4770.988 ; gain = 0.000 ; free physical = 14505 ; free virtual = 41491
+# report_cdc -details -file $out/cdc.rpt
+INFO: [Timing 38-91] UpdateTimingParams: No interconnect No Cell Dly, Speed grade: -2, Temperature grade: E, Delay Type: min_max.
+INFO: [Timing 38-191] Multithreading enabled for timing update using a maximum of 8 CPUs
+INFO: [Timing 38-314] The report_cdc command only analyzes and reports clock domain crossing paths where clocks have been defined on both source and destination sides. Ports with no input delay constraint are skipped. Please run check_timing to verify there are no missing clock definitions in your design, nor any unconstrained input port.
+# puts CLOCK_MODEL_DIAG_COMPLETE
+CLOCK_MODEL_DIAG_COMPLETE
+# close_design
+INFO: [Common 17-206] Exiting Vivado at Sat Oct 10 17:20:41 2026...

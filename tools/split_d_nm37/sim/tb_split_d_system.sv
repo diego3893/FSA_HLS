@@ -54,6 +54,11 @@ module tb_split_d_system;
     end
     initial begin
         #10000;
+        if(!clock_locked || !dut.split_d_system_i.selftest_0.reset_n ||
+            !dut.split_d_system_i.hbm_0.AXI_00_ARESET_N ||
+            !dut.split_d_system_i.hbm_0.APB_0_PRESET_N ||
+            !dut.split_d_system_i.hbm_0.APB_1_PRESET_N)
+            $fatal(1,"SYSTEM RESET RELEASE FAIL at 10us");
         $display("SYSTEM CLOCK DIAGNOSTIC time=%t ctrl_clk=%b locked=%b init_done=%b reset_n=%b",$time,ctrl_clk,clock_locked,init_done,reset_n);
     end
     initial begin

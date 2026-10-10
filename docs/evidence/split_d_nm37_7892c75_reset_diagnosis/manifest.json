@@ -1,0 +1,28 @@
+{
+  "system_commit": "7892c75",
+  "formal_ip_commit": "bf41d16",
+  "physical_gate": false,
+  "functional_gate": false,
+  "reason": "XDC foreach ignored; auxiliary reset active-low tied low in generated IP",
+  "sha256": {
+    "codex_nm37_7892c75_system_impl_20261010.log": "2904d5e76be155510e9439ef5f657317efca10a52af9855b7529e99f111ed542",
+    "codex_nm37_clock_model_diag.log": "3aef2de8b98f4c09be22b08b2a10cbede258e4cf799fee06b144cec0ed2aa06d",
+    "codex_nm37_init_diagnostic_1810.log": "f3abcd6106bfd29bfdf835bfd7d7abe046a31d97da857566a074bcd653d69dd6",
+    "split_d_system_rst_100_0.xci": "af8a6614b4ee7b79743422eaab4bc5ae0e0acd799effda3203aaaf27e7db8290",
+    "reports/bus_skew.rpt": "0a0c0cf4eb1642a05537a5ba0bd8e4195d9a064c23f3306164c65712fd348c19",
+    "reports/cdc.rpt": "e095821fdad619fef1c417787ff3f198a783e26a162331f802354528036f8fa3",
+    "reports/clocks.rpt": "1170afe8f5aaafdbd9321d6240cb72bae181afb2d99d1aa4f36a275f7ee2ccb6",
+    "reports/clock_interaction.rpt": "69c7fe7a7ae1fb7f1769509a22459adcb757c2c2b7e94fbcce4a928278500fbc",
+    "reports/drc.rpt": "019dd5660dca4ed85e7acbdadf1fd3f47ab256ec18b65603034c27c0eeaee2e8",
+    "reports/effective_constraints.xdc": "d12359ebd22f01e9a0c842d52e6a21156165be188d169bc87e98b6bcb6c19ed4",
+    "reports/exceptions.rpt": "28eaa77f5f21b0def094b47f8b9d35ed22318ddb71a10427b5bc5ce6287166d4",
+    "reports/hold_paths.rpt": "9cbaf9299aef10231edb526de4cd11a401df010f791e3a702b3511b57329a062",
+    "reports/methodology.rpt": "d72018156dcb6cc46daef1f41ec48406432f26a77dbd6f31931612aa8a37d82f",
+    "reports/route_status.rpt": "c422b139ab292dabd4e988906fc39d5a4e94a88e9c907400d410c61c62903072",
+    "reports/setup_paths.rpt": "98c13ef319db9333cff0349ac27e694920161db50127a37186a1602c0d6bd842",
+    "reports/synthesis_utilization.rpt": "cc0cf019ed293ddd78529ee55f0e20af425022fcc6eb6ec6b46c104a4239283a",
+    "reports/timing_gate.txt": "a49e10a340dcac755063d406fc6937765afa9f442f2ae31ee529a51c7af5a35d",
+    "reports/timing_summary.rpt": "b0b878222c0139b47e0d949a794d0104ec9a1be3f4c14291fe783d3e96a5d758",
+    "reports/utilization.rpt": "8b9c039a46ddfa90ff5f6a1a473806e275bb7fbc247d47e61a4c40c80f27541e"
+  }
+}

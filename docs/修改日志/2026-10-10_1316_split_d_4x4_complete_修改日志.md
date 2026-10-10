@@ -122,3 +122,7 @@ Q完整覆盖`QUERY_BLOCK_COLS×QKV_WORDS_PER_TOKEN×DMA_ELEMS_PER_WORD`，K/V�
 - 7892c75于17:33:12开始新工程/实现；18:03读到Designutils20-1307 Critical：XDC不支持foreach/if。此前core_budget中的if断言也不应放XDC，不能用普通Tcl内存诊断成功代替XDC读取器验收。修正为显式两条generated_clock＋uncertainty纯约束，断言移scripts/check_clocks.tcl在synth/route/bitstream打开设计后执行。计算硬件/IP不变，保留789失败。系统仿真仍未取得事务：离线WDB证明17:37时164395ns、17:57时380805ns，持续推进约11us/min；MEM文件与IP SHA一致，XSIM CPU活跃，不能归因缺MEM或零时刻死循环。
 
 - 7892c75实现17:34:57—18:04:17最终exit1，timing仍+0.226/+0.010，但methodology4条Critical仍在，失败门槛正确拦截；XDC foreach未生效得到直接证据。纯约束修复将起新正式工程；新增TB每50us打印两stack apb_complete/控制器reset，增加观察能力且不改综合硬件。当前旧仿真不重启。
+
+- a394c8d89cc8327c19f6f0ac0bb040fa509a78b3本地审查diff --check通过并推送；服务器新正式工程build/split_d_nm37_a394c8d_ipbf，计算IP仍bf41，执行create_project→build_and_report，Git/root/origin/branch/clean/ffpull/component SHA预检齐全。另18:09:53在build/nm37_init_diagnostic_xsim_1810复制已编译768快照，xsim只跑20us并get_value两stack/复位，作为诊断而非功能PASS；旧完整仿真继续运行。
+
+- 18:13短诊断完成：20us时clock_locked=1/reset_n=1，但两APB/AXI00/自检reset均0。实际生成的rst_100/rst_225 XCI均C_EXT_RESET_HIGH=0、C_AUX_RESET_HIGH=0；unused aux_reset_in却接常量0，形成永久有效辅助复位。此为真实配置错误，旧仿真没有开始事务，不能把11us/min推进率当有效HBM吞吐。修正create_project显式C_AUX_RESET_HIGH=1（unused低电平无效），validate后双域断言；TB在10us检查时钟/全部关键复位已释放。独立旧快照强制aux=1只作根因诊断，不作为功能验收。已精确核对PID1380185的命令/工作目录后SIGTERM停止无效旧仿真，保留日志/波形。a394物理运行继续供纯XDC验证，因旧复位错误不能作为最终系统验收。

@@ -39,6 +39,9 @@ set zero [create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 zero]
 set_property -dict [list CONFIG.CONST_WIDTH {1} CONFIG.CONST_VAL {0}] $zero
 foreach domain {100 225} {
     set rst [create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_$domain]
+    # Unused auxiliary reset is tied low, so explicitly make it active-high.
+    # Without this setting BD propagation selected active-low and held reset.
+    set_property CONFIG.C_AUX_RESET_HIGH 1 $rst
     set clock_pin [expr {$domain==100 ? "clk_out1" : "clk_out2"}]
     connect_bd_net [get_bd_pins clk_wiz_0/$clock_pin] [get_bd_pins rst_$domain/slowest_sync_clk]
     connect_bd_net $reset [get_bd_pins rst_$domain/ext_reset_in]
@@ -123,6 +126,9 @@ foreach {name pin} {ctrl_clk clk_wiz_0/clk_out1 clock_locked clk_wiz_0/locked in
 }
 validate_bd_design
 foreach domain {100 225} {
+    if {[get_property CONFIG.C_AUX_RESET_HIGH [get_bd_cells rst_$domain]]!=1} {
+        error "Unused auxiliary reset must be active-high in domain $domain"
+    }
     if {[get_property CONFIG.C_EXT_RESET_HIGH [get_bd_cells rst_$domain]]!=0} {
         error "Reset polarity did not propagate ACTIVE_LOW in domain $domain"
     }
