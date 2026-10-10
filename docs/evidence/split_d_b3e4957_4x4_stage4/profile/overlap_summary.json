@@ -1,0 +1,175 @@
+{
+  "tested_commit": "b3e4957",
+  "interval_convention": "[start,done) on official monitor cycle counter",
+  "sample_clock_ns": 10,
+  "worker_calls": [
+    60,
+    60
+  ],
+  "worker_overlap_cycles": 68859,
+  "QK_calls": [
+    177,
+    177
+  ],
+  "QK_overlap_cycles": 14160,
+  "first_worker_intervals": [
+    [
+      [
+        71,
+        578
+      ],
+      [
+        755,
+        1280
+      ],
+      [
+        1462,
+        1987
+      ],
+      [
+        2169,
+        2694
+      ],
+      [
+        2888,
+        3734
+      ]
+    ],
+    [
+      [
+        71,
+        604
+      ],
+      [
+        755,
+        1306
+      ],
+      [
+        1462,
+        2013
+      ],
+      [
+        2169,
+        2720
+      ],
+      [
+        2888,
+        3760
+      ]
+    ]
+  ],
+  "first_QK_intervals": [
+    [
+      [
+        260,
+        340
+      ],
+      [
+        944,
+        1024
+      ],
+      [
+        1651,
+        1731
+      ],
+      [
+        2358,
+        2438
+      ],
+      [
+        3077,
+        3157
+      ]
+    ],
+    [
+      [
+        260,
+        340
+      ],
+      [
+        944,
+        1024
+      ],
+      [
+        1651,
+        1731
+      ],
+      [
+        2358,
+        2438
+      ],
+      [
+        3077,
+        3157
+      ]
+    ]
+  ],
+  "worker_stall_summary": [
+    [
+      3480,
+      80245,
+      1313,
+      2633,
+      684,
+      1147,
+      2451,
+      507,
+      0,
+      0,
+      3480,
+      0
+    ],
+    [
+      5418,
+      80245,
+      1313,
+      2633,
+      684,
+      1173,
+      2477,
+      533,
+      0,
+      0,
+      3480,
+      1938
+    ]
+  ],
+  "worker_stall_fields": [
+    "total_stall",
+    "monitor_cycles",
+    "avg_II",
+    "max_II",
+    "min_II",
+    "avg_latency",
+    "max_latency",
+    "min_latency",
+    "no_start",
+    "no_continue",
+    "read_stall",
+    "write_stall"
+  ],
+  "channel_peak_occupancy": {
+    "kv1": 8,
+    "output1": 8,
+    "o_address_c": 1,
+    "q0": 1,
+    "kv0": 8,
+    "header_query_base_c": 1,
+    "header0": 1,
+    "output0": 1,
+    "header1": 1,
+    "header_active_queries_c": 1,
+    "q1": 1
+  },
+  "sha256": {
+    "channel.zip": "7f11756acb2062bfdc3747a978ce97278459feadc716ff05c328c22b926281c2",
+    "dataflow_monitor.sv": "1e4da807176cbcb0e2e4ccd8ed13bff58cd70815f08a6e9baa50add7a09da90f",
+    "df_fifo_monitor.svh": "c5365fb60d1ebe9a9a9f8cb1e2a7f4012bc623f203daa3bf85481ef1f8632489",
+    "df_process_monitor.svh": "026fd4c548db0285f56f889befa39767d98be761bbd5cfe92589c90b677bd929",
+    "kernel_module_hierarchy.tcl": "12fa4cae4a2e9497007313d9a1a629fa3c1e9c97cc036446ded40506e7884344",
+    "loop.zip": "a8d609abab77266b22ebc57c555d1cd6eb506922e4e8230ffed58963089fe90c",
+    "overlap_summary.json": "702d72e713a0d33b5d1fd36a07d84399af37df93cad3d821d430fe94a187eb5e",
+    "process.zip": "347697490372f6ad16e8e888a7f3bef47edd542c29024c76fdab44e316806752",
+    "process_info.csv": "755a4f34913520cd9f2f36f2fcd6e80adf8798083488825ac8365243070005dd"
+  }
+}

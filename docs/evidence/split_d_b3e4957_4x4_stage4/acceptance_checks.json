@@ -1,0 +1,27 @@
+{
+  "tested_commit": "b3e4957e7454989198f58345e9ebcff1dac536d3",
+  "PE": 16,
+  "Acc": 4,
+  "PE_arrays": 2,
+  "loops": {
+    "block0_109_1_VITIS_LOOP_110_2": 5,
+    "block0_162_1": 5,
+    "block0_295_25": 1,
+    "block0_364_33": 1,
+    "block1_109_1_VITIS_LOOP_110_2": 5,
+    "block1_162_1": 5,
+    "block1_295_25": 1,
+    "block1_364_33": 1
+  },
+  "resources": {
+    "BRAM_18K": 8,
+    "DSP": 40,
+    "FF": 45091,
+    "LUT": 129592,
+    "URAM": 0
+  },
+  "HLS_estimated_ns": 7.3,
+  "CoSim_transactions": 26,
+  "CoSim_cycles": "80242",
+  "physical_implementation_verified": false
+}

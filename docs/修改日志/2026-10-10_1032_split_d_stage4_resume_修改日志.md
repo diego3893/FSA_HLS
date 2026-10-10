@@ -32,3 +32,29 @@
 - 官方原理依据：[UG939非工程IP流程](https://docs.amd.com/r/2024.2-English/ug939-vivado-designing-with-ip-tutorial/Step-8-Run-the-Script)、[UG903 OOC约束](https://docs.amd.com/r/en-US/ug903-vivado-using-constraints/Out-of-Context-Constraints)。下一步在相同正式IP上运行自动布局，区域取实际位置。
 - 本地指纹工具初版错误地断言export/syn全部文件相同，且Windows路径分隔符令ZIP索引失败；已改为记录逐文件差异和POSIX相对路径。实际只发现导出top增加translate_off包围的仿真deadlock include/闲置信号及一个导出专用detect模块，其余Verilog相同，不将字节差异隐藏。OOC读取正式导出并设置include目录；后续检查无blackbox及真实资源。
 - PowerShell未在该指纹检查失败时停止后续Git命令，f316a5c先提交了OOC脚本和已有HLS证据；IP清单补入下一提交。本地检查失败不写成验收通过，未因此启动错误版本的远端测试。
+
+### OOC自动布局执行
+
+- OOC脚本/证据提交8437255bf9ca8f8e6cd4aa62575410dc4adabc5d已推送并远端ff-only核对。运行前验证正式IP ZIP SHA256为d7e9e8cd4d5e2a6034d43bd200df4f8ba5f259de23df63ad3dd60e3f7fa23e03。
+- 命令：`vivado -mode batch -source tools/split_d_ooc/run.tcl -tclargs hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1/impl/verilog build/split_d_ooc_b3e4957/auto auto`；日志`/tmp/codex_split_d_b3e4957_ooc_auto_20261010.log`。
+- 本地逐word核对24项全部相同，C/RTL输出SHA与25d6dda相同；详见本次verification.json。正式导出原始component.xml和全部impl指纹已提交；仿真注入的字节差异如实列出。
+- Vivado已进入Timing Optimization，暂未得到实现时序。正式CoSim WDB和performance transaction XML已定位，尚未读取重叠时标。
+
+### 新物理与并行证据（尚未闭环）
+
+- Vivado综合网表：LUT51723（Logic48965/LUTRAM640/SRL2118）、FF26495、RAMB36=7/RAMB18=40、DSP40。分发器LUT452/FF918/SRL9；其K/V流水子模块LUT273/FF441/SRL9。HLS寄存器估算并非最终物理数量，撤回“仅凭10724FF优先改广播”的依据；需实际关键路径。
+- 正式profiling压缩统计从.autopilot/db读取，无重跑/自建测试。60次worker启动，两块运行窗口交集68859cycles；两条QK循环各177次、区间完全一致，交集14160cycles（177×80）。例：QK0/QK1均[260,340)、[944,1024)、[1651,1731)。这是实际RTL活动窗口重叠证据，不声称所有PE每拍有效。
+- 原始process/channel/loop ZIP、ID映射和推导结果在本次evidence/profile；monitor计数总80245，包含仿真启动采样偏移，不能替换顶层80242事务统计。WDB275MiB留在服务器；无需下载全量波形才证明已采样的QK重叠。
+
+### 第1轮分析闭环
+
+- 已解决：正式全流程/IP，24项位模式与基线完全相同，实例/II/资源保持；官方profiling证明真实QK并行，K/V峰值8、block1输出write stall1938cycles而26事务正常完成；OOC route完成，77220条可路由net全部完成、route error0。全部12项check_timing均0，无timing exception。
+- 自动布局结果：setup WNS0.371ns/TNS0，hold WHS−0.080ns/THS−36.648ns，771失败endpoint。布线资源LUT49200/FF26459/RAMB36=7/RAMB18=40/DSP40。无SLR跨越、无level>5拥塞窗口；最差setup在worker0的FP32减法/softmax块内，delay6.910ns，logic4.078/route2.832，19级。不能据此给广播盲目插级。
+- 仍存在：hold未通过（已见最差AXI输入→首级FDRE，边界0ns min+虚拟未路由input）；尚未完整分类所有771路径；区域对照未做，完整系统仍不在本次范围。DRC有DPIP/DPOP/RTSTAT warning、无Error/Critical Warning；TIMING-44提示2.7ns余量较大，保留用户固定余量，不放宽。
+- 标准状态：功能/HLS/IP/route/setup/约束覆盖通过，hold失败，阶段4未验收。自动布局报告/实际位置已取回`build/stage4_b3e4957/auto/physical.tar.gz`（717573bytes）。已完成分析闭环1轮。
+- 下一轮：保持所有时序约束，从同一routed.dcp分类内部/边界hold并尝试工具的post-route hold_fix；真实位置用于后续区域对照，不修改HLS数值。
+
+## 3 第2轮：hold分类与物理修复
+
+- 本轮从第1轮数据分析结束后开始；目标先解决WHS/THS，或获得模型边界不可修复的直接证据。新增repair_hold.tcl只读取routed.dcp、报告全部失败endpoint及内部hold，调用官方post-route hold_fix和路由，边界预算/clock/uncertainty全部保持。
+- 原理依据：[UG8352024.2 phys_opt_design](https://docs.amd.com/r/2024.2-English/ug835-vivado-tcl-commands/phys_opt_design)明确hold_fix需显式开启，默认Default不包含此修复。本轮无C++/测试改变，复用正式b3e4957 IP；只增加布线/等价延迟缓冲，不增加算法事务周期。
