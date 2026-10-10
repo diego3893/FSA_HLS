@@ -58,3 +58,6 @@
 
 - 本轮从第1轮数据分析结束后开始；目标先解决WHS/THS，或获得模型边界不可修复的直接证据。新增repair_hold.tcl只读取routed.dcp、报告全部失败endpoint及内部hold，调用官方post-route hold_fix和路由，边界预算/clock/uncertainty全部保持。
 - 原理依据：[UG8352024.2 phys_opt_design](https://docs.amd.com/r/2024.2-English/ug835-vivado-tcl-commands/phys_opt_design)明确hold_fix需显式开启，默认Default不包含此修复。本轮无C++/测试改变，复用正式b3e4957 IP；只增加布线/等价延迟缓冲，不增加算法事务周期。
+- 首次脚本a0b890d读取DCP及内部hold成功（最差+0.019ns），列出全部负hold；但`phys_opt_design -post_route -hold_fix`的-post_route不是2024.2合法选项，exit1。修正为`phys_opt_design -hold_fix`，工具依已路由design state识别post-route；保留失败目录，使用auto_hold_retry重试，属于同一轮命令修正。
+- 读取DCP时发现Timing38-242：未设HD.CLK_SRC，时钟偏斜估计受限。此前自动布局仅初步模型结果，不能作为完整物理验收。新增实际器件BUFGCE库存记录，后续以明确OOC时钟源假设重新固定自动/区域模型。周期/uncertainty及边界预算不放宽。
+- TSV初版误输出字面量反斜杠t；修复以后脚本的分隔符，原自动布局文件保持原始字节，分析读取时识别该分隔符。不覆盖既有证据。

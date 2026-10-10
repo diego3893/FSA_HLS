@@ -7,6 +7,12 @@ file mkdir $output_dir
 cd $output_dir
 set_param general.maxThreads 8
 open_checkpoint $checkpoint
+set f [open clock_sites.tsv w]
+puts $f [join {site slr clock_region} "\t"]
+foreach site [lsort [get_sites -filter {SITE_TYPE == BUFGCE}]] {
+    puts $f [join [list $site [get_slrs -of_objects $site] [get_clock_regions -of_objects $site]] "\t"]
+}
+close $f
 report_timing -from [all_registers] -to [all_registers] -delay_type min -max_paths 10 -file internal_hold_before.rpt
 set f [open hold_violators_before.tsv w]
 puts $f [join {source destination slack} "\t"]
@@ -14,7 +20,7 @@ foreach path [get_timing_paths -delay_type min -slack_lesser_than 0 -max_paths 1
     puts $f [join [list [get_property STARTPOINT_PIN $path] [get_property ENDPOINT_PIN $path] [get_property SLACK $path]] "\t"]
 }
 close $f
-phys_opt_design -post_route -hold_fix
+phys_opt_design -hold_fix
 route_design -directive Default
 write_checkpoint routed.dcp
 report_timing_summary -delay_type min_max -report_unconstrained -check_timing_verbose -max_paths 50 -file timing_summary.rpt
