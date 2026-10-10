@@ -48,3 +48,5 @@ vivado -mode batch -source tools/split_d_nm37/scripts/build_and_report.tcl \
 完整系统testbench使用同一个HBM/SmartConnect/FSA/selftest BD，绕过的只有封装时钟输入缓冲和JTAG调试核。普通模式和stress模式各跑26笔，存在有限仿真超时。AMD说明XSIM使用HBM internal responder模型；真实HBM行为仍须板测确认：[PG276 Simulation](https://docs.amd.com/r/en-US/pg276-axi-hbm/Simulation)。
 
 必须分别核对控制器unit、系统仿真、综合、实现setup/hold、CDC、DRC、bitstream和板测。成功创建工程或下载bitstream不等于数值验收。
+
+可追加官方HBM TLM功能对照：`simulate.tcl <新工程副本路径> hbm_tlm`。仅切换Vivado实际允许的HBM模型，FSA、自检、SmartConnect仍使用RTL，ROM、52事务、全部canary/位模式及复位测试不变。默认`rtl`流程保留。TLM结果不得作为实际HBM延迟、吞吐或物理时序证据。

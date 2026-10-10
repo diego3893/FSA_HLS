@@ -126,3 +126,8 @@ Q完整覆盖`QUERY_BLOCK_COLS×QKV_WORDS_PER_TOKEN×DMA_ELEMS_PER_WORD`，K/V�
 - a394c8d89cc8327c19f6f0ac0bb040fa509a78b3本地审查diff --check通过并推送；服务器新正式工程build/split_d_nm37_a394c8d_ipbf，计算IP仍bf41，执行create_project→build_and_report，Git/root/origin/branch/clean/ffpull/component SHA预检齐全。另18:09:53在build/nm37_init_diagnostic_xsim_1810复制已编译768快照，xsim只跑20us并get_value两stack/复位，作为诊断而非功能PASS；旧完整仿真继续运行。
 
 - 18:13短诊断完成：20us时clock_locked=1/reset_n=1，但两APB/AXI00/自检reset均0。实际生成的rst_100/rst_225 XCI均C_EXT_RESET_HIGH=0、C_AUX_RESET_HIGH=0；unused aux_reset_in却接常量0，形成永久有效辅助复位。此为真实配置错误，旧仿真没有开始事务，不能把11us/min推进率当有效HBM吞吐。修正create_project显式C_AUX_RESET_HIGH=1（unused低电平无效），validate后双域断言；TB在10us检查时钟/全部关键复位已释放。独立旧快照强制aux=1只作根因诊断，不作为功能验收。已精确核对PID1380185的命令/工作目录后SIGTERM停止无效旧仿真，保留日志/波形。a394物理运行继续供纯XDC验证，因旧复位错误不能作为最终系统验收。
+
+- a0e137ac7831e1efc424a91010289627c5dd98da显式辅助复位极性与10us释放检查已审查、提交/推送，18:21:26在新目录build/split_d_nm37_a0e137a_ipbf启动工程生成→正式52事务仿真，标准精确提交/component预检完成。独立force诊断失败：XSIM不能force该跨HDL实体输入端口（Simtcl6-179）；无功能结果，不据此增加强制信号到正式TB。已归档789失败、20us原始复位诊断与XCI。789旧bus-skew报告18项，最小正slack3.718ns，但旧方法论仍失败，不当最终物理通过。
+
+- 18:23:04 a0e137a工程生成成功，原始XCI双域C_AUX_RESET_HIGH=1/C_EXT_RESET_HIGH=0已递归核对；18:24:41在独立副本启动完整系统实现，正式RTL仿真同时编译中。自包含build/nm37_delivery_a0e137a静态验证287文件SHA/正式component/ROM/相对入口通过，尚不代表工具验收。
+- 官方UG900和实际Vivado只读属性查询确认HBM/两SmartConnect均支持tlm/rtl，当前均rtl。增加可选hbm_tlm功能对照，仅HBM使用官方TLM，FSA/controller/SmartConnect保持RTL，不改变硬件配置、52事务/32768canary/金标准/复位覆盖；默认RTL流程继续。TLM不可用来声称实际HBM吞吐，实际吞吐须板测。TB释放检查改!==1确保X也失败。这是同一第3轮诊断补强，非新的HLS迭代。
