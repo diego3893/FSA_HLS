@@ -93,3 +93,15 @@
 - 3c9a58ced49a3625b1a5e3cecdaa22ce11de624b已推送/服务器ff-only核对，regions在12:12:02启动，当前路由中。只读auto_context diagnostic_retry在12:12:46—12:14:11 exit0，HD.CLK_SRC/100MHz、blackbox0及实际XDC确认，4560负hold全部input、内部+0.010/+0.230ns确认。诊断归档初次tar glob相对于Shell仓库目录而非tar的-C /tmp展开，exit2；改成明确日志名归档成功，不重跑实现。
 - 本地analyze.py增加模型/资源/完整gate及关键路径抽取，原始报告SHA与diag子目录均记录。模型gate为true，完整OOC gate为false；没有把内部通过伪装成边界hold通过。
 - 新发现物理存储与HLS估算不一致：两个worker各Q4/K8/V8个RAMB18，共40；AXI Q/K/V各2、O1个RAMB36，共7。tile逻辑载荷5120bits。逐primitive在bram_mapping.json，stage3“无tile BRAM”更正为仅HLS估算。RTL为auto RAM、两个写端口，后续须先证明初始化/装载端口活动再评估LUTRAM，当前不盲目改综合输入。
+
+### 第4轮分析闭环
+
+- regions 3c9a58c在12:12:02—12:25:35 exit0，只读da12f37 diagnostic在12:25:59—12:27:35 exit0。最终setup+0.111ns、内部hold+0.010ns；hold−1.565ns/THS−5989.018ns，4553个失败endpoint全部input（reset3777）。资源LUT49228/FF26461/RAMB36=7/RAMB18=40/DSP40；76252条net全路由、error0。最差setup移到Accumulator，7.087ns（logic2.539/route4.548）。比auto_context的setup余量少0.119ns，此候选未显示收益。
+- 进一步验收发现DRC有2个HDOOC-4 Critical Warning：placer为两个Accumulator ap_ce各插一BUFGCE，未LOC约束。更重要：effective/diagnostic XDC实际IS_SOFT=TRUE，109条primitive记录在预期范围外；脚本的硬约束目标未落实。归档为失败软区域候选，不能称硬floorplan已验收。
+- 部分DSP/RAMB范围被Vivado按tile自动扩展，但不足以解释全部越界。待核实set_property CONTAIN_ROUTING 0对IS_SOFT的联动；禁止只通过删除placement gate规避失败。当前已完成分析闭环4轮，hold gate仍失败。
+
+## 6 第5轮：修正floorplan属性与BUFG约束
+
+- 主要假设：两个Pblock属性存在设置顺序联动；先从routed DCP只在内存中probe，记录每次赋值后的实际属性，再修正生成脚本并在实现前后断言硬约束。工具按tile调整的实际范围也要归档。
+- HDOOC-4需要控制已插入BUFG的实际位置，保留其用途/接线，依据实际site固定LOC；不得屏蔽DRC。修正后重做同模型硬区域对照，原失败目录保留。
+- hold aggressive选项仅本地准备，尚未执行，不算已验证；边界min0ns仍保持，用户选择待回复。

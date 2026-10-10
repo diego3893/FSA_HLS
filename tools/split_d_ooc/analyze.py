@@ -85,12 +85,38 @@ def analyze(directory):
     return result
 
 
+def check_regions(directory, plan_file):
+    plan = json.loads(plan_file.read_text())['workers']
+    rows = list(csv.DictReader((directory/'primitive_locations.tsv').open(), delimiter='\t'))
+    counts = Counter()
+    outside = []
+    for row in rows:
+        match = re.search(r'/runQueryBlock_([01])_U0/', row['cell'])
+        if not match or not row['site']:
+            continue
+        worker = 'worker'+match.group(1)
+        site = re.fullmatch(r'(SLICE|DSP48E2|RAMB18|RAMB36)_X(\d+)Y(\d+)', row['site'])
+        if not site:
+            continue
+        counts[worker] += 1
+        typ, x, y = site.group(1), int(site.group(2)), int(site.group(3))
+        box = plan[worker]['bounds'].get(typ)
+        if not box or not (box[0]<=x<=box[2] and box[1]<=y<=box[3]) or row['slr']!='SLR0':
+            outside.append(row)
+    return {'checked_placed_primitives': dict(counts), 'outside': outside,
+            'gate': bool(counts['worker0'] and counts['worker1'] and not outside)}
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('directory', type=Path)
     parser.add_argument('--output', type=Path)
+    parser.add_argument('--regions-plan', type=Path)
     args = parser.parse_args()
     data = analyze(args.directory)
+    if args.regions_plan:
+        data['region_placement'] = check_regions(args.directory, args.regions_plan)
+        data['full_ooc_gate'] = data['full_ooc_gate'] and data['region_placement']['gate']
     encoded = json.dumps(data, indent=2, ensure_ascii=False)+'\n'
     if args.output:
         args.output.write_text(encoded, encoding='utf-8')
