@@ -16,6 +16,7 @@ set_property target_language Verilog [current_project]
 if {$mode eq "auto"} {
     set sources [glob -nocomplain [file join $rtl_dir *.v]]
     if {[llength $sources] == 0} { error "No formally exported Verilog" }
+    set_property include_dirs [list $rtl_dir] [get_filesets sources_1]
     read_verilog $sources
     # HLS-generated scripts reproduce vendor floating point configurations.
     foreach ip_script [lsort [glob -nocomplain [file join $rtl_dir *_ip.tcl]]] {
