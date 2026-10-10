@@ -4,7 +4,7 @@
 
 这是4×4/head16 Split-D的完整存储与控制集成工程。计算IP仍由仓库标准入口`./run_hls.sh fsa_stream_split_d`生成；本目录的Vivado流程不替代、不缩减HLS测试。
 
-当前状态：控制器4项单元检查与正式计算IP全流程已通过；真实HBM工程已生成。首轮实现数值时序通过，但参考时钟模型存在4条methodology Critical，已修正待新实现；系统仿真已定位辅助复位配置错误（低有效却接0），显式改active-high并加释放检查后待正式重试。bitstream和板测未执行。最终被测版本与结果应以综合报告和本次1316修改日志为准。
+当前状态：正式计算IP全流程已通过。系统辅助复位和参考时钟约束已修正，a0e137a物理setup/hold为+0.200/+0.010ns且无DRC/methodology Critical；默认RTL初始化及忙中整体复位已恢复，但首笔输出检查失败。官方资料及实际网线证明旧自检单拍SIZE3不符合HBM，现已改原生256位SIZE5并补lane/canary测试，待新精确提交验证；时钟ODT=RTT_48也须纳入最终实现。bitstream和板测未执行。
 
 ## 2 系统合同
 
@@ -21,6 +21,7 @@
 - 24个有效事务：全部1576个O字、两端canary、输入Q/K/V保持检查。
 - L0和4097：全部32768个O字与两个guard保持canary，status必须为1。
 - AXI AW/W分别握手，阻塞时保持VALID和数据；B/R的RESP及单拍RLAST均检查。
+- 自检使用32字节对齐、AxSIZE5的256位HBM访问，ROM仍按64位word和8字节步长执行。写WSTRB只使能目标8字节，读回选择该lane，保留其余word和canary；四路HLS接口仍为64位。HBM端被动检查SIZE5及地址对齐，不能假定SmartConnect对单拍窄访问自动放大SIZE。
 - stress模式每四拍接受一次自检响应；它测试自检master的背压，不应单独宣称计算master的任意停顿已验证。HBM/SmartConnect实际给计算核施加的停顿另由系统波形核对。
 - 超时报fail_code=ff，保留尚未被接受的AXI VALID直到peer接收，禁止取消事务。无法排空时需复位整个系统，不能直接启动下一笔。
 - `last_case_cycles`包含预装载、控制轮询、计算和检查；不能当作纯核吞吐。
@@ -49,7 +50,7 @@ vivado -mode batch -source tools/split_d_nm37/scripts/build_and_report.tcl \
 
 必须分别核对控制器unit、系统仿真、综合、实现setup/hold、CDC、DRC、bitstream和板测。成功创建工程或下载bitstream不等于数值验收。
 
-可追加官方HBM TLM功能对照：`simulate.tcl <新工程副本路径> hbm_tlm`。仅切换Vivado实际允许的HBM模型，FSA、自检、SmartConnect仍使用RTL，ROM、52事务、全部canary/位模式及复位测试不变。默认`rtl`流程保留。TLM结果不得作为实际HBM延迟、吞吐或物理时序证据。
+可追加官方HBM TLM功能对照：`simulate.tcl <新工程副本路径> hbm_tlm`。仅切换Vivado实际允许的HBM模型，FSA、自检、SmartConnect仍使用RTL，ROM、52事务、全部canary/位模式不变。TLM的APB为stub，不能建模流量后的全HBM复位，故仅该对照排除忙中复位并在日志声明；默认`rtl`仍完整执行初始化与忙中整体复位。TLM结果不得作为实际HBM延迟、吞吐或物理时序证据。
 
 Vivado2024.2的官方HBM TLM在`hbm_sc.h`将APB和`apb_complete`声明为`xsc_stub_port`，不模拟校准。可选TLM功能对照仅在仿真宏下将BD内部`init_done`适配为clock_locked，日志显式标记FUNCTIONAL ONLY；普通RTL模式无此适配。TLM对照不证明HBM初始化/校准/复位恢复，不能替代默认RTL流程或板测。
 

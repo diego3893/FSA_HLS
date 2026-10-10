@@ -15,8 +15,8 @@ module tb_split_d_selftest;
     wire [3:0] m_axi_awqos;
     wire m_axi_awvalid;
     reg m_axi_awready;
-    wire [63:0] m_axi_wdata;
-    wire [7:0] m_axi_wstrb;
+    wire [255:0] m_axi_wdata;
+    wire [31:0] m_axi_wstrb;
     wire m_axi_wlast;
     wire m_axi_wvalid;
     reg m_axi_wready;
@@ -33,7 +33,7 @@ module tb_split_d_selftest;
     wire [3:0] m_axi_arqos;
     wire m_axi_arvalid;
     reg m_axi_arready;
-    reg [63:0] m_axi_rdata;
+    reg [255:0] m_axi_rdata;
     reg [1:0] m_axi_rresp;
     reg m_axi_rlast;
     reg m_axi_rvalid;
@@ -139,15 +139,17 @@ module tb_split_d_selftest;
     reg [63:0] memory [0:31];
     reg [31:0] control_value;
     reg [31:0] aw_address, ar_address;
-    reg [63:0] w_data;
+    reg [255:0] w_data;
+    reg [31:0] w_strobe;
     reg aw_pending, w_pending;
     reg axil_aw_pending, axil_w_pending;
     reg [31:0] axil_aw_address, axil_w_data;
-    integer tick, polls;
+    integer tick, polls, byte_index, check_index;
     reg inject, timeout_mode;
     reg held_aw, held_w, held_ar;
     reg [31:0] last_aw, last_ar;
-    reg [63:0] last_w;
+    reg [255:0] last_w;
+    reg [31:0] last_strobe;
     initial clk = 0;
     always #5 clk = !clk;
     always @* begin
@@ -170,27 +172,31 @@ module tb_split_d_selftest;
         end else begin
             tick <= tick+1;
             if(held_aw && (!m_axi_awvalid || m_axi_awaddr!==last_aw)) $fatal(1,"AW payload changed while stalled");
-            if(held_w && (!m_axi_wvalid || m_axi_wdata!==last_w)) $fatal(1,"W payload changed while stalled");
+            if(held_w && (!m_axi_wvalid || m_axi_wdata!==last_w || m_axi_wstrb!==last_strobe)) $fatal(1,"W payload changed while stalled");
             if(held_ar && (!m_axi_arvalid || m_axi_araddr!==last_ar)) $fatal(1,"AR payload changed while stalled");
             held_aw <= m_axi_awvalid && !m_axi_awready; last_aw <= m_axi_awaddr;
-            held_w <= m_axi_wvalid && !m_axi_wready; last_w <= m_axi_wdata;
+            held_w <= m_axi_wvalid && !m_axi_wready; last_w <= m_axi_wdata; last_strobe <= m_axi_wstrb;
             held_ar <= m_axi_arvalid && !m_axi_arready; last_ar <= m_axi_araddr;
             if(m_axi_awvalid && m_axi_awready) begin
-                if(m_axi_awlen!=0 || m_axi_awsize!=3 || m_axi_awburst!=1) $fatal(1,"Unexpected AXI write attributes");
+                if(m_axi_awlen!=0 || m_axi_awsize!=5 || m_axi_awburst!=1 || m_axi_awaddr[4:0]!=0) $fatal(1,"Unexpected AXI write attributes");
                 aw_address <= m_axi_awaddr; aw_pending <= 1;
             end
             if(m_axi_wvalid && m_axi_wready) begin
-                if(!m_axi_wlast || m_axi_wstrb!=8'hff) $fatal(1,"Unexpected AXI write mask/last");
-                w_data <= m_axi_wdata; w_pending <= 1;
+                if(!m_axi_wlast || !(m_axi_wstrb==32'hff || m_axi_wstrb==32'hff00 || m_axi_wstrb==32'hff0000 || m_axi_wstrb==32'hff000000)) $fatal(1,"Unexpected AXI write mask/last");
+                w_data <= m_axi_wdata; w_strobe <= m_axi_wstrb; w_pending <= 1;
             end
             if(aw_pending && w_pending && !m_axi_bvalid) begin
-                memory[aw_address>>3] <= w_data; m_axi_bvalid <= 1;
+                for(byte_index=0; byte_index<32; byte_index=byte_index+1) begin
+                    if(w_strobe[byte_index]) memory[(aw_address>>3)+(byte_index/8)][(byte_index%8)*8 +: 8] <= w_data[byte_index*8 +: 8];
+                end
+                m_axi_bvalid <= 1;
             end
             if(m_axi_bvalid && m_axi_bready) begin
                 m_axi_bvalid <= 0; aw_pending <= 0; w_pending <= 0;
             end
             if(m_axi_arvalid && m_axi_arready) begin
-                m_axi_rdata <= memory[m_axi_araddr>>3] ^ (inject ? 64'd1 : 64'd0);
+                if(m_axi_arlen!=0 || m_axi_arsize!=5 || m_axi_arburst!=1 || m_axi_araddr[4:0]!=0) $fatal(1,"Unexpected AXI read attributes");
+                m_axi_rdata <= {memory[(m_axi_araddr>>3)+3],memory[(m_axi_araddr>>3)+2],memory[(m_axi_araddr>>3)+1],memory[m_axi_araddr>>3]} ^ (inject ? 256'd1 : 256'd0);
                 m_axi_rvalid <= 1;
             end
             if(m_axi_rvalid && m_axi_rready) m_axi_rvalid <= 0;
@@ -213,6 +219,7 @@ module tb_split_d_selftest;
     initial begin
         reset_n = 0; run_test = 0; memory_ready = 1; stress_enable = 1;
         inject = $test$plusargs("inject"); timeout_mode = $test$plusargs("timeout");
+        for(check_index=0; check_index<32; check_index=check_index+1) memory[check_index] = 64'hdeadcafe00000000+check_index;
         #100; @(negedge clk) reset_n = 1;
         repeat(5) @(posedge clk);
         @(negedge clk) run_test = 1;
@@ -237,6 +244,15 @@ module tb_split_d_selftest;
             if(m_axi_awvalid || m_axi_wvalid || test_pass || !test_fail) $fatal(1,"Timeout did not drain safely");
         end else begin
             if(!test_pass || test_fail || cases_done!=26) $fatal(1,"Unit failure code=%h pc=%d",fail_code,debug_pc);
+            // Independent expected addresses from unit_program.mem. Verify
+            // lane order across a 32-byte boundary and untouched neighbors.
+            for(check_index=0; check_index<32; check_index=check_index+1) begin
+                if(check_index==0) begin
+                    if(memory[check_index]!==64'h0123456789abcdef) $fatal(1,"Unit word0 changed");
+                end else if(check_index>=2 && check_index<=6) begin
+                    if(memory[check_index]!==64'h00000000aabbccdd) $fatal(1,"Unit fill lane mismatch index=%0d",check_index);
+                end else if(memory[check_index]!==64'hdeadcafe00000000+check_index) $fatal(1,"Unit neighbor overwritten index=%0d",check_index);
+            end
         end
         $display("SELFTEST UNIT PASS inject=%b timeout=%b cases=%d",inject,timeout_mode,cases_done);
         $finish;

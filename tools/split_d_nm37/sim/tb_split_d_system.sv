@@ -40,6 +40,9 @@ module tb_split_d_system;
         #1000 reset_n = 1;
         wait(clock_locked && init_done);
         repeat(20) @(posedge ctrl_clk);
+`ifndef NM37_HBM_TLM_FUNCTIONAL
+        // APB reset reinitializes the complete HBM only in the RTL model.
+        // TLM stubs APB and cannot validate reset after memory traffic.
         // Reset the entire clock/reset/AXI/HBM system during an active write.
         @(negedge ctrl_clk) run_test = 1;
         wait(state==5);
@@ -48,6 +51,9 @@ module tb_split_d_system;
         wait(clock_locked && init_done);
         repeat(20) @(posedge ctrl_clk);
         $display("SYSTEM RESET EXERCISE initialization restored");
+`else
+        $display("HBM TLM FUNCTIONAL ONLY: busy-reset recovery excluded; mandatory in RTL and board validation");
+`endif
         @(negedge ctrl_clk) run_test = 1;
         wait(done);
         if(!pass || fail || cases!=26) $fatal(1,"SYSTEM FAIL mode0 cases=%0d code=%h pc=%0d actual=%h",cases,code,pc,actual);
@@ -82,5 +88,19 @@ module tb_split_d_system;
     initial begin
         #(64'd3000000000);
         $fatal(1,"SYSTEM TIMEOUT busy=%b done=%b cases=%0d pc=%0d state=%0d",busy,done,cases,pc,state);
+    end
+    // Observe the final SmartConnect-to-HBM boundary. Width conversion
+    // alone does not guarantee native HBM SIZE=5 for single-beat accesses.
+    always @(posedge dut.split_d_system_i.hbm_0.AXI_00_ACLK) begin
+        if(dut.split_d_system_i.hbm_0.AXI_00_ARESET_N) begin
+            if(dut.split_d_system_i.memory_interconnect_M00_AXI_AWVALID && dut.split_d_system_i.memory_interconnect_M00_AXI_AWREADY) begin
+                if(dut.split_d_system_i.memory_interconnect_M00_AXI_AWSIZE!==3'd5 || dut.split_d_system_i.memory_interconnect_M00_AXI_AWADDR[4:0]!==5'b0)
+                    $fatal(1,"HBM native write SIZE/alignment violation");
+            end
+            if(dut.split_d_system_i.memory_interconnect_M00_AXI_ARVALID && dut.split_d_system_i.memory_interconnect_M00_AXI_ARREADY) begin
+                if(dut.split_d_system_i.memory_interconnect_M00_AXI_ARSIZE!==3'd5 || dut.split_d_system_i.memory_interconnect_M00_AXI_ARADDR[4:0]!==5'b0)
+                    $fatal(1,"HBM native read SIZE/alignment violation");
+            end
+        end
     end
 endmodule

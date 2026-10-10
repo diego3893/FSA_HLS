@@ -16,7 +16,7 @@ module split_d_selftest #(
     input wire memory_ready,
     input wire stress_enable,
 
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 M_AXI AWADDR", X_INTERFACE_PARAMETER = "PROTOCOL AXI4, ADDR_WIDTH 32, DATA_WIDTH 64, FREQ_HZ 100000000" *)
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 M_AXI AWADDR", X_INTERFACE_PARAMETER = "PROTOCOL AXI4, ADDR_WIDTH 32, DATA_WIDTH 256, FREQ_HZ 100000000" *)
     output wire [31:0] m_axi_awaddr,
     (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 M_AXI AWLEN" *)
     output wire [7:0] m_axi_awlen,
@@ -37,9 +37,9 @@ module split_d_selftest #(
     (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 M_AXI AWREADY" *)
     input wire m_axi_awready,
     (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 M_AXI WDATA" *)
-    output wire [63:0] m_axi_wdata,
+    output wire [255:0] m_axi_wdata,
     (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 M_AXI WSTRB" *)
-    output wire [7:0] m_axi_wstrb,
+    output wire [31:0] m_axi_wstrb,
     (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 M_AXI WLAST" *)
     output wire m_axi_wlast,
     (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 M_AXI WVALID" *)
@@ -73,7 +73,7 @@ module split_d_selftest #(
     (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 M_AXI ARREADY" *)
     input wire m_axi_arready,
     (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 M_AXI RDATA" *)
-    input wire [63:0] m_axi_rdata,
+    input wire [255:0] m_axi_rdata,
     (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 M_AXI RRESP" *)
     input wire [1:0] m_axi_rresp,
     (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 M_AXI RLAST" *)
@@ -150,26 +150,31 @@ module split_d_selftest #(
     wire [63:0] data = instruction[91:28];
     wire [19:0] repeat_count = instruction[27:8];
     wire accept_response = !stress_enable || throttle[1:0]==2'b11;
+    // ROM commands address 64-bit words. HBM requires aligned 256-bit
+    // transfers; byte strobes preserve the other three words on writes.
+    wire [31:0] word_address = address+(repeat_index<<3);
+    wire [1:0] word_lane = word_address[4:3];
+    wire [63:0] read_word = m_axi_rdata[word_lane*64 +: 64];
 
     assign debug_pc = pc;
     assign debug_state = state;
-    assign m_axi_awaddr = address+(repeat_index<<3);
+    assign m_axi_awaddr = {word_address[31:5],5'b0};
     assign m_axi_awlen = 0;
-    assign m_axi_awsize = 3;
+    assign m_axi_awsize = 5;
     assign m_axi_awburst = 1;
     assign m_axi_awlock = 0;
     assign m_axi_awcache = 0;
     assign m_axi_awprot = 0;
     assign m_axi_awqos = 0;
     assign m_axi_awvalid = state==MW && !aw_seen;
-    assign m_axi_wdata = data;
-    assign m_axi_wstrb = 8'hff;
+    assign m_axi_wdata = {4{data}};
+    assign m_axi_wstrb = 32'hff<<(word_lane*8);
     assign m_axi_wlast = 1;
     assign m_axi_wvalid = state==MW && !w_seen;
     assign m_axi_bready = state==MB && accept_response;
-    assign m_axi_araddr = address+(repeat_index<<3);
+    assign m_axi_araddr = {word_address[31:5],5'b0};
     assign m_axi_arlen = 0;
-    assign m_axi_arsize = 3;
+    assign m_axi_arsize = 5;
     assign m_axi_arburst = 1;
     assign m_axi_arlock = 0;
     assign m_axi_arcache = 0;
@@ -245,8 +250,8 @@ module split_d_selftest #(
                 end
                 MR: if(m_axi_arready) state <= MD;
                 MD: if(m_axi_rvalid && m_axi_rready) begin
-                    actual_word <= m_axi_rdata;
-                    if(m_axi_rresp!=0 || !m_axi_rlast || m_axi_rdata!==data) begin
+                    actual_word <= read_word;
+                    if(m_axi_rresp!=0 || !m_axi_rlast || read_word!==data) begin
                         test_fail <= 1; fail_code <= 8'h02; state <= FINISH;
                     end else if(!timed_out && repeat_index+1 < repeat_count) begin
                         repeat_index <= repeat_index+1; timeout_count <= 0; state <= MR;
