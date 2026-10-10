@@ -1,0 +1,436 @@
+
+****** Vivado v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sat Oct 10 16:25:56 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source tools/split_d_nm37/scripts/create_project.tcl
+# if {[llength $argv] != 2} { error "Expected formal IP directory and new build directory" }
+# set ip_repo [file normalize [lindex $argv 0]]
+# set output_dir [file normalize [lindex $argv 1]]
+# set package_dir [file normalize [file join [file dirname [info script]] ..]]
+# if {[file exists $output_dir]} { error "Output exists: $output_dir" }
+# if {![file exists [file join $ip_repo component.xml]]} { error "Missing formal component.xml" }
+# file mkdir $output_dir
+# create_project split_d_nm37 [file join $output_dir project] -part xcvu37p_CIV-fsvh2892-2-e
+create_project: Time (s): cpu = 00:00:08 ; elapsed = 00:00:10 . Memory (MB): peak = 1486.102 ; gain = 127.840 ; free physical = 28926 ; free virtual = 60686
+# set_property target_language Verilog [current_project]
+# set_property simulator_language Mixed [current_project]
+# set_property ip_repo_paths [list $ip_repo] [current_project]
+# update_ip_catalog
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository '/home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1/impl/ip'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/opt/Xilinx_2024.2/Vivado/2024.2/data/ip'.
+# add_files -norecurse [glob [file join $package_dir rtl *.sv]]
+# set_property FILE_TYPE Verilog [get_files [file join $package_dir rtl split_d_selftest.sv]]
+# add_files -norecurse [file join $package_dir data split_d_program.mem]
+# add_files -fileset constrs_1 -norecurse [file join $package_dir constraints nm37.xdc]
+# set core_budget [file join $package_dir constraints core_budget.xdc]
+# add_files -fileset constrs_1 -norecurse $core_budget
+# set_property PROCESSING_ORDER LATE [get_files $core_budget]
+# update_compile_order -fileset sources_1
+# create_bd_design split_d_system
+Wrote  : </home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.srcs/sources_1/bd/split_d_system/split_d_system.bd> 
+WARNING: [BD 5-670] It is required to provide a frequency value for a user created input clock port. Please use the <-freq_hz $freq_val> argument of the create_bd_port command. ie create_bd_port -dir I -type clk -freq_hz 100000000 clkin
+# set sys_clk [create_bd_port -dir I -type clk sys_clk_100]
+# set_property CONFIG.FREQ_HZ 100000000 $sys_clk
+# set reset [create_bd_port -dir I -type rst reset_n]
+# set_property CONFIG.POLARITY ACTIVE_LOW $reset
+INFO: [Device 21-403] Loading part xcvu37p_CIV-fsvh2892-2-e
+create_bd_cell: Time (s): cpu = 00:00:08 ; elapsed = 00:00:13 . Memory (MB): peak = 2985.027 ; gain = 1351.773 ; free physical = 27492 ; free virtual = 59252
+# set clk [create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz_0]
+# set_property -dict [list CONFIG.PRIM_SOURCE {No_buffer} CONFIG.PRIM_IN_FREQ {100.000} \
+#     CONFIG.NUM_OUT_CLKS {2} CONFIG.CLKOUT2_USED {true} CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100.000} \
+#     CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {225.000} CONFIG.USE_LOCKED {true} \
+#     CONFIG.USE_RESET {true} CONFIG.RESET_TYPE {ACTIVE_LOW}] $clk
+# connect_bd_net $sys_clk [get_bd_pins clk_wiz_0/clk_in1]
+# connect_bd_net $reset [get_bd_pins clk_wiz_0/resetn]
+INFO: [BD 5-1043] It is recommended to use inline hdl version xilinx.com:inline_hdl:ilconstant:1.0 for the IP type xilinx.com:ip:xlconstant:1.1 for improved performance and reduced disk space. IPs with VLNV xilinx.com:ip:xlconstant:1.1 may be deprecated in future releases. More information on inline hdl IP is available in UG994 
+# set zero [create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 zero]
+# set_property -dict [list CONFIG.CONST_WIDTH {1} CONFIG.CONST_VAL {0}] $zero
+# foreach domain {100 225} {
+#     set rst [create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_$domain]
+#     set clock_pin [expr {$domain==100 ? "clk_out1" : "clk_out2"}]
+#     connect_bd_net [get_bd_pins clk_wiz_0/$clock_pin] [get_bd_pins rst_$domain/slowest_sync_clk]
+#     connect_bd_net $reset [get_bd_pins rst_$domain/ext_reset_in]
+#     connect_bd_net [get_bd_pins clk_wiz_0/locked] [get_bd_pins rst_$domain/dcm_locked]
+#     connect_bd_net [get_bd_pins zero/dout] [get_bd_pins rst_$domain/aux_reset_in] [get_bd_pins rst_$domain/mb_debug_sys_rst]
+# }
+# set hbm [create_bd_cell -type ip -vlnv xilinx.com:ip:hbm:1.0 hbm_0]
+# set hbm_props [list CONFIG.USER_APB_EN {false} CONFIG.USER_AXI_CLK_FREQ {225} \
+#     CONFIG.USER_HBM_DENSITY {8GB} CONFIG.USER_DEBUG_EN {TRUE} CONFIG.USER_XSDB_INTF_EN {TRUE}]
+# for {set i 1} {$i<32} {incr i} { lappend hbm_props CONFIG.USER_SAXI_[format %02d $i] {false} }
+# set_property -dict $hbm_props $hbm
+# foreach stack {0 1} {
+#     # Match the implemented NM37 example: HBM's internal reference BUFG
+#     # receives raw IBUFDS output, avoiding cascaded global clock buffers.
+#     connect_bd_net $sys_clk [get_bd_pins hbm_0/HBM_REF_CLK_$stack]
+#     connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins hbm_0/APB_${stack}_PCLK]
+#     connect_bd_net [get_bd_pins rst_100/peripheral_aresetn] [get_bd_pins hbm_0/APB_${stack}_PRESET_N]
+# }
+# connect_bd_net [get_bd_pins clk_wiz_0/clk_out2] [get_bd_pins hbm_0/AXI_00_ACLK]
+# connect_bd_net [get_bd_pins rst_225/peripheral_aresetn] [get_bd_pins hbm_0/AXI_00_ARESET_N]
+# set fsa [create_bd_cell -type ip -vlnv xilinx.com:hls:fsa_stream_split_d:1.0 fsa_0]
+INFO: [IP_Flow 19-5107] Inferred bus interface 'clk' of definition 'xilinx.com:signal:clock:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'clk' of definition 'xilinx.com:signal:clock:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'reset_n' of definition 'xilinx.com:signal:reset:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'reset_n' of definition 'xilinx.com:signal:reset:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'M_AXI' of definition 'xilinx.com:interface:aximm:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'M_AXI' of definition 'xilinx.com:interface:aximm:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'M_AXIL' of definition 'xilinx.com:interface:aximm:1.0' (from X_INTERFACE_INFO parameter from HDL file).
+INFO: [IP_Flow 19-5107] Inferred bus interface 'M_AXIL' of definition 'xilinx.com:interface:aximm:1.0' (from 'X_INTERFACE_INFO' attribute).
+INFO: [IP_Flow 19-4728] Bus Interface 'clk': Added interface parameter 'ASSOCIATED_BUSIF' with value 'M_AXI'.
+INFO: [IP_Flow 19-4728] Bus Interface 'clk': Added interface parameter 'ASSOCIATED_RESET' with value 'reset_n'.
+INFO: [IP_Flow 19-4728] Bus Interface 'clk': Added interface parameter 'FREQ_HZ' with value '100000000'.
+INFO: [IP_Flow 19-4728] Bus Interface 'reset_n': Added interface parameter 'POLARITY' with value 'ACTIVE_LOW'.
+INFO: [IP_Flow 19-4728] Bus Interface 'M_AXI': Added interface parameter 'PROTOCOL' with value 'AXI4'.
+INFO: [IP_Flow 19-4728] Bus Interface 'M_AXI': Added interface parameter 'ADDR_WIDTH' with value '32'.
+INFO: [IP_Flow 19-4728] Bus Interface 'M_AXI': Added interface parameter 'DATA_WIDTH' with value '64'.
+INFO: [IP_Flow 19-4728] Bus Interface 'M_AXI': Added interface parameter 'FREQ_HZ' with value '100000000'.
+INFO: [IP_Flow 19-4728] Bus Interface 'M_AXIL': Added interface parameter 'PROTOCOL' with value 'AXI4LITE'.
+INFO: [IP_Flow 19-4728] Bus Interface 'M_AXIL': Added interface parameter 'ADDR_WIDTH' with value '32'.
+INFO: [IP_Flow 19-4728] Bus Interface 'M_AXIL': Added interface parameter 'DATA_WIDTH' with value '32'.
+INFO: [IP_Flow 19-4728] Bus Interface 'M_AXIL': Added interface parameter 'FREQ_HZ' with value '100000000'.
+INFO: [IP_Flow 19-7067] Note that bus interface 'clk' has a fixed FREQ_HZ of '100000000'. This value will be respected whenever this IP is instantiated in IP Integrator.
+INFO: [IP_Flow 19-7067] Note that bus interface 'M_AXI' has a fixed FREQ_HZ of '100000000'. This value will be respected whenever this IP is instantiated in IP Integrator.
+INFO: [IP_Flow 19-7067] Note that bus interface 'M_AXIL' has a fixed FREQ_HZ of '100000000'. This value will be respected whenever this IP is instantiated in IP Integrator.
+# set tester [create_bd_cell -type module -reference split_d_selftest selftest_0]
+# connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins fsa_0/ap_clk] [get_bd_pins selftest_0/clk]
+# connect_bd_net [get_bd_pins rst_100/peripheral_aresetn] [get_bd_pins fsa_0/ap_rst_n] [get_bd_pins selftest_0/reset_n]
+# set control_sc [create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 control_interconnect]
+# set_property -dict [list CONFIG.NUM_SI {1} CONFIG.NUM_MI {1}] $control_sc
+# connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins control_interconnect/aclk]
+# connect_bd_net [get_bd_pins rst_100/interconnect_aresetn] [get_bd_pins control_interconnect/aresetn]
+# connect_bd_intf_net [get_bd_intf_pins selftest_0/M_AXIL] [get_bd_intf_pins control_interconnect/S00_AXI]
+# connect_bd_intf_net [get_bd_intf_pins control_interconnect/M00_AXI] [get_bd_intf_pins fsa_0/s_axi_control]
+INFO: [BD 5-1043] It is recommended to use inline hdl version xilinx.com:inline_hdl:ilvector_logic:1.0 for the IP type xilinx.com:ip:util_vector_logic:2.0 for improved performance and reduced disk space. IPs with VLNV xilinx.com:ip:util_vector_logic:2.0 may be deprecated in future releases. More information on inline hdl IP is available in UG994 
+# set ready [create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 memory_ready]
+# set_property -dict [list CONFIG.C_OPERATION {and} CONFIG.C_SIZE {1}] $ready
+# connect_bd_net [get_bd_pins hbm_0/apb_complete_0] [get_bd_pins memory_ready/Op1]
+# connect_bd_net [get_bd_pins hbm_0/apb_complete_1] [get_bd_pins memory_ready/Op2]
+# connect_bd_net [get_bd_pins memory_ready/Res] [get_bd_pins selftest_0/memory_ready]
+# set sc [create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 memory_interconnect]
+# set_property -dict [list CONFIG.NUM_SI {5} CONFIG.NUM_MI {1} CONFIG.NUM_CLKS {2}] $sc
+# connect_bd_net [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins memory_interconnect/aclk]
+# connect_bd_net [get_bd_pins clk_wiz_0/clk_out2] [get_bd_pins memory_interconnect/aclk1]
+# connect_bd_net [get_bd_pins rst_100/interconnect_aresetn] [get_bd_pins memory_interconnect/aresetn]
+# set slot 0
+# foreach bundle {q k v o} {
+#     connect_bd_intf_net [get_bd_intf_pins fsa_0/m_axi_${bundle}_gmem] [get_bd_intf_pins memory_interconnect/S[format %02d $slot]_AXI]
+#     incr slot
+# }
+# connect_bd_intf_net [get_bd_intf_pins selftest_0/M_AXI] [get_bd_intf_pins memory_interconnect/S04_AXI]
+# set hbm_intf [get_bd_intf_pins -quiet hbm_0/SAXI_00]
+# if {[llength $hbm_intf]!=1} { set hbm_intf [get_bd_intf_pins hbm_0/AXI_00] }
+# connect_bd_intf_net [get_bd_intf_pins memory_interconnect/M00_AXI] $hbm_intf
+# assign_bd_address -offset 0 -range 64K -target_address_space [get_bd_addr_spaces selftest_0/M_AXIL] [get_bd_addr_segs fsa_0/s_axi_control/Reg]
+Slave segment '/fsa_0/s_axi_control/Reg' is being assigned into address space '/selftest_0/M_AXIL' at <0x0000_0000 [ 64K ]>.
+# assign_bd_address
+INFO: [BD 41-3093] Triggering Legacy Auto Assign Algorithm
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM16' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM16' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_0000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM17' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM17' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_1000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM18' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM18' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_2000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM19' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM19' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_3000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM20' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM20' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_4000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM21' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM21' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_5000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM22' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM22' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_6000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM23' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM23' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_7000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM24' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM24' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_8000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM25' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM25' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_9000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM26' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM26' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_A000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM27' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM27' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_B000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM28' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM28' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_C000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM29' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM29' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_D000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM30' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM30' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_E000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+WARNING: [BD 41-1743] Cannot assign slave segment '/hbm_0/SAXI_00/HBM_MEM31' into address space '/selftest_0/M_AXI' because no valid addressing path exists. The addressing path from slave segment '/hbm_0/SAXI_00/HBM_MEM31' to address space '/selftest_0/M_AXI' terminates at master interface '/selftest_0/M_AXI'. The apertures for this interface {<0x0_0000_0000 [ 4G ]>} do not intersect with previous path apertures {<0x1_F000_0000 [ 256M ]>}. This assignment will be automatically excluded.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM00' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x0000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM00' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x0000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM00' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x0000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM00' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x0000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM00' is being assigned into address space '/selftest_0/M_AXI' at <0x0000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM01' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM01' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM01' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM01' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM01' is being assigned into address space '/selftest_0/M_AXI' at <0x1000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM02' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x2000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM02' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x2000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM02' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x2000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM02' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x2000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM02' is being assigned into address space '/selftest_0/M_AXI' at <0x2000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM03' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x3000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM03' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x3000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM03' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x3000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM03' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x3000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM03' is being assigned into address space '/selftest_0/M_AXI' at <0x3000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM04' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x4000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM04' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x4000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM04' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x4000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM04' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x4000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM04' is being assigned into address space '/selftest_0/M_AXI' at <0x4000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM05' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x5000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM05' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x5000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM05' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x5000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM05' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x5000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM05' is being assigned into address space '/selftest_0/M_AXI' at <0x5000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM06' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x6000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM06' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x6000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM06' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x6000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM06' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x6000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM06' is being assigned into address space '/selftest_0/M_AXI' at <0x6000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM07' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x7000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM07' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x7000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM07' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x7000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM07' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x7000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM07' is being assigned into address space '/selftest_0/M_AXI' at <0x7000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM08' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x8000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM08' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x8000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM08' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x8000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM08' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x8000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM08' is being assigned into address space '/selftest_0/M_AXI' at <0x8000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM09' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x9000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM09' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x9000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM09' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x9000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM09' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x9000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM09' is being assigned into address space '/selftest_0/M_AXI' at <0x9000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM10' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0xA000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM10' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0xA000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM10' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0xA000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM10' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0xA000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM10' is being assigned into address space '/selftest_0/M_AXI' at <0xA000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM11' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0xB000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM11' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0xB000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM11' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0xB000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM11' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0xB000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM11' is being assigned into address space '/selftest_0/M_AXI' at <0xB000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM12' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0xC000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM12' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0xC000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM12' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0xC000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM12' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0xC000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM12' is being assigned into address space '/selftest_0/M_AXI' at <0xC000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM13' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0xD000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM13' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0xD000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM13' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0xD000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM13' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0xD000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM13' is being assigned into address space '/selftest_0/M_AXI' at <0xD000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM14' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0xE000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM14' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0xE000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM14' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0xE000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM14' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0xE000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM14' is being assigned into address space '/selftest_0/M_AXI' at <0xE000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM15' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0xF000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM15' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0xF000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM15' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0xF000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM15' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0xF000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM15' is being assigned into address space '/selftest_0/M_AXI' at <0xF000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM16' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_0000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM16' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_0000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM16' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_0000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM16' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_0000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM17' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_1000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM17' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_1000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM17' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_1000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM17' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_1000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM18' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_2000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM18' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_2000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM18' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_2000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM18' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_2000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM19' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_3000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM19' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_3000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM19' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_3000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM19' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_3000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM20' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_4000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM20' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_4000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM20' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_4000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM20' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_4000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM21' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_5000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM21' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_5000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM21' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_5000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM21' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_5000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM22' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_6000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM22' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_6000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM22' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_6000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM22' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_6000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM23' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_7000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM23' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_7000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM23' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_7000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM23' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_7000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM24' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_8000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM24' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_8000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM24' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_8000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM24' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_8000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM25' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_9000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM25' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_9000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM25' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_9000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM25' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_9000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM26' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_A000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM26' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_A000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM26' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_A000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM26' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_A000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM27' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_B000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM27' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_B000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM27' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_B000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM27' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_B000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM28' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_C000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM28' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_C000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM28' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_C000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM28' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_C000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM29' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_D000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM29' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_D000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM29' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_D000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM29' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_D000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM30' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_E000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM30' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_E000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM30' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_E000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM30' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_E000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM31' is being assigned into address space '/fsa_0/Data_m_axi_k_gmem' at <0x1_F000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM31' is being assigned into address space '/fsa_0/Data_m_axi_o_gmem' at <0x1_F000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM31' is being assigned into address space '/fsa_0/Data_m_axi_q_gmem' at <0x1_F000_0000 [ 256M ]>.
+Slave segment '/hbm_0/SAXI_00/HBM_MEM31' is being assigned into address space '/fsa_0/Data_m_axi_v_gmem' at <0x1_F000_0000 [ 256M ]>.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM16 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM18 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM19 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM17 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM20 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM21 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM22 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM23 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM24 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM25 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM26 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM27 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM28 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM29 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM30 from address space /selftest_0/M_AXI.
+Excluding slave segment /hbm_0/SAXI_00/HBM_MEM31 from address space /selftest_0/M_AXI.
+# set control_segments [get_bd_addr_segs -of_objects [get_bd_addr_spaces selftest_0/M_AXIL]]
+# if {[llength $control_segments]!=1 || [get_property OFFSET $control_segments]!=0} { error "Control window must map at zero" }
+# foreach name {run_test stress_enable} {
+#     set p [create_bd_port -dir I $name]
+#     connect_bd_net $p [get_bd_pins selftest_0/$name]
+# }
+# foreach {name width} {test_busy 1 test_done 1 test_pass 1 test_fail 1 fail_code 8 cases_done 6 last_case_cycles 32 debug_pc 13 debug_state 4 actual_word 64} {
+#     set pin [get_bd_pins selftest_0/$name]
+#     if {$width==1} { set p [create_bd_port -dir O $name] } else {
+#         set p [create_bd_port -dir O -from [expr {$width-1}] -to 0 $name]
+#     }
+#     connect_bd_net $pin $p
+# }
+# foreach {name pin} {ctrl_clk clk_wiz_0/clk_out1 clock_locked clk_wiz_0/locked init_done memory_ready/Res} {
+#     if {$name eq "ctrl_clk"} { set p [create_bd_port -dir O -type clk $name] } else {
+#         set p [create_bd_port -dir O $name]
+#     }
+#     connect_bd_net $p [get_bd_pins $pin]
+# }
+# validate_bd_design
+INFO: [BD 5-943] Reserving offset range <0x0_0000_0000 [ 8G ]> from slave interface '/memory_interconnect/S00_AXI' to master interface '/memory_interconnect/M00_AXI'. This will be used by smartconnect on path for routing.
+INFO: [BD 5-943] Reserving offset range <0x0_0000_0000 [ 8G ]> from slave interface '/memory_interconnect/S01_AXI' to master interface '/memory_interconnect/M00_AXI'. This will be used by smartconnect on path for routing.
+INFO: [BD 5-943] Reserving offset range <0x0_0000_0000 [ 8G ]> from slave interface '/memory_interconnect/S02_AXI' to master interface '/memory_interconnect/M00_AXI'. This will be used by smartconnect on path for routing.
+INFO: [BD 5-943] Reserving offset range <0x0_0000_0000 [ 8G ]> from slave interface '/memory_interconnect/S03_AXI' to master interface '/memory_interconnect/M00_AXI'. This will be used by smartconnect on path for routing.
+INFO: [BD 5-943] Reserving offset range <0x0_0000_0000 [ 4G ]> from slave interface '/memory_interconnect/S04_AXI' to master interface '/memory_interconnect/M00_AXI'. This will be used by smartconnect on path for routing.
+INFO: [xilinx.com:ip:smartconnect:1.0-1] split_d_system_memory_interconnect_0: SmartConnect split_d_system_memory_interconnect_0 is in High-performance Mode.
+INFO: [BD 5-943] Reserving offset range <0x0000_0000 [ 64K ]> from slave interface '/control_interconnect/S00_AXI' to master interface '/control_interconnect/M00_AXI'. This will be used by smartconnect on path for routing.
+INFO: [xilinx.com:ip:smartconnect:1.0-1] split_d_system_control_interconnect_0: SmartConnect split_d_system_control_interconnect_0 is in Low-Area Mode.
+INFO: [xilinx.com:ip:clk_wiz:6.0-1] /clk_wiz_0 clk_wiz propagate
+validate_bd_design: Time (s): cpu = 00:00:07 ; elapsed = 00:00:09 . Memory (MB): peak = 3052.500 ; gain = 59.469 ; free physical = 27447 ; free virtual = 59208
+# foreach domain {100 225} {
+#     if {[get_property CONFIG.C_EXT_RESET_HIGH [get_bd_cells rst_$domain]]!=0} {
+#         error "Reset polarity did not propagate ACTIVE_LOW in domain $domain"
+#     }
+# }
+# save_bd_design
+Wrote  : </home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.srcs/sources_1/bd/split_d_system/split_d_system.bd> 
+# set bd [get_files split_d_system.bd]
+INFO: [BD 41-1662] The design 'split_d_system.bd' is already validated. Therefore parameter propagation will not be re-run.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S00_AXI_arlock'(1) to pin: '/fsa_0/m_axi_q_gmem_ARLOCK'(2) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S01_AXI_arlock'(1) to pin: '/fsa_0/m_axi_k_gmem_ARLOCK'(2) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S02_AXI_arlock'(1) to pin: '/fsa_0/m_axi_v_gmem_ARLOCK'(2) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S03_AXI_awlock'(1) to pin: '/fsa_0/m_axi_o_gmem_AWLOCK'(2) - Only lower order bits will be connected.
+Verilog Output written to : /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S00_AXI_arlock'(1) to pin: '/fsa_0/m_axi_q_gmem_ARLOCK'(2) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S01_AXI_arlock'(1) to pin: '/fsa_0/m_axi_k_gmem_ARLOCK'(2) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S02_AXI_arlock'(1) to pin: '/fsa_0/m_axi_v_gmem_ARLOCK'(2) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S03_AXI_awlock'(1) to pin: '/fsa_0/m_axi_o_gmem_AWLOCK'(2) - Only lower order bits will be connected.
+Verilog Output written to : /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/sim/split_d_system.v
+Verilog Output written to : /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/hdl/split_d_system_wrapper.v
+# set wrapper [make_wrapper -files $bd -top]
+# add_files -norecurse $wrapper
+# generate_target all $bd
+INFO: [BD 41-1662] The design 'split_d_system.bd' is already validated. Therefore parameter propagation will not be re-run.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S00_AXI_arlock'(1) to pin: '/fsa_0/m_axi_q_gmem_ARLOCK'(2) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S01_AXI_arlock'(1) to pin: '/fsa_0/m_axi_k_gmem_ARLOCK'(2) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S02_AXI_arlock'(1) to pin: '/fsa_0/m_axi_v_gmem_ARLOCK'(2) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S03_AXI_awlock'(1) to pin: '/fsa_0/m_axi_o_gmem_AWLOCK'(2) - Only lower order bits will be connected.
+Verilog Output written to : /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.v
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S00_AXI_arlock'(1) to pin: '/fsa_0/m_axi_q_gmem_ARLOCK'(2) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S01_AXI_arlock'(1) to pin: '/fsa_0/m_axi_k_gmem_ARLOCK'(2) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S02_AXI_arlock'(1) to pin: '/fsa_0/m_axi_v_gmem_ARLOCK'(2) - Only lower order bits will be connected.
+WARNING: [BD 41-2384] Width mismatch when connecting pin: '/memory_interconnect/S03_AXI_awlock'(1) to pin: '/fsa_0/m_axi_o_gmem_AWLOCK'(2) - Only lower order bits will be connected.
+Verilog Output written to : /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/sim/split_d_system.v
+Verilog Output written to : /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/hdl/split_d_system_wrapper.v
+INFO: [BD 41-1029] Generation completed for the IP Integrator block clk_wiz_0 .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block zero .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block rst_100 .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block rst_225 .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block hbm_0 .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block fsa_0 .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block selftest_0 .
+Exporting to file /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/bd_0/hw_handoff/split_d_system_control_interconnect_0.hwh
+Generated Hardware Definition File /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_control_interconnect_0/bd_0/synth/split_d_system_control_interconnect_0.hwdef
+INFO: [BD 41-1029] Generation completed for the IP Integrator block control_interconnect .
+INFO: [BD 41-1029] Generation completed for the IP Integrator block memory_ready .
+Exporting to file /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/hw_handoff/split_d_system_memory_interconnect_0.hwh
+Generated Hardware Definition File /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/ip/split_d_system_memory_interconnect_0/bd_0/synth/split_d_system_memory_interconnect_0.hwdef
+INFO: [BD 41-1029] Generation completed for the IP Integrator block memory_interconnect .
+Exporting to file /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/hw_handoff/split_d_system.hwh
+Generated Hardware Definition File /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.gen/sources_1/bd/split_d_system/synth/split_d_system.hwdef
+generate_target: Time (s): cpu = 00:00:12 ; elapsed = 00:00:18 . Memory (MB): peak = 3104.688 ; gain = 28.172 ; free physical = 27291 ; free virtual = 59109
+# create_ip -vlnv xilinx.com:ip:vio:3.0 -module_name split_d_vio
+# set_property -dict [list CONFIG.C_NUM_PROBE_IN {8} CONFIG.C_NUM_PROBE_OUT {2} \
+#     CONFIG.C_PROBE_IN0_WIDTH {4} CONFIG.C_PROBE_IN1_WIDTH {8} CONFIG.C_PROBE_IN2_WIDTH {6} \
+#     CONFIG.C_PROBE_IN3_WIDTH {13} CONFIG.C_PROBE_IN4_WIDTH {32} CONFIG.C_PROBE_IN5_WIDTH {4} \
+#     CONFIG.C_PROBE_IN6_WIDTH {64} CONFIG.C_PROBE_IN7_WIDTH {1} \
+#     CONFIG.C_PROBE_OUT0_WIDTH {1} CONFIG.C_PROBE_OUT1_WIDTH {1}] [get_ips split_d_vio]
+# create_ip -vlnv xilinx.com:ip:ila:6.2 -module_name split_d_ila
+# set_property -dict [list CONFIG.C_NUM_OF_PROBES {8} CONFIG.C_DATA_DEPTH {1024} \
+#     CONFIG.C_PROBE0_WIDTH {4} CONFIG.C_PROBE1_WIDTH {8} CONFIG.C_PROBE2_WIDTH {6} \
+#     CONFIG.C_PROBE3_WIDTH {13} CONFIG.C_PROBE4_WIDTH {32} CONFIG.C_PROBE5_WIDTH {4} \
+#     CONFIG.C_PROBE6_WIDTH {64} CONFIG.C_PROBE7_WIDTH {1}] [get_ips split_d_ila]
+# generate_target all [get_ips {split_d_vio split_d_ila}]
+INFO: [IP_Flow 19-1686] Generating 'Instantiation Template' target for IP 'split_d_ila'...
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'split_d_ila'...
+WARNING: [IP_Flow 19-4994] Overwriting existing constraint file '/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.gen/sources_1/ip/split_d_ila/split_d_ila_ooc.xdc'
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'split_d_ila'...
+INFO: [IP_Flow 19-1686] Generating 'Implementation' target for IP 'split_d_ila'...
+INFO: [IP_Flow 19-1686] Generating 'Change Log' target for IP 'split_d_ila'...
+INFO: [IP_Flow 19-1686] Generating 'Instantiation Template' target for IP 'split_d_vio'...
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'split_d_vio'...
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'split_d_vio'...
+INFO: [IP_Flow 19-1686] Generating 'Change Log' target for IP 'split_d_vio'...
+# set_property top split_d_nm37_top [get_filesets sources_1]
+# set_property STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY none [get_runs synth_1]
+# update_compile_order -fileset sources_1
+# write_bd_tcl [file join $output_dir recreate_bd.tcl]
+WARNING: [BD 41-2937] The design that will be created by this Tcl script contains the following user IPs:
+/fsa_0
+Please add the following user repository(s):
+/home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1/impl/ip
+before sourcing this Tcl script or use write_project_tcl.
+WARNING: [BD 41-2925] The design that will be created by this Tcl script contains the following module references: split_d_selftest.
+Please add the sources of those modules before sourcing this Tcl script or use write_project_tcl.
+INFO: [BD 5-148] Tcl file written out </home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/recreate_bd.tcl>.
+
+# report_ip_status -file [file join $output_dir ip_status.rpt]
+# set address_report [file join $output_dir address_map.txt]
+# set f [open $address_report w]
+# close $f
+# foreach segment [get_bd_addr_segs] { report_property -file $address_report -append $segment }
+# assign_bd_address -export_to_file [file join $output_dir address_map.csv]
+INFO: [BD 5-621] Generated address map in csv format to /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/address_map.csv
+# puts "NM37_PROJECT_CREATED=[file join $output_dir project split_d_nm37.xpr]"
+NM37_PROJECT_CREATED=/home/zhangchenxuan/FSA_HLS/build/split_d_nm37_a37d2e0_ipbf/project/split_d_nm37.xpr
+# close_project
+INFO: [Common 17-206] Exiting Vivado at Sat Oct 10 16:27:39 2026...

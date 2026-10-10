@@ -21,7 +21,7 @@
 
 ## 2 硬约束
 
-物理存储新证据：b3e4957正式IP的auto_context实际Q/K/V tile共40个RAMB18（每块Q4/K8/V8），AXI缓冲7个RAMB36。HLS的BRAM18K8仅为估算，不能继续称“物理无tile BRAM”；stage3报告已纠正。tile载荷5120bits，导出RAM含两个写端口，本次已核实Q/K/V装载全覆盖，首轮仅删除重复零初始化；首轮4934747初始化删除后仍40RAMB18，Q每bank两lane同拍写；当前第2轮cyclic4 lane分bank，收益待新RTL与物理证据确认。
+物理存储新证据：b3e4957正式IP的auto_context实际Q/K/V tile共40个RAMB18（每块Q4/K8/V8），AXI缓冲7个RAMB36。HLS的BRAM18K8仅为估算，不能继续称“物理无tile BRAM”；stage3报告已纠正。tile载荷5120bits，导出RAM含两个写端口，本次已核实Q/K/V装载全覆盖，首轮仅删除重复零初始化；首轮4934747初始化删除后仍40RAMB18，Q每bank两lane同拍写；第2轮bf41d16 cyclic4 lane分bank正式验收，tile RAMB18从40降0、AXI RAMB36仍7，代价+1341LUT/+1617FF/总cycle+0.261%（相对493），详见第11节。
 
 - 不修改`FSA-main`；现有生产顶层`fsa_stream`的接口和行为保持不变。
 - **Git规则已修订（2026-10-09）**：AGENTS.md现为“默认不进行git操作；用户明确授权后，在撤回前默认进行git操作”。先前记录的用户Git授权不再与该文件矛盾；Git授权不包含新的构建或实现授权。2026-10-10用户已明确授权同步本次测试补强并运行一轮完整4×4流程。
@@ -140,7 +140,7 @@ Q/K/V AXI
 
 ## 7 当前工作集
 
-- 本次存储/完整系统：`tools/split_d_nm37/`、`docs/evidence/split_d_4934747_4x4_complete/`、1316修改日志；包含真实HBM/SmartConnect/时钟复位/板内自检与独立unit检查。当前未做系统仿真、实现或板测，不能写通过。生成目录build/split_d_nm37_a37d2e0_ipbf，真实IP bf41d16；旧失败工程隔离保留。
+- 本次存储/完整系统：`tools/split_d_nm37/`、`docs/evidence/split_d_4934747_4x4_complete/`、1316修改日志；包含真实HBM/SmartConnect/时钟复位/板内自检与独立unit检查。首轮系统仿真a0c4329因TB无尺寸超时延迟在Time0溢出而exit98，768c12e显式64位修复后重跑中；首轮实现a0c4329完成route/setup+0.226ns/hold+0.010ns，但HBM参考时钟重复primary定义引出4条methodology Critical，尚不能验收。板测未做。生成目录build/split_d_nm37_a37d2e0_ipbf，真实IP bf41d16；旧失败工程隔离保留。
 
 - Split-D配置与类型：`include/fsa/stream/split_d/`
 - Split-D顶层：`src/stream/split_d/fsa_stream_split_d.cpp`
@@ -236,7 +236,7 @@ Q/K/V AXI
 
 第二次核查已修订方案：保留D/H和全局索引、K/V读取量及现有量化链；补倒数通路、位模式基线、广播/汇聚等待关系、IP导出与OOC/全系统时序等级。范围以方案第13节为准，不声称所有独立模块已逐行审计。失败构建读取对应失败归档；当前成功目录为130c778，不得误引用旧HEAD。
 
-**2026-10-10 13:16当前任务：**从de03998启动4×4存储优化与真实AXI完整集成；第1轮4934747仅删除Q/K/V冗余初始化，完整HLS/IP已通过：数学/严格24/24、26事务、完整输出SHA保持、16PE/4Acc/II5/5/1/1、7.300ns/DSP40/FF45051/LUT127976/BRAM8，总72507cycles（较80242少9.64%）。OOC已完成：内部setup+0.267ns/hold+0.010ns、LUT49091/FF26441/RAMB36=7/RAMB18=40，DRC无Error/Critical，75848 nets全route；外部min0ns hold4985个（reset3922），完整OOC不合格，留真实系统关闭。第1轮已闭环，第2轮bf41d16 cyclic4正式HLS/IP已通过：24/24数学/严格、26事务、位模式/16PE/4Acc/II保持，总72696cycles、7.300ns/DSP40/FF45889/LUT129412；OOC已验收内部setup+0.330ns/hold+0.010ns、77088 nets全route、DRC无Error/Critical；tile RAMB18由40降0，保留7RAMB36 AXI，LUT50432/FF28058，接受分bank。边界hold4575（reset3752）仍未关闭，完整OOC不合格。第2轮已闭环，当前第3轮完整系统集成。NM37控制器4项unit通过；系统源码a0c4329（工程生成a37d2e0）、计算IP bf41d16。历次BD生成修复CLKOUT2_USED、低有效复位传播断言、Verilog module reference、显式debug ports；HBM_MEM00已在五master确认0/256MB。当前加入Control SmartConnect显式映射0/64KB并修复地址报告Tcl，build/split_d_nm37_a37d2e0_ipbf于16:27:39成功创建，控制窗口/低复位断言通过、无Critical/Error。系统TB新增整体忙中reset后52完整事务，仿真a0c4329 exit98，原始日志Time0ps的SYSTEM TIMEOUT证明TB无尺寸3e9延迟溢出，正在改显式64位、保持3s原合同，硬件不改。独立impl工程16:39:42启动，16:47:24综合产出DCP、ROM30RAMB36，当前routing；板测未执行。JTAG唯一VU37P target=210017937722A，另一个ZU5不使用。新日志1316，服务器tracked干净、工具可用、704GB可用，有NM37 HBM示例，无XDMA节点。系统目标已确认，后续执行生成包的unit/HBM仿真/实现与板测，分级记录结果。
+**2026-10-10 13:16当前任务：**从de03998启动4×4存储优化与真实AXI完整集成；第1轮4934747仅删除Q/K/V冗余初始化，完整HLS/IP已通过：数学/严格24/24、26事务、完整输出SHA保持、16PE/4Acc/II5/5/1/1、7.300ns/DSP40/FF45051/LUT127976/BRAM8，总72507cycles（较80242少9.64%）。OOC已完成：内部setup+0.267ns/hold+0.010ns、LUT49091/FF26441/RAMB36=7/RAMB18=40，DRC无Error/Critical，75848 nets全route；外部min0ns hold4985个（reset3922），完整OOC不合格，留真实系统关闭。第1轮已闭环，第2轮bf41d16 cyclic4正式HLS/IP已通过：24/24数学/严格、26事务、位模式/16PE/4Acc/II保持，总72696cycles、7.300ns/DSP40/FF45889/LUT129412；OOC已验收内部setup+0.330ns/hold+0.010ns、77088 nets全route、DRC无Error/Critical；tile RAMB18由40降0，保留7RAMB36 AXI，LUT50432/FF28058，接受分bank。边界hold4575（reset3752）仍未关闭，完整OOC不合格。第2轮已闭环，当前第3轮完整系统集成。NM37控制器4项unit通过；系统源码a0c4329（工程生成a37d2e0）、计算IP bf41d16。历次BD生成修复CLKOUT2_USED、低有效复位传播断言、Verilog module reference、显式debug ports；HBM_MEM00已在五master确认0/256MB。当前加入Control SmartConnect显式映射0/64KB并修复地址报告Tcl，build/split_d_nm37_a37d2e0_ipbf于16:27:39成功创建，控制窗口/低复位断言通过、无Critical/Error。系统TB新增整体忙中reset后52完整事务，仿真a0c4329 exit98，原始日志Time0ps的SYSTEM TIMEOUT证明TB无尺寸3e9延迟溢出，正在改显式64位、保持3s原合同，硬件不改。独立impl工程16:39:42—17:08:46完成，98003 nets全部route、setup+0.226ns/hold+0.010ns、LUT60777/FF43700/RAMB36=45/RAMB18=0/DSP40。DRC无Error/Critical，但HBM_REF_CLK两个内部primary重复定义产生TIMING-4×2/TIMING-27×2，需修正时钟来源模型后重新实现；原route证据保留。CDC694项CDC-15均Safely Timed/max_delay_datapath_only，需核对IP边界。768c12e仿真17:10:20重试，尚模型编译；板测未执行。JTAG唯一VU37P target=210017937722A，另一个ZU5不使用。新日志1316，服务器tracked干净、工具可用、704GB可用，有NM37 HBM示例，无XDMA节点。系统目标已确认，后续执行生成包的unit/HBM仿真/实现与板测，分级记录结果。
 
 **此前OOC状态（保留证据）：**阶段4本次OOC对照收敛，保留auto_context：内部setup+0.230ns/hold+0.010ns，正式HLS/IP及通信profiling通过。实际hard区域dbaec01位置越界0、无DRC Error/Critical，但setup−0.081ns/TNS−0.273ns、4个内部endpoint失败，比auto差0.311ns，明确弃用；不把区域实验失败改写成通过。属性顺序已确认，旧soft仅固定BUFG LOC后HDOOC-4由2降0且QoR不变；最终所选自动检查点内部时序/全部负hold已复核。用户指定边界hold留完整系统；min0ns及auto的4560个input失败保持，full_ooc_gate=false。本次未新增距离感知流水，四组完整研究对照/系统/16×16/bitstream/板测未完成。正式IP仍b3e4957，计算仍130c778；日志1032已闭环5轮，本次OOC工作包结束；完整阶段4研究计划尚未全部执行。
 

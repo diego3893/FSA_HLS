@@ -32,6 +32,8 @@ report_drc -file [file join $report_dir drc.rpt]
 report_methodology -file [file join $report_dir methodology.rpt]
 report_clock_interaction -file [file join $report_dir clock_interaction.rpt]
 report_cdc -details -file [file join $report_dir cdc.rpt]
+report_bus_skew -warn_on_violation -file [file join $report_dir bus_skew.rpt]
+report_clocks -file [file join $report_dir clocks.rpt]
 report_exceptions -file [file join $report_dir exceptions.rpt]
 write_checkpoint [file join $report_dir routed.dcp]
 write_xdc [file join $report_dir effective_constraints.xdc]
@@ -41,5 +43,14 @@ set f [open [file join $report_dir timing_gate.txt] w]
 puts $f "setup=$setup\nhold=$hold\nclock=[get_property NAME $core_clock]"
 close $f
 puts "NM37_IMPLEMENTATION_REPORTS_COMPLETE setup=$setup hold=$hold"
+if {$setup<0 || $hold<0} { error "Full-system setup/hold gate failed" }
+foreach report {drc.rpt methodology.rpt} {
+    set f [open [file join $report_dir $report] r]
+    set contents [read $f]
+    close $f
+    if {[regexp {Critical Warning|\|\s*Error\s*\|} $contents]} {
+        error "Full-system critical/error gate failed: $report"
+    }
+}
 # Bitstream is deliberately a separate gate after timing/DRC/CDC review.
 close_project

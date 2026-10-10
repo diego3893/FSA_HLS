@@ -114,3 +114,7 @@ Q完整覆盖`QUERY_BLOCK_COLS×QKV_WORDS_PER_TOKEN×DMA_ELEMS_PER_WORD`，K/V�
 
 - a0c4329系统仿真16:38:54—16:52:57结束，外层严格要求两处PASS，实际exit98。Fatal为SYSTEM TIMEOUT，busy/done/state均X；进一步查原始日志明确Time=0ps/Iteration1，不是HBM运行3s后死锁。原因是TB的无尺寸3000000000延迟超出32-bit signed，XSIM把它落在0时刻。修正为显式64位延迟，保持原本3s超时合同，加入10us clock诊断。计算核与硬件不改；保留失败，不用Vivado进程exit0当作仿真PASS。
 - 系统综合已成功产出顶层DCP（16:47:24），控制器ROM实际1个/30RAMB36；独立实现继续routing，尚无完整timing/CDC结果。
+
+- 系统实现16:39:42—17:08:46 exit0，98003/98003 nets routed，setup+0.226ns/hold+0.010ns，DRC无Error/Critical；物理门槛仍未通过：methodology有TIMING-4×2/TIMING-27×2，HBM内置hbm_ip.xdc在两个HBM_REF_CLK内部pin重复定义100MHz主时钟，覆盖board_clk_100传播。CDC为13项CDC-3/2项CDC-9 Info、694项CDC-15 Warning（SmartConnect双域Safely Timed/max_delay_datapath_only），需结合所有者/原始约束审查，不以正slack直接上板。768c12e修复TB后17:10:20重试仿真，仍模型编译中；本轮分析尚未关闭。下一步只读原routed DCP验证参考时钟生成关系，原证据不覆盖。
+
+- 17:18:52—17:20:42只读routed DCP内存副本诊断：把两HBM reference改为同名divide_by1/combinational generated clock，MASTER_CLOCK=board_clk_100、PERIOD10ns，TIMING-4/27 Critical全部归零，WNS/WHS仍+0.226/+0.010ns，2.7ns uncertainty不变；有预期XDCC-1/7各2项覆盖告警。修正写入LATE core_budget.xdc并逐stack断言；不抑制告警、不更改HBM厂商源文件。正式实现另起新工程，加入bus-skew/clock报告及setup/hold/DRC/methodology失败返回非零门槛。首轮系统原证据归档docs/evidence/split_d_nm37_a0c4329_ipbf41d16/；尚未作为通过使用。

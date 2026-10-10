@@ -1,0 +1,2182 @@
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM00
+OFFSET    string  false      0x0000000000000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM00
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM01
+OFFSET    string  false      0x0000000010000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM01
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM02
+OFFSET    string  false      0x0000000020000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM02
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM03
+OFFSET    string  false      0x0000000030000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM03
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM04
+OFFSET    string  false      0x0000000040000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM04
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM05
+OFFSET    string  false      0x0000000050000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM05
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM06
+OFFSET    string  false      0x0000000060000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM06
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM07
+OFFSET    string  false      0x0000000070000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM07
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM08
+OFFSET    string  false      0x0000000080000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM08
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM09
+OFFSET    string  false      0x0000000090000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM09
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM10
+OFFSET    string  false      0x00000000A0000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM10
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM11
+OFFSET    string  false      0x00000000B0000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM11
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM12
+OFFSET    string  false      0x00000000C0000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM12
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM13
+OFFSET    string  false      0x00000000D0000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM13
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM14
+OFFSET    string  false      0x00000000E0000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM14
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM15
+OFFSET    string  false      0x00000000F0000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM15
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM16
+OFFSET    string  false      0x0000000100000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM16
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM17
+OFFSET    string  false      0x0000000110000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM17
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM18
+OFFSET    string  false      0x0000000120000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM18
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM19
+OFFSET    string  false      0x0000000130000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM19
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM20
+OFFSET    string  false      0x0000000140000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM20
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM21
+OFFSET    string  false      0x0000000150000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM21
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM22
+OFFSET    string  false      0x0000000160000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM22
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM23
+OFFSET    string  false      0x0000000170000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM23
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM24
+OFFSET    string  false      0x0000000180000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM24
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM25
+OFFSET    string  false      0x0000000190000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM25
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM26
+OFFSET    string  false      0x00000001A0000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM26
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM27
+OFFSET    string  false      0x00000001B0000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM27
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM28
+OFFSET    string  false      0x00000001C0000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM28
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM29
+OFFSET    string  false      0x00000001D0000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM29
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM30
+OFFSET    string  false      0x00000001E0000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM30
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM31
+OFFSET    string  false      0x00000001F0000000
+PATH      string  true       /fsa_0/Data_m_axi_k_gmem/SEG_hbm_0_HBM_MEM31
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM00
+OFFSET    string  false      0x0000000000000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM00
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM01
+OFFSET    string  false      0x0000000010000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM01
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM02
+OFFSET    string  false      0x0000000020000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM02
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM03
+OFFSET    string  false      0x0000000030000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM03
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM04
+OFFSET    string  false      0x0000000040000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM04
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM05
+OFFSET    string  false      0x0000000050000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM05
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM06
+OFFSET    string  false      0x0000000060000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM06
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM07
+OFFSET    string  false      0x0000000070000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM07
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM08
+OFFSET    string  false      0x0000000080000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM08
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM09
+OFFSET    string  false      0x0000000090000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM09
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM10
+OFFSET    string  false      0x00000000A0000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM10
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM11
+OFFSET    string  false      0x00000000B0000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM11
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM12
+OFFSET    string  false      0x00000000C0000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM12
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM13
+OFFSET    string  false      0x00000000D0000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM13
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM14
+OFFSET    string  false      0x00000000E0000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM14
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM15
+OFFSET    string  false      0x00000000F0000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM15
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM16
+OFFSET    string  false      0x0000000100000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM16
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM17
+OFFSET    string  false      0x0000000110000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM17
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM18
+OFFSET    string  false      0x0000000120000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM18
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM19
+OFFSET    string  false      0x0000000130000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM19
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM20
+OFFSET    string  false      0x0000000140000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM20
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM21
+OFFSET    string  false      0x0000000150000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM21
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM22
+OFFSET    string  false      0x0000000160000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM22
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM23
+OFFSET    string  false      0x0000000170000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM23
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM24
+OFFSET    string  false      0x0000000180000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM24
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM25
+OFFSET    string  false      0x0000000190000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM25
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM26
+OFFSET    string  false      0x00000001A0000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM26
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM27
+OFFSET    string  false      0x00000001B0000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM27
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM28
+OFFSET    string  false      0x00000001C0000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM28
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM29
+OFFSET    string  false      0x00000001D0000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM29
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM30
+OFFSET    string  false      0x00000001E0000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM30
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM31
+OFFSET    string  false      0x00000001F0000000
+PATH      string  true       /fsa_0/Data_m_axi_o_gmem/SEG_hbm_0_HBM_MEM31
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM00
+OFFSET    string  false      0x0000000000000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM00
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM01
+OFFSET    string  false      0x0000000010000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM01
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM02
+OFFSET    string  false      0x0000000020000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM02
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM03
+OFFSET    string  false      0x0000000030000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM03
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM04
+OFFSET    string  false      0x0000000040000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM04
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM05
+OFFSET    string  false      0x0000000050000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM05
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM06
+OFFSET    string  false      0x0000000060000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM06
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM07
+OFFSET    string  false      0x0000000070000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM07
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM08
+OFFSET    string  false      0x0000000080000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM08
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM09
+OFFSET    string  false      0x0000000090000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM09
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM10
+OFFSET    string  false      0x00000000A0000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM10
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM11
+OFFSET    string  false      0x00000000B0000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM11
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM12
+OFFSET    string  false      0x00000000C0000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM12
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM13
+OFFSET    string  false      0x00000000D0000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM13
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM14
+OFFSET    string  false      0x00000000E0000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM14
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM15
+OFFSET    string  false      0x00000000F0000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM15
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM16
+OFFSET    string  false      0x0000000100000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM16
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM17
+OFFSET    string  false      0x0000000110000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM17
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM18
+OFFSET    string  false      0x0000000120000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM18
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM19
+OFFSET    string  false      0x0000000130000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM19
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM20
+OFFSET    string  false      0x0000000140000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM20
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM21
+OFFSET    string  false      0x0000000150000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM21
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM22
+OFFSET    string  false      0x0000000160000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM22
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM23
+OFFSET    string  false      0x0000000170000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM23
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM24
+OFFSET    string  false      0x0000000180000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM24
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM25
+OFFSET    string  false      0x0000000190000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM25
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM26
+OFFSET    string  false      0x00000001A0000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM26
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM27
+OFFSET    string  false      0x00000001B0000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM27
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM28
+OFFSET    string  false      0x00000001C0000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM28
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM29
+OFFSET    string  false      0x00000001D0000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM29
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM30
+OFFSET    string  false      0x00000001E0000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM30
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM31
+OFFSET    string  false      0x00000001F0000000
+PATH      string  true       /fsa_0/Data_m_axi_q_gmem/SEG_hbm_0_HBM_MEM31
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM00
+OFFSET    string  false      0x0000000000000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM00
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM01
+OFFSET    string  false      0x0000000010000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM01
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM02
+OFFSET    string  false      0x0000000020000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM02
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM03
+OFFSET    string  false      0x0000000030000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM03
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM04
+OFFSET    string  false      0x0000000040000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM04
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM05
+OFFSET    string  false      0x0000000050000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM05
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM06
+OFFSET    string  false      0x0000000060000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM06
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM07
+OFFSET    string  false      0x0000000070000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM07
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM08
+OFFSET    string  false      0x0000000080000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM08
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM09
+OFFSET    string  false      0x0000000090000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM09
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM10
+OFFSET    string  false      0x00000000A0000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM10
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM11
+OFFSET    string  false      0x00000000B0000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM11
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM12
+OFFSET    string  false      0x00000000C0000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM12
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM13
+OFFSET    string  false      0x00000000D0000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM13
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM14
+OFFSET    string  false      0x00000000E0000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM14
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM15
+OFFSET    string  false      0x00000000F0000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM15
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM16
+OFFSET    string  false      0x0000000100000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM16
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM17
+OFFSET    string  false      0x0000000110000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM17
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM18
+OFFSET    string  false      0x0000000120000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM18
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM19
+OFFSET    string  false      0x0000000130000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM19
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM20
+OFFSET    string  false      0x0000000140000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM20
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM21
+OFFSET    string  false      0x0000000150000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM21
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM22
+OFFSET    string  false      0x0000000160000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM22
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM23
+OFFSET    string  false      0x0000000170000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM23
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM24
+OFFSET    string  false      0x0000000180000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM24
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM25
+OFFSET    string  false      0x0000000190000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM25
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM26
+OFFSET    string  false      0x00000001A0000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM26
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM27
+OFFSET    string  false      0x00000001B0000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM27
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM28
+OFFSET    string  false      0x00000001C0000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM28
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM29
+OFFSET    string  false      0x00000001D0000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM29
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM30
+OFFSET    string  false      0x00000001E0000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM30
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM31
+OFFSET    string  false      0x00000001F0000000
+PATH      string  true       /fsa_0/Data_m_axi_v_gmem/SEG_hbm_0_HBM_MEM31
+RANGE     string  false      0x0000000010000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       Reg
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x00010000
+USAGE     string  true       register
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM00
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM01
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM02
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM03
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM04
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM05
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM06
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM07
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM08
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM09
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM10
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM11
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM12
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM13
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM14
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM15
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM16
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM17
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM18
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM19
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM20
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM21
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM22
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM23
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM24
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM25
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM26
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM27
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM28
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM29
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM30
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  true       
+MEMTYPE   string  true       
+NAME      string  true       HBM_MEM31
+OFFSET    string  true       
+PATH      string  true       
+RANGE     string  true       0x10000000
+USAGE     string  true       memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM00
+OFFSET    string  false      0x00000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM00
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM01
+OFFSET    string  false      0x10000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM01
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM02
+OFFSET    string  false      0x20000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM02
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM03
+OFFSET    string  false      0x30000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM03
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM04
+OFFSET    string  false      0x40000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM04
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM05
+OFFSET    string  false      0x50000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM05
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM06
+OFFSET    string  false      0x60000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM06
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM07
+OFFSET    string  false      0x70000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM07
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM08
+OFFSET    string  false      0x80000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM08
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM09
+OFFSET    string  false      0x90000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM09
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM10
+OFFSET    string  false      0xA0000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM10
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM11
+OFFSET    string  false      0xB0000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM11
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM12
+OFFSET    string  false      0xC0000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM12
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM13
+OFFSET    string  false      0xD0000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM13
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM14
+OFFSET    string  false      0xE0000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM14
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_hbm_0_HBM_MEM15
+OFFSET    string  false      0xF0000000
+PATH      string  true       /selftest_0/M_AXI/SEG_hbm_0_HBM_MEM15
+RANGE     string  false      0x10000000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      memory
+Property  Type    Read-only  Value
+ACCESS    string  false      read-write
+CLASS     string  true       bd_addr_seg
+EXEIMG    string  false      
+LOCKTYPE  string  false      none
+MEMTYPE   string  false      both
+NAME      string  false      SEG_fsa_0_Reg
+OFFSET    string  false      0x00000000
+PATH      string  true       /selftest_0/M_AXIL/SEG_fsa_0_Reg
+RANGE     string  false      0x00010000
+REMAPPED  string  true       0
+SECURE    bool    false      0
+USAGE     string  false      register
