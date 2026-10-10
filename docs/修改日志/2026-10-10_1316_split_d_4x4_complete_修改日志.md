@@ -118,3 +118,7 @@ Q完整覆盖`QUERY_BLOCK_COLS×QKV_WORDS_PER_TOKEN×DMA_ELEMS_PER_WORD`，K/V�
 - 系统实现16:39:42—17:08:46 exit0，98003/98003 nets routed，setup+0.226ns/hold+0.010ns，DRC无Error/Critical；物理门槛仍未通过：methodology有TIMING-4×2/TIMING-27×2，HBM内置hbm_ip.xdc在两个HBM_REF_CLK内部pin重复定义100MHz主时钟，覆盖board_clk_100传播。CDC为13项CDC-3/2项CDC-9 Info、694项CDC-15 Warning（SmartConnect双域Safely Timed/max_delay_datapath_only），需结合所有者/原始约束审查，不以正slack直接上板。768c12e修复TB后17:10:20重试仿真，仍模型编译中；本轮分析尚未关闭。下一步只读原routed DCP验证参考时钟生成关系，原证据不覆盖。
 
 - 17:18:52—17:20:42只读routed DCP内存副本诊断：把两HBM reference改为同名divide_by1/combinational generated clock，MASTER_CLOCK=board_clk_100、PERIOD10ns，TIMING-4/27 Critical全部归零，WNS/WHS仍+0.226/+0.010ns，2.7ns uncertainty不变；有预期XDCC-1/7各2项覆盖告警。修正写入LATE core_budget.xdc并逐stack断言；不抑制告警、不更改HBM厂商源文件。正式实现另起新工程，加入bus-skew/clock报告及setup/hold/DRC/methodology失败返回非零门槛。首轮系统原证据归档docs/evidence/split_d_nm37_a0c4329_ipbf41d16/；尚未作为通过使用。
+
+- 7892c75于17:33:12开始新工程/实现；18:03读到Designutils20-1307 Critical：XDC不支持foreach/if。此前core_budget中的if断言也不应放XDC，不能用普通Tcl内存诊断成功代替XDC读取器验收。修正为显式两条generated_clock＋uncertainty纯约束，断言移scripts/check_clocks.tcl在synth/route/bitstream打开设计后执行。计算硬件/IP不变，保留789失败。系统仿真仍未取得事务：离线WDB证明17:37时164395ns、17:57时380805ns，持续推进约11us/min；MEM文件与IP SHA一致，XSIM CPU活跃，不能归因缺MEM或零时刻死循环。
+
+- 7892c75实现17:34:57—18:04:17最终exit1，timing仍+0.226/+0.010，但methodology4条Critical仍在，失败门槛正确拦截；XDC foreach未生效得到直接证据。纯约束修复将起新正式工程；新增TB每50us打印两stack apb_complete/控制器reset，增加观察能力且不改综合硬件。当前旧仿真不重启。

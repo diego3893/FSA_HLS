@@ -1,5 +1,6 @@
 # Full physical integration; constraints apply to real clocks/internal AXI.
 if {[llength $argv] != 1} { error "Expected project path" }
+source [file join [file dirname [info script]] check_clocks.tcl]
 open_project [file normalize [lindex $argv 0]]
 set report_dir [file normalize [file join [get_property DIRECTORY [current_project]] .. reports]]
 file mkdir $report_dir
@@ -8,6 +9,7 @@ launch_runs synth_1 -jobs 8
 wait_on_run synth_1
 if {[get_property PROGRESS [get_runs synth_1]] ne "100%"} { error "Synthesis failed" }
 open_run synth_1
+check_nm37_clocks
 set fsa_clock_pin [get_pins -hier -filter {NAME =~ */fsa_0/ap_clk}]
 if {[llength $fsa_clock_pin]!=1} { error "Cannot identify unique FSA clock pin: $fsa_clock_pin" }
 set core_clock [get_clocks -of_objects $fsa_clock_pin]
@@ -21,6 +23,7 @@ launch_runs impl_1 -to_step route_design -jobs 8
 wait_on_run impl_1
 if {[get_property PROGRESS [get_runs impl_1]] ne "100%"} { error "Implementation failed" }
 open_run impl_1
+check_nm37_clocks
 set core_clock [get_clocks -of_objects [get_pins -hier -filter {NAME =~ */fsa_0/ap_clk}]]
 if {[llength $core_clock]!=1 || abs([get_property PERIOD $core_clock]-10.0)>0.001} { error "Implementation core clock differs" }
 report_timing_summary -delay_type min_max -check_timing_verbose -report_unconstrained -max_paths 50 -file [file join $report_dir timing_summary.rpt]

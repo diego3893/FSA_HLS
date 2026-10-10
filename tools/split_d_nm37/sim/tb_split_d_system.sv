@@ -57,6 +57,15 @@ module tb_split_d_system;
         $display("SYSTEM CLOCK DIAGNOSTIC time=%t ctrl_clk=%b locked=%b init_done=%b reset_n=%b",$time,ctrl_clk,clock_locked,init_done,reset_n);
     end
     initial begin
+        forever begin
+            #50000;
+            $display("SYSTEM HEARTBEAT time=%t locked=%b apb0=%b apb1=%b reset100=%b state=%0d pc=%0d cases=%0d",
+                $time,clock_locked,dut.split_d_system_i.hbm_0.apb_complete_0,
+                dut.split_d_system_i.hbm_0.apb_complete_1,
+                dut.split_d_system_i.selftest_0.reset_n,state,pc,cases);
+        end
+    end
+    initial begin
         #(64'd3000000000);
         $fatal(1,"SYSTEM TIMEOUT busy=%b done=%b cases=%0d pc=%0d state=%0d",busy,done,cases,pc,state);
     end

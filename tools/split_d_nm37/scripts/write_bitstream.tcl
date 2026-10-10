@@ -1,9 +1,11 @@
 # Run only after the system simulation and routed CDC/bus-skew review pass.
 if {[llength $argv]!=2} { error "Expected routed checkpoint and new output directory" }
+source [file join [file dirname [info script]] check_clocks.tcl]
 set checkpoint [file normalize [lindex $argv 0]]
 set output_dir [file normalize [lindex $argv 1]]
 if {[file exists $output_dir]} { error "Output exists: $output_dir" }
 open_checkpoint $checkpoint
+check_nm37_clocks
 if {[get_property PART [current_design]] ne "xcvu37p_CIV-fsvh2892-2-e"} {
     error "Unexpected board device"
 }
