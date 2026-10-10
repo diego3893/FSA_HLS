@@ -1,0 +1,305 @@
+{
+  "tested_IP_commit": "b3e4957",
+  "implementation_script_commit": "b3776dc",
+  "counts": {
+    "block0_k_tile_RAMB18E2": 8,
+    "block0_v_tile_RAMB18E2": 8,
+    "block0_q_tile_RAMB18E2": 4,
+    "block1_k_tile_RAMB18E2": 8,
+    "block1_v_tile_RAMB18E2": 8,
+    "block1_q_tile_RAMB18E2": 4,
+    "k_gmem_m_axi_U_RAMB36E2": 2,
+    "o_gmem_m_axi_U_RAMB36E2": 1,
+    "q_gmem_m_axi_U_RAMB36E2": 2,
+    "v_gmem_m_axi_U_RAMB36E2": 2
+  },
+  "primitive_rows": [
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/k_tile_10_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X6Y80",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/k_tile_11_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X7Y76",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/k_tile_12_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X5Y78",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/k_tile_13_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X6Y76",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/k_tile_14_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X5Y79",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/k_tile_8_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X6Y78",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/k_tile_9_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X7Y77",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/k_tile_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X5Y76",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/v_tile_10_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X7Y79",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/v_tile_11_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X7Y80",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/v_tile_12_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X7Y78",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/v_tile_13_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X6Y81",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/v_tile_14_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X6Y79",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/v_tile_8_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X6Y77",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/v_tile_9_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X7Y81",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/v_tile_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X5Y77",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/q_tile_4_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X6Y73",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/q_tile_5_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X6Y70",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/q_tile_6_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X6Y71",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/q_tile_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X6Y72",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/k_tile_1_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y67",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/k_tile_2_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y70",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/k_tile_3_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y71",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/k_tile_4_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y68",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/k_tile_5_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y66",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/k_tile_6_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y69",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/k_tile_7_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X7Y69",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/k_tile_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X7Y68",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/v_tile_1_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y64",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/v_tile_2_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X7Y70",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/v_tile_3_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y73",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/v_tile_4_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X7Y66",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/v_tile_5_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y65",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/v_tile_6_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y72",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/v_tile_7_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y74",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/grp_runQueryBlock_1_Outline_VITIS_LOOP_115_5_fu_170/v_tile_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X7Y67",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/q_tile_1_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y58",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/q_tile_2_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y56",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/q_tile_3_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y59",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_1_U0/q_tile_U/ram_reg_bram_0",
+      "ref": "RAMB18E2",
+      "site": "RAMB18_X8Y57",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "k_gmem_m_axi_U/load_unit_0/buff_rdata/U_fifo_mem/mem_reg_bram_0",
+      "ref": "RAMB36E2",
+      "site": "RAMB36_X7Y42",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "k_gmem_m_axi_U/load_unit_0/buff_rdata/U_fifo_mem/mem_reg_bram_1",
+      "ref": "RAMB36E2",
+      "site": "RAMB36_X7Y41",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "o_gmem_m_axi_U/store_unit_0/buff_wdata/U_fifo_mem/mem_reg",
+      "ref": "RAMB36E2",
+      "site": "RAMB36_X7Y25",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "q_gmem_m_axi_U/load_unit_0/buff_rdata/U_fifo_mem/mem_reg_bram_0",
+      "ref": "RAMB36E2",
+      "site": "RAMB36_X7Y32",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "q_gmem_m_axi_U/load_unit_0/buff_rdata/U_fifo_mem/mem_reg_bram_1",
+      "ref": "RAMB36E2",
+      "site": "RAMB36_X7Y31",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "v_gmem_m_axi_U/load_unit_0/buff_rdata/U_fifo_mem/mem_reg_bram_0",
+      "ref": "RAMB36E2",
+      "site": "RAMB36_X7Y44",
+      "slr": "SLR0"
+    },
+    {
+      "cell": "v_gmem_m_axi_U/load_unit_0/buff_rdata/U_fifo_mem/mem_reg_bram_1",
+      "ref": "RAMB36E2",
+      "site": "RAMB36_X7Y43",
+      "slr": "SLR0"
+    }
+  ],
+  "HLS_BRAM_18K_estimate": 8,
+  "Vivado_RAMB18": 40,
+  "Vivado_RAMB36": 7,
+  "tile_payload_bits": 5120,
+  "interpretation": "40 RAMB18 primitives map Q/K/V tile banks; 7 RAMB36 map AXI buffers. HLS estimate is not physical BRAM count."
+}

@@ -26,11 +26,13 @@ vivado -mode batch -source tools/split_d_ooc/run.tcl -tclargs \
 
 读取自动布局的实际primitive位置、关键路径和资源分布后，生成并审查同目录下`regions.tcl`。通过`regions`模式从同一个auto/synthesized.dcp开始，保留相同约束与实现directive；所有区域必须解释其实际资源来源。不预先强制两个worker跨SLR。区域实现目录与auto同级，例如`build/split_d_ooc_b3e4957/regions`。
 
+`make_regions.py <primitive_locations.tsv> <regions.tcl> <plan.json>`从完整worker实例的实际SLICE/DSP/RAMB占用生成边界并记录SHA。本次两个hard区域的边界可以重叠，IS_SOFT=false、CONTAIN_ROUTING=false；它们约束模块位置，不代表互斥保留资源或限制所有布线。
+
 只有真实长连接成为瓶颈时才修改通信流水，并重新执行正式HLS全流程及新的OOC对照。若瓶颈在块内算术，记录该规模下通信插级缺乏依据，不为制造收益而插级。
 
 ## 4 报告复核
 
-`inspect.tcl <routed.dcp> <new diagnostic dir>`只读检查内部setup/hold、全部负hold endpoint及时钟源、blackbox，不改变约束或网表。可把诊断文件与对应实现报告合并在本地归档目录，再执行：
+`inspect.tcl <routed.dcp> <new diagnostic dir>`只读检查内部setup/hold、全部负hold endpoint及时钟源、blackbox，不改变约束或网表。诊断目录放在实现目录下的diagnostic（重试为diagnostic_retry），完整归档并解压后执行：
 
 ```bash
 python tools/split_d_ooc/analyze.py <report directory> --output <summary.json>

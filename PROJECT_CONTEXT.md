@@ -17,9 +17,11 @@
 - **基线及新证据已归档**：旧`9c49789`20项未改输入/O/周期在新官方流程逐项一致；新24个有效事务全部QKV/O、非法canary和26事务周期存于`docs/evidence/split_d_25d6dda_4x4/`。完整C/RTL O逐字节一致；阶段3已将全部24项期望内嵌，分块130c778全部24项及完整C/RTL输出SHA与其一致。
 - **阶段3已完成（2026-10-10）**：三轮迭代在130c778f5878b34ed998c6be6adcf3e64579c0ea收敛。官方数学24/24、严格24/24、26/26 CoSim；两个独立4×2 worker，总PE16/Acc4/恢复除法循环4（倒数wrapper内begin/normalize共享）；7.300ns、DSP40/FF45091/LUT129592/BRAM8、II5/5/1/1。总80242cycles，比25d6dda少14.78%；FF增41.25%、LUT增3.57%。原始DMA字广播/worker内解包修复前两轮RTL数值失败；具体缓存/调度根因未最小化证明。此为阶段3结束状态；随后用户“继续4”授权阶段4，见下条。死代码未清理。
 
-- **阶段4进行中（2026-10-10）**：阶段4正式b3e4957 HLS/IP通过，24/24数学/严格、26事务80242cycles，资源/II保持阶段3。官方profiling证明两条QK循环177次活动窗口完全重叠（14160cycles），两个worker窗口交集68859cycles。初次auto缺HD.CLK_SRC，setup+0.371ns/hold−0.080ns、771失败endpoint；默认hold_fix后721失败，全部原始失败起于顶层输入、内部hold+0.019ns，不能物理验收。b3776dc正在运行补齐BUFGCE_X0Y48时钟假设后的auto_context，随后取其实际位置做regions对照。日志1032已闭环2轮、第3轮进行中。完整集成后续，阶段5/16×16/bitstream/板测未进入。
+- **阶段4进行中（2026-10-10）**：b3e4957正式HLS/IP通过，24/24数学/严格、26事务80242cycles，资源/II保持130c778。官方profiling已证明QK177次窗口完全重叠（14160cycles）。补齐BUFGCE_X0Y48模型的auto_context（b3776dc）已完成：setup+0.230ns、内部hold+0.010ns，接口hold−1.582ns/THS−6287.366ns，4560失败endpoint全部起于input（reset3771）；未物理验收。当前最差setup为分发icmp→V AXI读缓冲BRAM使能，6.477ns（route5.937）。3c9a58c的regions对照及只读diagnostic_retry运行中。日志1032已闭环3轮、第4轮进行中。用户边界合同选择待回复，期间min0ns保持。完整集成后续，不进入16×16/bitstream/板测。
 
 ## 2 硬约束
+
+物理存储新证据：b3e4957正式IP的auto_context实际Q/K/V tile共40个RAMB18（每块Q4/K8/V8），AXI缓冲7个RAMB36。HLS的BRAM18K8仅为估算，不能继续称“物理无tile BRAM”；stage3报告已纠正。tile载荷5120bits，导出RAM含两个写端口，后续先审查初始化与装载是否互斥，再考虑LUTRAM/寄存器绑定；当前不改变已验收计算代码。
 
 - 不修改`FSA-main`；现有生产顶层`fsa_stream`的接口和行为保持不变。
 - **Git规则已修订（2026-10-09）**：AGENTS.md现为“默认不进行git操作；用户明确授权后，在撤回前默认进行git操作”。先前记录的用户Git授权不再与该文件矛盾；Git授权不包含新的构建或实现授权。2026-10-10用户已明确授权同步本次测试补强并运行一轮完整4×4流程。
@@ -151,16 +153,16 @@ Q/K/V AXI
 - 当前分阶段方案：`docs/Split-D修正与TAPA启发的分阶段修改验收方案_20261009.md`；旧20260930计划与DeepSeek交接用于历史参考，冲突处以新方案的核查结果为准。
 - Split-D历史交接：`docs/split_d_implementation_plan_20260923/PROJECT_CONTEXT.md`（停止维护，不作为当前状态来源）
 - Split-D迁移交接：`docs/Split-D_FSA_DeepSeek迁移交接_20260929.md`（当前任务的第2优先级来源）
-- 服务器`hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1`：现为b3e4957正式HLS/IP成功生成物，10:45:01—10:59:11，本地完整报告/TV/IP归档`build/stage4_b3e4957/ip_snapshot.tar.gz`，精简证据`docs/evidence/split_d_b3e4957_4x4_stage4/`。130c778阶段3旧成功完整归档仍在`build/stage3_130c778/full_snapshot.tar.gz`。OOC探索auto/auto_hold_retry已结束，auto_context进行中；目录均在服务器`build/split_d_ooc_b3e4957/`，日志`/tmp/codex_split_d_b3e4957_ooc_<mode>_20261010.log`。
+- 服务器`hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1`：现为b3e4957正式HLS/IP成功生成物，10:45:01—10:59:11，本地完整报告/TV/IP归档`build/stage4_b3e4957/ip_snapshot.tar.gz`，精简证据`docs/evidence/split_d_b3e4957_4x4_stage4/`。130c778阶段3旧成功完整归档仍在`build/stage3_130c778/full_snapshot.tar.gz`。OOC探索auto/auto_hold_retry和正式时钟模型auto_context已结束，regions/diagnostic_retry进行中；目录均在服务器`build/split_d_ooc_b3e4957/`，日志`/tmp/codex_split_d_b3e4957_ooc_<mode>_20261010.log`。
 - 本地`build/fsa_stream_split_d_build/solution1/`是**拆分前**的旧生成物（最新`csynth.rpt`为2026-09-28 16:51，仍含已删除的`peArrayTask`/`accumulatorTask`/`KPN`模块），只能作为历史基线，**不得**用于描述当前源码。
 
 默认参数为`FSA_SPLIT_D_PE_DIM=4`、`FSA_SPLIT_D_HEAD_DIM=16`；目标参数为`16/128`。
 
 ## 8 下一步
 
-1. 阶段1/2/3已完成。阶段4读完补齐时钟模型的auto_context结果，再从实际primitive范围做同条件regions对照，明确接口/内部setup/hold门槛；初次auto仅探索。
+1. 阶段1/2/3已完成。读取regions同模型对照及诊断，分别验收内部与接口时序；用户未改变合同前，min0ns接口hold保持失败状态。通信插级必须由实际瓶颈及反馈/背压审查决定。
 2. 保留每块唯一PE/Acc共享层级和真实distance8反馈。源码状态复用不等于物理阶段寄存器完全复用。低风险死代码清理需独立范围和新4×4验证；stageAccumulatorResult仍被调用。
-3. 阶段4不再仅按HLS的10724FF/74级广播估算决定优化优先级。实际分发器综合918FF，初次最差setup在块内FP32减法（19级、6.910ns、logic4.078/route2.832），未发现SLR跨越或高拥塞。通信插级由新模型实际路径决定，改HLS须重验全流程。
+3. 实际分发器综合918FF；新模型最差setup为分发icmp→V AXI读缓冲BRAM使能（6.477ns、91.7%route），setup+0.230ns已满足100MHz。纯数据广播未证明是首要瓶颈；不按HLS10724FF盲目插级。当前是HLS后物理反馈，不是自动物理感知HLS调度。
 4. 当前物理验证已授权，采用OOC载体并声明边界预算。比较自动布局、粗粒度区域约束，通信插级由实测路径决定；核对AXI、反馈、背压、setup/hold、DRC及端到端时间，不外推板测。
 5. 16×16仍暂缓。恢复时先检查当前单元II配置、15/16/17/32/33边界和物理分块，详见新方案阶段5。H=128的QK是128次逐feature求值，旧64拍估算漏算lane，作废。
 
@@ -168,7 +170,7 @@ Q/K/V AXI
 
 ### 已完成
 
-- 阶段4正式HLS/IP和实际QK并行已补证；初次OOC自动布局及hold修复已归档，hold失败，补齐时钟源模型后对照进行中。报告`docs/综合报告/Split-D阶段4物理对照_20261010.md`，证据`docs/evidence/split_d_b3e4957_4x4_stage4/`。
+- 阶段4正式HLS/IP、实际QK并行、补齐时钟模型的auto_context已补证；内部时序通过、接口hold失败，regions对照进行中。详见阶段4报告及1032日志。
 
 - 阶段3在130c778官方全流程通过：24/24数学/严格、26/26事务、相同C/RTL O SHA；两个worker独立启动/调度结构，总16PE/4Acc/4恢复除法循环，7.300ns/DSP40/II5/5/1/1。FF45091/LUT129592/BRAM8，总80242cycles；容量及额外寄存器开销已记录。用户未设轮数上限，三轮收敛后停止。
 
@@ -223,7 +225,7 @@ Q/K/V AXI
 - 时钟：10.0ns，uncertainty 2.7ns；不得放宽。
 - Split-D服务器命令：`./run_hls.sh fsa_stream_split_d`。
 - 生产基线命令：`./run_hls.sh fsa_stream`。
-- 分支`fsa_split_D`；2026-10-10被测commit`25d6dda678104d8a856292b83c1c48607a1148fd`已推GitHub并由服务器fast-forward拉取，运行前及取证时HEAD一致。阶段3被测130c778f5878b34ed998c6be6adcf3e64579c0ea已推送/同步并完整验收；远端成功生成物已更新为130c778，70项Git blob/远端文件SHA相同。后续仅文档提交不算HLS被测版本。
+- 分支`fsa_split_D`；HLS被测25d6dda、130c778均已正式验收，最新正式生成物为b3e4957 HLS/IP；计算代码仍130c778。OOC auto_context被测脚本b3776dc，regions脚本3c9a58c；文档提交不算重新HLS验收。
 - 旧`source_manifest.json`和`delivery_validation.json`是历史快照，不代表当前源码。
 
 ## 11 交接摘要
@@ -232,7 +234,7 @@ Q/K/V AXI
 
 第二次核查已修订方案：保留D/H和全局索引、K/V读取量及现有量化链；补倒数通路、位模式基线、广播/汇聚等待关系、IP导出与OOC/全系统时序等级。范围以方案第13节为准，不声称所有独立模块已逐行审计。失败构建读取对应失败归档；当前成功目录为130c778，不得误引用旧HEAD。
 
-**2026-10-10最新状态（覆盖以上）：**阶段4正式b3e4957 HLS/IP通过，24/24数学/严格、26事务80242cycles，资源/II保持阶段3。官方profiling证明两条QK循环177次活动窗口完全重叠（14160cycles），两个worker窗口交集68859cycles。初次auto缺HD.CLK_SRC，setup+0.371ns/hold−0.080ns、771失败endpoint；默认hold_fix后721失败，全部原始失败起于顶层输入、内部hold+0.019ns，不能物理验收。b3776dc正在运行补齐BUFGCE_X0Y48时钟假设后的auto_context，随后取其实际位置做regions对照。日志1032已闭环2轮、第3轮进行中。完整集成后续，阶段5/16×16/bitstream/板测未进入。
+**2026-10-10最新状态（覆盖以上）：**b3e4957正式HLS/IP通过，24/24数学/严格、26事务80242cycles，资源/II保持130c778。官方profiling已证明QK177次窗口完全重叠（14160cycles）。补齐BUFGCE_X0Y48模型的auto_context（b3776dc）已完成：setup+0.230ns、内部hold+0.010ns，接口hold−1.582ns/THS−6287.366ns，4560失败endpoint全部起于input（reset3771）；未物理验收。当前最差setup为分发icmp→V AXI读缓冲BRAM使能，6.477ns（route5.937）。3c9a58c的regions对照及只读diagnostic_retry运行中。日志1032已闭环3轮、第4轮进行中。用户边界合同选择待回复，期间min0ns保持。完整集成后续，不进入16×16/bitstream/板测。
 
 ## 11.1 本地git推送的环境坑（2026-09-30，已修复）
 

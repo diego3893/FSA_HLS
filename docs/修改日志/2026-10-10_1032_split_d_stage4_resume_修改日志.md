@@ -90,3 +90,6 @@
 
 - 继承第3轮4560接口hold失败、内部setup/hold通过。主要假设：限制两个query worker在其真实资源范围是否改善控制/数据路由；同一正式IP、综合DCP、BUFGCE_X0Y48、100MHz/2.7ns及min0ns预算，唯一实现变化为两个Pblock。
 - 本地生成区域后核对所有位置均SLR0、两处实例各匹配一个；运行regions，不改变HLS或事务。只读诊断属性修复作为第3轮命令重试同批同步，不改变布局算法。用户边界选择未收到前，不放宽hold门槛。
+- 3c9a58ced49a3625b1a5e3cecdaa22ce11de624b已推送/服务器ff-only核对，regions在12:12:02启动，当前路由中。只读auto_context diagnostic_retry在12:12:46—12:14:11 exit0，HD.CLK_SRC/100MHz、blackbox0及实际XDC确认，4560负hold全部input、内部+0.010/+0.230ns确认。诊断归档初次tar glob相对于Shell仓库目录而非tar的-C /tmp展开，exit2；改成明确日志名归档成功，不重跑实现。
+- 本地analyze.py增加模型/资源/完整gate及关键路径抽取，原始报告SHA与diag子目录均记录。模型gate为true，完整OOC gate为false；没有把内部通过伪装成边界hold通过。
+- 新发现物理存储与HLS估算不一致：两个worker各Q4/K8/V8个RAMB18，共40；AXI Q/K/V各2、O1个RAMB36，共7。tile逻辑载荷5120bits。逐primitive在bram_mapping.json，stage3“无tile BRAM”更正为仅HLS估算。RTL为auto RAM、两个写端口，后续须先证明初始化/装载端口活动再评估LUTRAM，当前不盲目改综合输入。

@@ -33,16 +33,80 @@
     "Warning": 141,
     "Advisory": 10
   },
+  "resources": {
+    "LUT": 49368,
+    "logic_LUT": 47478,
+    "LUTRAM": 320,
+    "SRL": 1570,
+    "FF": 26415,
+    "RAMB36": 7,
+    "RAMB18": 40,
+    "URAM": 0,
+    "DSP": 40
+  },
+  "DSP_gate": true,
+  "worst_setup_path": {
+    "source": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/distributeQueryTile_U0/grp_distributeQueryTile_Pipeline_VITIS_LOOP_496_3_VITIS_LOOP_501_4_VITIS_LOOP_502_5_fu_220/icmp_ln496_reg_673_reg[0]/C",
+    "destination": "v_gmem_m_axi_U/load_unit_0/buff_rdata/U_fifo_mem/mem_reg_bram_0/ENBWREN",
+    "data_ns": 6.477,
+    "logic_ns": 0.54,
+    "route_ns": 5.937
+  },
+  "worst_hold_path": {
+    "source": "ap_rst_n",
+    "destination": "grp_run_fu_161/grp_runController_fu_106/grp_runQueryTile_fu_142/runQueryBlock_0_U0/grp_runQueryBlock_0_Outline_VITIS_LOOP_115_5_fu_166/grp_runPeArray_fu_642/ap_enable_reg_pp0_iter1_reg/R",
+    "data_ns": 0.017,
+    "logic_ns": 0.0,
+    "route_ns": 0.017
+  },
+  "diagnostic_source": "diagnostic_retry",
+  "context": {
+    "clock_source": "BUFGCE_X0Y48",
+    "clock_period": "10.000",
+    "black_boxes": "0"
+  },
+  "internal_hold_slack": 0.01,
+  "internal_setup_slack": 0.23,
+  "hold_violator_count": 4560,
+  "hold_startpoint_groups": {
+    "ap_rst_n": 3771,
+    "m_axi_v_gmem_RDATA": 128,
+    "m_axi_k_gmem_RDATA": 128,
+    "m_axi_k_gmem_RLAST": 2,
+    "m_axi_v_gmem_RLAST": 2,
+    "s_axi_control_WDATA": 279,
+    "m_axi_k_gmem_ARREADY": 7,
+    "s_axi_control_AWADDR": 5,
+    "m_axi_q_gmem_RDATA": 128,
+    "m_axi_q_gmem_ARREADY": 3,
+    "m_axi_q_gmem_RLAST": 2,
+    "s_axi_control_ARADDR": 20,
+    "m_axi_v_gmem_ARREADY": 7,
+    "m_axi_k_gmem_RVALID": 17,
+    "m_axi_o_gmem_BVALID": 5,
+    "s_axi_control_WSTRB": 19,
+    "s_axi_control_RREADY": 2,
+    "m_axi_v_gmem_RVALID": 12,
+    "s_axi_control_BREADY": 1,
+    "m_axi_o_gmem_AWREADY": 10,
+    "m_axi_q_gmem_RVALID": 12
+  },
   "timing_and_route_gate": false,
   "drc_error_gate": true,
+  "ooc_model_gate": true,
+  "full_ooc_gate": false,
   "sha256": {
     "clockInfo.txt": "a80b238b1cc9e54ece8be54ed0933f8c6dcf78a73637e89c998c77cb4c922c1b",
     "congestion.rpt": "3d584c52007e803f64ee8812cca67812144b3e344119c55e373459ebbf1becb5",
+    "context_properties.txt": "aad6cb9ad33bb33ca7ee6372f1182b95906223a6969dfb0cc181fbb2ab05541e",
     "drc.rpt": "5a4455809231f67f377e44a3e76e39c1c3dccf37714253d71015bbd80907c169",
     "effective_constraints.xdc": "2afbb5bbe1c2c64a7a9236c32ceb5b03362c5c4ec4faece2b73764c6a809035b",
     "exceptions.rpt": "ad19bba0a44a74d703eb8141feaeafe4d31b732e3d8cf09e63734195d9496b21",
     "fanout.rpt": "029ae67ad35fb9cb056a474014d120e30718a13102fd1356c96c72d12cc55719",
     "hold_paths.rpt": "337da501f76102de29c0e7ac51eec9bece3f03d4e12a00d3a6421f3f09c73ecf",
+    "hold_violators.tsv": "5d099c379af839b65e2fd019414b763e5846756459b4965feb4a9cc065c2ee75",
+    "internal_hold.rpt": "6a68959086647feaf9e9cc38a0bdf6196d984a8335dc95fdcb78fd97692fa937",
+    "internal_setup.rpt": "1d3eafa8d3191e574ea7dd3ed84e7d8aaa6bb47c12a31db52be29f302ccba395",
     "iter_3_CongestedCLBsAndNets.txt": "863ca80f7799514fe5d8d058719125d45a69123fe8a1b1b777f01686c931a5e1",
     "methodology.rpt": "8a132bb9068d908f5c58922c682666d0fab8a5b30a75fcbc181cb923bb01f9de",
     "physical_metrics.txt": "7392654d724ca541a9c3cadbc38736c02b235c18e7627a95db1a8bb2f723768c",
@@ -51,6 +115,11 @@
     "setup_paths.rpt": "d7f61dcb3f9de57bbf3d3874b1873b68f3d3c4c301d0b907e7412a762da57722",
     "tight_setup_hold_pins.txt": "d71026f7d8d81f130996d4aacf3ccc3a364b912d0a369c86f810b2dcea52bab4",
     "timing_summary.rpt": "3861c787e1f7bd5f57e903fbe15145b5fb093cf45f041e7c7695a8149ffa7e06",
-    "utilization.rpt": "fefe9fc4403d523ecf7718795ee503621fdf4b36b74f6c172577f203817ca484"
+    "utilization.rpt": "fefe9fc4403d523ecf7718795ee503621fdf4b36b74f6c172577f203817ca484",
+    "diagnostic_retry/context_properties.txt": "aad6cb9ad33bb33ca7ee6372f1182b95906223a6969dfb0cc181fbb2ab05541e",
+    "diagnostic_retry/diagnostic_constraints.xdc": "92c3fba96b970861780c81ecb3eae87eb86416e64fba785a56e8ddd312ba1b43",
+    "diagnostic_retry/hold_violators.tsv": "5d099c379af839b65e2fd019414b763e5846756459b4965feb4a9cc065c2ee75",
+    "diagnostic_retry/internal_hold.rpt": "6a68959086647feaf9e9cc38a0bdf6196d984a8335dc95fdcb78fd97692fa937",
+    "diagnostic_retry/internal_setup.rpt": "1d3eafa8d3191e574ea7dd3ed84e7d8aaa6bb47c12a31db52be29f302ccba395"
   }
 }
