@@ -142,7 +142,7 @@ Q/K/V AXI
 
 ## 7 当前工作集
 
-- 当前工作集：`tools/split_d_nm37/`、20261011_1952日志、上板验收报告及`docs/evidence/split_d_nm37_dfbf82e_board/`。硬件dfbf82e、IP bf41d16、板测脚本fb06b16；完整52笔板测及新启动ILA/16MC状态已验收，物理/bit/LTX/下载证据已归档。用户AGENTS.md及无关未跟踪文件保留。
+- 当前工作集：`tools/split_d_nm37/`、20261011_1952日志、上板验收报告及`docs/evidence/split_d_nm37_dfbf82e_board/`。硬件dfbf82e、IP bf41d16、板测脚本fb06b16；完整52笔板测及新启动ILA/16MC状态已验收，物理/bit/LTX/下载证据已归档。自包含包build/resume_nm37/split_d_nm37_delivery_c59cbf4.tar.gz（含bit/正式IP/证据）已下载，340文件SHA校验通过；清单delivery_summary.json。用户AGENTS.md及无关未跟踪文件保留。
 
 - Split-D配置与类型：`include/fsa/stream/split_d/`
 - Split-D顶层：`src/stream/split_d/fsa_stream_split_d.cpp`

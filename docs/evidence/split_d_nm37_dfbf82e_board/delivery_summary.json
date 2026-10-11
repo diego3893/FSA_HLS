@@ -1,0 +1,11 @@
+{
+  "archive": "/tmp/split_d_nm37_delivery_c59cbf4.tar.gz",
+  "bytes": 3941152,
+  "sha256": "ebfdb5d182e7d2c8d5f3b02be33366933e136e3a922c9afe01f1f0c441f726ea",
+  "file_count": 340,
+  "package_source_commit": "c59cbf4a5696594c65731dd5a8e3890965b1095c",
+  "hardware_commit": "dfbf82e320dbab61af8dff37ab1183df124d7427",
+  "board_script_commit": "fb06b168b0a3c736bcd1d85ae7c5ba26c1f10010",
+  "component_sha256": "a64c7be2ae2cc026bd4164cd347004a67287aba3688a93d703bbfc065a3a26dc",
+  "delivery_manifest_sha256": "d6abdf593c379c9559be1f22473d21b3d412be3f8b3ac47add3b8cfffcc80d93"
+}
