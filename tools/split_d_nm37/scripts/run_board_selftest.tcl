@@ -84,9 +84,11 @@ foreach stress {0 1} {
     reset_hw_ila $ila
     set_property CONTROL.DATA_DEPTH 1024 $ila
     set_property CONTROL.TRIGGER_POSITION 128 $ila
-    set_property CONTROL.TRIGGER_MODE BASIC_ONLY $ila
+    if {[get_property CONTROL.TRIGGER_MODE $ila] ne "BASIC_ONLY" ||
+        [get_property CONTROL.CAPTURE_MODE $ila] ne "ALWAYS"} {
+        error "Expected synthesized BASIC_ONLY/ALWAYS ILA configuration"
+    }
     set_property CONTROL.TRIGGER_CONDITION AND $ila
-    set_property CONTROL.CAPTURE_MODE ALWAYS $ila
     # Arm on busy=1, done/pass/fail=0: the preceding run's latched PASS
     # cannot satisfy this condition. Save evidence of actual new-run acceptance.
     set flag_probe [named_probe $ila flags]
@@ -117,8 +119,17 @@ set hbm_index 0
 foreach hbm [get_hw_hbms -of_objects $device] {
     refresh_hw_hbm $hbm
     report_property $hbm -file [file join $evidence_dir hbm_final_${hbm_index}.rpt]
+    # In this design MC registers are properties of each stack's hw_hbm;
+    # Vivado exposes no separate hw_hbmmc objects. Check the actual registers.
+    for {set mc 0} {$mc<8} {incr mc} {
+        foreach suffix {CTRLR_INIT_DONE CTRLR_READY STAT.DFI_INIT_COMPLETE} {
+            if {[get_property MC${mc}.${suffix} $hbm] ne "1"} {
+                error "HBM controller not ready: $hbm MC${mc}.${suffix}"
+            }
+        }
+    }
     set mc_index 0
-    foreach mc [get_hw_hbmmcs -of_objects $hbm] {
+    foreach mc [get_hw_hbmmcs -quiet -of_objects $hbm] {
         refresh_hw_hbmmc $mc
         report_property $mc -file [file join $evidence_dir hbm_final_${hbm_index}_mc_${mc_index}.rpt]
         incr mc_index
