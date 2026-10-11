@@ -4,7 +4,7 @@
 
 这是4×4/head16 Split-D的完整存储与控制集成工程。计算IP仍由仓库标准入口`./run_hls.sh fsa_stream_split_d`生成；本目录的Vivado流程不替代、不缩减HLS测试。
 
-当前状态：正式计算IP全流程已通过。系统辅助复位和参考时钟约束已修正，a0e137a物理setup/hold为+0.200/+0.010ns且无DRC/methodology Critical；默认RTL初始化及忙中整体复位已恢复，但首笔输出检查失败。官方资料及实际网线证明旧自检单拍SIZE3不符合HBM，现已改原生256位SIZE5并补lane/canary测试，待新精确提交验证；时钟ODT=RTT_48也须纳入最终实现。bitstream和板测未执行。
+当前状态（2026-10-11）：正式计算IP`bf41d16`全流程已通过。原生256位/SIZE5自检控制器unit通过；`4a5c803`完整实现setup/hold为+0.261/+0.010ns，默认RTL在首事务前置canary读回全X。已确认该工程开启了XSIM模型不支持的DBI；`dfbf82e`关闭16个MC读/写DBI，保持仿真与硬件一致，正在新工程执行完整RTL及实现。尚不能断言DBI是失败根因。bitstream和板测未执行。最新结果以本次修改日志与正式验收报告为准。
 
 ## 2 系统合同
 
@@ -12,6 +12,7 @@
 - 计算核/自检/AXI-Lite100MHz，计算时钟setup uncertainty2.7ns；HBM AXI225MHz、APB/reference100MHz。
 - Clocking Wizard和每个时钟域的Processor System Reset生成真实时钟与复位。外部按钮仅作为异步复位输入排除；内部复位、AXI与数据路径保持时序分析。
 - 既有NM37 HBM工程的双stack、总8GB配置，启用一个SAXI_00端口。四个64-bit计算bundle保留；SmartConnect汇聚四个计算master与一个自检master，并转换到真实256-bit HBM AXI端口。这是单HBM端口功能集成，不代表32端口峰值带宽。
+- 16个MC的READ/WRITE_DBI_EN均为false。实际HBM XSIM模型不支持DBI，配置须与下载工程一致；参考[AWS官方修正脚本](https://github.com/aws/aws-fpga/blob/f2/hdk/common/verif/scripts/xsim_patch.tcl)。
 - Q/K/V/O地址分别为0、1MB、2MB、3MB；都落在首256MB映射内，不重叠。AXI-Lite寄存器地址由正式导出RTL核对。
 
 ## 3 自检与诊断
@@ -49,6 +50,19 @@ vivado -mode batch -source tools/split_d_nm37/scripts/build_and_report.tcl \
 完整系统testbench使用同一个HBM/SmartConnect/FSA/selftest BD，绕过的只有封装时钟输入缓冲和JTAG调试核。普通模式和stress模式各跑26笔，存在有限仿真超时。AMD说明XSIM使用HBM internal responder模型；真实HBM行为仍须板测确认：[PG276 Simulation](https://docs.amd.com/r/en-US/pg276-axi-hbm/Simulation)。
 
 必须分别核对控制器unit、系统仿真、综合、实现setup/hold、CDC、DRC、bitstream和板测。成功创建工程或下载bitstream不等于数值验收。
+
+实现后用`review_cdc.tcl <routed.dcp> <新审查目录>`导出CDC实际端点，分辨SmartConnect XPM FIFO数据路径及XSDB FIFO；脚本不豁免警告、不修改约束。还须人工核对全部bus-skew裕量。通过全部门槛后依次运行：
+
+```bash
+vivado -mode batch -source tools/split_d_nm37/scripts/write_bitstream.tcl \
+  -tclargs <routed.dcp> <新bit目录>
+vivado -mode batch -source tools/split_d_nm37/scripts/program_and_inventory.tcl \
+  -tclargs <新bit目录>/split_d_nm37.bit <新bit目录>/split_d_nm37.ltx
+vivado -mode batch -source tools/split_d_nm37/scripts/run_board_selftest.tcl \
+  -tclargs <同一个ltx> <新板测证据目录>
+```
+
+板测只选择JTAG线缆`210017937722A`及唯一VU37P，采用易失JTAG配置。脚本运行普通/stress各26笔，保存每次新启动busy触发及终态ILA/CSV、VIO状态CSV。接受条件为flags=6、fail_code=0、cases_done=26、init_done=1；启动捕获防止复用上轮PASS。未执行这些脚本前不得宣称板测通过。
 
 可追加官方HBM TLM功能对照：`simulate.tcl <新工程副本路径> hbm_tlm`。仅切换Vivado实际允许的HBM模型，FSA、自检、SmartConnect仍使用RTL，ROM、52事务、全部canary/位模式不变。TLM的APB为stub，不能建模流量后的全HBM复位，故仅该对照排除忙中复位并在日志声明；默认`rtl`仍完整执行初始化与忙中整体复位。TLM结果不得作为实际HBM延迟、吞吐或物理时序证据。
 
