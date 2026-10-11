@@ -173,8 +173,9 @@ namespace detail{
                 for(int col=0; col<QUERY_BLOCK_COLS; ++col){
                     #pragma HLS UNROLL
                     operand_b[r][col] = elemOne();
-                    operand_c[r][col] = r==row
-                        ? row_sum[col] : accZero();
+                    // 只提交当前row的结果；广播部分和，移除PE输入前的行选择器。
+                    // 其他行的结果被丢弃，当前行的FMA输入及跨行累加顺序不变。
+                    operand_c[r][col] = row_sum[col];
                 }
             }
             runPeArray(
