@@ -1,0 +1,44 @@
+{
+  "tested_commit": "71025ffadbe4e566432eaeed51bfc2b1bab2c9e9",
+  "source_files_sha_verified": 92,
+  "dsp_accounting": {
+    "PE": 256,
+    "Accumulator": 32,
+    "fsub": 64,
+    "total": 352
+  },
+  "interfaces": {
+    "C_S_AXI_CONTROL_DATA_WIDTH": 32,
+    "C_S_AXI_CONTROL_ADDR_WIDTH": 7,
+    "C_M_AXI_K_GMEM_ADDR_WIDTH": 64,
+    "C_M_AXI_K_GMEM_DATA_WIDTH": 64,
+    "C_M_AXI_O_GMEM_ADDR_WIDTH": 64,
+    "C_M_AXI_O_GMEM_DATA_WIDTH": 64,
+    "C_M_AXI_Q_GMEM_ADDR_WIDTH": 64,
+    "C_M_AXI_Q_GMEM_DATA_WIDTH": 64,
+    "C_M_AXI_V_GMEM_ADDR_WIDTH": 64,
+    "C_M_AXI_V_GMEM_DATA_WIDTH": 64
+  },
+  "archive_sha256": "c3040b830956ea7eccbcf2d1a96716dd068f56d3729b6c95b1095a8c6195fca6",
+  "archive_files_verified": 338,
+  "timing_margin_ns": -0.08999999999999986,
+  "pv_issue_model": {
+    "N": 1024,
+    "H": 128,
+    "D": 16,
+    "B": 8,
+    "tile_pairs": 4096,
+    "calls_per_worker": 8388608,
+    "actual_pe_ii": 5,
+    "pv_issue_lower_bound_ms": 419.4304,
+    "pv_loop_scheduled_cycles_per_tile": 10886,
+    "pv_loop_only_model_ms": 445.89056,
+    "scope": "derived from source and HLS scheduling, not CoSim or on-board elapsed time"
+  },
+  "paper_numeric_ratios": {
+    "LUT": 13.33241299531828,
+    "FF": 1.3744058110345565,
+    "DSP": 0.6470588235294118
+  },
+  "paused_after_round": true
+}

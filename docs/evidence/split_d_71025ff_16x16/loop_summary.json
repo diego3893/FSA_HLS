@@ -1,0 +1,130 @@
+{
+  "block0_QK": {
+    "report": "runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_csynth.rpt",
+    "clock_ns": "7.272",
+    "loop": [
+      {
+        "name": "VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+        "Slack": "7.30",
+        "TripCount": "128",
+        "Latency": "1281",
+        "AbsoluteTimeLatency": "12810",
+        "PipelineII": "10",
+        "PipelineDepth": "12",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block0_ROW_SUM": {
+    "report": "runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_csynth.rpt",
+    "clock_ns": "7.390",
+    "loop": [
+      {
+        "name": "VITIS_LOOP_162_1",
+        "Slack": "7.30",
+        "TripCount": "16",
+        "Latency": "160",
+        "AbsoluteTimeLatency": "1600",
+        "PipelineII": "10",
+        "PipelineDepth": "11",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block0_PWL": {
+    "report": "runQueryBlock_0_Pipeline_VITIS_LOOP_300_25_csynth.rpt",
+    "clock_ns": "7.272",
+    "loop": [
+      {
+        "name": "VITIS_LOOP_300_25",
+        "Slack": "7.30",
+        "TripCount": "8",
+        "Latency": "53",
+        "AbsoluteTimeLatency": "530",
+        "PipelineII": "5",
+        "PipelineDepth": "17",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block0_PV": {
+    "report": "runQueryBlock_0_Pipeline_VITIS_LOOP_369_33_csynth.rpt",
+    "clock_ns": "7.299",
+    "loop": [
+      {
+        "name": "VITIS_LOOP_369_33",
+        "Slack": "7.30",
+        "TripCount": "2176",
+        "Latency": "10886",
+        "AbsoluteTimeLatency": "108860",
+        "PipelineII": "5",
+        "PipelineDepth": "12",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block1_QK": {
+    "report": "runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_csynth.rpt",
+    "clock_ns": "7.272",
+    "loop": [
+      {
+        "name": "VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+        "Slack": "7.30",
+        "TripCount": "128",
+        "Latency": "1281",
+        "AbsoluteTimeLatency": "12810",
+        "PipelineII": "10",
+        "PipelineDepth": "12",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block1_ROW_SUM": {
+    "report": "runQueryBlock_1_Pipeline_VITIS_LOOP_162_1_csynth.rpt",
+    "clock_ns": "7.390",
+    "loop": [
+      {
+        "name": "VITIS_LOOP_162_1",
+        "Slack": "7.30",
+        "TripCount": "16",
+        "Latency": "160",
+        "AbsoluteTimeLatency": "1600",
+        "PipelineII": "10",
+        "PipelineDepth": "11",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block1_PWL": {
+    "report": "runQueryBlock_1_Pipeline_VITIS_LOOP_300_25_csynth.rpt",
+    "clock_ns": "7.272",
+    "loop": [
+      {
+        "name": "VITIS_LOOP_300_25",
+        "Slack": "7.30",
+        "TripCount": "8",
+        "Latency": "53",
+        "AbsoluteTimeLatency": "530",
+        "PipelineII": "5",
+        "PipelineDepth": "17",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block1_PV": {
+    "report": "runQueryBlock_1_Pipeline_VITIS_LOOP_369_33_csynth.rpt",
+    "clock_ns": "7.299",
+    "loop": [
+      {
+        "name": "VITIS_LOOP_369_33",
+        "Slack": "7.30",
+        "TripCount": "2176",
+        "Latency": "10886",
+        "AbsoluteTimeLatency": "108860",
+        "PipelineII": "5",
+        "PipelineDepth": "12",
+        "InstanceList": "\n"
+      }
+    ]
+  }
+}

@@ -1,0 +1,1851 @@
+{
+  "input": "C:\\Users\\30130\\Desktop\\workstation\\FlashAttention\\FSA_HLS\\build\\resume_nm37\\measure16_evidence",
+  "selected_solution": "C:\\Users\\30130\\Desktop\\workstation\\FlashAttention\\FSA_HLS\\build\\resume_nm37\\measure16_evidence",
+  "selection": {
+    "completeness_score": 9,
+    "ambiguous": false,
+    "candidate_count": 1,
+    "candidates": [
+      {
+        "solution": "C:\\Users\\30130\\Desktop\\workstation\\FlashAttention\\FSA_HLS\\build\\resume_nm37\\measure16_evidence",
+        "top": "fsa_stream_split_d",
+        "score": 9,
+        "latest_artifact_time": "2026-10-11T23:25:53+08:00"
+      }
+    ]
+  },
+  "artifact_time_range": {
+    "earliest": "2026-10-11T22:24:35+08:00",
+    "latest": "2026-10-11T23:25:53+08:00"
+  },
+  "artifacts": {
+    "top_xml": {
+      "path": "syn\\report\\fsa_stream_split_d_csynth.xml",
+      "exists": true,
+      "modified": "2026-10-11T23:23:43+08:00"
+    },
+    "top_rpt": {
+      "path": "syn\\report\\fsa_stream_split_d_csynth.rpt",
+      "exists": true,
+      "modified": "2026-10-11T23:23:43+08:00"
+    },
+    "csim_log": {
+      "path": "csim\\report\\fsa_stream_split_d_csim.log",
+      "exists": true,
+      "modified": "2026-10-11T22:24:35+08:00"
+    },
+    "cosim_report": {
+      "path": null,
+      "exists": false,
+      "modified": null
+    },
+    "transaction_report": {
+      "path": null,
+      "exists": false,
+      "modified": null
+    },
+    "component_xml": {
+      "path": null,
+      "exists": false,
+      "modified": null
+    },
+    "export_zip": {
+      "path": null,
+      "exists": false,
+      "modified": null
+    },
+    "solution_log": {
+      "path": "codex_split_d_71025ff_16x16_short_csim_csynth_20261011.log",
+      "exists": true,
+      "modified": "2026-10-11T23:25:53+08:00"
+    },
+    "solution_data": {
+      "path": null,
+      "exists": false,
+      "modified": null
+    }
+  },
+  "top_synthesis": {
+    "assignments": {
+      "tool_version": "2024.2",
+      "top": "fsa_stream_split_d",
+      "product_family": "virtexuplusHBM",
+      "part": "xcvu37p_CIV-fsvh2892-2-e",
+      "flow_target": "vivado",
+      "target_period_ns": 10.0,
+      "clock_uncertainty_ns": 2.7
+    },
+    "performance": {
+      "pipeline_type": "no",
+      "estimated_period_ns": 7.39,
+      "latency_min_cycles": 1,
+      "latency_avg_cycles": "undef",
+      "latency_max_cycles": 850450435,
+      "interval_min_cycles": 2,
+      "interval_max_cycles": 850450436,
+      "derived_effective_budget_ns": 7.3,
+      "derived_timing_margin_ns": -0.09,
+      "derived_fmax_mhz": 135.317997
+    },
+    "resources": {
+      "BRAM_18K": 8,
+      "DSP": 352,
+      "FF": 231597,
+      "LUT": 1221689,
+      "URAM": 0
+    },
+    "available_resources": {
+      "BRAM_18K": 4032,
+      "DSP": 9024,
+      "FF": 2607360,
+      "LUT": 1303680,
+      "URAM": 960
+    },
+    "derived_resource_percent": {
+      "BRAM_18K": 0.198413,
+      "DSP": 3.900709,
+      "FF": 8.882433,
+      "LUT": 93.710803,
+      "URAM": 0.0
+    },
+    "interface_ports": [
+      {
+        "name": "s_axi_control_AWVALID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_AWREADY",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_AWADDR",
+        "direction": "in",
+        "bits": 7,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_WVALID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_WREADY",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_WDATA",
+        "direction": "in",
+        "bits": 32,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_WSTRB",
+        "direction": "in",
+        "bits": 4,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_ARVALID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_ARREADY",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_ARADDR",
+        "direction": "in",
+        "bits": 7,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_RVALID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_RREADY",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_RDATA",
+        "direction": "out",
+        "bits": 32,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_RRESP",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_BVALID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_BREADY",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "s_axi_control_BRESP",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "s_axi",
+        "source_object": "control",
+        "c_type": "int"
+      },
+      {
+        "name": "ap_clk",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "ap_ctrl_hs",
+        "source_object": "fsa_stream_split_d",
+        "c_type": "return value"
+      },
+      {
+        "name": "ap_rst_n",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "ap_ctrl_hs",
+        "source_object": "fsa_stream_split_d",
+        "c_type": "return value"
+      },
+      {
+        "name": "interrupt",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "ap_ctrl_hs",
+        "source_object": "fsa_stream_split_d",
+        "c_type": "return value"
+      },
+      {
+        "name": "m_axi_q_gmem_AWVALID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_AWREADY",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_AWADDR",
+        "direction": "out",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_AWID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_AWLEN",
+        "direction": "out",
+        "bits": 8,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_AWSIZE",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_AWBURST",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_AWLOCK",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_AWCACHE",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_AWPROT",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_AWQOS",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_AWREGION",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_AWUSER",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_WVALID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_WREADY",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_WDATA",
+        "direction": "out",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_WSTRB",
+        "direction": "out",
+        "bits": 8,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_WLAST",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_WID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_WUSER",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_ARVALID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_ARREADY",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_ARADDR",
+        "direction": "out",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_ARID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_ARLEN",
+        "direction": "out",
+        "bits": 8,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_ARSIZE",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_ARBURST",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_ARLOCK",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_ARCACHE",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_ARPROT",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_ARQOS",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_ARREGION",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_ARUSER",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_RVALID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_RREADY",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_RDATA",
+        "direction": "in",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_RLAST",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_RID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_RUSER",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_RRESP",
+        "direction": "in",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_BVALID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_BREADY",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_BRESP",
+        "direction": "in",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_BID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_q_gmem_BUSER",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "q_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_AWVALID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_AWREADY",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_AWADDR",
+        "direction": "out",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_AWID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_AWLEN",
+        "direction": "out",
+        "bits": 8,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_AWSIZE",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_AWBURST",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_AWLOCK",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_AWCACHE",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_AWPROT",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_AWQOS",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_AWREGION",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_AWUSER",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_WVALID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_WREADY",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_WDATA",
+        "direction": "out",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_WSTRB",
+        "direction": "out",
+        "bits": 8,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_WLAST",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_WID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_WUSER",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_ARVALID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_ARREADY",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_ARADDR",
+        "direction": "out",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_ARID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_ARLEN",
+        "direction": "out",
+        "bits": 8,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_ARSIZE",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_ARBURST",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_ARLOCK",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_ARCACHE",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_ARPROT",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_ARQOS",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_ARREGION",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_ARUSER",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_RVALID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_RREADY",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_RDATA",
+        "direction": "in",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_RLAST",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_RID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_RUSER",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_RRESP",
+        "direction": "in",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_BVALID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_BREADY",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_BRESP",
+        "direction": "in",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_BID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_k_gmem_BUSER",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "k_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_AWVALID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_AWREADY",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_AWADDR",
+        "direction": "out",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_AWID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_AWLEN",
+        "direction": "out",
+        "bits": 8,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_AWSIZE",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_AWBURST",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_AWLOCK",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_AWCACHE",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_AWPROT",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_AWQOS",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_AWREGION",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_AWUSER",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_WVALID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_WREADY",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_WDATA",
+        "direction": "out",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_WSTRB",
+        "direction": "out",
+        "bits": 8,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_WLAST",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_WID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_WUSER",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_ARVALID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_ARREADY",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_ARADDR",
+        "direction": "out",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_ARID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_ARLEN",
+        "direction": "out",
+        "bits": 8,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_ARSIZE",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_ARBURST",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_ARLOCK",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_ARCACHE",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_ARPROT",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_ARQOS",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_ARREGION",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_ARUSER",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_RVALID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_RREADY",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_RDATA",
+        "direction": "in",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_RLAST",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_RID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_RUSER",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_RRESP",
+        "direction": "in",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_BVALID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_BREADY",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_BRESP",
+        "direction": "in",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_BID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_v_gmem_BUSER",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "v_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_AWVALID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_AWREADY",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_AWADDR",
+        "direction": "out",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_AWID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_AWLEN",
+        "direction": "out",
+        "bits": 8,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_AWSIZE",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_AWBURST",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_AWLOCK",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_AWCACHE",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_AWPROT",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_AWQOS",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_AWREGION",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_AWUSER",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_WVALID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_WREADY",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_WDATA",
+        "direction": "out",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_WSTRB",
+        "direction": "out",
+        "bits": 8,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_WLAST",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_WID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_WUSER",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_ARVALID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_ARREADY",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_ARADDR",
+        "direction": "out",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_ARID",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_ARLEN",
+        "direction": "out",
+        "bits": 8,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_ARSIZE",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_ARBURST",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_ARLOCK",
+        "direction": "out",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_ARCACHE",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_ARPROT",
+        "direction": "out",
+        "bits": 3,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_ARQOS",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_ARREGION",
+        "direction": "out",
+        "bits": 4,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_ARUSER",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_RVALID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_RREADY",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_RDATA",
+        "direction": "in",
+        "bits": 64,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_RLAST",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_RID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_RUSER",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_RRESP",
+        "direction": "in",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_BVALID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_BREADY",
+        "direction": "out",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_BRESP",
+        "direction": "in",
+        "bits": 2,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_BID",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      },
+      {
+        "name": "m_axi_o_gmem_BUSER",
+        "direction": "in",
+        "bits": 1,
+        "protocol": "m_axi",
+        "source_object": "o_gmem",
+        "c_type": "int"
+      }
+    ]
+  },
+  "csim": {
+    "status": "pass",
+    "pass_markers": [
+      "[PASS] fsa_stream_split_d: PE=16x16 HEAD_DIM=128 DIM_BLOCKS=8"
+    ],
+    "fail_markers": []
+  },
+  "cosim": {
+    "status": "not_found"
+  },
+  "solution_log": {
+    "warning_counts": {
+      "ANALYSIS 214-52": 32,
+      "HLS 200-1016": 2,
+      "HLS 200-1020": 1,
+      "HLS 200-1995": 16,
+      "HLS 200-871": 2,
+      "HLS 200-875": 16,
+      "HLS 200-880": 4,
+      "RTGEN 206-101": 96,
+      "SYN 201-103": 60
+    },
+    "warning_examples": {
+      "HLS 200-1995": "There were 392,722 instructions in the design after the 'Compile/Link' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+      "ANALYSIS 214-52": "Found false inter dependency for variable 'output_acc.7' (/home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_controller.cpp:100).",
+      "SYN 201-103": "Legalizing function name 'runQueryBlock<0>_Pipeline_VITIS_LOOP_90_1_VITIS_LOOP_91_2' to 'runQueryBlock_0_Pipeline_VITIS_LOOP_90_1_VITIS_LOOP_91_2'.",
+      "HLS 200-880": "The II Violation in module 'runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2' (loop 'VITIS_LOOP_109_1_VITIS_LOOP_110_2'): Unable to enforce a carried dependence constraint (II = 5, distance = 1, offset = 0) between 'store' operation 0 bit ('operand_c_write_ln130', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:130->/home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_controller.cpp:175) of variable 'pe_result.out_accType', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:134->/home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_controller.cpp:175 on local variable 'operand_c', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:130->/home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_controller.cpp:175 and 'load' operation 32 bit ('operand_c_load_2', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:134->/home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_controller.cpp:175) on local variable 'operand_c', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:130->/home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_controller.cpp:175.",
+      "HLS 200-875": "II = 6 is infeasible due to multiple pipeline iteration latency = 10 and incompatible II = 5 of 'call' operation 6272 bit ('call_ret', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:134->/home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_controller.cpp:175) to 'runPeArray'.",
+      "HLS 200-871": "Estimated clock period (7.390 ns) exceeds the target (target clock period: 10.000 ns, clock uncertainty: 2.700 ns, effective delay budget: 7.300 ns).",
+      "HLS 200-1016": "The critical path in module 'runQueryBlock_0_Pipeline_VITIS_LOOP_162_1' consists of the following:",
+      "HLS 200-1020": "Increasing the depth of FIFO start_for_gatherQueryTile_U0 (from entry_proc_U0 to gatherQueryTile_U0) to 3 to improve performance and/or avoid deadlocks.",
+      "RTGEN 206-101": "Setting dangling out port 'distributeQueryTile_Pipeline_VITIS_LOOP_489_1_VITIS_LOOP_490_2/m_axi_q_gmem_0_ARVALID' to 0."
+    },
+    "error_count": 0,
+    "error_examples": [],
+    "flow_markers": {
+      "cosim_pass": false,
+      "cosim_fail": false,
+      "export_finished": false,
+      "timing_constraint_warning": true
+    }
+  },
+  "solution_metadata": {},
+  "ip_export": {
+    "component_xml": false,
+    "export_zip": false
+  },
+  "hierarchy_inventory": {
+    "submodule_csynth_reports": [
+      "syn\\report\\cvtAtoE_csynth.rpt",
+      "syn\\report\\distributeQueryTile_csynth.rpt",
+      "syn\\report\\distributeQueryTile_Pipeline_VITIS_LOOP_489_1_VITIS_LOOP_490_2_csynth.rpt",
+      "syn\\report\\distributeQueryTile_Pipeline_VITIS_LOOP_501_3_VITIS_LOOP_506_4_VITIS_LOOP_507_5_csynth.rpt",
+      "syn\\report\\entry_proc_csynth.rpt",
+      "syn\\report\\gatherQueryTile_csynth.rpt",
+      "syn\\report\\gatherQueryTile_Pipeline_1_csynth.rpt",
+      "syn\\report\\gatherQueryTile_Pipeline_VITIS_LOOP_526_1_VITIS_LOOP_527_2_csynth.rpt",
+      "syn\\report\\p_anonymous_namespace_begin_reciprocal_csynth.rpt",
+      "syn\\report\\p_anonymous_namespace_divider_tick_csynth.rpt",
+      "syn\\report\\p_anonymous_namespace_ldexpByBits_csynth.rpt",
+      "syn\\report\\p_anonymous_namespace_normalize_and_round_csynth.rpt",
+      "syn\\report\\reciprocalColumns_csynth.rpt",
+      "syn\\report\\reciprocalColumns_Pipeline_VITIS_LOOP_369_115_csynth.rpt",
+      "syn\\report\\reciprocalColumns_Pipeline_VITIS_LOOP_369_116_csynth.rpt",
+      "syn\\report\\reciprocalColumns_Pipeline_VITIS_LOOP_369_117_csynth.rpt",
+      "syn\\report\\reciprocalColumns_Pipeline_VITIS_LOOP_369_118_csynth.rpt",
+      "syn\\report\\reciprocalColumns_Pipeline_VITIS_LOOP_369_119_csynth.rpt",
+      "syn\\report\\reciprocalColumns_Pipeline_VITIS_LOOP_369_120_csynth.rpt",
+      "syn\\report\\reciprocalColumns_Pipeline_VITIS_LOOP_369_121_csynth.rpt",
+      "syn\\report\\reciprocalColumns_Pipeline_VITIS_LOOP_369_1_csynth.rpt",
+      "syn\\report\\run_csynth.rpt",
+      "syn\\report\\runAccumulatorColumns_csynth.rpt",
+      "syn\\report\\runController_csynth.rpt",
+      "syn\\report\\runPeArray_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Outline_VITIS_LOOP_117_5_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_20_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_23_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_25_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_2_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_4_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_5_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_6_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_7_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_8_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_144_6_VITIS_LOOP_145_7_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_190_1210_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_190_1211_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_190_1212_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_190_1213_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_190_1214_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_190_128_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_190_129_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_190_12_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_242_15_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_300_25_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_369_33_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_451_40_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_474_43_VITIS_LOOP_475_44_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_Pipeline_VITIS_LOOP_90_1_VITIS_LOOP_91_2_csynth.rpt",
+      "syn\\report\\runQueryBlock_0_s_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Outline_VITIS_LOOP_117_5_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_20_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_23_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_25_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_2_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_4_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_5_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_6_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_7_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_8_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_144_6_VITIS_LOOP_145_7_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_162_1_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_190_121_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_190_122_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_190_123_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_190_124_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_190_125_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_190_126_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_190_127_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_190_12_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_242_15_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_300_25_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_369_33_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_451_40_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_474_43_VITIS_LOOP_475_44_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_Pipeline_VITIS_LOOP_90_1_VITIS_LOOP_91_2_csynth.rpt",
+      "syn\\report\\runQueryBlock_1_s_csynth.rpt",
+      "syn\\report\\runQueryTile_csynth.rpt",
+      "syn\\report\\stageAccumulatorResult_csynth.rpt",
+      "syn\\report\\storeOutputTile_csynth.rpt",
+      "syn\\report\\storeOutputTile_Pipeline_VITIS_LOOP_76_1_csynth.rpt"
+    ],
+    "generated_rtl_file_count": 144
+  }
+}
