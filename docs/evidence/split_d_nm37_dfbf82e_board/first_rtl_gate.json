@@ -1,0 +1,19 @@
+{
+  "hardware_commit": "dfbf82e320dbab61af8dff37ab1183df124d7427",
+  "actual_coverage": {
+    "normal_valid_transactions": 1,
+    "stress_transactions": 0,
+    "initialization": true,
+    "busy_whole_system_reset_recovery": true,
+    "first_transaction_word_and_canary_checks": true
+  },
+  "core_cycles": 624,
+  "full_first_case_cycles": 2594,
+  "user_changed_contract": "first RTL transaction plus full 52 hardware transactions",
+  "stop_time": "2026-10-11T21:05:06.523643+08:00",
+  "stop_pids": [
+    1968985,
+    1961136
+  ],
+  "snapshot_sha256": "f4af2a0d5864ba395027c78dcb2f8019fc366c5882a2b1141d92856653a3f552"
+}

@@ -142,7 +142,7 @@ Q/K/V AXI
 
 ## 7 当前工作集
 
-- 当前工作集：`tools/split_d_nm37/`、20261011_1952修改日志及`docs/evidence/split_d_nm37_dfbf82e_board/`。硬件被测dfbf82e（16MC读/写DBI=false）；20:05启动默认RTL与物理实现；新实现20:38自动门槛通过（+0.261/+0.010ns），新CDC/bus-skew20:41复核通过；首笔RTL尚未闭环。辅助脚本9497ab3包含CDC对象导出、VIO/ILA板测和unit生成器修复；四项unit已通过。计时监视器修正已提交dfbf82e，完整核计时仍待运行。用户AGENTS.md及无关未跟踪文件保留。
+- 当前工作集：`tools/split_d_nm37/`、20261011_1952修改日志及`docs/evidence/split_d_nm37_dfbf82e_board/`。硬件被测dfbf82e（16MC读/写DBI=false）；20:05启动默认RTL与物理实现；新实现20:38自动门槛通过（+0.261/+0.010ns），新CDC/bus-skew20:41复核通过；首笔RTL21:03通过（核624/完整2594周期），21:04按用户合同受控停止并开始bit/LTX生成。辅助脚本9497ab3包含CDC对象导出、VIO/ILA板测和unit生成器修复；四项unit已通过。计时监视器修正已提交dfbf82e，完整核计时仍待运行。用户AGENTS.md及无关未跟踪文件保留。
 
 - Split-D配置与类型：`include/fsa/stream/split_d/`
 - Split-D顶层：`src/stream/split_d/fsa_stream_split_d.cpp`
@@ -244,7 +244,7 @@ Q/K/V AXI
 
 **前轮系统证据（2026-10-10）：**计算IP仍bf41d16，component SHA不变。473a4f9原生256位/SIZE5自检四项unit通过；真实HBM RTL19:32:00—20:17:46完成，初始化及忙中整体复位恢复通过，但109335ns首个用例前置canary失败，cases0/code02/pc26/actual全X。ROM pc26为地址0x002ffff8的READ，期望0x0000000012345678；不是O数值比较，根因未确定。4a5c803完整实现19:52:04—20:22:18完成，setup+0.261/hold+0.010ns，TNS/THS0、99857 nets全route、LUT61894/FF45210/R36=45/R18=0/DSP40，时钟ODT/100MHz/2.7ns断言通过，DRC/methodology无Error/Critical。CDC13/2项Info＋696 CDC15 Warning，详细人工复核未完成；18组bus-skew最小slack+3.739ns。证据docs/evidence/split_d_nm37_4a5c803_pause/。前轮未验收；本轮用户已恢复，使用dfbf82e新工程闭环。
 
-**2026-10-11当前恢复状态：**dfbf82e默认HBM RTL与完整物理实现分别运行于`build/split_d_nm37_dfbf82e_rtl_ipbf`/`build/split_d_nm37_dfbf82e_phys_ipbf`，日志`/tmp/codex_nm37_dfbf82e_{rtl,physical}_20261011.log`。关闭XSIM不支持的DBI，尚未证实它解决全X。9497ab3四项controller unit回归通过，原始日志已取回；JTAG只读确认210017937722A唯一VU37P，ZU5未操作。CDC脚本已在旧DCP试运行覆盖全部警告，新DCP已生成，20:38新实现setup/hold+0.261/+0.010ns通过，CDC692项XPM＋4项XSDB FIFO已全部审查；18组bus-skew最小+3.739ns通过，物理证据已下载并验SHA。用户已修订为首笔RTL＋完整52笔真实板测；首笔证据齐全后允许受控停止长仿真，不称完整RTL通过。未生成bitstream、未下载、未板测；用户已明确恢复，无需再因旧暂停重复请求授权。
+**2026-10-11当前恢复状态：**dfbf82e默认HBM RTL与完整物理实现分别运行于`build/split_d_nm37_dfbf82e_rtl_ipbf`/`build/split_d_nm37_dfbf82e_phys_ipbf`，日志`/tmp/codex_nm37_dfbf82e_{rtl,physical}_20261011.log`。关闭XSIM不支持的DBI后首笔全部比较通过，原canary全X消失；系统RTL实际覆盖普通1笔，未覆盖完整52笔。9497ab3四项controller unit回归通过，原始日志已取回；JTAG只读确认210017937722A唯一VU37P，ZU5未操作。CDC脚本已在旧DCP试运行覆盖全部警告，新DCP已生成，20:38新实现setup/hold+0.261/+0.010ns通过，CDC692项XPM＋4项XSDB FIFO已全部审查；18组bus-skew最小+3.739ns通过，物理证据已下载并验SHA。用户已修订为首笔RTL＋完整52笔真实板测；首笔证据齐全后允许受控停止长仿真，不称完整RTL通过。bit/LTX正在生成，未下载、未板测；用户已明确恢复，无需再因旧暂停重复请求授权。
 
 **已证实失败与范围：**a0c4329 TB超时无尺寸3e9在Time0溢出，已改显式64位保持3s合同；旧完整仿真768因unused aux active-low且接0永久复位，20us诊断锁定=1但APB/AXI/selftest reset全0，已精确停止并保留WDB。HBM内部两primary重复造成4条TIMING Critical；789 XDC foreach/if被忽略而exit1，改为纯generated_clock＋普通Tcl断言。原始日志/失败报告/XCI在docs/evidence/split_d_nm37_a0c4329_ipbf41d16/和split_d_nm37_7892c75_reset_diagnosis/。控制器4项unit通过；新4a5c803物理自动门槛已通过，系统功能失败、CDC详细复核/板测未完成。授权与日志见第2节/1316修改日志。
 

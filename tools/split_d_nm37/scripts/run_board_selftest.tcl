@@ -113,6 +113,20 @@ foreach stress {0 1} {
 set_property OUTPUT_VALUE 0 $run_probe
 set_property OUTPUT_VALUE 0 $stress_probe
 commit_hw_vio $vio
+set hbm_index 0
+foreach hbm [get_hw_hbms -of_objects $device] {
+    refresh_hw_hbm $hbm
+    report_property $hbm -file [file join $evidence_dir hbm_final_${hbm_index}.rpt]
+    set mc_index 0
+    foreach mc [get_hw_hbmmcs -of_objects $hbm] {
+        refresh_hw_hbmmc $mc
+        report_property $mc -file [file join $evidence_dir hbm_final_${hbm_index}_mc_${mc_index}.rpt]
+        incr mc_index
+    }
+    puts "NM37_FINAL_HBM core=$hbm controllers=$mc_index"
+    incr hbm_index
+}
+if {$hbm_index<1} { error "Missing final HBM status" }
 close $channel
 close_hw_target
 disconnect_hw_server

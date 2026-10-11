@@ -13,6 +13,11 @@ if {[llength $target]!=1} { error "Expected the verified NM37 JTAG target" }
 current_hw_target $target
 open_hw_target
 report_property $target
+set jtag_frequency [get_property PARAM.FREQUENCY $target]
+if {$jtag_frequency<=0 || 100000000<2.5*$jtag_frequency} {
+    error "JTAG frequency violates the stable 100MHz debug-hub clock ratio"
+}
+puts "NM37_JTAG_FREQUENCY_HZ=$jtag_frequency DEBUG_HUB_HZ=100000000"
 set device [get_hw_devices -filter {PART =~ xcvu37p*}]
 if {[llength $device]!=1 || [llength [get_hw_devices]]!=1} {
     error "Expected only the verified VU37P device on this target"
