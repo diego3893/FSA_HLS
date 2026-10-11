@@ -2,7 +2,7 @@
 
 > 本文件只保留恢复任务所需的高信号状态。后续工作开始时先读取，并在关键结果或决策变化后原地更新。
 
-> **2026-10-11 19:52用户恢复4×4上板工作：**继续Git/SSH/Vivado/易失JTAG与板测闭环，未设轮数上限，16×16仍暂缓。起点是473a4f9真实HBM RTL前置canary全X失败与4a5c803完整实现自动门槛通过；先修系统功能、完成CDC审查，再bitstream/下载。新日志`docs/修改日志/2026-10-11_1952_split_d_4x4_board_修改日志.md`。19:51远端tracked干净，无本任务Vivado/XSIM，正式IP SHA保持bf41d16。
+> **2026-10-11 19:52用户恢复4×4上板工作：**继续Git/SSH/Vivado/易失JTAG与板测闭环，未设轮数上限，16×16仍暂缓。起点是473a4f9真实HBM RTL前置canary全X失败与4a5c803完整实现自动门槛通过；先修系统功能、完成CDC审查，再bitstream/下载。新日志`docs/修改日志/2026-10-11_1952_split_d_4x4_board_修改日志.md`。当前系统被测dfbf82e；20:05启动完整RTL与物理实现，辅助脚本9497ab3已同步。正式IP仍bf41d16。
 
 ## 1 目标与当前优先级
 
@@ -142,7 +142,7 @@ Q/K/V AXI
 
 ## 7 当前工作集
 
-- 当前工作集（恢复）：`tools/split_d_nm37/`、20261011_1952修改日志、两份综合/板级报告及`docs/evidence/split_d_nm37_4a5c803_pause/`。计算IP固定bf41d16；473a4f9真实系统RTL失败，4a5c803物理自动门槛通过。`core_latency_watch.sv`及TB启动谓词修正仍本地未提交、未验证。用户的AGENTS.md修改及其他无关未跟踪文件不纳入本任务提交。
+- 当前工作集：`tools/split_d_nm37/`、20261011_1952修改日志及`docs/evidence/split_d_nm37_dfbf82e_board/`。硬件被测dfbf82e（16MC读/写DBI=false）；20:05启动默认RTL与物理实现；新实现20:38自动门槛通过（+0.261/+0.010ns），新CDC/bus-skew20:41复核通过；首笔RTL尚未闭环。辅助脚本9497ab3包含CDC对象导出、VIO/ILA板测和unit生成器修复；四项unit已通过。计时监视器修正已提交dfbf82e，完整核计时仍待运行。用户AGENTS.md及无关未跟踪文件保留。
 
 - Split-D配置与类型：`include/fsa/stream/split_d/`
 - Split-D顶层：`src/stream/split_d/fsa_stream_split_d.cpp`
@@ -164,7 +164,7 @@ Q/K/V AXI
 
 ## 8 下一步
 
-1. **当前恢复4×4上板闭环。**先查473a4f9首个用例前置canary的HBM写入/读回全X：pc26、地址0x002ffff8、期望0x0000000012345678，仿真109335ns时失败，尚未逐字比较O结果，不能直接归因attention算术。另完成未验证计时监视器、CDC详细复核、完整52笔系统测试；上述门槛通过后生成bitstream/ltx、易失JTAG下载及板测，16×16暂缓。
+1. **当前恢复4×4上板闭环。**先查473a4f9首个用例前置canary的HBM写入/读回全X：pc26、地址0x002ffff8、期望0x0000000012345678，仿真109335ns时失败，尚未逐字比较O结果，不能直接归因attention算术。另完成未验证计时监视器、CDC详细复核、用户2026-10-11修订：默认RTL验初始化/忙中复位/首笔完整事务，全部52笔位模式和保护区在真实HBM板测；上述上板前门槛通过后生成bitstream/ltx、易失JTAG下载及板测，16×16暂缓。
 2. 保留每块唯一PE/Acc共享层级和真实distance8反馈。源码状态复用不等于物理阶段寄存器完全复用。低风险死代码清理需独立范围和新4×4验证；stageAccumulatorResult仍被调用。
 3. 实际分发器综合918FF；新模型最差setup为分发icmp→V AXI读缓冲BRAM使能（6.477ns、91.7%route），setup+0.230ns已满足100MHz。纯数据广播未证明是首要瓶颈；不按HLS10724FF盲目插级。当前是HLS后物理反馈，不是自动物理感知HLS调度。
 4. 本次授权的OOC对照已经结束，区域候选失败且保留auto。后续物理实验继续固定器件/时钟/接口并声明边界；通信插级由实测路径和反馈/背压审查决定，完整系统现已纳入1316调用；板卡实际运行须与生成bitstream/实现区分。
@@ -240,11 +240,11 @@ Q/K/V AXI
 
 第二次核查已修订方案：保留D/H和全局索引、K/V读取量及现有量化链；补倒数通路、位模式基线、广播/汇聚等待关系、IP导出与OOC/全系统时序等级。范围以方案第13节为准，不声称所有独立模块已逐行审计。失败构建读取对应失败归档；当前成功目录为130c778，不得误引用旧HEAD。
 
-**2026-10-10 13:16当前任务：**三个4×4工作包，第1/2轮已闭环、工作包1/2合格；第3轮远端结果已分析，系统功能失败，现按用户要求暂停。最终计算IP/source固定bf41d1602d5c59d35033b74c2ab82fddc232a528：数学/严格24/24、26 CoSim、与25d6dda全部原始word相同、16PE/4Acc/II5/5/1/1、7.300ns/DSP40，总72696cycles；tile RAMB18由40降0、AXI RAMB36仍7，物理LUT50432/FF28058、内部setup+0.330/hold+0.010ns。完整OOC仍因外部min0ns hold4575失败，必须留真实系统关闭。正式component SHA a64c7be2ae2cc026bd4164cd347004a67287aba3688a93d703bbfc065a3a26dc。
+**2026-10-10 13:16当前任务：**三个4×4工作包，第1/2轮已闭环、工作包1/2合格；第3轮远端结果已分析，系统功能失败；2026-10-11用户恢复上板，当前见下一段。最终计算IP/source固定bf41d1602d5c59d35033b74c2ab82fddc232a528：数学/严格24/24、26 CoSim、与25d6dda全部原始word相同、16PE/4Acc/II5/5/1/1、7.300ns/DSP40，总72696cycles；tile RAMB18由40降0、AXI RAMB36仍7，物理LUT50432/FF28058、内部setup+0.330/hold+0.010ns。完整OOC仍因外部min0ns hold4575失败，必须留真实系统关闭。正式component SHA a64c7be2ae2cc026bd4164cd347004a67287aba3688a93d703bbfc065a3a26dc。
 
-**当前系统候选与暂停交接：**计算IP仍bf41d16，component SHA不变。473a4f9原生256位/SIZE5自检四项unit通过；真实HBM RTL19:32:00—20:17:46完成，初始化及忙中整体复位恢复通过，但109335ns首个用例前置canary失败，cases0/code02/pc26/actual全X。ROM pc26为地址0x002ffff8的READ，期望0x0000000012345678；不是O数值比较，根因未确定。4a5c803完整实现19:52:04—20:22:18完成，setup+0.261/hold+0.010ns，TNS/THS0、99857 nets全route、LUT61894/FF45210/R36=45/R18=0/DSP40，时钟ODT/100MHz/2.7ns断言通过，DRC/methodology无Error/Critical。CDC13/2项Info＋696 CDC15 Warning，详细人工复核未完成；18组bus-skew最小slack+3.739ns。证据docs/evidence/split_d_nm37_4a5c803_pause/。整体仍未验收，按用户要求暂停，不进入bitstream或上板。
+**前轮系统证据（2026-10-10）：**计算IP仍bf41d16，component SHA不变。473a4f9原生256位/SIZE5自检四项unit通过；真实HBM RTL19:32:00—20:17:46完成，初始化及忙中整体复位恢复通过，但109335ns首个用例前置canary失败，cases0/code02/pc26/actual全X。ROM pc26为地址0x002ffff8的READ，期望0x0000000012345678；不是O数值比较，根因未确定。4a5c803完整实现19:52:04—20:22:18完成，setup+0.261/hold+0.010ns，TNS/THS0、99857 nets全route、LUT61894/FF45210/R36=45/R18=0/DSP40，时钟ODT/100MHz/2.7ns断言通过，DRC/methodology无Error/Critical。CDC13/2项Info＋696 CDC15 Warning，详细人工复核未完成；18组bus-skew最小slack+3.739ns。证据docs/evidence/split_d_nm37_4a5c803_pause/。前轮未验收；本轮用户已恢复，使用dfbf82e新工程闭环。
 
-**最新仿真与任务状态：**当前两项任务已自然结束，20:25核对没有本任务Vivado/XSIM进程；旧20us辅助复位诊断驻留PID1495091/1495158已确认目录/script后关闭，未删除文件。TLM100us已定位3个HBM请求只返回Q/K，V无返回；不外推真实硬件故障。4a5c显式AXI监视器已实际编译/运行（AR1/1/1、R4/4/0）；core旧start&&ap_idle谓词错误，改start&&entry-state的本地补丁尚未验证，不声称核计时已通过。bitstream/JTAG/板测均未执行。唯一VU37P target210017937722A；另一ZU5不使用。暂停仅保留日志/报告/未提交补丁，恢复需用户明确指示。
+**2026-10-11当前恢复状态：**dfbf82e默认HBM RTL与完整物理实现分别运行于`build/split_d_nm37_dfbf82e_rtl_ipbf`/`build/split_d_nm37_dfbf82e_phys_ipbf`，日志`/tmp/codex_nm37_dfbf82e_{rtl,physical}_20261011.log`。关闭XSIM不支持的DBI，尚未证实它解决全X。9497ab3四项controller unit回归通过，原始日志已取回；JTAG只读确认210017937722A唯一VU37P，ZU5未操作。CDC脚本已在旧DCP试运行覆盖全部警告，新DCP已生成，20:38新实现setup/hold+0.261/+0.010ns通过，CDC692项XPM＋4项XSDB FIFO已全部审查；18组bus-skew最小+3.739ns通过，物理证据已下载并验SHA。用户已修订为首笔RTL＋完整52笔真实板测；首笔证据齐全后允许受控停止长仿真，不称完整RTL通过。未生成bitstream、未下载、未板测；用户已明确恢复，无需再因旧暂停重复请求授权。
 
 **已证实失败与范围：**a0c4329 TB超时无尺寸3e9在Time0溢出，已改显式64位保持3s合同；旧完整仿真768因unused aux active-low且接0永久复位，20us诊断锁定=1但APB/AXI/selftest reset全0，已精确停止并保留WDB。HBM内部两primary重复造成4条TIMING Critical；789 XDC foreach/if被忽略而exit1，改为纯generated_clock＋普通Tcl断言。原始日志/失败报告/XCI在docs/evidence/split_d_nm37_a0c4329_ipbf41d16/和split_d_nm37_7892c75_reset_diagnosis/。控制器4项unit通过；新4a5c803物理自动门槛已通过，系统功能失败、CDC详细复核/板测未完成。授权与日志见第2节/1316修改日志。
 

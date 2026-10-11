@@ -13,7 +13,7 @@ file mkdir $evidence_dir
 proc named_probe {core net} {
     # The generated LTX names are the actual nets (e.g. flags_1), not
     # probe_in0/probe0. Restrict to the selected core and require uniqueness.
-    set result [get_hw_probes -of_objects $core *${net}*]
+    set result [get_hw_probes -of_objects $core -filter "NAME =~ *${net}*"]
     if {[llength $result]!=1} { error "Expected one probe net=$net core=$core" }
     return [lindex $result 0]
 }

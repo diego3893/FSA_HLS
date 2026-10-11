@@ -62,7 +62,7 @@ vivado -mode batch -source tools/split_d_nm37/scripts/run_board_selftest.tcl \
   -tclargs <同一个ltx> <新板测证据目录>
 ```
 
-板测只选择JTAG线缆`210017937722A`及唯一VU37P，采用易失JTAG配置。脚本运行普通/stress各26笔，保存每次新启动busy触发及终态ILA/CSV、VIO状态CSV。接受条件为flags=6、fail_code=0、cases_done=26、init_done=1；启动捕获防止复用上轮PASS。未执行这些脚本前不得宣称板测通过。
+板测只选择JTAG线缆`210017937722A`及唯一VU37P，采用易失JTAG配置。脚本运行普通/stress各26笔，保存每次新启动busy触发及终态ILA/CSV、VIO状态CSV。接受条件为flags=6、fail_code=0、cases_done=26、init_done=1；启动捕获防止复用上轮PASS。未执行这些脚本前不得宣称板测通过。用户2026-10-11选择上板前默认RTL验初始化、忙中整体复位及首笔完整事务；全部52笔验收由真实HBM板测完成。默认TB仍包含52笔，若首笔后受控停止，必须记录实际覆盖与停止原因，不能称完整系统RTL通过。
 
 可追加官方HBM TLM功能对照：`simulate.tcl <新工程副本路径> hbm_tlm`。仅切换Vivado实际允许的HBM模型，FSA、自检、SmartConnect仍使用RTL，ROM、52事务、全部canary/位模式不变。TLM的APB为stub，不能建模流量后的全HBM复位，故仅该对照排除忙中复位并在日志声明；默认`rtl`仍完整执行初始化与忙中整体复位。TLM结果不得作为实际HBM延迟、吞吐或物理时序证据。
 

@@ -12,6 +12,7 @@ set target [get_hw_targets -filter {NAME =~ */210017937722A}]
 if {[llength $target]!=1} { error "Expected the verified NM37 JTAG target" }
 current_hw_target $target
 open_hw_target
+report_property $target
 set device [get_hw_devices -filter {PART =~ xcvu37p*}]
 if {[llength $device]!=1 || [llength [get_hw_devices]]!=1} {
     error "Expected only the verified VU37P device on this target"
@@ -28,6 +29,18 @@ foreach vio [get_hw_vios -of_objects $device] {
     refresh_hw_vio $vio
     report_property $vio
     foreach probe [get_hw_probes -of_objects $vio] { report_property $probe }
+}
+set hbms [get_hw_hbms -of_objects $device]
+if {[llength $hbms]<1} { error "Missing configured HBM debug core" }
+foreach hbm $hbms {
+    refresh_hw_hbm $hbm
+    puts "NM37_HBM_STATUS=$hbm"
+    report_property $hbm
+    foreach mc [get_hw_hbmmcs -of_objects $hbm] {
+        refresh_hw_hbmmc $mc
+        puts "NM37_HBMMC_STATUS=$mc"
+        report_property $mc
+    }
 }
 close_hw_target
 disconnect_hw_server

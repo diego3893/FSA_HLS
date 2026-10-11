@@ -1,0 +1,6 @@
+# Preserve tool output bytes and SHA256; these are raw evidence, not source.
+*.rpt -text -diff
+*.log -text -diff
+*.tsv -text -diff
+*.xdc -text -diff
+*.txt -text -diff
