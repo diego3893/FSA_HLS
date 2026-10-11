@@ -1795,8 +1795,21 @@ int main(){
         "invalid-length-over-max", (unsigned)fsa::MAX_SEQUENCE_LENGTH+1U
     ) && passed;
 
-    const unsigned expected_math_cases = PE_DIM==4 && HEAD_DIM==16 ? 24U : 22U;
+    unsigned expected_math_cases = PE_DIM==4 && HEAD_DIM==16 ? 24U : 22U;
+#if defined(FSA_SPLIT_D_LONG_CSIM_TEST) && FSA_SPLIT_D_LONG_CSIM_TEST
+    static_assert(PE_DIM==16 && HEAD_DIM==128 && fsa::MAX_SEQUENCE_LENGTH>=1024,
+                  "Long CSim test requires PE16/head128/L_MAX>=1024");
+    // Host numerical coverage only. CSim wall time is not FPGA latency.
+    std::cout << "[long-csim] begin L=1024 HEAD_DIM=128 causal=0" << std::endl;
+    passed = runCase("paper-shape-noncausal", 1024U, false, 1901,
+                     InputPattern::Random) && passed;
+    ++expected_math_cases;
+#endif
     std::cout << "[math-summary] " << mathematical_cases_passed << "/" << expected_math_cases << "\n";
+    if(mathematical_cases_passed != expected_math_cases){
+        std::cerr << "mathematical coverage failure\n";
+        passed = false;
+    }
     if(PE_DIM==4 && HEAD_DIM==16){
         std::cout << "[bit-summary] " << baseline_cases_passed << "/" << baseline_cases_checked << "\n";
         if(baseline_cases_checked != 24U){
