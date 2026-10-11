@@ -96,10 +96,20 @@ module tb_split_d_system;
             if(dut.split_d_system_i.memory_interconnect_M00_AXI_AWVALID && dut.split_d_system_i.memory_interconnect_M00_AXI_AWREADY) begin
                 if(dut.split_d_system_i.memory_interconnect_M00_AXI_AWSIZE!==3'd5 || dut.split_d_system_i.memory_interconnect_M00_AXI_AWADDR[4:0]!==5'b0)
                     $fatal(1,"HBM native write SIZE/alignment violation");
+                if(cases==0 && pc<=28)
+                    $display("HBM AW time=%t pc=%0d address=%h len=%0d",$time,pc,dut.split_d_system_i.memory_interconnect_M00_AXI_AWADDR,dut.split_d_system_i.memory_interconnect_M00_AXI_AWLEN);
             end
             if(dut.split_d_system_i.memory_interconnect_M00_AXI_ARVALID && dut.split_d_system_i.memory_interconnect_M00_AXI_ARREADY) begin
                 if(dut.split_d_system_i.memory_interconnect_M00_AXI_ARSIZE!==3'd5 || dut.split_d_system_i.memory_interconnect_M00_AXI_ARADDR[4:0]!==5'b0)
                     $fatal(1,"HBM native read SIZE/alignment violation");
+                if(cases==0 && pc<=28)
+                    $display("HBM AR time=%t pc=%0d address=%h len=%0d",$time,pc,dut.split_d_system_i.memory_interconnect_M00_AXI_ARADDR,dut.split_d_system_i.memory_interconnect_M00_AXI_ARLEN);
+            end
+            if(cases==0 && pc<=28) begin
+                if(dut.split_d_system_i.memory_interconnect_M00_AXI_WVALID && dut.split_d_system_i.memory_interconnect_M00_AXI_WREADY)
+                    $display("HBM W time=%t pc=%0d data=%h strb=%h last=%b",$time,pc,dut.split_d_system_i.memory_interconnect_M00_AXI_WDATA,dut.split_d_system_i.memory_interconnect_M00_AXI_WSTRB,dut.split_d_system_i.memory_interconnect_M00_AXI_WLAST);
+                if(dut.split_d_system_i.memory_interconnect_M00_AXI_RVALID && dut.split_d_system_i.memory_interconnect_M00_AXI_RREADY)
+                    $display("HBM R time=%t pc=%0d data=%h resp=%h last=%b",$time,pc,dut.split_d_system_i.memory_interconnect_M00_AXI_RDATA,dut.split_d_system_i.memory_interconnect_M00_AXI_RRESP,dut.split_d_system_i.memory_interconnect_M00_AXI_RLAST);
             end
         end
     end
@@ -191,6 +201,6 @@ module tb_split_d_system;
     );
     core_latency_watch latency_watch(
         .clk(ctrl_clk),.reset_n(dut.split_d_system_i.fsa_0.inst.ap_rst_n),
-        .start(dut.split_d_system_i.fsa_0.inst.ap_start),.idle(dut.split_d_system_i.fsa_0.inst.ap_idle),.done(dut.split_d_system_i.fsa_0.inst.ap_done)
+        .start(dut.split_d_system_i.fsa_0.inst.ap_start),.idle_state(dut.split_d_system_i.fsa_0.inst.ap_CS_fsm_state1),.done(dut.split_d_system_i.fsa_0.inst.ap_done)
     );
 endmodule

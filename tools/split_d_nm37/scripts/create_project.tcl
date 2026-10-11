@@ -55,6 +55,14 @@ set hbm [create_bd_cell -type ip -vlnv xilinx.com:ip:hbm:1.0 hbm_0]
 set hbm_props [list CONFIG.USER_APB_EN {false} CONFIG.USER_AXI_CLK_FREQ {225} \
     CONFIG.USER_HBM_DENSITY {8GB} CONFIG.USER_DEBUG_EN {TRUE} CONFIG.USER_XSDB_INTF_EN {TRUE}]
 for {set i 1} {$i<32} {incr i} { lappend hbm_props CONFIG.USER_SAXI_[format %02d $i] {false} }
+# Vivado2024.2 HBM_xsim.sv explicitly lists DBI as unsupported. Match
+# simulation and hardware settings, following the AWS XSIM workaround:
+# https://github.com/aws/aws-fpga/blob/f2/hdk/common/verif/scripts/xsim_patch.tcl
+# Disable only data bus inversion; payload width, ECC and clocks stay fixed.
+for {set i 0} {$i<16} {incr i} {
+    lappend hbm_props CONFIG.USER_MC${i}_WRITE_DBI_EN {false}
+    lappend hbm_props CONFIG.USER_MC${i}_READ_DBI_EN {false}
+}
 set_property -dict $hbm_props $hbm
 foreach stack {0 1} {
     # Match the implemented NM37 example: HBM's internal reference BUFG
@@ -125,6 +133,13 @@ foreach {name pin} {ctrl_clk clk_wiz_0/clk_out1 clock_locked clk_wiz_0/locked in
     connect_bd_net $p [get_bd_pins $pin]
 }
 validate_bd_design
+for {set i 0} {$i<16} {incr i} {
+    foreach direction {WRITE READ} {
+        if {[get_property CONFIG.USER_MC${i}_${direction}_DBI_EN $hbm] ni {false FALSE 0}} {
+            error "HBM DBI must be disabled for the reviewed XSIM model"
+        }
+    }
+}
 foreach domain {100 225} {
     if {[get_property CONFIG.C_AUX_RESET_HIGH [get_bd_cells rst_$domain]]!=1} {
         error "Unused auxiliary reset must be active-high in domain $domain"
