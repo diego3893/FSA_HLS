@@ -4,3 +4,6 @@
 *.tsv -text -diff
 *.xdc -text -diff
 *.txt -text -diff
+*.csv -text -diff
+*.ltx -text -diff
+*.ila -text -diff

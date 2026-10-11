@@ -4,7 +4,7 @@
 
 这是4×4/head16 Split-D的完整存储与控制集成工程。计算IP仍由仓库标准入口`./run_hls.sh fsa_stream_split_d`生成；本目录的Vivado流程不替代、不缩减HLS测试。
 
-当前状态（2026-10-11）：正式计算IP`bf41d16`全流程已通过。`dfbf82e`关闭XSIM不支持的16MC读/写DBI后，默认RTL初始化、忙中整体复位及首笔完整比较通过，原canary全X消失；按用户修订受控停止，实际普通1笔/stress0笔。完整系统实现+0.261/+0.010ns、CDC详细分类与18组bus-skew最小+3.739ns通过。bit/LTX正在生成，尚未下载/板测；全部52笔由真实板测验收。
+当前状态：2026-10-11 21:23，4×4/head16真实HBM上板验收通过。系统硬件dfbf82e、计算IP bf41d16；普通26笔＋背压26笔全部通过，两个HBM stack共16MC初始化/ready均1。新实现setup+0.261ns/hold+0.010ns，CDC及18组bus-skew已审查。按用户合同，默认RTL验初始化、忙中整体复位恢复与首笔完整事务，实际覆盖普通1笔/stress0笔；完整52笔由真实板测验收。
 
 ## 2 系统合同
 
@@ -69,3 +69,5 @@ vivado -mode batch -source tools/split_d_nm37/scripts/run_board_selftest.tcl \
 Vivado2024.2的官方HBM TLM在`hbm_sc.h`将APB和`apb_complete`声明为`xsc_stub_port`，不模拟校准。可选TLM功能对照仅在仿真宏下将BD内部`init_done`适配为clock_locked，日志显式标记FUNCTIONAL ONLY；普通RTL模式无此适配。TLM对照不证明HBM初始化/校准/复位恢复，不能替代默认RTL流程或板测。
 
 板级时钟必须按NM37原理图第3页处理：U7为100MHz LVDS，经100nF电容交流耦合，BH42/BJ42位于1.2V Bank65。XDC保留DIFF_SSTL12并显式ODT=RTT_48，提供接收端split终端/偏置，最终设计断言防止使用缺该修正的旧DCP。SW2低复位同时连接ZU5，不能当FSA独占复位。板级来源、检查步骤与未完成项见`docs/综合报告/NM37板测依据与原理图核查_20261010.md`。
+
+实际验收报告：`docs/综合报告/Split-D_4x4真实HBM上板验收_20261011.md`。最终硬件dfbf82e、板测脚本fb06b16；原始证据含普通/stress启动及终态ILA、VIO状态、两个HBM stack寄存器及SHA清单。Vivado2024.2的ILA TRIGGER_MODE/CAPTURE_MODE为只读，应核对综合属性而非写入；此设计MC状态在hw_hbm的MC0–7属性中，独立hw_hbmmc对象为空。

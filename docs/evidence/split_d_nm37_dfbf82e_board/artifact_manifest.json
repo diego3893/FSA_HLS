@@ -1,0 +1,21 @@
+{
+  "hardware_commit": "dfbf82e320dbab61af8dff37ab1183df124d7427",
+  "files": {
+    "build/split_d_nm37_dfbf82e_phys_ipbf/bitstream/split_d_nm37.bit": {
+      "bytes": 84989281,
+      "sha256": "b5cc536eabd9e64d2cbf86292fb2f87c3a5fb1c32160c579a34e592a8b3d6570"
+    },
+    "build/split_d_nm37_dfbf82e_phys_ipbf/bitstream/split_d_nm37.ltx": {
+      "bytes": 60524,
+      "sha256": "596539bf643c1444d0a8edce0683eda68b74fa93ca08d70ab54fbda2d7b0969f"
+    },
+    "build/split_d_nm37_dfbf82e_phys_ipbf/reports/routed.dcp": {
+      "bytes": 47488823,
+      "sha256": "df1911231628193bf2ee7c2c9724e14d29d748ffab7573a66368d0e86f6982ba"
+    },
+    "hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1/impl/ip/component.xml": {
+      "bytes": 450108,
+      "sha256": "a64c7be2ae2cc026bd4164cd347004a67287aba3688a93d703bbfc065a3a26dc"
+    }
+  }
+}

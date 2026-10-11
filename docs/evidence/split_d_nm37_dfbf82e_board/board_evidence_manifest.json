@@ -1,0 +1,71 @@
+{
+  "board_script_commit": "fb06b16",
+  "hardware_commit": "dfbf82e",
+  "files": {
+    "normal_terminal.csv": {
+      "source": "build/split_d_nm37_dfbf82e_board_fb06b16/normal_terminal.csv",
+      "bytes": 54350,
+      "sha256": "b145da4905e2b805ab370b4dc5925449094164c2c91fe132c233b3e7d8be88a5"
+    },
+    "normal_terminal.ila": {
+      "source": "build/split_d_nm37_dfbf82e_board_fb06b16/normal_terminal.ila",
+      "bytes": 10637,
+      "sha256": "43e1d1f4e349c874e86fd9cf0d119afca5586405356f9fa8db66b41427dbb652"
+    },
+    "normal_start.csv": {
+      "source": "build/split_d_nm37_dfbf82e_board_fb06b16/normal_start.csv",
+      "bytes": 54350,
+      "sha256": "a630fe3a8dc108dafc293d05c2f427985b77c4494bf4f0a08e2b9d9ee0b27021"
+    },
+    "stress_terminal.csv": {
+      "source": "build/split_d_nm37_dfbf82e_board_fb06b16/stress_terminal.csv",
+      "bytes": 54350,
+      "sha256": "0ed4081e5467463cf581063d35ad56496aaf2c1dd2f197266a89eef05a17ff65"
+    },
+    "vio_status.csv": {
+      "source": "build/split_d_nm37_dfbf82e_board_fb06b16/vio_status.csv",
+      "bytes": 239,
+      "sha256": "291a052471f99f336d90a234cc2754f6bf9a97a547502adab762af6818b0cb1e"
+    },
+    "stress_start.csv": {
+      "source": "build/split_d_nm37_dfbf82e_board_fb06b16/stress_start.csv",
+      "bytes": 54350,
+      "sha256": "db4866e9f78504df80f525b27cab90d3e91c1af3c5f369c0b1150af22ea2bb7b"
+    },
+    "hbm_final_1.rpt": {
+      "source": "build/split_d_nm37_dfbf82e_board_fb06b16/hbm_final_1.rpt",
+      "bytes": 263003,
+      "sha256": "1458715950ca176c5715ed53537f1548ca596e41e6fc51f56a17b4ad8addd2a5"
+    },
+    "device.rpt": {
+      "source": "build/split_d_nm37_dfbf82e_board_fb06b16/device.rpt",
+      "bytes": 31922,
+      "sha256": "a15787daba648eedac4edf26897d00bbb32d5cbc021de05ca40043a80d3b62d7"
+    },
+    "normal_start.ila": {
+      "source": "build/split_d_nm37_dfbf82e_board_fb06b16/normal_start.ila",
+      "bytes": 12930,
+      "sha256": "b804fc339b5b4a2c59bc94a8dc57ea71c9757986a86eae6fca6107e74fc49b8a"
+    },
+    "stress_terminal.ila": {
+      "source": "build/split_d_nm37_dfbf82e_board_fb06b16/stress_terminal.ila",
+      "bytes": 10613,
+      "sha256": "87da2e74f3fe626a6491b3c40e935e868f0b0024735e3ba3bebde1b2e6e26e63"
+    },
+    "stress_start.ila": {
+      "source": "build/split_d_nm37_dfbf82e_board_fb06b16/stress_start.ila",
+      "bytes": 12868,
+      "sha256": "0c23a383b52e20ddb54450b6c48da061ff555cb923b403ad57e5f8f1b75928dc"
+    },
+    "hbm_final_0.rpt": {
+      "source": "build/split_d_nm37_dfbf82e_board_fb06b16/hbm_final_0.rpt",
+      "bytes": 263003,
+      "sha256": "0f644b9c262c74f96c15e719a9c301708a31010a17d599e58c960fb603a9d8e0"
+    },
+    "board_run.log": {
+      "source": "/tmp/codex_nm37_fb06b16_board_20261011.log",
+      "bytes": 15571,
+      "sha256": "c3bfd0e094268a1682c6eeebbe5ee8af8fab90d87aff05d4b068319c4a89071a"
+    }
+  }
+}

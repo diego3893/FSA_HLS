@@ -1,0 +1,1162 @@
+{
+    "ltx_root": {
+        "version": 4,
+        "minor": 0,
+        "ltx_data": [
+            {
+                "name": "EDA_PROBESET",
+                "active": true,
+                "debug_cores": [
+                    {
+                        "type": "XSDB_V3",
+                        "name": "dbg_hub",
+                        "spec": "labtools_xsdbm_v3",
+                        "clk_input_freq_hz": "100000000"
+                    },
+                    {
+                        "type": "XSDBS_V2",
+                        "name": "u_bd/split_d_system_i/hbm_0",
+                        "spec": "labtools_xsdbslavelib_v2",
+                        "ipName": "hbm",
+                        "core_location": {
+                            "user_chain": 1,
+                            "slave_index": 0,
+                            "bscan_switch_index": 0
+                        },
+                        "uuid": "12DC8007A0905C1B84BFA4BFA8CE25DC"
+                    },
+                    {
+                        "type": "ILA_V3",
+                        "name": "u_ila",
+                        "spec": "labtools_ila_v6",
+                        "ipName": "ila",
+                        "core_location": {
+                            "user_chain": 1,
+                            "slave_index": 2,
+                            "bscan_switch_index": 0
+                        },
+                        "uuid": "C30A833047BA52038DBC7E3E3214D902",
+                        "pins": [
+                            {
+                                "name": "probe0",
+                                "id": 0,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 3,
+                                "portIndex": 0,
+                                "nets": [
+                                    {
+                                        "name": "flags_1",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "flags_1[3]"
+                                            },
+                                            {
+                                                "name": "flags_1[2]"
+                                            },
+                                            {
+                                                "name": "flags_1[1]"
+                                            },
+                                            {
+                                                "name": "flags_1[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe1",
+                                "id": 1,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 7,
+                                "portIndex": 1,
+                                "nets": [
+                                    {
+                                        "name": "fail_code_1",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "fail_code_1[7]"
+                                            },
+                                            {
+                                                "name": "fail_code_1[6]"
+                                            },
+                                            {
+                                                "name": "fail_code_1[5]"
+                                            },
+                                            {
+                                                "name": "fail_code_1[4]"
+                                            },
+                                            {
+                                                "name": "fail_code_1[3]"
+                                            },
+                                            {
+                                                "name": "fail_code_1[2]"
+                                            },
+                                            {
+                                                "name": "fail_code_1[1]"
+                                            },
+                                            {
+                                                "name": "fail_code_1[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe2",
+                                "id": 2,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 5,
+                                "portIndex": 2,
+                                "nets": [
+                                    {
+                                        "name": "cases_done_1",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "cases_done_1[5]"
+                                            },
+                                            {
+                                                "name": "cases_done_1[4]"
+                                            },
+                                            {
+                                                "name": "cases_done_1[3]"
+                                            },
+                                            {
+                                                "name": "cases_done_1[2]"
+                                            },
+                                            {
+                                                "name": "cases_done_1[1]"
+                                            },
+                                            {
+                                                "name": "cases_done_1[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe3",
+                                "id": 3,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 12,
+                                "portIndex": 3,
+                                "nets": [
+                                    {
+                                        "name": "debug_pc_1",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "debug_pc_1[12]"
+                                            },
+                                            {
+                                                "name": "debug_pc_1[11]"
+                                            },
+                                            {
+                                                "name": "debug_pc_1[10]"
+                                            },
+                                            {
+                                                "name": "debug_pc_1[9]"
+                                            },
+                                            {
+                                                "name": "debug_pc_1[8]"
+                                            },
+                                            {
+                                                "name": "debug_pc_1[7]"
+                                            },
+                                            {
+                                                "name": "debug_pc_1[6]"
+                                            },
+                                            {
+                                                "name": "debug_pc_1[5]"
+                                            },
+                                            {
+                                                "name": "debug_pc_1[4]"
+                                            },
+                                            {
+                                                "name": "debug_pc_1[3]"
+                                            },
+                                            {
+                                                "name": "debug_pc_1[2]"
+                                            },
+                                            {
+                                                "name": "debug_pc_1[1]"
+                                            },
+                                            {
+                                                "name": "debug_pc_1[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe4",
+                                "id": 4,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 31,
+                                "portIndex": 4,
+                                "nets": [
+                                    {
+                                        "name": "last_case_cycles_1",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "last_case_cycles_1[31]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[30]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[29]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[28]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[27]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[26]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[25]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[24]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[23]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[22]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[21]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[20]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[19]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[18]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[17]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[16]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[15]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[14]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[13]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[12]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[11]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[10]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[9]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[8]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[7]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[6]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[5]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[4]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[3]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[2]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[1]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles_1[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe5",
+                                "id": 5,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 3,
+                                "portIndex": 5,
+                                "nets": [
+                                    {
+                                        "name": "debug_state_1",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "debug_state_1[3]"
+                                            },
+                                            {
+                                                "name": "debug_state_1[2]"
+                                            },
+                                            {
+                                                "name": "debug_state_1[1]"
+                                            },
+                                            {
+                                                "name": "debug_state_1[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe6",
+                                "id": 6,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 63,
+                                "portIndex": 6,
+                                "nets": [
+                                    {
+                                        "name": "actual_word_1",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "actual_word_1[63]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[62]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[61]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[60]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[59]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[58]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[57]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[56]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[55]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[54]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[53]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[52]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[51]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[50]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[49]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[48]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[47]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[46]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[45]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[44]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[43]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[42]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[41]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[40]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[39]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[38]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[37]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[36]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[35]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[34]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[33]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[32]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[31]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[30]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[29]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[28]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[27]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[26]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[25]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[24]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[23]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[22]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[21]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[20]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[19]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[18]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[17]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[16]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[15]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[14]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[13]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[12]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[11]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[10]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[9]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[8]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[7]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[6]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[5]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[4]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[3]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[2]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[1]"
+                                            },
+                                            {
+                                                "name": "actual_word_1[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe7",
+                                "id": 7,
+                                "type": "DATA_TRIGGER",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 7,
+                                "nets": [
+                                    {
+                                        "name": "init_done_1",
+                                        "isBus": false
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "VIO_V2",
+                        "name": "u_vio",
+                        "spec": "labtools_vio_v3",
+                        "ipName": "vio",
+                        "core_location": {
+                            "user_chain": 1,
+                            "slave_index": 3,
+                            "bscan_switch_index": 0
+                        },
+                        "uuid": "407D14E81CC958EF8C2E354D7BF170FD",
+                        "pins": [
+                            {
+                                "name": "probe_in0",
+                                "id": 8,
+                                "type": "DATA",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 3,
+                                "portIndex": 0,
+                                "nets": [
+                                    {
+                                        "name": "flags",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "flags[3]"
+                                            },
+                                            {
+                                                "name": "flags[2]"
+                                            },
+                                            {
+                                                "name": "flags[1]"
+                                            },
+                                            {
+                                                "name": "flags[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe_in1",
+                                "id": 9,
+                                "type": "DATA",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 7,
+                                "portIndex": 1,
+                                "nets": [
+                                    {
+                                        "name": "fail_code",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "fail_code[7]"
+                                            },
+                                            {
+                                                "name": "fail_code[6]"
+                                            },
+                                            {
+                                                "name": "fail_code[5]"
+                                            },
+                                            {
+                                                "name": "fail_code[4]"
+                                            },
+                                            {
+                                                "name": "fail_code[3]"
+                                            },
+                                            {
+                                                "name": "fail_code[2]"
+                                            },
+                                            {
+                                                "name": "fail_code[1]"
+                                            },
+                                            {
+                                                "name": "fail_code[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe_in2",
+                                "id": 10,
+                                "type": "DATA",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 5,
+                                "portIndex": 2,
+                                "nets": [
+                                    {
+                                        "name": "cases_done",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "cases_done[5]"
+                                            },
+                                            {
+                                                "name": "cases_done[4]"
+                                            },
+                                            {
+                                                "name": "cases_done[3]"
+                                            },
+                                            {
+                                                "name": "cases_done[2]"
+                                            },
+                                            {
+                                                "name": "cases_done[1]"
+                                            },
+                                            {
+                                                "name": "cases_done[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe_in3",
+                                "id": 11,
+                                "type": "DATA",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 12,
+                                "portIndex": 3,
+                                "nets": [
+                                    {
+                                        "name": "debug_pc",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "debug_pc[12]"
+                                            },
+                                            {
+                                                "name": "debug_pc[11]"
+                                            },
+                                            {
+                                                "name": "debug_pc[10]"
+                                            },
+                                            {
+                                                "name": "debug_pc[9]"
+                                            },
+                                            {
+                                                "name": "debug_pc[8]"
+                                            },
+                                            {
+                                                "name": "debug_pc[7]"
+                                            },
+                                            {
+                                                "name": "debug_pc[6]"
+                                            },
+                                            {
+                                                "name": "debug_pc[5]"
+                                            },
+                                            {
+                                                "name": "debug_pc[4]"
+                                            },
+                                            {
+                                                "name": "debug_pc[3]"
+                                            },
+                                            {
+                                                "name": "debug_pc[2]"
+                                            },
+                                            {
+                                                "name": "debug_pc[1]"
+                                            },
+                                            {
+                                                "name": "debug_pc[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe_in4",
+                                "id": 12,
+                                "type": "DATA",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 31,
+                                "portIndex": 4,
+                                "nets": [
+                                    {
+                                        "name": "last_case_cycles",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "last_case_cycles[31]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[30]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[29]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[28]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[27]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[26]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[25]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[24]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[23]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[22]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[21]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[20]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[19]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[18]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[17]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[16]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[15]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[14]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[13]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[12]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[11]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[10]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[9]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[8]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[7]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[6]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[5]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[4]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[3]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[2]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[1]"
+                                            },
+                                            {
+                                                "name": "last_case_cycles[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe_in5",
+                                "id": 13,
+                                "type": "DATA",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 3,
+                                "portIndex": 5,
+                                "nets": [
+                                    {
+                                        "name": "debug_state",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "debug_state[3]"
+                                            },
+                                            {
+                                                "name": "debug_state[2]"
+                                            },
+                                            {
+                                                "name": "debug_state[1]"
+                                            },
+                                            {
+                                                "name": "debug_state[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe_in6",
+                                "id": 14,
+                                "type": "DATA",
+                                "direction": "IN",
+                                "isVector": true,
+                                "leftIndex": 0,
+                                "rightIndex": 63,
+                                "portIndex": 6,
+                                "nets": [
+                                    {
+                                        "name": "actual_word",
+                                        "isBus": true,
+                                        "subnets": [
+                                            {
+                                                "name": "actual_word[63]"
+                                            },
+                                            {
+                                                "name": "actual_word[62]"
+                                            },
+                                            {
+                                                "name": "actual_word[61]"
+                                            },
+                                            {
+                                                "name": "actual_word[60]"
+                                            },
+                                            {
+                                                "name": "actual_word[59]"
+                                            },
+                                            {
+                                                "name": "actual_word[58]"
+                                            },
+                                            {
+                                                "name": "actual_word[57]"
+                                            },
+                                            {
+                                                "name": "actual_word[56]"
+                                            },
+                                            {
+                                                "name": "actual_word[55]"
+                                            },
+                                            {
+                                                "name": "actual_word[54]"
+                                            },
+                                            {
+                                                "name": "actual_word[53]"
+                                            },
+                                            {
+                                                "name": "actual_word[52]"
+                                            },
+                                            {
+                                                "name": "actual_word[51]"
+                                            },
+                                            {
+                                                "name": "actual_word[50]"
+                                            },
+                                            {
+                                                "name": "actual_word[49]"
+                                            },
+                                            {
+                                                "name": "actual_word[48]"
+                                            },
+                                            {
+                                                "name": "actual_word[47]"
+                                            },
+                                            {
+                                                "name": "actual_word[46]"
+                                            },
+                                            {
+                                                "name": "actual_word[45]"
+                                            },
+                                            {
+                                                "name": "actual_word[44]"
+                                            },
+                                            {
+                                                "name": "actual_word[43]"
+                                            },
+                                            {
+                                                "name": "actual_word[42]"
+                                            },
+                                            {
+                                                "name": "actual_word[41]"
+                                            },
+                                            {
+                                                "name": "actual_word[40]"
+                                            },
+                                            {
+                                                "name": "actual_word[39]"
+                                            },
+                                            {
+                                                "name": "actual_word[38]"
+                                            },
+                                            {
+                                                "name": "actual_word[37]"
+                                            },
+                                            {
+                                                "name": "actual_word[36]"
+                                            },
+                                            {
+                                                "name": "actual_word[35]"
+                                            },
+                                            {
+                                                "name": "actual_word[34]"
+                                            },
+                                            {
+                                                "name": "actual_word[33]"
+                                            },
+                                            {
+                                                "name": "actual_word[32]"
+                                            },
+                                            {
+                                                "name": "actual_word[31]"
+                                            },
+                                            {
+                                                "name": "actual_word[30]"
+                                            },
+                                            {
+                                                "name": "actual_word[29]"
+                                            },
+                                            {
+                                                "name": "actual_word[28]"
+                                            },
+                                            {
+                                                "name": "actual_word[27]"
+                                            },
+                                            {
+                                                "name": "actual_word[26]"
+                                            },
+                                            {
+                                                "name": "actual_word[25]"
+                                            },
+                                            {
+                                                "name": "actual_word[24]"
+                                            },
+                                            {
+                                                "name": "actual_word[23]"
+                                            },
+                                            {
+                                                "name": "actual_word[22]"
+                                            },
+                                            {
+                                                "name": "actual_word[21]"
+                                            },
+                                            {
+                                                "name": "actual_word[20]"
+                                            },
+                                            {
+                                                "name": "actual_word[19]"
+                                            },
+                                            {
+                                                "name": "actual_word[18]"
+                                            },
+                                            {
+                                                "name": "actual_word[17]"
+                                            },
+                                            {
+                                                "name": "actual_word[16]"
+                                            },
+                                            {
+                                                "name": "actual_word[15]"
+                                            },
+                                            {
+                                                "name": "actual_word[14]"
+                                            },
+                                            {
+                                                "name": "actual_word[13]"
+                                            },
+                                            {
+                                                "name": "actual_word[12]"
+                                            },
+                                            {
+                                                "name": "actual_word[11]"
+                                            },
+                                            {
+                                                "name": "actual_word[10]"
+                                            },
+                                            {
+                                                "name": "actual_word[9]"
+                                            },
+                                            {
+                                                "name": "actual_word[8]"
+                                            },
+                                            {
+                                                "name": "actual_word[7]"
+                                            },
+                                            {
+                                                "name": "actual_word[6]"
+                                            },
+                                            {
+                                                "name": "actual_word[5]"
+                                            },
+                                            {
+                                                "name": "actual_word[4]"
+                                            },
+                                            {
+                                                "name": "actual_word[3]"
+                                            },
+                                            {
+                                                "name": "actual_word[2]"
+                                            },
+                                            {
+                                                "name": "actual_word[1]"
+                                            },
+                                            {
+                                                "name": "actual_word[0]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe_in7",
+                                "id": 15,
+                                "type": "DATA",
+                                "direction": "IN",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 7,
+                                "nets": [
+                                    {
+                                        "name": "init_done",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe_out0",
+                                "id": 16,
+                                "type": "DATA",
+                                "direction": "OUT",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 0,
+                                "nets": [
+                                    {
+                                        "name": "run_test",
+                                        "isBus": false
+                                    }
+                                ]
+                            },
+                            {
+                                "name": "probe_out1",
+                                "id": 17,
+                                "type": "DATA",
+                                "direction": "OUT",
+                                "isVector": false,
+                                "leftIndex": 0,
+                                "rightIndex": 0,
+                                "portIndex": 1,
+                                "nets": [
+                                    {
+                                        "name": "stress_enable",
+                                        "isBus": false
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

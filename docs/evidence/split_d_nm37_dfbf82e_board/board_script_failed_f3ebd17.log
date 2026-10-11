@@ -1,0 +1,227 @@
+bash: 无法设定终端进程组 (2098632): 对设备不适当的 ioctl 操作
+bash: 此 shell 中无任务控制
+2026-10-11T21:18:18+08:00
+f3ebd1740260ba0d70d25d56161471a3c29b500f
+
+****** Vivado v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sun Oct 11 21:18:20 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source tools/split_d_nm37/scripts/run_board_selftest.tcl
+# if {[llength $argv]!=2} { error "Expected matching probes and NEW evidence directory" }
+# set probes_file [file normalize [lindex $argv 0]]
+# set evidence_dir [file normalize [lindex $argv 1]]
+# if {![file isfile $probes_file] || [file exists $evidence_dir]} {
+#     error "Missing probes or evidence directory already exists"
+# }
+# file mkdir $evidence_dir
+# proc named_probe {core net} {
+#     # The generated LTX names are the actual nets (e.g. flags_1), not
+#     # probe_in0/probe0. Restrict to the selected core and require uniqueness.
+#     set result [get_hw_probes -of_objects $core -filter "NAME =~ *${net}*"]
+#     if {[llength $result]!=1} { error "Expected one probe net=$net core=$core" }
+#     return [lindex $result 0]
+# }
+# proc read_hex {probe} {
+#     set value [string trim [get_property INPUT_VALUE $probe]]
+#     if {![regexp {^(0x)?[0-9a-fA-F]+$} $value]} { error "Unknown VIO input $probe=$value" }
+#     scan $value %x number
+#     return $number
+# }
+# proc snapshot {vio probes channel label} {
+#     refresh_hw_vio $vio
+#     set values {}
+#     foreach probe $probes { lappend values [read_hex $probe] }
+#     puts $channel "[clock milliseconds],$label,[join $values ,]"
+#     flush $channel
+#     puts "NM37_STATUS $label flags=[lindex $values 0] fail=[lindex $values 1] cases=[lindex $values 2] pc=[lindex $values 3] cycles=[lindex $values 4] state=[lindex $values 5] actual=[format %016llx [lindex $values 6]] init=[lindex $values 7]"
+#     return $values
+# }
+# proc capture {ila output_base} {
+#     wait_on_hw_ila -timeout 0.05 $ila
+#     set data [upload_hw_ila_data $ila]
+#     write_hw_ila_data ${output_base}.ila $data
+#     write_hw_ila_data -csv_file ${output_base}.csv $data
+# }
+# open_hw_manager
+open_hw_manager: Time (s): cpu = 00:00:08 ; elapsed = 00:00:09 . Memory (MB): peak = 1504.020 ; gain = 128.840 ; free physical = 38095 ; free virtual = 60566
+# connect_hw_server -url localhost:3121
+INFO: [Labtools 27-2285] Connecting to hw_server url TCP:localhost:3121
+INFO: [Labtools 27-3415] Connecting to cs_server url TCP:localhost:0
+INFO: [Labtools 27-3417] Launching cs_server...
+INFO: [Labtools 27-2221] Launch Output:
+
+
+******** Xilinx cs_server v2024.2.0
+  ****** Build date   : Oct 31 2024-02:19:07
+    **** Build number : 2024.2.1730312347
+      ** Copyright 2017-2022 Xilinx, Inc. All Rights Reserved.
+      ** Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.
+
+
+
+connect_hw_server: Time (s): cpu = 00:00:02 ; elapsed = 00:00:05 . Memory (MB): peak = 1516.168 ; gain = 12.148 ; free physical = 37939 ; free virtual = 60459
+# set target [get_hw_targets -filter {NAME =~ */210017937722A}]
+# if {[llength $target]!=1} { error "Expected verified NM37 JTAG target" }
+# current_hw_target $target
+# open_hw_target
+INFO: [Labtoolstcl 44-466] Opening hw_target localhost:3121/xilinx_tcf/Digilent/210017937722A
+# set device [get_hw_devices -filter {PART =~ xcvu37p*}]
+# if {[llength $device]!=1 || [llength [get_hw_devices]]!=1} { error "Expected only VU37P" }
+# current_hw_device $device
+# set_property PROBES.FILE $probes_file $device
+# set_property FULL_PROBES.FILE $probes_file $device
+# refresh_hw_device $device
+INFO: [Labtools 27-2302] Device xcvu37p_CIV (JTAG device index = 0) is programmed with a design that has 2 HBM core(s).
+INFO: [Labtools 27-2302] Device xcvu37p_CIV (JTAG device index = 0) is programmed with a design that has 1 ILA core(s).
+INFO: [Labtools 27-2302] Device xcvu37p_CIV (JTAG device index = 0) is programmed with a design that has 1 VIO core(s).
+INFO: [Labtools 27-1889] Uploading output probe values for VIO core [hw_vio_1]
+# set vio [get_hw_vios -of_objects $device -filter {CELL_NAME =~ *u_vio}]
+# set ila [get_hw_ilas -of_objects $device -filter {CELL_NAME =~ *u_ila}]
+# if {[llength $vio]!=1 || [llength $ila]!=1} { error "Expected selftest VIO and ILA" }
+# set inputs {}
+# foreach net {flags fail_code cases_done debug_pc last_case_cycles debug_state actual_word init_done} {
+#     lappend inputs [named_probe $vio $net]
+# }
+# set run_probe [named_probe $vio run_test]
+# set stress_probe [named_probe $vio stress_enable]
+# set channel [open [file join $evidence_dir vio_status.csv] w]
+# puts $channel "host_ms,label,flags,fail_code,cases_done,pc,last_case_cycles,state,actual_word,init_done"
+# report_property $device -file [file join $evidence_dir device.rpt]
+# foreach core [list $vio $ila] { report_property $core }
+Property               Type    Read-only  Value
+CELL_NAME              enum    true       u_vio
+CLASS                  string  true       hw_vio
+CORE_REFRESH_RATE_MS   int     false      500
+CORE_UUID              string  true       407D14E81CC958EF8C2E354D7BF170FD
+IS_ACTIVITY_SUPPORTED  bool    true       1
+NAME                   string  true       hw_vio_1
+Property                                       Type    Read-only  Value
+CELL_NAME                                      enum    true       u_ila
+CLASS                                          string  true       hw_ila
+CONTROL.CAPTURE_CONDITION                      enum    true       AND
+CONTROL.CAPTURE_MODE                           enum    true       ALWAYS
+CONTROL.DATA_DEPTH                             int     false      1024
+CONTROL.TRIGGER_CONDITION                      string  false      AND
+CONTROL.TRIGGER_MODE                           enum    true       BASIC_ONLY
+CONTROL.TRIGGER_POSITION                       int     false      512
+CONTROL.TRIG_OUT_MODE                          enum    true       DISABLED
+CONTROL.TSM_FILE                               string  false      
+CONTROL.WINDOW_COUNT                           int     false      1
+CORE_REFRESH_RATE_MS                           int     false      500
+CORE_UUID                                      string  true       C30A833047BA52038DBC7E3E3214D902
+NAME                                           string  true       hw_ila_1
+STATIC.ILA_CLOCK_FREQ                          int     true       0
+STATIC.IS_ADVANCED_TRIGGER_MODE_SUPPORTED      bool    true       0
+STATIC.IS_BASIC_CAPTURE_MODE_SUPPORTED         bool    true       0
+STATIC.IS_TRANSITIONAL_CAPTURE_MODE_SUPPORTED  bool    true       0
+STATIC.IS_TRIG_IN_SUPPORTED                    bool    true       0
+STATIC.IS_TRIG_OUT_SUPPORTED                   bool    true       0
+STATIC.MAX_DATA_DEPTH                          int     true       1024
+STATIC.PORTS.COUNT                             int     true       8
+STATIC.PORTS.PORT_0.COMPARATOR_COUNT           int     true       1
+STATIC.PORTS.PORT_0.IS_DATA                    bool    true       1
+STATIC.PORTS.PORT_0.IS_TRIGGER                 bool    true       1
+STATIC.PORTS.PORT_0.WIDTH                      int     true       4
+STATIC.PORTS.PORT_1.COMPARATOR_COUNT           int     true       1
+STATIC.PORTS.PORT_1.IS_DATA                    bool    true       1
+STATIC.PORTS.PORT_1.IS_TRIGGER                 bool    true       1
+STATIC.PORTS.PORT_1.WIDTH                      int     true       8
+STATIC.PORTS.PORT_2.COMPARATOR_COUNT           int     true       1
+STATIC.PORTS.PORT_2.IS_DATA                    bool    true       1
+STATIC.PORTS.PORT_2.IS_TRIGGER                 bool    true       1
+STATIC.PORTS.PORT_2.WIDTH                      int     true       6
+STATIC.PORTS.PORT_3.COMPARATOR_COUNT           int     true       1
+STATIC.PORTS.PORT_3.IS_DATA                    bool    true       1
+STATIC.PORTS.PORT_3.IS_TRIGGER                 bool    true       1
+STATIC.PORTS.PORT_3.WIDTH                      int     true       13
+STATIC.PORTS.PORT_4.COMPARATOR_COUNT           int     true       1
+STATIC.PORTS.PORT_4.IS_DATA                    bool    true       1
+STATIC.PORTS.PORT_4.IS_TRIGGER                 bool    true       1
+STATIC.PORTS.PORT_4.WIDTH                      int     true       32
+STATIC.PORTS.PORT_5.COMPARATOR_COUNT           int     true       1
+STATIC.PORTS.PORT_5.IS_DATA                    bool    true       1
+STATIC.PORTS.PORT_5.IS_TRIGGER                 bool    true       1
+STATIC.PORTS.PORT_5.WIDTH                      int     true       4
+STATIC.PORTS.PORT_6.COMPARATOR_COUNT           int     true       1
+STATIC.PORTS.PORT_6.IS_DATA                    bool    true       1
+STATIC.PORTS.PORT_6.IS_TRIGGER                 bool    true       1
+STATIC.PORTS.PORT_6.WIDTH                      int     true       64
+STATIC.PORTS.PORT_7.COMPARATOR_COUNT           int     true       1
+STATIC.PORTS.PORT_7.IS_DATA                    bool    true       1
+STATIC.PORTS.PORT_7.IS_TRIGGER                 bool    true       1
+STATIC.PORTS.PORT_7.WIDTH                      int     true       1
+STATIC.TIME_TAG_PORT                           int     true       -1
+STATIC.TIME_TAG_WIDTH                          int     true       0
+STATIC.TSM_COUNTER_0_WIDTH                     int     true       0
+STATIC.TSM_COUNTER_1_WIDTH                     int     true       0
+STATIC.TSM_COUNTER_2_WIDTH                     int     true       0
+STATIC.TSM_COUNTER_3_WIDTH                     int     true       0
+STATUS.CORE_STATUS                             string  true       IDLE
+STATUS.DATA_DEPTH                              int     true       1
+STATUS.IS_TRIGGER_AT_STARTUP                   bool    true       0
+STATUS.SAMPLE_COUNT                            int     true       0
+STATUS.TRIGGER_POSITION                        int     true       0
+STATUS.TSM_FLAG0                               bool    true       0
+STATUS.TSM_FLAG1                               bool    true       0
+STATUS.TSM_FLAG2                               bool    true       0
+STATUS.TSM_FLAG3                               bool    true       0
+STATUS.TSM_STATE                               int     true       0
+STATUS.WINDOW_COUNT                            int     true       1
+TRIGGER_START_TIME_SECONDS                     string  true       
+TRIGGER_STOP_TIME_SECONDS                      string  true       
+# set_property OUTPUT_VALUE 0 $run_probe
+# set_property OUTPUT_VALUE 0 $stress_probe
+# commit_hw_vio $vio
+# set deadline [expr {[clock milliseconds]+30000}]
+# while {1} {
+#     set values [snapshot $vio $inputs $channel readiness]
+#     if {[lindex $values 7]==1 && ([lindex $values 0]&1)==0} { break }
+#     if {[clock milliseconds]>$deadline} { error "HBM initialization/idle timeout" }
+#     after 500
+# }
+NM37_STATUS readiness flags=0 fail=0 cases=0 pc=0 cycles=0 state=0 actual=0000000000000000 init=1
+# foreach stress {0 1} {
+#     set label [expr {$stress ? "stress" : "normal"}]
+#     set_property OUTPUT_VALUE 0 $run_probe
+#     set_property OUTPUT_VALUE $stress $stress_probe
+#     commit_hw_vio $vio
+#     after 500
+#     reset_hw_ila $ila
+#     set_property CONTROL.DATA_DEPTH 1024 $ila
+#     set_property CONTROL.TRIGGER_POSITION 128 $ila
+#     set_property CONTROL.TRIGGER_MODE BASIC_ONLY $ila
+#     set_property CONTROL.TRIGGER_CONDITION AND $ila
+#     set_property CONTROL.CAPTURE_MODE ALWAYS $ila
+#     # Arm on busy=1, done/pass/fail=0: the preceding run's latched PASS
+#     # cannot satisfy this condition. Save evidence of actual new-run acceptance.
+#     set flag_probe [named_probe $ila flags]
+#     set_property TRIGGER_COMPARE_VALUE {eq4'b0001} $flag_probe
+#     run_hw_ila $ila
+#     set_property OUTPUT_VALUE 1 $run_probe
+#     commit_hw_vio $vio
+#     capture $ila [file join $evidence_dir ${label}_start]
+#     set deadline [expr {[clock milliseconds]+90000}]
+#     while {1} {
+#         set values [snapshot $vio $inputs $channel $label]
+#         if {([lindex $values 0]&2)!=0} { break }
+#         if {[clock milliseconds]>$deadline} { error "$label board-test timeout" }
+#         after 500
+#     }
+#     # Capture terminal status on both success and failure before checking gates.
+#     run_hw_ila -trigger_now $ila
+#     capture $ila [file join $evidence_dir ${label}_terminal]
+#     if {[lindex $values 0]!=6 || [lindex $values 1]!=0 || [lindex $values 2]!=26 || [lindex $values 7]!=1} {
+#         error "$label failed: flags/fail/cases/init=$values"
+#     }
+#     puts "NM37_BOARD_PASS mode=$label cases=26 flags=6 fail_code=0 init_done=1"
+# }
+ERROR: [Labtoolstcl 44-156] hw_ila property 'CONTROL.TRIGGER_MODE' is read-only.
+INFO: [Common 17-206] Exiting Vivado at Sun Oct 11 21:18:57 2026...
+2026-10-11T21:18:59+08:00
+BOARD_EXIT=1
+exit

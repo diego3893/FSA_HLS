@@ -1,0 +1,35 @@
+{
+  "board_cases": 52,
+  "fresh_start_and_terminal_ila": {
+    "normal": {
+      "samples": 1024,
+      "trigger_sample": 128,
+      "trigger_flags": 1,
+      "trigger_cases": 0,
+      "trigger_pc": 0,
+      "terminal_flags": 6,
+      "terminal_cases": 26,
+      "last_case_cycles": 2578065,
+      "start_flag_counts": {
+        "0": 128,
+        "1": 896
+      }
+    },
+    "stress": {
+      "samples": 1024,
+      "trigger_sample": 128,
+      "trigger_flags": 1,
+      "trigger_cases": 0,
+      "trigger_pc": 0,
+      "terminal_flags": 6,
+      "terminal_cases": 26,
+      "last_case_cycles": 2687535,
+      "start_flag_counts": {
+        "6": 128,
+        "1": 896
+      }
+    }
+  },
+  "hbm_stacks": 2,
+  "hbm_controller_ready": 16
+}

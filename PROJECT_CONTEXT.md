@@ -2,7 +2,7 @@
 
 > 本文件只保留恢复任务所需的高信号状态。后续工作开始时先读取，并在关键结果或决策变化后原地更新。
 
-> **2026-10-11 19:52用户恢复4×4上板工作：**继续Git/SSH/Vivado/易失JTAG与板测闭环，未设轮数上限，16×16仍暂缓。起点是473a4f9真实HBM RTL前置canary全X失败与4a5c803完整实现自动门槛通过；先修系统功能、完成CDC审查，再bitstream/下载。新日志`docs/修改日志/2026-10-11_1952_split_d_4x4_board_修改日志.md`。当前系统被测dfbf82e；20:05启动完整RTL与物理实现，辅助脚本9497ab3已同步。正式IP仍bf41d16。
+> **当前已验收：**2026-10-11 21:23，4×4/head16真实HBM上板验收通过。系统硬件dfbf82e、计算IP bf41d16；普通26笔＋背压26笔全部通过，两个HBM stack共16MC初始化/ready均1。新实现setup+0.261ns/hold+0.010ns，CDC及18组bus-skew已审查。按用户合同，默认RTL验初始化、忙中整体复位恢复与首笔完整事务，实际覆盖普通1笔/stress0笔；完整52笔由真实板测验收。报告`docs/综合报告/Split-D_4x4真实HBM上板验收_20261011.md`；日志1952已闭环。本次未设轮数上限，1轮完成。16×16仍暂缓。
 
 ## 1 目标与当前优先级
 
@@ -142,7 +142,7 @@ Q/K/V AXI
 
 ## 7 当前工作集
 
-- 当前工作集：`tools/split_d_nm37/`、20261011_1952修改日志及`docs/evidence/split_d_nm37_dfbf82e_board/`。硬件被测dfbf82e（16MC读/写DBI=false）；20:05启动默认RTL与物理实现；新实现20:38自动门槛通过（+0.261/+0.010ns），新CDC/bus-skew20:41复核通过；首笔RTL21:03通过（核624/完整2594周期），21:04按用户合同受控停止并开始bit/LTX生成。辅助脚本9497ab3包含CDC对象导出、VIO/ILA板测和unit生成器修复；四项unit已通过。计时监视器修正已提交dfbf82e，完整核计时仍待运行。用户AGENTS.md及无关未跟踪文件保留。
+- 当前工作集：`tools/split_d_nm37/`、20261011_1952日志、上板验收报告及`docs/evidence/split_d_nm37_dfbf82e_board/`。硬件dfbf82e、IP bf41d16、板测脚本fb06b16；完整52笔板测及新启动ILA/16MC状态已验收，物理/bit/LTX/下载证据已归档。用户AGENTS.md及无关未跟踪文件保留。
 
 - Split-D配置与类型：`include/fsa/stream/split_d/`
 - Split-D顶层：`src/stream/split_d/fsa_stream_split_d.cpp`
@@ -164,7 +164,7 @@ Q/K/V AXI
 
 ## 8 下一步
 
-1. **当前恢复4×4上板闭环。**先查473a4f9首个用例前置canary的HBM写入/读回全X：pc26、地址0x002ffff8、期望0x0000000012345678，仿真109335ns时失败，尚未逐字比较O结果，不能直接归因attention算术。另完成未验证计时监视器、CDC详细复核、用户2026-10-11修订：默认RTL验初始化/忙中复位/首笔完整事务，全部52笔位模式和保护区在真实HBM板测；上述上板前门槛通过后生成bitstream/ltx、易失JTAG下载及板测，16×16暂缓。
+1. **4×4上板已闭环。**保留dfbf82e同次实现bit/LTX与完整52笔板测证据；后续若研究板上性能，需新增纯核时间戳及明确吞吐口径，当前last_case_cycles包含完整自检。16×16暂缓，不自动扩大验证范围。
 2. 保留每块唯一PE/Acc共享层级和真实distance8反馈。源码状态复用不等于物理阶段寄存器完全复用。低风险死代码清理需独立范围和新4×4验证；stageAccumulatorResult仍被调用。
 3. 实际分发器综合918FF；新模型最差setup为分发icmp→V AXI读缓冲BRAM使能（6.477ns、91.7%route），setup+0.230ns已满足100MHz。纯数据广播未证明是首要瓶颈；不按HLS10724FF盲目插级。当前是HLS后物理反馈，不是自动物理感知HLS调度。
 4. 本次授权的OOC对照已经结束，区域候选失败且保留auto。后续物理实验继续固定器件/时钟/接口并声明边界；通信插级由实测路径和反馈/背压审查决定，完整系统现已纳入1316调用；板卡实际运行须与生成bitstream/实现区分。
@@ -174,7 +174,7 @@ Q/K/V AXI
 
 ### 已完成
 
-- 当前存储工作包1/2：bf41d16完整正式HLS/IP/内部OOC通过，精确数值、实例/II与实际存储成本见第11节；完整系统仍未验收。
+- 三个4×4工作包均已完成本次合同：bf41d16正式HLS/IP/内部OOC；dfbf82e首笔默认RTL/完整真实系统时序/CDC；fb06b16真实HBM普通26＋背压26及新启动/终态ILA验收。用户修订为首笔RTL＋完整52笔板测，不称52笔系统RTL通过。
 
 - 阶段4本次正式HLS/IP、实际QK并行、通信等待关系及所选auto内部setup/hold均通过；实际hard区域对照完成但setup失败，弃用。用户范围与完整OOC gate分开，见阶段4报告及1032日志。
 
@@ -218,9 +218,9 @@ Q/K/V AXI
 
 ### 未完成
 
-- 阶段3前两轮缓存/RTL调度根因未最小化证明；阶段4官方profiling已补实际QK重叠证据。5项本地stub位差归因、跨阶段寄存器复用优化、完整系统/板测未完成；IP及所选auto内部时序已验收，边界hold按用户选择留完整系统。
+- 阶段3前两轮缓存/RTL调度根因未最小化证明；5项本地stub位差归因、跨阶段寄存器复用优化、板上纯核吞吐未完成。完整4×4真实系统时序与52笔板测已验收。
 - **16×16/128 的目标II与完整验收：暂时搁置**（用户2026-10-09指示只做4×4）。
-- 4×4 Split-D IP已正式导出，所选auto的内部实现时序通过；完整边界hold、完整系统、板测未验收。硬区域setup失败已拒绝。16×16未导出/实现。
+- 4×4 Split-D正式IP、内部OOC及真实完整系统时序/板测已通过；历史人为min0ns OOC边界hold失败仍保留，实际系统接口路径已闭合。硬区域setup失败已拒绝。16×16未导出/实现。
 - 生产基线 IP 导出、Vivado 实现后时序和板测。
 - 代码清理：`peBankMacUnit` 在 P3a 后已无调用点（定义在 `split_d_compute.cpp:51`），需清理或复用；`PE_ARRAY_II` 在16×16仍为5，是否改1待16×16恢复后按是否复发`204-65`决定。
 
@@ -231,7 +231,7 @@ Q/K/V AXI
 - 时钟：10.0ns，uncertainty 2.7ns；不得放宽。
 - Split-D服务器命令：`./run_hls.sh fsa_stream_split_d`。
 - 生产基线命令：`./run_hls.sh fsa_stream`。
-- 分支`fsa_split_D`；计算HLS/IP仍bf41d16。473a4f9真实系统RTL功能失败，4a5c803含ODT RTT_48/原生256位自检的完整实现自动门槛通过（+0.261/+0.010ns），均已结束。后续文档提交不算重新HLS或系统验收。
+- 分支`fsa_split_D`；计算HLS/IP bf41d16。系统硬件dfbf82e（16MC DBI=false），最终板测脚本fb06b16，普通/背压52笔PASS；所有新工程及原始SHA见上板报告。文档提交不算重新HLS或系统测试。
 - 旧`source_manifest.json`和`delivery_validation.json`是历史快照，不代表当前源码。
 
 ## 11 交接摘要
@@ -244,9 +244,9 @@ Q/K/V AXI
 
 **前轮系统证据（2026-10-10）：**计算IP仍bf41d16，component SHA不变。473a4f9原生256位/SIZE5自检四项unit通过；真实HBM RTL19:32:00—20:17:46完成，初始化及忙中整体复位恢复通过，但109335ns首个用例前置canary失败，cases0/code02/pc26/actual全X。ROM pc26为地址0x002ffff8的READ，期望0x0000000012345678；不是O数值比较，根因未确定。4a5c803完整实现19:52:04—20:22:18完成，setup+0.261/hold+0.010ns，TNS/THS0、99857 nets全route、LUT61894/FF45210/R36=45/R18=0/DSP40，时钟ODT/100MHz/2.7ns断言通过，DRC/methodology无Error/Critical。CDC13/2项Info＋696 CDC15 Warning，详细人工复核未完成；18组bus-skew最小slack+3.739ns。证据docs/evidence/split_d_nm37_4a5c803_pause/。前轮未验收；本轮用户已恢复，使用dfbf82e新工程闭环。
 
-**2026-10-11当前恢复状态：**dfbf82e默认HBM RTL与完整物理实现分别运行于`build/split_d_nm37_dfbf82e_rtl_ipbf`/`build/split_d_nm37_dfbf82e_phys_ipbf`，日志`/tmp/codex_nm37_dfbf82e_{rtl,physical}_20261011.log`。关闭XSIM不支持的DBI后首笔全部比较通过，原canary全X消失；系统RTL实际覆盖普通1笔，未覆盖完整52笔。9497ab3四项controller unit回归通过，原始日志已取回；JTAG只读确认210017937722A唯一VU37P，ZU5未操作。CDC脚本已在旧DCP试运行覆盖全部警告，新DCP已生成，20:38新实现setup/hold+0.261/+0.010ns通过，CDC692项XPM＋4项XSDB FIFO已全部审查；18组bus-skew最小+3.739ns通过，物理证据已下载并验SHA。用户已修订为首笔RTL＋完整52笔真实板测；首笔证据齐全后允许受控停止长仿真，不称完整RTL通过。bit/LTX正在生成，未下载、未板测；用户已明确恢复，无需再因旧暂停重复请求授权。
+**2026-10-11最终上板状态：**2026-10-11 21:23，4×4/head16真实HBM上板验收通过。系统硬件dfbf82e、计算IP bf41d16；普通26笔＋背压26笔全部通过，两个HBM stack共16MC初始化/ready均1。新实现setup+0.261ns/hold+0.010ns，CDC及18组bus-skew已审查。按用户合同，默认RTL验初始化、忙中整体复位恢复与首笔完整事务，实际覆盖普通1笔/stress0笔；完整52笔由真实板测验收。21:08新DCP生成bit/LTX；21:13易失JTAG下载成功，仅VU37P；21:23最终脚本fb06b16退出0。两次启动ILA sample128均flags1/cases0/pc0，终态均flags6/cases26/code0/init1。脚本先前f3ebd17写只读ILA属性，在run_test前退出0笔，修正后完成；MC寄存器在两个hw_hbm属性中，无独立hw_hbmmc对象。原始物理/CDC/下载/板测证据已逐SHA验收。完整合同结束，未来性能/16×16须按新任务范围推进。
 
-**已证实失败与范围：**a0c4329 TB超时无尺寸3e9在Time0溢出，已改显式64位保持3s合同；旧完整仿真768因unused aux active-low且接0永久复位，20us诊断锁定=1但APB/AXI/selftest reset全0，已精确停止并保留WDB。HBM内部两primary重复造成4条TIMING Critical；789 XDC foreach/if被忽略而exit1，改为纯generated_clock＋普通Tcl断言。原始日志/失败报告/XCI在docs/evidence/split_d_nm37_a0c4329_ipbf41d16/和split_d_nm37_7892c75_reset_diagnosis/。控制器4项unit通过；新4a5c803物理自动门槛已通过，系统功能失败、CDC详细复核/板测未完成。授权与日志见第2节/1316修改日志。
+**已证实失败与范围：**a0c4329 TB超时无尺寸3e9在Time0溢出，已改显式64位保持3s合同；旧完整仿真768因unused aux active-low且接0永久复位，20us诊断锁定=1但APB/AXI/selftest reset全0，已精确停止并保留WDB。HBM内部两primary重复造成4条TIMING Critical；789 XDC foreach/if被忽略而exit1，改为纯generated_clock＋普通Tcl断言。原始日志/失败报告/XCI在docs/evidence/split_d_nm37_a0c4329_ipbf41d16/和split_d_nm37_7892c75_reset_diagnosis/。这些是此前失败证据；现dfbf82e首笔RTL/新物理CDC与fb06b16完整52笔真实HBM板测通过。授权与日志见第2节/1316修改日志。
 
 **此前OOC状态（保留证据）：**阶段4本次OOC对照收敛，保留auto_context：内部setup+0.230ns/hold+0.010ns，正式HLS/IP及通信profiling通过。实际hard区域dbaec01位置越界0、无DRC Error/Critical，但setup−0.081ns/TNS−0.273ns、4个内部endpoint失败，比auto差0.311ns，明确弃用；不把区域实验失败改写成通过。属性顺序已确认，旧soft仅固定BUFG LOC后HDOOC-4由2降0且QoR不变；最终所选自动检查点内部时序/全部负hold已复核。用户指定边界hold留完整系统；min0ns及auto的4560个input失败保持，full_ooc_gate=false。本次未新增距离感知流水，四组完整研究对照/系统/16×16/bitstream/板测未完成。正式IP仍b3e4957，计算仍130c778；日志1032已闭环5轮，本次OOC工作包结束；完整阶段4研究计划尚未全部执行。
 

@@ -1,0 +1,27 @@
+{
+  "bit_generation.log": {
+    "source": "/tmp/codex_nm37_dfbf82e_bit_20261011.log",
+    "sha256": "643da656249558de0eabbbc6ef87b1b301a21ba5321e0488a3279c6f499c6201",
+    "bytes": 10967
+  },
+  "programming.log": {
+    "source": "/tmp/codex_nm37_f3ebd17_program_20261011.log",
+    "sha256": "b8bad59d33e26234687302e86a17b9318e52c4af12ccbc7649244335ed7575bf",
+    "bytes": 571355
+  },
+  "board_script_failed_f3ebd17.log": {
+    "source": "/tmp/codex_nm37_f3ebd17_board_20261011.log",
+    "sha256": "0b0a395f655fda8546157afbe0283cf1d1ccde0eaae07aaf1f0acd5407ffb56d",
+    "bytes": 12914
+  },
+  "artifact_manifest.json": {
+    "source": "build/split_d_nm37_dfbf82e_phys_ipbf/bitstream/artifact_manifest.json",
+    "sha256": "bd91818c6ee3f99797747e57f53e4f6f737ab22cbcdaf747c9215aec2be97ebe",
+    "bytes": 840
+  },
+  "split_d_nm37.ltx": {
+    "source": "build/split_d_nm37_dfbf82e_phys_ipbf/bitstream/split_d_nm37.ltx",
+    "sha256": "596539bf643c1444d0a8edce0683eda68b74fa93ca08d70ab54fbda2d7b0969f",
+    "bytes": 60524
+  }
+}

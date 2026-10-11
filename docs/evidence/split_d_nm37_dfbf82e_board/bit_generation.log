@@ -1,0 +1,165 @@
+bash: 无法设定终端进程组 (2097642): 对设备不适当的 ioctl 操作
+bash: 此 shell 中无任务控制
+2026-10-11T21:05:08+08:00
+88e481ce53b3e04f3449fc6dca8b404ee1163475
+
+****** Vivado v2024.2 (64-bit)
+  **** SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
+  **** IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
+  **** SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
+  **** Start of session at: Sun Oct 11 21:05:10 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source tools/split_d_nm37/scripts/write_bitstream.tcl
+# if {[llength $argv]!=2} { error "Expected routed checkpoint and new output directory" }
+# source [file join [file dirname [info script]] check_clocks.tcl]
+## proc check_nm37_clocks {} {
+##     foreach port {board_clk_p board_clk_n} {
+##         set p [get_ports $port]
+##         if {[llength $p]!=1 || [get_property IOSTANDARD $p] ne "DIFF_SSTL12" ||
+##             [get_property ODT $p] ne "RTT_48"} {
+##             error "NM37 AC-coupled clock requires DIFF_SSTL12 split ODT RTT_48"
+##         }
+##     }
+##     foreach stack {0 1} {
+##         set pin [get_pins u_bd/split_d_system_i/hbm_0/inst/HBM_REF_CLK_$stack]
+##         if {[llength $pin]!=1} { error "Expected one HBM reference per stack" }
+##         set clk [get_clocks -of_objects $pin]
+##         if {[llength $clk]!=1 || ![get_property IS_GENERATED $clk] ||
+##             [get_property MASTER_CLOCK $clk] ne "board_clk_100" ||
+##             abs([get_property PERIOD $clk]-10.0)>0.001} {
+##             error "HBM reference must derive from the 100MHz board clock"
+##         }
+##     }
+##     set pin [get_pins u_bd/split_d_system_i/fsa_0/ap_clk]
+##     if {[llength $pin]!=1} { error "Expected one FSA clock pin" }
+##     set clk [get_clocks -of_objects $pin]
+##     if {[llength $clk]!=1 || abs([get_property PERIOD $clk]-10.0)>0.001} {
+##         error "FSA clock must remain 100MHz"
+##     }
+##     puts "NM37_CLOCK_ASSERTIONS_PASS core=$clk"
+##     return $clk
+## }
+# set checkpoint [file normalize [lindex $argv 0]]
+# set output_dir [file normalize [lindex $argv 1]]
+# if {[file exists $output_dir]} { error "Output exists: $output_dir" }
+# open_checkpoint $checkpoint
+Command: open_checkpoint /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_dfbf82e_phys_ipbf/reports/routed.dcp
+
+Starting open_checkpoint Task
+
+Time (s): cpu = 00:00:00.04 ; elapsed = 00:00:00.04 . Memory (MB): peak = 1360.262 ; gain = 0.000 ; free physical = 38405 ; free virtual = 60779
+INFO: [Device 21-403] Loading part xcvu37p_CIV-fsvh2892-2-e
+Netlist sorting complete. Time (s): cpu = 00:00:00.99 ; elapsed = 00:00:00.99 . Memory (MB): peak = 2959.875 ; gain = 0.000 ; free physical = 36783 ; free virtual = 59157
+INFO: [Netlist 29-17] Analyzing 4155 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 1 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2024.2
+INFO: [Project 1-570] Preparing netlist for logic optimization
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'u_bd/split_d_system_i/hbm_0/HBM_REF_CLK_0' is not directly connected to top level port. 'IBUF_LOW_PWR' is ignored for synthesis but preserved for implementation.
+WARNING: [Constraints 18-550] Could not create 'IBUF_LOW_PWR' constraint because net 'u_bd/split_d_system_i/hbm_0/HBM_REF_CLK_1' is not directly connected to top level port. 'IBUF_LOW_PWR' is ignored for synthesis but preserved for implementation.
+Read ShapeDB Complete: Time (s): cpu = 00:00:00.26 ; elapsed = 00:00:00.28 . Memory (MB): peak = 3289.102 ; gain = 36.820 ; free physical = 36449 ; free virtual = 58824
+INFO: [Timing 38-478] Restoring timing data from binary archive.
+INFO: [Timing 38-479] Binary timing data restore complete.
+INFO: [Project 1-856] Restoring constraints from binary archive.
+INFO: [Project 1-853] Binary constraint restore complete.
+INFO: [Designutils 20-5722] Start Reading Physical Databases.
+Reading placement.
+Read Netlist Cache: Time (s): cpu = 00:00:00.11 ; elapsed = 00:00:00.11 . Memory (MB): peak = 3902.707 ; gain = 0.000 ; free physical = 35972 ; free virtual = 58346
+Reading placer database...
+Read Device Cache: Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.02 . Memory (MB): peak = 3902.707 ; gain = 0.000 ; free physical = 35972 ; free virtual = 58347
+Read PlaceDB: Time (s): cpu = 00:00:03 ; elapsed = 00:00:03 . Memory (MB): peak = 3970.707 ; gain = 68.000 ; free physical = 35895 ; free virtual = 58269
+Read PulsedLatchDB: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3970.707 ; gain = 0.000 ; free physical = 35895 ; free virtual = 58269
+Reading routing.
+Read RouteStorage: Time (s): cpu = 00:00:09 ; elapsed = 00:00:07 . Memory (MB): peak = 4335.855 ; gain = 365.148 ; free physical = 35536 ; free virtual = 57910
+Read Physdb Files: Time (s): cpu = 00:00:12 ; elapsed = 00:00:10 . Memory (MB): peak = 4335.855 ; gain = 433.148 ; free physical = 35536 ; free virtual = 57910
+Restored from archive | CPU: 12.270000 secs | Memory: 392.139069 MB |
+Finished XDEF File Restore: Time (s): cpu = 00:00:12 ; elapsed = 00:00:11 . Memory (MB): peak = 4335.855 ; gain = 433.148 ; free physical = 35537 ; free virtual = 57911
+Netlist sorting complete. Time (s): cpu = 00:00:00.02 ; elapsed = 00:00:00.01 . Memory (MB): peak = 4335.855 ; gain = 0.000 ; free physical = 35529 ; free virtual = 57904
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 2080 instances were transformed.
+  CFGLUT5 => CFGLUT5 (SRL16E, SRLC32E): 104 instances
+  DSP48E1 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 16 instances
+  DSP48E2 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 24 instances
+  HBM_TWO_STACK_INTF => HBM_TWO_STACK_INTF (HBM_REF_CLK(x2), HBM_SNGLBLI_INTF_APB(x2), HBM_SNGLBLI_INTF_AXI(x32)): 1 instance 
+  IBUF => IBUF (IBUFCTRL, INBUF): 1 instance 
+  IBUFDS => IBUFDS (DIFFINBUF, IBUFCTRL): 1 instance 
+  RAM16X1D => RAM32X1D (RAMD32(x2)): 258 instances
+  RAM16X1S => RAM32X1S (RAMS32): 1440 instances
+  RAM32M16 => RAM32M16 (RAMD32(x14), RAMS32(x2)): 230 instances
+  RAM32X1D => RAM32X1D (RAMD32(x2)): 5 instances
+
+INFO: [Project 1-604] Checkpoint was created with Vivado v2024.2 (64-bit) build 5239630
+open_checkpoint: Time (s): cpu = 00:00:53 ; elapsed = 00:00:59 . Memory (MB): peak = 4335.855 ; gain = 2975.594 ; free physical = 35529 ; free virtual = 57904
+# check_nm37_clocks
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+NM37_CLOCK_ASSERTIONS_PASS core=clk_out1_split_d_system_clk_wiz_0_0
+# if {[get_property PART [current_design]] ne "xcvu37p_CIV-fsvh2892-2-e"} {
+#     error "Unexpected board device"
+# }
+get_timing_paths: Time (s): cpu = 00:00:54 ; elapsed = 00:00:10 . Memory (MB): peak = 4646.262 ; gain = 285.953 ; free physical = 35136 ; free virtual = 57511
+# set setup [get_property SLACK [get_timing_paths -delay_type max -max_paths 1]]
+# set hold [get_property SLACK [get_timing_paths -delay_type min -max_paths 1]]
+# if {$setup<0 || $hold<0} { error "Setup/hold gate failed" }
+# set core_clock [get_clocks -of_objects [get_pins -hier -filter {NAME =~ */fsa_0/ap_clk}]]
+# if {[llength $core_clock]!=1 || abs([get_property PERIOD $core_clock]-10.0)>0.001} {
+#     error "Core clock must remain 100MHz"
+# }
+# file mkdir $output_dir
+# foreach command {report_drc report_methodology} {
+#     set report [file join $output_dir ${command}.rpt]
+#     $command -file $report
+#     set f [open $report r]
+#     set contents [read $f]
+#     close $f
+#     if {[regexp {Critical Warning|\|\s*Error\s*\|} $contents]} {
+#         error "Critical/error gate failed: $command"
+#     }
+# }
+Command: report_drc -file /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_dfbf82e_phys_ipbf/bitstream/report_drc.rpt
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/opt/Xilinx_2024.2/Vivado/2024.2/data/ip'.
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Vivado_Tcl 2-168] The results of DRC are in file /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_dfbf82e_phys_ipbf/bitstream/report_drc.rpt.
+report_drc completed successfully
+report_drc: Time (s): cpu = 00:00:28 ; elapsed = 00:00:12 . Memory (MB): peak = 4950.012 ; gain = 303.750 ; free physical = 34875 ; free virtual = 57249
+Command: report_methodology -file /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_dfbf82e_phys_ipbf/bitstream/report_methodology.rpt
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [DRC 23-133] Running Methodology with 8 threads
+INFO: [Vivado_Tcl 2-1520] The results of Report Methodology are in file /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_dfbf82e_phys_ipbf/bitstream/report_methodology.rpt.
+report_methodology completed successfully
+report_methodology: Time (s): cpu = 00:00:57 ; elapsed = 00:00:11 . Memory (MB): peak = 4956.949 ; gain = 6.938 ; free physical = 34866 ; free virtual = 57241
+# report_clocks -file [file join $output_dir clocks.rpt]
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+# report_bus_skew -warn_on_violation -file [file join $output_dir bus_skew.rpt]
+# write_debug_probes [file join $output_dir split_d_nm37.ltx]
+# write_bitstream [file join $output_dir split_d_nm37.bit]
+Command: write_bitstream /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_dfbf82e_phys_ipbf/bitstream/split_d_nm37.bit
+Attempting to get a license for feature 'Implementation' and/or device 'xcvu37p_CIV'
+INFO: [Common 17-349] Got license for feature 'Implementation' and/or device 'xcvu37p_CIV'
+Running DRC as a precondition to command write_bitstream
+INFO: [IP_Flow 19-1839] IP Catalog is up to date.
+INFO: [DRC 23-27] Running DRC with 8 threads
+INFO: [Vivado 12-3199] DRC finished with 0 Errors
+INFO: [Vivado 12-3200] Please refer to the DRC report (report_drc) for more information.
+INFO: [Designutils 20-2272] Running write_bitstream with 8 threads.
+Loading data files...
+Loading site data...
+Loading route data...
+Processing options...
+Creating bitmap...
+Creating bitstream...
+Writing bitstream /home/zhangchenxuan/FSA_HLS/build/split_d_nm37_dfbf82e_phys_ipbf/bitstream/split_d_nm37.bit...
+INFO: [Vivado 12-1842] Bitgen Completed Successfully.
+INFO: [Common 17-83] Releasing license: Implementation
+8 Infos, 0 Warnings, 0 Critical Warnings and 0 Errors encountered.
+write_bitstream completed successfully
+write_bitstream: Time (s): cpu = 00:01:37 ; elapsed = 00:00:47 . Memory (MB): peak = 6123.473 ; gain = 1166.523 ; free physical = 33658 ; free virtual = 56117
+# puts "NM37_BITSTREAM_COMPLETE setup=$setup hold=$hold"
+NM37_BITSTREAM_COMPLETE setup=0.261 hold=0.010
+# close_design
+INFO: [Common 17-206] Exiting Vivado at Sun Oct 11 21:08:00 2026...
+2026-10-11T21:08:01+08:00
+BITSTREAM_EXIT=0
+exit
