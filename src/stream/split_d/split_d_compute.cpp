@@ -264,6 +264,14 @@ namespace detail{
         }
     }
 
+    acc_t registerPwlProbability(const elem_t probability){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1
+        #pragma HLS LATENCY min=1 max=1
+        // 保留原FP16→FP32数值转换；返回寄存级隔开动态结果选择与S的RAM写口。
+        return (acc_t)probability;
+    }
+
     void runSharedEngine(const SharedOperation operation, const unsigned first_context, const unsigned context_count, SharedEngineState& state){
         #pragma HLS INLINE off
         #pragma HLS ALLOCATION function instances=runPeArray limit=1
@@ -379,7 +387,7 @@ namespace detail{
                                     state.reg[ctx][row][col] = state.score_valid[ctx][row][col]
                                         ? pe_elem[row][pe_slot][col] : elemZero();
                                 }else if(state.score_valid[ctx][row][col] && !state.probability_ready[ctx][row][col] && pe_hit[row][pe_slot][col]){
-                                    state.score[ctx][row][col] = (acc_t)pe_elem[row][pe_slot][col];
+                                    state.score[ctx][row][col] = registerPwlProbability(pe_elem[row][pe_slot][col]);
                                     state.probability_ready[ctx][row][col] = true;
                                 }
                             }

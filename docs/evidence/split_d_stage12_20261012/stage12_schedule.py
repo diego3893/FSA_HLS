@@ -41,6 +41,10 @@ def main():
     summary = json.loads(args.summary.read_text(encoding="utf-8-sig"))
     assert (summary["contexts"], summary["pe_hop"], summary["qk_feedback"], summary["acc_hop"]) == (M, PE_HOP, FEEDBACK, ACC_HOP)
     reports = summary["reports"]
+    assert float(reports["fsa_stream_split_d_csynth.xml"]["EstimatedClockPeriod"][0]) <= 7.300
+    assert summary["summaries"] == ["[stage12-summary] 28/28", "[math-summary] 52/52", "[bit-summary] 24/24"]
+    assert summary["rtl_counts"]["fsa_stream_split_d_mul_11ns_11ns_22_2_1"] == 16
+    assert summary["rtl_counts"]["fsa_stream_split_d_mul_24ns_24ns_48_3_1"] == 4
     pipeline = next(v for k, v in reports.items() if "runSharedEngine_Pipeline" in k)
     assert pipeline["PipelineII"] == ["1"], "Cannot budget an II2 candidate as II1"
     module = reports["runSharedEngine_csynth.xml"]
@@ -77,7 +81,7 @@ def main():
             elif phase == "PWL":
                 launches = [(piece*n+ctx, ctx, piece) for piece in range(8) for ctx in range(n)]
             elif phase == "PV":
-                launches = [(feature*n+ctx, ctx, feature) for feature in range(H) for ctx in range(n)]
+                launches = [(ctx*H+feature, ctx, feature) for ctx in range(n) for feature in range(H)]
             else:
                 launches = [(ctx, ctx, 0) for ctx in range(n)]
             lookup = {cycle: (ctx, index) for cycle, ctx, index in launches}
@@ -95,9 +99,13 @@ def main():
         tiles = (length+D-1)//D
         for causal in (False, True):
             core = calls = holes = pairs = 0
+            kv_loads = kv_words = normalization = 0
             for base in range(0, tiles, M):
                 count = min(M, tiles-base)
+                normalization += count*H+ACC_HOP+overhead
                 for key in range(base+count if causal else tiles):
+                    kv_loads += 1
+                    kv_words += min(D, length-key*D)*H//4
                     n = count-max(0, key-base) if causal else count
                     assert 0 < n <= M
                     p = phases(n)
@@ -116,6 +124,17 @@ def main():
                            "ebe529b_eight_component_budget": pairs*235,
                            "73110dc_eight_component_budget": pairs*197,
                            "QK_internal_holes": holes,
+                           "semantic_query_key_pairs": length*(length+1)//2 if causal else length*length,
+                           "QK_and_PV_useful_MACs_each": (length*(length+1)//2 if causal else length*length)*H,
+                           "Q_AXI_words": length*H//4,
+                           "Q_forwarded_words_including_zero_padding": tiles*D*H//4,
+                           "KV_load_events": kv_loads,
+                           "K_and_V_AXI_words_each": kv_words,
+                           "KV_forwarded_packets_per_worker": kv_loads*D*H//4,
+                           "O_AXI_words": length*H//2,
+                           "gather_FP32_tokens_including_padding": tiles*D*H,
+                           "reciprocal_calls_per_worker": tiles,
+                           "normalize_module_budget_separate": normalization,
                            "scope": "compute calls only; excludes controller, IO, reciprocal, normalization"})
     write_csv("accepted_phase_budgets.csv", batches)
     write_csv("accepted_cycle_tokens.csv", events)
@@ -129,6 +148,7 @@ def main():
                 "packed_flags_total_bytes": 5*M,
                 "fixed_duplicated_KV_bytes": 512,
                 "ring_source_payload_ceiling_bytes": 1495.75,
+                "token_orders": {"QK": "feature then context", "PWL": "piece then context", "PV": "context then feature"},
                 "minimum_full_issue_contexts_for_this_verified_feedback": FEEDBACK}
     (OUT / "accepted_schedule_manifest.json").write_text(json.dumps(manifest, indent=2)+"\n", encoding="utf-8")
     print(json.dumps({"overhead": overhead, "full_batch": batches[-1], "short_batch": batches[0]}))
