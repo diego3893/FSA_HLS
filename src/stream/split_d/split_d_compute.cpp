@@ -350,6 +350,20 @@ namespace detail{
             #pragma HLS ARRAY_PARTITION variable=row_input complete dim=0
             SharedToken column_input{};
 
+            acc_t widened_probability[PE_DIM][QUERY_BLOCK_COLS];
+            #pragma HLS ARRAY_PARTITION variable=widened_probability complete dim=0
+            for(int row=0; row<PE_DIM; ++row){
+                #pragma HLS UNROLL
+                for(int col=0; col<QUERY_BLOCK_COLS; ++col){
+                    #pragma HLS UNROLL
+                    // 数据转换独立推进，命中仅控制后面的提交，不启停转换流水。
+                    // 前HOP拍不能读取尚未写过的环槽。
+                    const elem_t probability = cycle>=(unsigned)SHARED_PE_HOP
+                        ? pe_elem[row][pe_slot][col] : elemZero();
+                    widened_probability[row][col] = registerPwlProbability(probability);
+                }
+            }
+
             // 只读取旧环槽。前HOP拍的每个槽先被写入，之后才允许读取。
             if(cycle >= (unsigned)SHARED_ACC_HOP){
                 const SharedToken completed = acc_control[acc_slot];
@@ -387,7 +401,7 @@ namespace detail{
                                     state.reg[ctx][row][col] = state.score_valid[ctx][row][col]
                                         ? pe_elem[row][pe_slot][col] : elemZero();
                                 }else if(state.score_valid[ctx][row][col] && !state.probability_ready[ctx][row][col] && pe_hit[row][pe_slot][col]){
-                                    state.score[ctx][row][col] = registerPwlProbability(pe_elem[row][pe_slot][col]);
+                                    state.score[ctx][row][col] = widened_probability[row][col];
                                     state.probability_ready[ctx][row][col] = true;
                                 }
                             }

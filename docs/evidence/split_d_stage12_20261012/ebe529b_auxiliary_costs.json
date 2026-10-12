@@ -1,0 +1,178 @@
+{
+  "baseline": "ebe529b",
+  "archive": "build/split_d_ebe529b_4x4_timing_evidence_20261012",
+  "reports": {
+    "syn/report/gatherQueryTile_Pipeline_1_csynth.xml": {
+      "Best-caseLatency": [
+        "66"
+      ],
+      "Worst-caseLatency": [
+        "66"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ]
+    },
+    "syn/report/reciprocalColumns_Pipeline_VITIS_LOOP_369_13_csynth.xml": {
+      "Best-caseLatency": [
+        "15"
+      ],
+      "Worst-caseLatency": [
+        "15"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ]
+    },
+    "syn/report/distributeQueryTile_Pipeline_VITIS_LOOP_501_3_VITIS_LOOP_506_4_VITIS_LOOP_507_5_csynth.xml": {
+      "Best-caseLatency": [
+        "90"
+      ],
+      "Worst-caseLatency": [
+        "16458"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "74"
+      ]
+    },
+    "syn/report/storeOutputTile_Pipeline_VITIS_LOOP_76_1_csynth.xml": {
+      "Best-caseLatency": [
+        "2"
+      ],
+      "Worst-caseLatency": [
+        "35"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "3"
+      ]
+    },
+    "syn/report/p_anonymous_namespace_begin_reciprocal_csynth.xml": {
+      "Best-caseLatency": [
+        "1"
+      ],
+      "Worst-caseLatency": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": []
+    },
+    "syn/report/runPeArray_csynth.xml": {
+      "Best-caseLatency": [
+        "3"
+      ],
+      "Worst-caseLatency": [
+        "3"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "4"
+      ]
+    },
+    "syn/report/reciprocalColumns_Pipeline_VITIS_LOOP_369_1_csynth.xml": {
+      "Best-caseLatency": [
+        "15"
+      ],
+      "Worst-caseLatency": [
+        "15"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ]
+    },
+    "syn/report/distributeQueryTile_csynth.xml": {
+      "Best-caseLatency": [
+        "184"
+      ],
+      "Worst-caseLatency": [
+        "16552"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": []
+    },
+    "syn/report/gatherQueryTile_Pipeline_VITIS_LOOP_526_1_VITIS_LOOP_527_2_csynth.xml": {
+      "Best-caseLatency": [
+        "66"
+      ],
+      "Worst-caseLatency": [
+        "66"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "2"
+      ]
+    },
+    "syn/report/reciprocalColumns_csynth.xml": {
+      "Best-caseLatency": [
+        "4"
+      ],
+      "Worst-caseLatency": [
+        "42"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": []
+    },
+    "syn/report/runAccumulatorColumns_csynth.xml": {
+      "Best-caseLatency": [
+        "7"
+      ],
+      "Worst-caseLatency": [
+        "7"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "8"
+      ]
+    },
+    "syn/report/distributeQueryTile_Pipeline_VITIS_LOOP_489_1_VITIS_LOOP_490_2_csynth.xml": {
+      "Best-caseLatency": [
+        "19"
+      ],
+      "Worst-caseLatency": [
+        "19"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "3"
+      ]
+    },
+    "syn/report/storeOutputTile_csynth.xml": {
+      "Best-caseLatency": [
+        "73"
+      ],
+      "Worst-caseLatency": [
+        "106"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": []
+    },
+    "syn/report/gatherQueryTile_csynth.xml": {
+      "Best-caseLatency": [
+        "210"
+      ],
+      "Worst-caseLatency": [
+        "243"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": []
+    }
+  }
+}
