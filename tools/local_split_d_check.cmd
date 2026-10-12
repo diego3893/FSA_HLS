@@ -12,7 +12,7 @@ rem Local math stubs are not bit-identical for every case: inspect math-summary
 rem and bit-summary separately. Any bit mismatch still returns a nonzero exit.
 rem
 rem Usage:  tools\local_split_d_check.cmd [PE_DIM] [HEAD_DIM] [QUERY_CONTEXTS]
-rem Defaults: 4 16 7
+rem Defaults: 4 16 8
 setlocal enabledelayedexpansion
 
 set PE_DIM=%~1
@@ -20,7 +20,7 @@ set HEAD_DIM=%~2
 set QUERY_CONTEXTS=%~3
 if "%PE_DIM%"=="" set PE_DIM=4
 if "%HEAD_DIM%"=="" set HEAD_DIM=16
-if "%QUERY_CONTEXTS%"=="" set QUERY_CONTEXTS=7
+if "%QUERY_CONTEXTS%"=="" set QUERY_CONTEXTS=8
 
 set SCRIPT_DIR=%~dp0
 set ROOT=%SCRIPT_DIR%..

@@ -17,16 +17,16 @@
 #define FSA_SPLIT_D_HEAD_DIM 16
 #endif
 
-// 第3轮证明5拍结果年龄不足；6拍成熟＋下一拍S读取对应最小候选M7。
+// 多context首命中标志寄存选择使age6不足；age7＋下一拍S读取对应候选M8。
 // 最终容量仍须按完整路径的实际II验收；M1由正式Tcl显式配置诊断。
 #ifndef FSA_SPLIT_D_QUERY_CONTEXTS
-#define FSA_SPLIT_D_QUERY_CONTEXTS 7
+#define FSA_SPLIT_D_QUERY_CONTEXTS 8
 #endif
 #ifndef FSA_SPLIT_D_PE_HOP_CYCLES
-#define FSA_SPLIT_D_PE_HOP_CYCLES 6
+#define FSA_SPLIT_D_PE_HOP_CYCLES 7
 #endif
 #ifndef FSA_SPLIT_D_QK_FEEDBACK_CYCLES
-#define FSA_SPLIT_D_QK_FEEDBACK_CYCLES 7
+#define FSA_SPLIT_D_QK_FEEDBACK_CYCLES 8
 #endif
 #ifndef FSA_SPLIT_D_ACC_HOP_CYCLES
 #define FSA_SPLIT_D_ACC_HOP_CYCLES 11
