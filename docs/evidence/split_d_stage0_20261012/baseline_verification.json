@@ -1,0 +1,496 @@
+{
+  "head": "420ec4632f71300ff3df6601722b1de0bb552297",
+  "branch": "fsa_split_D",
+  "tested_source": "73110dc2d6eb799072c29fc4954f8f8d5427973b",
+  "baseline_commit": "ebe529be6f4d03f855add5f3fe745af9874fa9d4",
+  "payload_sha_checked": 247,
+  "payload_mismatches": [],
+  "source_sha_checked_LF_normalized": 92,
+  "source_mismatches": [],
+  "source_diff_73110dc_to_HEAD": "",
+  "tracked_baseline_reports_matching_HEAD": 22,
+  "warning_counts": {
+    "HLS 200-880": 8,
+    "HLS 200-871": 4,
+    "HLS 200-1016": 4,
+    "HLS 200-875": 0,
+    "HLS 204-65": 0
+  },
+  "selected_instance_counts": {
+    "fsa_stream_split_d_runAccumulatorColumns": 2,
+    "fsa_stream_split_d_mul_24ns_24ns_48_3_1": 4,
+    "fsa_stream_split_d_runPeArray": 2,
+    "fsa_stream_split_d_mul_11ns_11ns_22_2_1": 16
+  },
+  "reports": {
+    "73110dc_4": {
+      "runPeArray": {
+        "path": "build/resume_nm37/ii1_round1_4x4/syn/report/runPeArray_csynth.rpt",
+        "sha256": "681dfb8ebf8be798752b88a394d36aa18eb3b602e9920fbcea50aa5ed2d2c8ae",
+        "module_latency": 3,
+        "module_interval": "1",
+        "clock_ns": 7.048,
+        "loops": []
+      },
+      "runAccumulatorColumns": {
+        "path": "build/resume_nm37/ii1_round1_4x4/syn/report/runAccumulatorColumns_csynth.rpt",
+        "sha256": "8e8d8ac375b4188279af916c761fb3471666f3eb5cee6864634c0adad7c062bd",
+        "module_latency": 7,
+        "module_interval": "1",
+        "clock_ns": 7.299,
+        "loops": []
+      },
+      "worker0_QK": {
+        "path": "build/resume_nm37/ii1_round1_4x4/syn/report/runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_csynth.rpt",
+        "sha256": "5ace942f256aa36bdca7d2e19ed20e2f1a9b5132a251599a7c4b8ad41f28d75b",
+        "module_latency": 52,
+        "module_interval": "51",
+        "clock_ns": 7.435,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+            "latency": 50,
+            "depth": 6,
+            "ii": 3,
+            "trip": 16
+          }
+        ]
+      },
+      "worker0_ROW_SUM": {
+        "path": "build/resume_nm37/ii1_round1_4x4/syn/report/runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_csynth.rpt",
+        "sha256": "cd1ec1bfee17666066ccd0faf780c508d29c754bd3390a6fc864e5dee1c5dfd3",
+        "module_latency": 15,
+        "module_interval": "14",
+        "clock_ns": 7.887,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_162_1",
+            "latency": 13,
+            "depth": 5,
+            "ii": 3,
+            "trip": 4
+          }
+        ]
+      },
+      "worker0_PWL": {
+        "path": "build/resume_nm37/ii1_round1_4x4/syn/report/runQueryBlock_0_Pipeline_VITIS_LOOP_300_25_csynth.rpt",
+        "sha256": "3fc1e917dafdd8688ef25c3b78720d706ffb3e53e7c0e1d25d26204811f69c47",
+        "module_latency": 14,
+        "module_interval": "9",
+        "clock_ns": 7.048,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_300_25",
+            "latency": 12,
+            "depth": 6,
+            "ii": 1,
+            "trip": 8
+          }
+        ]
+      },
+      "worker0_PV": {
+        "path": "build/resume_nm37/ii1_round1_4x4/syn/report/runQueryBlock_0_Pipeline_VITIS_LOOP_369_33_csynth.rpt",
+        "sha256": "97e45d2721c3136f6937cc57082a43d288f262f2e7f7f057922015647b3e5bc3",
+        "module_latency": 89,
+        "module_interval": "81",
+        "clock_ns": 7.299,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_369_33",
+            "latency": 87,
+            "depth": 9,
+            "ii": 1,
+            "trip": 80
+          }
+        ]
+      },
+      "worker1_QK": {
+        "path": "build/resume_nm37/ii1_round1_4x4/syn/report/runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_csynth.rpt",
+        "sha256": "4475b31231f0944fee8fe22189629a0339bce17ae0a4935fcbd77a4cb8a626c1",
+        "module_latency": 52,
+        "module_interval": "51",
+        "clock_ns": 7.435,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+            "latency": 50,
+            "depth": 6,
+            "ii": 3,
+            "trip": 16
+          }
+        ]
+      },
+      "worker1_ROW_SUM": {
+        "path": "build/resume_nm37/ii1_round1_4x4/syn/report/runQueryBlock_1_Pipeline_VITIS_LOOP_162_1_csynth.rpt",
+        "sha256": "fb6ec0365ab1265abc448a0eaf7aefd0ddc657df9191ad1bbe2a73e784f229a7",
+        "module_latency": 15,
+        "module_interval": "14",
+        "clock_ns": 7.887,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_162_1",
+            "latency": 13,
+            "depth": 5,
+            "ii": 3,
+            "trip": 4
+          }
+        ]
+      },
+      "worker1_PWL": {
+        "path": "build/resume_nm37/ii1_round1_4x4/syn/report/runQueryBlock_1_Pipeline_VITIS_LOOP_300_25_csynth.rpt",
+        "sha256": "8d72e377b169ef321658f26e59640d4e619e7df0f74ff64b6f3f9ecd4ff8a117",
+        "module_latency": 14,
+        "module_interval": "9",
+        "clock_ns": 7.048,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_300_25",
+            "latency": 12,
+            "depth": 6,
+            "ii": 1,
+            "trip": 8
+          }
+        ]
+      },
+      "worker1_PV": {
+        "path": "build/resume_nm37/ii1_round1_4x4/syn/report/runQueryBlock_1_Pipeline_VITIS_LOOP_369_33_csynth.rpt",
+        "sha256": "f322d0d17f47a98e0707509722399f0cc032e3ef9f3d1a41b88ac9f84f548dd0",
+        "module_latency": 89,
+        "module_interval": "81",
+        "clock_ns": 7.299,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_369_33",
+            "latency": 87,
+            "depth": 9,
+            "ii": 1,
+            "trip": 80
+          }
+        ]
+      },
+      "top": {
+        "clock_ns": "7.887",
+        "resources": {
+          "BRAM_18K": "8",
+          "DSP": "40",
+          "FF": "44855",
+          "LUT": "128938",
+          "URAM": "0"
+        }
+      }
+    },
+    "ebe529b_4": {
+      "runPeArray": {
+        "path": "docs/evidence/split_d_ebe529b_4x4_timing/syn/report/runPeArray_csynth.rpt",
+        "sha256": "44c48a2c9b62e3e61e1fea2eb1f482f52c76133f0091e6ba9b0ac438f69a3d6d",
+        "module_latency": 3,
+        "module_interval": "1",
+        "clock_ns": 7.048,
+        "loops": []
+      },
+      "runAccumulatorColumns": {
+        "path": "docs/evidence/split_d_ebe529b_4x4_timing/syn/report/runAccumulatorColumns_csynth.rpt",
+        "sha256": "3a0f49cafd547889cae3369d02e25a43174c1de71bdcc53fb57bfef380b82582",
+        "module_latency": 7,
+        "module_interval": "1",
+        "clock_ns": 7.299,
+        "loops": []
+      },
+      "worker0_QK": {
+        "path": "docs/evidence/split_d_ebe529b_4x4_timing/syn/report/runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_csynth.rpt",
+        "sha256": "dbb3c64cf00ac474e89119867fdc59d8b04ad41cb7060336095cb0fb6abd7f2d",
+        "module_latency": 83,
+        "module_interval": "82",
+        "clock_ns": 7.048,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+            "latency": 81,
+            "depth": 7,
+            "ii": 5,
+            "trip": 16
+          }
+        ]
+      },
+      "worker0_ROW_SUM": {
+        "path": "docs/evidence/split_d_ebe529b_4x4_timing/syn/report/runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_csynth.rpt",
+        "sha256": "fc94b388adbf88955ac9e4c057ba2a4048e071b769399f9d0e9712c6d6fee510",
+        "module_latency": 22,
+        "module_interval": "21",
+        "clock_ns": 7.048,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_162_1",
+            "latency": 20,
+            "depth": 6,
+            "ii": 5,
+            "trip": 4
+          }
+        ]
+      },
+      "worker0_PWL": {
+        "path": "docs/evidence/split_d_ebe529b_4x4_timing/syn/report/runQueryBlock_0_Pipeline_VITIS_LOOP_300_25_csynth.rpt",
+        "sha256": "eddcc158e73cb9bd7918822ecf76e059312f35cc0358f0ac91bb825a172c5d6a",
+        "module_latency": 14,
+        "module_interval": "9",
+        "clock_ns": 7.048,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_300_25",
+            "latency": 12,
+            "depth": 6,
+            "ii": 1,
+            "trip": 8
+          }
+        ]
+      },
+      "worker0_PV": {
+        "path": "docs/evidence/split_d_ebe529b_4x4_timing/syn/report/runQueryBlock_0_Pipeline_VITIS_LOOP_369_33_csynth.rpt",
+        "sha256": "210f9e1e5c3e8f7a9dbdbdb2c3208370b37205c738a63316f873378ea10d1721",
+        "module_latency": 89,
+        "module_interval": "81",
+        "clock_ns": 7.299,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_369_33",
+            "latency": 87,
+            "depth": 9,
+            "ii": 1,
+            "trip": 80
+          }
+        ]
+      },
+      "worker1_QK": {
+        "path": "docs/evidence/split_d_ebe529b_4x4_timing/syn/report/runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_csynth.rpt",
+        "sha256": "9c0225563b845e0ec9950f6f74c2a59e173461b48284fb9122e400927b4bab5f",
+        "module_latency": 83,
+        "module_interval": "82",
+        "clock_ns": 7.048,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+            "latency": 81,
+            "depth": 7,
+            "ii": 5,
+            "trip": 16
+          }
+        ]
+      },
+      "worker1_ROW_SUM": {
+        "path": "docs/evidence/split_d_ebe529b_4x4_timing/syn/report/runQueryBlock_1_Pipeline_VITIS_LOOP_162_1_csynth.rpt",
+        "sha256": "e9bec82a6fe00dd13609e1a6c9235b15ad0e113a40ff69e58aad53eb6cbd3908",
+        "module_latency": 22,
+        "module_interval": "21",
+        "clock_ns": 7.048,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_162_1",
+            "latency": 20,
+            "depth": 6,
+            "ii": 5,
+            "trip": 4
+          }
+        ]
+      },
+      "worker1_PWL": {
+        "path": "docs/evidence/split_d_ebe529b_4x4_timing/syn/report/runQueryBlock_1_Pipeline_VITIS_LOOP_300_25_csynth.rpt",
+        "sha256": "816ffed0606e3d479cc132b194f9fb29c9cbcef513f8bcf78408cce66e0a4904",
+        "module_latency": 14,
+        "module_interval": "9",
+        "clock_ns": 7.048,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_300_25",
+            "latency": 12,
+            "depth": 6,
+            "ii": 1,
+            "trip": 8
+          }
+        ]
+      },
+      "worker1_PV": {
+        "path": "docs/evidence/split_d_ebe529b_4x4_timing/syn/report/runQueryBlock_1_Pipeline_VITIS_LOOP_369_33_csynth.rpt",
+        "sha256": "b180666f02e83024292bf2c46d2d0a94411af9d7cdaee301965468fdc0ad4901",
+        "module_latency": 89,
+        "module_interval": "81",
+        "clock_ns": 7.299,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_369_33",
+            "latency": 87,
+            "depth": 9,
+            "ii": 1,
+            "trip": 80
+          }
+        ]
+      },
+      "top": {
+        "clock_ns": "7.300",
+        "resources": {
+          "BRAM_18K": "8",
+          "DSP": "40",
+          "FF": "45881",
+          "LUT": "128820",
+          "URAM": "0"
+        }
+      }
+    },
+    "ebe529b_16": {
+      "runPeArray": {
+        "path": "docs/evidence/split_d_ebe529b_16x16_timing/syn/report/runPeArray_csynth.rpt",
+        "sha256": "6210bad5ee473e391ea947f3111d563d1680440927d66cedac6df1c18a11878c",
+        "module_latency": 9,
+        "module_interval": "5",
+        "clock_ns": 7.272,
+        "loops": []
+      },
+      "runAccumulatorColumns": {
+        "path": "docs/evidence/split_d_ebe529b_16x16_timing/syn/report/runAccumulatorColumns_csynth.rpt",
+        "sha256": "a77e8ec889f837de12ab21e553fd54fedce6c422812074d275e40b20f548f890",
+        "module_latency": 7,
+        "module_interval": "1",
+        "clock_ns": 7.299,
+        "loops": []
+      },
+      "worker0_QK": {
+        "path": "docs/evidence/split_d_ebe529b_16x16_timing/syn/report/runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_csynth.rpt",
+        "sha256": "f83215e1c195eb18ac7413a2823a051e23ee379fe164b07498b3e72bcf52545f",
+        "module_latency": 1283,
+        "module_interval": "1282",
+        "clock_ns": 7.272,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+            "latency": 1281,
+            "depth": 12,
+            "ii": 10,
+            "trip": 128
+          }
+        ]
+      },
+      "worker0_ROW_SUM": {
+        "path": "docs/evidence/split_d_ebe529b_16x16_timing/syn/report/runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_csynth.rpt",
+        "sha256": "dfdd6e3b199c62e8529ef610587cab3c9e892a6d1a891e59017ad68391dea29f",
+        "module_latency": 162,
+        "module_interval": "161",
+        "clock_ns": 7.272,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_162_1",
+            "latency": 160,
+            "depth": 11,
+            "ii": 10,
+            "trip": 16
+          }
+        ]
+      },
+      "worker0_PWL": {
+        "path": "docs/evidence/split_d_ebe529b_16x16_timing/syn/report/runQueryBlock_0_Pipeline_VITIS_LOOP_300_25_csynth.rpt",
+        "sha256": "4544e931d068b51220ce3b78368f2b36ce1dd3e0a9f83b37b373c3cf65f3d589",
+        "module_latency": 55,
+        "module_interval": "45",
+        "clock_ns": 7.272,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_300_25",
+            "latency": 53,
+            "depth": 17,
+            "ii": 5,
+            "trip": 8
+          }
+        ]
+      },
+      "worker0_PV": {
+        "path": "docs/evidence/split_d_ebe529b_16x16_timing/syn/report/runQueryBlock_0_Pipeline_VITIS_LOOP_369_33_csynth.rpt",
+        "sha256": "766a706d15ef4ef7594b4f55045b69f1c6eafc049781d4bc4e5b89a78d4bbfcf",
+        "module_latency": 10888,
+        "module_interval": "10885",
+        "clock_ns": 7.299,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_369_33",
+            "latency": 10886,
+            "depth": 12,
+            "ii": 5,
+            "trip": 2176
+          }
+        ]
+      },
+      "worker1_QK": {
+        "path": "docs/evidence/split_d_ebe529b_16x16_timing/syn/report/runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_csynth.rpt",
+        "sha256": "3ee91ca1ac36832f8aaa4ef4fc0668979048e5fee61e59c9f227e162f69064da",
+        "module_latency": 1283,
+        "module_interval": "1282",
+        "clock_ns": 7.272,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_109_1_VITIS_LOOP_110_2",
+            "latency": 1281,
+            "depth": 12,
+            "ii": 10,
+            "trip": 128
+          }
+        ]
+      },
+      "worker1_ROW_SUM": {
+        "path": "docs/evidence/split_d_ebe529b_16x16_timing/syn/report/runQueryBlock_1_Pipeline_VITIS_LOOP_162_1_csynth.rpt",
+        "sha256": "3d2a356f40d67a910ad6993564b907245fa9b5c899339bf3f67ab2e3aa08a206",
+        "module_latency": 162,
+        "module_interval": "161",
+        "clock_ns": 7.272,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_162_1",
+            "latency": 160,
+            "depth": 11,
+            "ii": 10,
+            "trip": 16
+          }
+        ]
+      },
+      "worker1_PWL": {
+        "path": "docs/evidence/split_d_ebe529b_16x16_timing/syn/report/runQueryBlock_1_Pipeline_VITIS_LOOP_300_25_csynth.rpt",
+        "sha256": "270920014be458005122fd76e777e6191df4a7d6a62987ff76aa46a547f2a5b3",
+        "module_latency": 55,
+        "module_interval": "45",
+        "clock_ns": 7.272,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_300_25",
+            "latency": 53,
+            "depth": 17,
+            "ii": 5,
+            "trip": 8
+          }
+        ]
+      },
+      "worker1_PV": {
+        "path": "docs/evidence/split_d_ebe529b_16x16_timing/syn/report/runQueryBlock_1_Pipeline_VITIS_LOOP_369_33_csynth.rpt",
+        "sha256": "bb49d4a9b427da15c9b8836c7fd65ad20faefba4988b5efe899eb9d684a310c6",
+        "module_latency": 10888,
+        "module_interval": "10885",
+        "clock_ns": 7.299,
+        "loops": [
+          {
+            "name": "- VITIS_LOOP_369_33",
+            "latency": 10886,
+            "depth": 12,
+            "ii": 5,
+            "trip": 2176
+          }
+        ]
+      },
+      "top": {
+        "clock_ns": "7.300",
+        "resources": {
+          "BRAM_18K": "8",
+          "DSP": "352",
+          "FF": "231565",
+          "LUT": "1213113",
+          "URAM": "0"
+        }
+      }
+    }
+  },
+  "scope": "Local static inspection and scheduling enumeration only; no DUT or HLS execution."
+}

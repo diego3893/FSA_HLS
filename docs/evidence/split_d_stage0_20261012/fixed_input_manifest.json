@@ -1,0 +1,188 @@
+{
+  "encoding": "token-major, feature-minor, little-endian IEEE FP16; exactly representable dyadic inputs",
+  "recipes": {
+    "Q": "((5*token+3*feature)%17-8)/16",
+    "K": "((7*token+feature)%19-9)/16",
+    "V": "((3*token+5*feature)%23-11)/8"
+  },
+  "existing_24_case_source_sha256_LF": "455bacad3a28f68b73369a0417ce3d64f645f45f7282c0726f2fd78cb5a138f3",
+  "new_cases": [
+    {
+      "name": "stage0-fixed-N3-causal0",
+      "N": 3,
+      "H": 16,
+      "causal": false,
+      "input_sha256": {
+        "Q": "0c9c68c6458474a70d91bd70f32be8eac1acfa727ea6bb2a61ca52bb0f711fde",
+        "K": "5e47488c9b64a43b32372d4f08ceeb27e7bd1d165b55eb9a5d850ce4b7a603a5",
+        "V": "d658f0ab9cc512af6da96d27a9b9f073148dcf3f4849077d27375236565cba34"
+      }
+    },
+    {
+      "name": "stage0-fixed-N3-causal1",
+      "N": 3,
+      "H": 16,
+      "causal": true,
+      "input_sha256": {
+        "Q": "0c9c68c6458474a70d91bd70f32be8eac1acfa727ea6bb2a61ca52bb0f711fde",
+        "K": "5e47488c9b64a43b32372d4f08ceeb27e7bd1d165b55eb9a5d850ce4b7a603a5",
+        "V": "d658f0ab9cc512af6da96d27a9b9f073148dcf3f4849077d27375236565cba34"
+      }
+    },
+    {
+      "name": "stage0-fixed-N4-causal0",
+      "N": 4,
+      "H": 16,
+      "causal": false,
+      "input_sha256": {
+        "Q": "8b46dd5ac633f7dfe59dc45ec9edab07303cef9b16f88832ecee127eb7ed8fad",
+        "K": "21a8ef5563fd1f46da45e71151d1a1568f4b968e12ace71f0a828b62546ffdf2",
+        "V": "0ddbfaf216440b19e84d27e5c49883fd3e99f2bf975579e5dbd03f9bea839731"
+      }
+    },
+    {
+      "name": "stage0-fixed-N4-causal1",
+      "N": 4,
+      "H": 16,
+      "causal": true,
+      "input_sha256": {
+        "Q": "8b46dd5ac633f7dfe59dc45ec9edab07303cef9b16f88832ecee127eb7ed8fad",
+        "K": "21a8ef5563fd1f46da45e71151d1a1568f4b968e12ace71f0a828b62546ffdf2",
+        "V": "0ddbfaf216440b19e84d27e5c49883fd3e99f2bf975579e5dbd03f9bea839731"
+      }
+    },
+    {
+      "name": "stage0-fixed-N5-causal0",
+      "N": 5,
+      "H": 16,
+      "causal": false,
+      "input_sha256": {
+        "Q": "21a5ec09a89284ab41a082124873eb72f2bfe1fdf62d76fa178283d2d02d42e2",
+        "K": "1bd4c208aea5646fe34864eb60d91bf8ef193ecf59217363d45f5711d45517a1",
+        "V": "532d4a2b535083f8de69e9a8ac9dc18d02bab081c000040ceb023ec899e234df"
+      }
+    },
+    {
+      "name": "stage0-fixed-N5-causal1",
+      "N": 5,
+      "H": 16,
+      "causal": true,
+      "input_sha256": {
+        "Q": "21a5ec09a89284ab41a082124873eb72f2bfe1fdf62d76fa178283d2d02d42e2",
+        "K": "1bd4c208aea5646fe34864eb60d91bf8ef193ecf59217363d45f5711d45517a1",
+        "V": "532d4a2b535083f8de69e9a8ac9dc18d02bab081c000040ceb023ec899e234df"
+      }
+    },
+    {
+      "name": "stage0-fixed-N8-causal0",
+      "N": 8,
+      "H": 16,
+      "causal": false,
+      "input_sha256": {
+        "Q": "16cdd26c3cc7392abd02ed766eed8086fd2ddf7aec9be616dd69b0e836d05991",
+        "K": "affc5242ac9333f0fbbea7e63d692bf4499fbcbcb1bf13bdb3cbed0ed0985cda",
+        "V": "e041ee0d57f2012f19f87e0d4941e884e274c8da3355ba2ce03a7db4bec17b17"
+      }
+    },
+    {
+      "name": "stage0-fixed-N8-causal1",
+      "N": 8,
+      "H": 16,
+      "causal": true,
+      "input_sha256": {
+        "Q": "16cdd26c3cc7392abd02ed766eed8086fd2ddf7aec9be616dd69b0e836d05991",
+        "K": "affc5242ac9333f0fbbea7e63d692bf4499fbcbcb1bf13bdb3cbed0ed0985cda",
+        "V": "e041ee0d57f2012f19f87e0d4941e884e274c8da3355ba2ce03a7db4bec17b17"
+      }
+    },
+    {
+      "name": "stage0-fixed-N9-causal0",
+      "N": 9,
+      "H": 16,
+      "causal": false,
+      "input_sha256": {
+        "Q": "d3893bee72417814e0c81759d4f58311d891aa05a3ca099298751f71abe5652b",
+        "K": "42c8cdee95d972e27a85081b066ced8bff5dc94e01a0397544d9c17dd185fa0d",
+        "V": "bfd3a59c6d5d974f67e4a1116c62b38306b844f735a47c8338ea0e9f0b09effa"
+      }
+    },
+    {
+      "name": "stage0-fixed-N9-causal1",
+      "N": 9,
+      "H": 16,
+      "causal": true,
+      "input_sha256": {
+        "Q": "d3893bee72417814e0c81759d4f58311d891aa05a3ca099298751f71abe5652b",
+        "K": "42c8cdee95d972e27a85081b066ced8bff5dc94e01a0397544d9c17dd185fa0d",
+        "V": "bfd3a59c6d5d974f67e4a1116c62b38306b844f735a47c8338ea0e9f0b09effa"
+      }
+    },
+    {
+      "name": "stage0-fixed-N12-causal0",
+      "N": 12,
+      "H": 16,
+      "causal": false,
+      "input_sha256": {
+        "Q": "bd6ae25b50dc79c026de9e7e5d2655c9f994d3771a0e78582f3bc914c91da38e",
+        "K": "95e54818952033f815c39e3cdb53110f792307a4e17307990b3d85d1ad4edf90",
+        "V": "5b758fe2034a38eeef513b32bd1378c0ff9ece7c8bd4807f5084f69011c66a62"
+      }
+    },
+    {
+      "name": "stage0-fixed-N12-causal1",
+      "N": 12,
+      "H": 16,
+      "causal": true,
+      "input_sha256": {
+        "Q": "bd6ae25b50dc79c026de9e7e5d2655c9f994d3771a0e78582f3bc914c91da38e",
+        "K": "95e54818952033f815c39e3cdb53110f792307a4e17307990b3d85d1ad4edf90",
+        "V": "5b758fe2034a38eeef513b32bd1378c0ff9ece7c8bd4807f5084f69011c66a62"
+      }
+    },
+    {
+      "name": "stage0-fixed-N16-causal0",
+      "N": 16,
+      "H": 16,
+      "causal": false,
+      "input_sha256": {
+        "Q": "c558488bfb920f6a2b1c469871722cab6104dae84ec966b6bf4ed8622856007f",
+        "K": "2b1a9e057a06c6d58aafc53ac67334dca81422d637777c7785af70159755710e",
+        "V": "37a6bebfb3a2397907ff22660061908224f1fc76ff360020c908b9779186223a"
+      }
+    },
+    {
+      "name": "stage0-fixed-N16-causal1",
+      "N": 16,
+      "H": 16,
+      "causal": true,
+      "input_sha256": {
+        "Q": "c558488bfb920f6a2b1c469871722cab6104dae84ec966b6bf4ed8622856007f",
+        "K": "2b1a9e057a06c6d58aafc53ac67334dca81422d637777c7785af70159755710e",
+        "V": "37a6bebfb3a2397907ff22660061908224f1fc76ff360020c908b9779186223a"
+      }
+    },
+    {
+      "name": "stage0-fixed-N20-causal0",
+      "N": 20,
+      "H": 16,
+      "causal": false,
+      "input_sha256": {
+        "Q": "44c3c0faea6a3df90f4626091779abab74737e92ff293342fcee243d617803b1",
+        "K": "3379abca6d0242649a1de089a3b41c89e5c235d010ab8fb6214b741d6da1f529",
+        "V": "df44bdba931a7f4bddb63ee8641929828d06565a4c495725c57c4fcfee3c63d0"
+      }
+    },
+    {
+      "name": "stage0-fixed-N20-causal1",
+      "N": 20,
+      "H": 16,
+      "causal": true,
+      "input_sha256": {
+        "Q": "44c3c0faea6a3df90f4626091779abab74737e92ff293342fcee243d617803b1",
+        "K": "3379abca6d0242649a1de089a3b41c89e5c235d010ab8fb6214b741d6da1f529",
+        "V": "df44bdba931a7f4bddb63ee8641929828d06565a4c495725c57c4fcfee3c63d0"
+      }
+    }
+  ],
+  "status": "Inputs specified and hashed only. Not added to the testbench or simulated. No output golden generated."
+}

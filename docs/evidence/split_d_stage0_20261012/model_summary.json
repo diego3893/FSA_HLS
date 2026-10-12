@@ -1,0 +1,44 @@
+{
+  "assumptions": {
+    "D": 4,
+    "H": 16,
+    "PE_latency_historical": 3,
+    "PE_service_II_assumed": 1,
+    "feedback_assumed": 4,
+    "hop_assumed": 4,
+    "Accumulator_latency_historical": 7,
+    "Accumulator_service_II_assumed": 1,
+    "P_bank_load_assumed": 1,
+    "q_load_for_B_optimistic": 1,
+    "R_chunk_extra": 0,
+    "tail_contexts": "compact with stalls when active < feedback",
+    "AXI": "ideal parallel K/V; no compute/load overlap; waits unmodeled"
+  },
+  "ROW_PV_barrier": 61,
+  "ROW_PV_overlap": 39,
+  "A_full4_QK": 67,
+  "A_single_QK": 64,
+  "B_hop4_qload1": 80,
+  "B_hop4_qload4": 92,
+  "context_payload_bytes_excluding_flags": {
+    "1": 512,
+    "3": 1536,
+    "4": 2048,
+    "5": 2560,
+    "8": 4096
+  },
+  "event_rows": 1078,
+  "workload_rows": 96,
+  "checks": [
+    "247 archived payload SHA",
+    "92 LF-normalized source SHA",
+    "both worker report agreement",
+    "A/B feature order and ready-before-read",
+    "B and spatial ROW/PV coordinate ownership",
+    "shared Accumulator issue spacing",
+    "causal batch tile demand",
+    "useful MAC conservation"
+  ],
+  "limits": "Symbolic schedule checks only. No new numerical or synthesis validation. Partial budgets exclude whole-transaction overhead and cannot certify speedup.",
+  "head_at_verification": "420ec4632f71300ff3df6601722b1de0bb552297"
+}

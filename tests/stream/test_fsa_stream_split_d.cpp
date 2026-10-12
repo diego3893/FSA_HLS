@@ -3,12 +3,14 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <limits>
 #include <random>
 #include <vector>
 #include <utils/x_hls_utils.h>
+#include "split_d_stage12_baseline.hpp"
 
 namespace{
 
@@ -24,6 +26,7 @@ namespace{
     unsigned mathematical_cases_passed = 0;
     unsigned baseline_cases_checked = 0;
     unsigned baseline_cases_passed = 0;
+    unsigned stage12_cases_passed = 0;
 
     enum class InputPattern{
         Random,
@@ -1512,7 +1515,7 @@ namespace{
         std::fill(q_memory, q_memory+MAX_QKV_WORDS, (dma_word_t)0);
         std::fill(k_memory, k_memory+MAX_QKV_WORDS, (dma_word_t)0);
         std::fill(v_memory, v_memory+MAX_QKV_WORDS, (dma_word_t)0);
-        std::fill(o_memory, o_memory+MAX_O_WORDS, (dma_word_t)0);
+        std::fill(o_memory, o_memory+MAX_O_WORDS, (dma_word_t)0x5ac3e791d2086bf4ULL);
         packInput(q, q_memory);
         packInput(k, k_memory);
         packInput(v, v_memory);
@@ -1525,6 +1528,12 @@ namespace{
         if(status != 0){
             std::cerr << "status failure: " << status.to_uint() << "\n";
             return false;
+        }
+        for(unsigned word=length*(unsigned)O_WORDS_PER_TOKEN; word<(unsigned)MAX_O_WORDS; ++word){
+            if(o_memory[word] != (dma_word_t)0x5ac3e791d2086bf4ULL){
+                std::cerr << "output canary failure: " << name << " word=" << word << "\n";
+                return false;
+            }
         }
 
         const std::vector<std::vector<float>> actual =
@@ -1645,6 +1654,68 @@ namespace{
         // 固定历史基线的真实FP16输入，消除宿主随机分布/half转换差异。
         restoreBaselineInputs(name, length, causal, q, k, v);
         return runCaseWithInput(name, length, causal, pattern, q, k, v);
+    }
+
+    bool runStage12Case(const char* name, const unsigned length, const bool causal, const int edge){
+        std::vector<std::vector<elem_t>> q(length, std::vector<elem_t>(HEAD_DIM));
+        std::vector<std::vector<elem_t>> k = q;
+        std::vector<std::vector<elem_t>> v = q;
+        for(unsigned token=0; token<length; ++token){
+            for(int feature=0; feature<HEAD_DIM; ++feature){
+                q[token][feature] = (elem_t)((float)((int)((5U*token+3U*(unsigned)feature)%17U)-8)/16.0F);
+                k[token][feature] = (elem_t)((float)((int)((7U*token+(unsigned)feature)%19U)-9)/16.0F);
+                v[token][feature] = (elem_t)((float)((int)((3U*token+5U*(unsigned)feature)%23U)-11)/8.0F);
+                if(edge == 1){
+                    q[token][feature] = (elem_t)0.0F;
+                    k[token][feature] = (elem_t)0.0F;
+                }else if(edge == 2){
+                    q[token][feature] = halfFromBits((token+(unsigned)feature)%2U ? 0x8000U : 0U);
+                    k[token][feature] = halfFromBits((token+(unsigned)feature)%3U ? 0U : 0x8000U);
+                    v[token][feature] = feature%2 ? halfFromBits(0x8000U) : (elem_t)((float)((int)(token%3U)-1)/1024.0F);
+                }
+            }
+            if(edge == 1){
+                q[token][PE_DIM-1] = (elem_t)1.0F;
+                q[token][PE_DIM] = (elem_t)1.0F;
+                q[token][PE_DIM+1] = (elem_t)((float)(token%3U)/8.0F);
+                k[token][PE_DIM-1] = (elem_t)32.0F;
+                k[token][PE_DIM] = (elem_t)-32.0F;
+                k[token][PE_DIM+1] = (elem_t)(1.0F/1024.0F);
+            }
+        }
+        bool ok = runCaseWithInput(name, length, causal, InputPattern::Random, q, k, v);
+        const unsigned words = length*(unsigned)O_WORDS_PER_TOKEN;
+        if(std::getenv("FSA_SPLIT_D_CAPTURE_STAGE12") != nullptr){
+            for(unsigned word=0; word<words; ++word){
+                std::cout << "[stage12-word] " << name << " " << length << " " << causal
+                    << " " << word << " " << std::hex << o_memory[word].to_uint64() << std::dec << "\n";
+            }
+        }else{
+            bool found = false;
+            for(unsigned index=0; index<STAGE12_BIT_CASE_COUNT; ++index){
+                const Stage12BitCase& entry = STAGE12_BIT_CASES[index];
+                if(std::strcmp(name, entry.name)==0 && length==entry.length && causal==entry.causal){
+                    found = true;
+                    for(unsigned word=0; word<words; ++word){
+                        if(o_memory[word].to_uint64() != STAGE12_BIT_WORDS[entry.offset+word]){
+                            std::cerr << "stage12 bit mismatch: " << name << " N=" << length
+                                << " causal=" << causal << " word=" << word << "\n";
+                            ok = false;
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            if(!found){
+                std::cerr << "stage12 missing frozen baseline: " << name << " N=" << length << "\n";
+                ok = false;
+            }
+        }
+        if(ok){
+            ++stage12_cases_passed;
+        }
+        return ok;
     }
 
 }  // namespace
@@ -1796,6 +1867,22 @@ int main(){
     ) && passed;
 
     unsigned expected_math_cases = PE_DIM==4 && HEAD_DIM==16 ? 24U : 22U;
+    if(PE_DIM==4 && HEAD_DIM==16){
+        const unsigned stage12_lengths[12] = {3, 4, 5, 8, 9, 12, 16, 20, 24, 28, 32, 36};
+        for(int index=0; index<12; ++index){
+            passed = runStage12Case("stage12-fixed", stage12_lengths[index], false, 0) && passed;
+            passed = runStage12Case("stage12-fixed", stage12_lengths[index], true, 0) && passed;
+        }
+        passed = runStage12Case("stage12-cancel", 9U, false, 1) && passed;
+        passed = runStage12Case("stage12-cancel", 9U, true, 1) && passed;
+        passed = runStage12Case("stage12-signed-zero", 9U, false, 2) && passed;
+        passed = runStage12Case("stage12-signed-zero", 9U, true, 2) && passed;
+        expected_math_cases += 28U;
+        std::cout << "[stage12-summary] " << stage12_cases_passed << "/28\n";
+        if(stage12_cases_passed != 28U){
+            passed = false;
+        }
+    }
 #if defined(FSA_SPLIT_D_LONG_CSIM_TEST) && FSA_SPLIT_D_LONG_CSIM_TEST
     static_assert(PE_DIM==16 && HEAD_DIM==128 && fsa::MAX_SEQUENCE_LENGTH>=1024,
                   "Long CSim test requires PE16/head128/L_MAX>=1024");
