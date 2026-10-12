@@ -54,8 +54,11 @@ def budget(length, causal, front, skip_initial_alpha, overhead):
     tiles = (length+D-1)//D
     counts = batches(tiles, front)
     base = calls = pairs = holes = loads = kv_words = saved = 0
+    phase_budgets = {phase: 0 for phase in phase_cycles(1)}
+    normalization = 0
     for count in counts:
         end = base+count
+        normalization += count*H+ACC_HOP+overhead
         for key in range(end if causal else tiles):
             n = count-max(0, key-base) if causal else count
             p = phase_cycles(n)
@@ -63,16 +66,30 @@ def budget(length, causal, front, skip_initial_alpha, overhead):
             discount = 2*(n+ACC_HOP+overhead) if skip_initial_alpha and key == 0 else 0
             saved += discount
             calls += full-discount
+            for phase, source_cycles in p.items():
+                if not (skip_initial_alpha and key == 0 and phase.startswith("ALPHA")):
+                    phase_budgets[phase] += source_cycles+overhead
             pairs += n
             holes += (H-1)*(max(n, FEEDBACK)-n)
             loads += 1
             kv_words += min(D, length-key*D)*H//4
         base = end
     assert pairs == (tiles*(tiles+1)//2 if causal else tiles*tiles)
-    return {"partition": "+".join(map(str, counts)), "legal_tile_pairs": pairs,
+    assert calls == sum(phase_budgets.values())
+    return {"partition": "+".join(map(str, counts)), "batch_count": len(counts), "legal_tile_pairs": pairs,
             "compute_call_budget": calls, "QK_internal_holes": holes,
             "KV_load_events": loads, "K_and_V_AXI_words_each": kv_words,
-            "initial_alpha_call_budget_saved": saved}
+            "initial_alpha_call_budget_saved": saved,
+            "compute_engine_invocations": 8*loads-(2*len(counts) if skip_initial_alpha else 0),
+            **{phase+"_call_budget": value for phase, value in phase_budgets.items()},
+            "normalize_module_budget_separate": normalization,
+            "reciprocal_calls_per_worker": tiles,
+            "Q_AXI_words": length*H//4, "O_AXI_words": length*H//2,
+            "Q_forwarded_words_including_padding": tiles*D*H//4,
+            "KV_forwarded_packets_per_worker": loads*D*H//4,
+            "O_gather_FP32_tokens_including_padding": tiles*D*H,
+            "max_context_iterations_per_worker": pairs,
+            "FP32_to_FP16_quantize_row_iterations_per_worker": pairs*D}
 
 
 def main():
@@ -115,7 +132,11 @@ def main():
     manifest = {"scope": "HLS schedule prediction; not complete transaction latency",
                 "versions": versions, "front_partition_DP_verified_tiles": [1, 1024],
                 "state_payload_bytes": {"stage2_per_context": 576, "final_per_context": 528,
-                                        "stage2_M8": 4608, "final_M8": 4224},
+                                        "stage2_M8": 4608, "final_M8": 4224,
+                                        "final_status": "verified" if args.final else "planned"},
+                "full_transaction_unknown_terms": ["AXI stalls/burst overhead", "DATAFLOW/FIFO waits",
+                                                   "controller setup/exit", "max/quantize loop cycles",
+                                                   "reciprocal actual input latency", "output packing/store overhead"],
                 "fixed_KV_bytes": 512, "ring_payload_ceiling_bytes": 1495.75,
                 "FIFO_depths_unchanged": {"header": 2, "Q": 8, "KV": 8, "O": 8},
                 "minimum_full_QK_issue_contexts": FEEDBACK,

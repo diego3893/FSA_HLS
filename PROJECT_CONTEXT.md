@@ -1,11 +1,11 @@
 # FSA HLS Project Context
 
-> 2026-10-12压缩版，阶段0、1、2均已完成；用户现已恢复阶段3的4配置供数/状态/尾批优化。只维护仓库根目录本文件；历史全文可从Git提交d3245a3恢复。
+> 2026-10-12压缩版，阶段0、1、2、3均已完成；4配置供数/状态/尾批优化已通过CSim/CSynth。只维护仓库根目录本文件；历史全文可从Git提交d3245a3恢复。
 
 ## 1 当前状态与任务
 
-- 用户任务：“继续阶段3”。仅4×4/head16，tail-only消融已通过，现第2轮状态生命周期复用/首key alpha冗余消除；与阶段2同输入/模型/资源对照。原FP32顺序/FP16量化、16PE/4Acc、实际服务II1、VU37P/10ns/2.7ns/≤7.300ns不变。持续授权同仓库/分支推送及NM37标准CSim/CSynth；CoSim/IP/16/板测/1024长测关闭，无轮数上限。当前日志1842。
-- 阶段3第1轮cd7d064正式CSim52/24/28全过、共享II1/depth46、7.300ns、DSP40/FF105480/LUT180448/BRAM8、16PE/4Acc。小batch前置经DP1至1024tile证明；N36 causal模型12230→7750拍、KV17→10。归档build/split_d_stage3_cd7d064_tail_20261012/。第2轮删除next_max/alpha_delta/inverse_sum，复用running_max/alpha，首key跳过两次冗余alpha；payload4608→4224B。本地数学52/52、3440word差分0，原stub19/24不变，待正式HLS。
+- 用户任务：“继续阶段3”已完成。仅4×4/head16，小batch前置＋状态生命周期复用/首key alpha冗余消除，经两轮同输入/模型/资源消融验收。原FP32顺序/FP16量化、16PE/4Acc、实际II1、VU37P/10ns/2.7ns/7.300ns保持。持续授权同仓库/分支推送及NM37标准CSim/CSynth；CoSim/IP/16/板测/1024长测关闭。日志1842，无轮数上限。
+- 阶段3最终被测16fa1525332110188544031350e806d54dcfd90c：官方数学52/52、旧严格24/24、新严格28/28及保护检查通过；II1/depth46、7.300ns、DSP40/FF103620/LUT179562/BRAM8，RTL16PE/4Acc/8减法。尾批消融cd7d064同门槛通过，FF105480/LUT180448。小batch前置经DP1至1024tile证明；N36 causal模型12230→7492拍、KV17→10；N3为670→548但仍高于ebe529b235。删除next_max/alpha_delta/inverse_sum，payload4608→4224B（−8.3%）。两轮精确归档build/split_d_stage3_{cd7d064_tail,16fa152_state}_20261012/；本地3440word差分0，stub19/24限制不变。阶段3完成，不自动启动16迁移。
 - 被测DUT提交902838ec6a2cefd24368e7be42e82d6ca29bc28f，第4轮M1诊断完整通过：数学52/52、旧严格24/24、新严格28/28、输出canary/2非法；正确S真实依赖下共享II1/depth46、顶层7.300ns，DSP40/FF71968/LUT148213/BRAM8/URAM0。阶段1已通过约定CSim/CSynth门槛。
 - 阶段2最终被测代码`02b16663c14b84fda80446376385c04fce596656`已通过默认M8正式CSim/CSynth：容量8、PE年龄7、QK反馈8、S提交距离1、Acc年龄11。数学52/52、旧严格24/24、新严格28/28及保护检查通过；共享实际II1/depth46、顶层7.300ns、DSP40/FF105482/LUT180509/BRAM8/URAM0，实际16PE/4Acc/8减法。阶段1、2完成。
 - 数值基线1afc13e保持73110dc DUT未改，官方28笔3440word已固定于tests/stream/split_d_stage12_baseline.hpp；来源/SHA在official_baseline_manifest.json，禁止候选改golden。完整N24/28/32覆盖M7−1/M7/M7＋1，N36覆盖尾批；全部52笔数学/52笔严格与2非法不收窄。
@@ -32,7 +32,7 @@
 
 - 输入分发→两个模板runQueryBlock→单输出汇聚为前向DATAFLOW；header FIFO深度2，Q/KV/O深度8。原始64-bit Q/128-bit KV字传输，在worker中解包。worker消费全部key输入后输出；需随结构变更重新审查有限FIFO等待关系。
 - D4/B2和D16/B8分别总16/256PE；各worker内部QK、SUB_MAX、SCALE、PWL、ROW_SUM、PV共享runPeArray，FP32列运算共享runAccumulatorColumns。全局D/H与DMA步长不得替换成局部B。
-- Q/K/V均按[token][feature]装载；PV消费方式不同。PV每次仅一条key行有效，总D个有效MAC位置；8个独立feature上下文覆盖真实反馈距离8，各feature按原key顺序累加。
+- Q/K/V均按[token][feature]装载；当前空间PV按context→feature逐拍向row0发射，部分和以hop7沿key0→key3推进，不再逐行同步求值/丢弃其他行。历史73110dc的PV才是每次仅一条key行有效、8个feature上下文反馈。
 - 73110dc：QK16次/II3，循环50cycles、模块52cycles；ROW_SUM4次/II3，循环13cycles、模块15cycles；PWL循环12/模块14，PV循环87/模块89，均II1。stage0已纠正旧文档循环/模块口径混用，不是完整attention延迟。
 - QK失败路径：PE返回7.048ns＋反馈store0.387ns＝7.435ns；ROW_SUM另加32-bit sparsemux0.453ns，达到7.887ns。200-880共8、200-871/200-1016各4；只改目标pragma不能消除真实顺序FP32反馈。
 - PE_ARRAY_II当前默认D≤4为1、D16为5。PE_BANK_*、peBankMacUnit等为无效遗留拆分接口；Tcl不透传相关II/bank环境宏，改环境变量不等于改综合输入。stageAccumulatorResult仍被调用，不能作为死代码删除。
@@ -68,15 +68,16 @@
 ## 6 证据与历史入口
 
 - 阶段0本地静态证据：docs/evidence/split_d_stage0_20261012/，包含模型、归档核对、逐拍CSV、A/B敏感性、96组部分预算和固定输入清单。对应[报告](docs/Split-D阶段0调度与账本_20261012.md)，没有新的数值或HLS验收。
-- 当前日志：[2026-10-12_1437_split_d_stage12_修改日志.md](docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md)。已闭合10轮；第4轮阶段1通过，第10轮阶段2通过。正式报告为[阶段1与2共享引擎与II1验收](docs/综合报告/Split-D阶段1与2_共享引擎与II1验收_20261012.md)。历史II1诊断为1148日志。
+- 当前日志：[阶段3日志1842](docs/修改日志/2026-10-12_1842_split_d_stage3_修改日志.md)，闭合2轮；正式报告[供数状态与尾批验收](docs/综合报告/Split-D阶段3_供数状态与尾批验收_20261012.md)，证据docs/evidence/split_d_stage3_20261012/。
+- 阶段1、2日志[1437](docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md)闭合10轮；第4轮阶段1、第10轮阶段2通过。[阶段1与2报告](docs/综合报告/Split-D阶段1与2_共享引擎与II1验收_20261012.md)。历史II1诊断为1148日志。
 - 实施来源：[Split-D数据流与II1优化交接方案_20261012.md](docs/Split-D数据流与II1优化交接方案_20261012.md)。本地FSA/两示例固定版本、互联网主来源、候选取舍、工作包与数值/II/性能验收已转化为阶段0账本和阶段1、2实现。
-- 最终完整证据：本地docs/evidence/split_d_stage12_20261012/；远端build/split_d_stage2_02b1666_defaultM8_20261012/。最终机器摘要、调度脚本、满批/短批预算、逐拍token表和序列预算均已归档。
+- 阶段1、2完整证据：本地docs/evidence/split_d_stage12_20261012/；远端build/split_d_stage2_02b1666_defaultM8_20261012/。机器摘要、调度脚本、满批/短批预算、逐拍token表和序列预算均已归档。
 - 第1轮73110dc诊断证据仍保存在本地build/resume_nm37/ii1_round1_4x4/及远端build/split_d_73110dc_4x4_ii1_evidence_20261012/，用于与最终结果对照，不再代表当前DUT。
 - 时序基线：[0850日志](docs/修改日志/2026-10-12_0850_split_d_critical_path_修改日志.md)，docs/evidence/split_d_ebe529b_{4x4,16x16}_timing/；远端build/split_d_ebe529b_{4x4,16x16}_timing_evidence_20261012/。
 - [修正与TAPA启发方案](docs/Split-D修正与TAPA启发的分阶段修改验收方案_20261009.md)、[阶段1/2验收](docs/综合报告/Split-D阶段1与2验收_20261010.md)、[阶段3验收](docs/综合报告/Split-D阶段3空间分块验收_20261010.md)、[阶段4物理对照](docs/综合报告/Split-D阶段4物理对照_20261010.md)。
 - [4×4真实HBM上板验收](docs/综合报告/Split-D_4x4真实HBM上板验收_20261011.md)、[1952板测日志](docs/修改日志/2026-10-11_1952_split_d_4x4_board_修改日志.md)、[1316实现日志](docs/修改日志/2026-10-10_1316_split_d_4x4_complete_修改日志.md)。工具tools/split_d_nm37/，证据docs/evidence/split_d_nm37_dfbf82e_board/；本地340文件自包含包build/resume_nm37/split_d_nm37_delivery_c59cbf4.tar.gz。
 - [16/128旧测量](docs/综合报告/Split-D_16x16_head128_CSim与综合测量_20261011.md)，docs/evidence/split_d_71025ff_16x16/。NM37原理图docs/NM37_SCH_220331.pdf。
-- 远端标准solution1最新是阶段2的02b1666默认M8构建，运行会覆盖；已按commit归档，每轮须再核对。本地build/fsa_stream_split_d_build/solution1是2026-09-28拆分前旧产物，不用于描述当前源码。
+- 远端标准solution1最新是阶段3的16fa152默认M8构建，运行会覆盖；已按commit归档，每轮须再核对。本地build/fsa_stream_split_d_build/solution1是2026-09-28拆分前旧产物，不用于描述当前源码。
 
 ## 7 不能重复的错误
 
@@ -103,4 +104,4 @@ RUN_CSIM=1 RUN_COSIM=0 EXPORT_IP=0 FSA_SPLIT_D_PE_DIM=4 FSA_SPLIT_D_HEAD_DIM=16 
 
 ## 9 对话接续摘要
 
-用户继续阶段3。阶段1、2基线02b1666保持默认M8/hop7/feedback8/S距离1/Acc11、II1/7.300ns/16PE4Acc、官方52数学/24旧严格/28新严格。阶段3日志1842：第1轮cd7d064小batch前置（N36为1＋8）已正式通过全部功能、II1/depth46、7.300ns、DSP40/FF105480/LUT180448/BRAM8及实例；完整归档build/split_d_stage3_cd7d064_tail_20261012/。第2轮已改types/controller/compute，删除next_max/alpha_delta/inverse_sum，复用running_max/alpha，首key跳过两次冗余alpha；payload4608→4224B。本地数学52/52、3440word差分0，原stub19/24不变，待提交/push/ff-only精确HEAD标准CSim/CSynth及消融模型收口。模型脚本docs/evidence/split_d_stage3_20261012/stage3_ablation.py，DP1024分组通过。top latency仍undef；CoSim/IP/16/Vivado/板测/1024关闭，无轮数上限，Git/SSH持续授权。run_hls.sh结束后实际目录为hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1，须按commit归档，不再用已重命名的build路径。用户AGENTS.md、.tmprun/、旧local_math_stubs_check.log不提交。
+用户要求阶段3，现已完成2轮官方闭环。最终代码16fa1525332110188544031350e806d54dcfd90c：M8/hop7/feedback8/S距离1/Acc11，官方数学52/52、旧严格24/24、新严格28/28及保护检查，II1/depth46/顶层7.300ns，DSP40/FF103620/LUT179562/BRAM8，RTL16PE/4Acc/8减法；无II/时序违例。小batch前置（N36为1＋8）、running_max/alpha复用删除3份列数组、首key省略两次冗余alpha，数值payload4608→4224B。阶段2基线02b1666及tail-only cd7d064同输入消融保留；N36 causal模型12230→7492拍（−38.7%）、KV17→10，N3为670→548但对ebe529b235仍退化。报告Split-D阶段3_供数状态与尾批验收_20261012.md、日志1842、证据docs/evidence/split_d_stage3_20261012/由最终文档提交交付；远端build/split_d_stage3_{cd7d064_tail,16fa152_state}_20261012/均精确归档。源码测试闭环已结束，不再改DUT或重跑测试。top latency仍undef；CoSim/IP/16/Vivado/板测/1024关闭，阶段4须用户继续后重新选择16服务/hop/M/bank。Git/SSH持续授权；实际生成目录fsa_stream_split_d_build，用户AGENTS.md、.tmprun/、旧stub日志不提交。

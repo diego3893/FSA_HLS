@@ -1,0 +1,206 @@
+{
+  "scope": "HLS schedule prediction; not complete transaction latency",
+  "versions": {
+    "stage2": {
+      "commit": "02b16663c14b84fda80446376385c04fce596656",
+      "clock_ns": 7.3,
+      "overhead": 49,
+      "depth": [
+        "46"
+      ],
+      "resources": {
+        "DSP": 40,
+        "FF": 105482,
+        "LUT": 180509,
+        "BRAM_18K": 8,
+        "URAM": 0
+      },
+      "warning_counts": {
+        "HLS 200-1995": 16,
+        "ANALYSIS 214-52": 4,
+        "SYN 201-103": 21,
+        "HLS 200-1020": 1,
+        "RTGEN 206-101": 84
+      }
+    },
+    "tail_only": {
+      "commit": "cd7d0646bbd98b1907564e3120724d30095c334d",
+      "clock_ns": 7.3,
+      "overhead": 49,
+      "depth": [
+        "46"
+      ],
+      "resources": {
+        "DSP": 40,
+        "FF": 105480,
+        "LUT": 180448,
+        "BRAM_18K": 8,
+        "URAM": 0
+      },
+      "warning_counts": {
+        "HLS 200-1995": 16,
+        "ANALYSIS 214-52": 4,
+        "SYN 201-103": 21,
+        "HLS 200-1020": 1,
+        "RTGEN 206-101": 84
+      }
+    },
+    "final": {
+      "commit": "16fa1525332110188544031350e806d54dcfd90c",
+      "clock_ns": 7.3,
+      "overhead": 49,
+      "depth": [
+        "46"
+      ],
+      "resources": {
+        "DSP": 40,
+        "FF": 103620,
+        "LUT": 179562,
+        "BRAM_18K": 8,
+        "URAM": 0
+      },
+      "warning_counts": {
+        "HLS 200-1995": 16,
+        "ANALYSIS 214-52": 4,
+        "SYN 201-103": 21,
+        "HLS 200-1020": 1,
+        "RTGEN 206-101": 84
+      }
+    }
+  },
+  "front_partition_DP_verified_tiles": [
+    1,
+    1024
+  ],
+  "state_payload_bytes": {
+    "stage2_per_context": 576,
+    "final_per_context": 528,
+    "stage2_M8": 4608,
+    "final_M8": 4224,
+    "final_status": "verified"
+  },
+  "full_transaction_unknown_terms": [
+    "AXI stalls/burst overhead",
+    "DATAFLOW/FIFO waits",
+    "controller setup/exit",
+    "max/quantize loop cycles",
+    "reciprocal actual input latency",
+    "output packing/store overhead"
+  ],
+  "fixed_KV_bytes": 512,
+  "ring_payload_ceiling_bytes": 1495.75,
+  "FIFO_depths_unchanged": {
+    "header": 2,
+    "Q": 8,
+    "KV": 8,
+    "O": 8
+  },
+  "minimum_full_QK_issue_contexts": 8,
+  "example_N36_causal": [
+    {
+      "version": "stage2",
+      "commit": "02b16663c14b84fda80446376385c04fce596656",
+      "N": 36,
+      "causal": 1,
+      "partition": "8+1",
+      "batch_count": 2,
+      "legal_tile_pairs": 45,
+      "compute_call_budget": 12230,
+      "QK_internal_holes": 1365,
+      "KV_load_events": 17,
+      "K_and_V_AXI_words_each": 272,
+      "initial_alpha_call_budget_saved": 0,
+      "compute_engine_invocations": 136,
+      "QK_call_budget": 3037,
+      "ALPHA_SCALE_call_budget": 1065,
+      "ALPHA_PWL_call_budget": 1065,
+      "SUB_MAX_call_budget": 997,
+      "SCALE_call_budget": 997,
+      "PWL_call_budget": 1312,
+      "ROW_SUM_call_budget": 1541,
+      "PV_call_budget": 2216,
+      "normalize_module_budget_separate": 264,
+      "reciprocal_calls_per_worker": 9,
+      "Q_AXI_words": 144,
+      "O_AXI_words": 288,
+      "Q_forwarded_words_including_padding": 144,
+      "KV_forwarded_packets_per_worker": 272,
+      "O_gather_FP32_tokens_including_padding": 576,
+      "max_context_iterations_per_worker": 45,
+      "FP32_to_FP16_quantize_row_iterations_per_worker": 180,
+      "stage2_budget": 12230,
+      "delta_percent": 0.0,
+      "scope": "HLS compute calls only; no RTL or hardware measurement"
+    },
+    {
+      "version": "tail_only",
+      "commit": "cd7d0646bbd98b1907564e3120724d30095c334d",
+      "N": 36,
+      "causal": 1,
+      "partition": "1+8",
+      "batch_count": 2,
+      "legal_tile_pairs": 45,
+      "compute_call_budget": 7750,
+      "QK_internal_holes": 525,
+      "KV_load_events": 10,
+      "K_and_V_AXI_words_each": 160,
+      "initial_alpha_call_budget_saved": 0,
+      "compute_engine_invocations": 80,
+      "QK_call_budget": 1805,
+      "ALPHA_SCALE_call_budget": 645,
+      "ALPHA_PWL_call_budget": 645,
+      "SUB_MAX_call_budget": 605,
+      "SCALE_call_budget": 605,
+      "PWL_call_budget": 920,
+      "ROW_SUM_call_budget": 925,
+      "PV_call_budget": 1600,
+      "normalize_module_budget_separate": 264,
+      "reciprocal_calls_per_worker": 9,
+      "Q_AXI_words": 144,
+      "O_AXI_words": 288,
+      "Q_forwarded_words_including_padding": 144,
+      "KV_forwarded_packets_per_worker": 160,
+      "O_gather_FP32_tokens_including_padding": 576,
+      "max_context_iterations_per_worker": 45,
+      "FP32_to_FP16_quantize_row_iterations_per_worker": 180,
+      "stage2_budget": 12230,
+      "delta_percent": -36.631,
+      "scope": "HLS compute calls only; no RTL or hardware measurement"
+    },
+    {
+      "version": "final",
+      "commit": "16fa1525332110188544031350e806d54dcfd90c",
+      "N": 36,
+      "causal": 1,
+      "partition": "1+8",
+      "batch_count": 2,
+      "legal_tile_pairs": 45,
+      "compute_call_budget": 7492,
+      "QK_internal_holes": 525,
+      "KV_load_events": 10,
+      "K_and_V_AXI_words_each": 160,
+      "initial_alpha_call_budget_saved": 258,
+      "compute_engine_invocations": 76,
+      "QK_call_budget": 1805,
+      "ALPHA_SCALE_call_budget": 516,
+      "ALPHA_PWL_call_budget": 516,
+      "SUB_MAX_call_budget": 605,
+      "SCALE_call_budget": 605,
+      "PWL_call_budget": 920,
+      "ROW_SUM_call_budget": 925,
+      "PV_call_budget": 1600,
+      "normalize_module_budget_separate": 264,
+      "reciprocal_calls_per_worker": 9,
+      "Q_AXI_words": 144,
+      "O_AXI_words": 288,
+      "Q_forwarded_words_including_padding": 144,
+      "KV_forwarded_packets_per_worker": 160,
+      "O_gather_FP32_tokens_including_padding": 576,
+      "max_context_iterations_per_worker": 45,
+      "FP32_to_FP16_quantize_row_iterations_per_worker": 180,
+      "stage2_budget": 12230,
+      "delta_percent": -38.741,
+      "scope": "HLS compute calls only; no RTL or hardware measurement"
+    }
+  ]
+}
