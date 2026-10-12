@@ -1,0 +1,503 @@
+{
+  "commit": "f57e9ef95e6478e07cf3486b101a75922b82de6c",
+  "contexts": 1,
+  "reports": {
+    "stageAccumulatorOperands_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "0.000"
+      ],
+      "Best-caseLatency": [
+        "1"
+      ],
+      "Worst-caseLatency": [
+        "1"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "194",
+        "2607360"
+      ],
+      "LUT": [
+        "2",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "stageAccumulatorResult_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "0.000"
+      ],
+      "Best-caseLatency": [
+        "1"
+      ],
+      "Worst-caseLatency": [
+        "1"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "66",
+        "2607360"
+      ],
+      "LUT": [
+        "2",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runPeArray_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.048"
+      ],
+      "Best-caseLatency": [
+        "4"
+      ],
+      "Worst-caseLatency": [
+        "4"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "5"
+      ],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "8",
+        "9024"
+      ],
+      "FF": [
+        "4999",
+        "2607360"
+      ],
+      "LUT": [
+        "29570",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runSharedEngine_Pipeline_VITIS_LOOP_303_1_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.961"
+      ],
+      "Best-caseLatency": [
+        "47"
+      ],
+      "Worst-caseLatency": [
+        "173"
+      ],
+      "Interval-min": [
+        "2"
+      ],
+      "Interval-max": [
+        "128"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "46"
+      ],
+      "Latency": [
+        "\n"
+      ],
+      "TripCount": [
+        "\n"
+      ],
+      "DSP": [
+        "12",
+        "9024"
+      ],
+      "FF": [
+        "17412",
+        "2607360"
+      ],
+      "LUT": [
+        "53414",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runSharedEngine_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.961"
+      ],
+      "Best-caseLatency": [
+        "52"
+      ],
+      "Worst-caseLatency": [
+        "178"
+      ],
+      "Interval-min": [
+        "52"
+      ],
+      "Interval-max": [
+        "178"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "16",
+        "9024"
+      ],
+      "FF": [
+        "18218",
+        "2607360"
+      ],
+      "LUT": [
+        "54428",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runAccumulatorColumns_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.299"
+      ],
+      "Best-caseLatency": [
+        "7"
+      ],
+      "Worst-caseLatency": [
+        "7"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "8"
+      ],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "4",
+        "9024"
+      ],
+      "FF": [
+        "2542",
+        "2607360"
+      ],
+      "LUT": [
+        "14230",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "stagePeArrayResult_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "0.000"
+      ],
+      "Best-caseLatency": [
+        "1"
+      ],
+      "Worst-caseLatency": [
+        "1"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "394",
+        "2607360"
+      ],
+      "LUT": [
+        "2",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "fsa_stream_split_d_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.961"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "undef"
+      ],
+      "Interval-max": [
+        "undef"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "40",
+        "9024"
+      ],
+      "FF": [
+        "70246",
+        "2607360"
+      ],
+      "LUT": [
+        "147299",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "8",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    }
+  },
+  "hierarchy_counts": {
+    "fsa_stream_split_d": 1,
+    "fsa_stream_split_d_run": 1,
+    "fsa_stream_split_d_runController": 1,
+    "fsa_stream_split_d_runQueryTile": 1,
+    "fsa_stream_split_d_entry_proc": 1,
+    "fsa_stream_split_d_distributeQueryTile": 1,
+    "fsa_stream_split_d_distributeQueryTile_Pipeline_VITIS_LOOP_229_1_VITIS_LOOP_230_2_VITIS_LOOP_231_3": 1,
+    "fsa_stream_split_d_flow_control_loop_pipe_sequential_init": 27,
+    "fsa_stream_split_d_distributeQueryTile_Pipeline_VITIS_LOOP_243_4_VITIS_LOOP_248_5_VITIS_LOOP_249_6": 1,
+    "fsa_stream_split_d_runQueryBlock_0_s": 1,
+    "fsa_stream_split_d_runQueryBlock_0_s_state_q_RAM_AUTO_1R1W": 80,
+    "fsa_stream_split_d_runQueryBlock_0_s_state_output_acc_RAM_AUTO_1R1W": 4,
+    "fsa_stream_split_d_runQueryBlock_0_s_state_running_max_RAM_AUTO_1R1W": 2,
+    "fsa_stream_split_d_runSharedEngine": 2,
+    "fsa_stream_split_d_runSharedEngine_Pipeline_VITIS_LOOP_303_1": 2,
+    "fsa_stream_split_d_runSharedEngine_Pipeline_VITIS_LOOP_303_1_slopes_ROM_AUTO_1R": 2,
+    "fsa_stream_split_d_runSharedEngine_Pipeline_VITIS_LOOP_303_1_fsa_anonymous_namespace_EXP2_PWL_INdEe": 2,
+    "fsa_stream_split_d_runPeArray": 2,
+    "fsa_stream_split_d_stagePeArrayResult": 2,
+    "fsa_stream_split_d_mul_11ns_11ns_22_2_1": 16,
+    "fsa_stream_split_d_ctlz_22_22_1_1": 16,
+    "fsa_stream_split_d_ctlz_27_27_1_1": 16,
+    "fsa_stream_split_d_stageAccumulatorOperands": 2,
+    "fsa_stream_split_d_runAccumulatorColumns": 2,
+    "fsa_stream_split_d_runAccumulatorColumns_fsa_anonymous_namespace_ACC_EXP2_PWL_SLOPE_BITS_ROM_AUTbkb": 2,
+    "fsa_stream_split_d_runAccumulatorColumns_fsa_anonymous_namespace_ACC_EXP2_PWL_INTERCEPT_BITS_ROMcud": 2,
+    "fsa_stream_split_d_p_anonymous_namespace_ldexpByBits": 4,
+    "fsa_stream_split_d_stageAccumulatorResult": 2,
+    "fsa_stream_split_d_mul_24ns_24ns_48_3_1": 4,
+    "fsa_stream_split_d_ctlz_48_48_1_1": 4,
+    "fsa_stream_split_d_ctlz_24_24_1_1": 4,
+    "fsa_stream_split_d_ctlz_51_51_1_1": 4,
+    "fsa_stream_split_d_hptosp_16ns_32_1_no_dsp_1": 16,
+    "fsa_stream_split_d_urem_32ns_4ns_3_36_1": 2,
+    "fsa_stream_split_d_urem_32ns_4ns_3_36_1_divider": 2,
+    "fsa_stream_split_d_urem_32ns_5ns_4_36_1": 2,
+    "fsa_stream_split_d_urem_32ns_5ns_4_36_1_divider": 2,
+    "fsa_stream_split_d_fsub_32ns_32ns_32_3_full_dsp_1": 8,
+    "fsa_stream_split_d_mul_32s_4ns_32_1_1": 2,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_91_1_VITIS_LOOP_92_2_VITIS_LOOP_94_3": 1,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_109_6_VITIS_LOOP_110_7": 1,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_125_9": 1,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_144_12": 1,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_198_22": 1,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_165_15": 1,
+    "fsa_stream_split_d_cvtAtoE": 16,
+    "fsa_stream_split_d_sptohp_32ns_16_1_no_dsp_1": 32,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_185_19": 1,
+    "fsa_stream_split_d_reciprocalColumns": 2,
+    "fsa_stream_split_d_p_anonymous_namespace_begin_reciprocal": 2,
+    "fsa_stream_split_d_reciprocalColumns_Pipeline_VITIS_LOOP_369_1": 2,
+    "fsa_stream_split_d_p_anonymous_namespace_normalize_and_round": 2,
+    "fsa_stream_split_d_reciprocalColumns_Pipeline_VITIS_LOOP_369_11": 2,
+    "fsa_stream_split_d_fcmp_32ns_32ns_1_1_no_dsp_1": 2,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_212_25_VITIS_LOOP_213_26_VITIS_LOOP_214_27": 1,
+    "fsa_stream_split_d_runQueryBlock_1_s": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_91_1_VITIS_LOOP_92_2_VITIS_LOOP_94_3": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_109_6_VITIS_LOOP_110_7": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_125_9": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_144_12": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_198_22": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_165_15": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_185_19": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_212_25_VITIS_LOOP_213_26_VITIS_LOOP_214_27": 1,
+    "fsa_stream_split_d_gatherQueryTile": 1,
+    "fsa_stream_split_d_gatherQueryTile_normalized_RAM_AUTO_1R1W": 4,
+    "fsa_stream_split_d_gatherQueryTile_Pipeline_1": 1,
+    "fsa_stream_split_d_gatherQueryTile_Pipeline_VITIS_LOOP_269_2_VITIS_LOOP_270_3": 1,
+    "fsa_stream_split_d_storeOutputTile": 1,
+    "fsa_stream_split_d_storeOutputTile_Pipeline_VITIS_LOOP_76_1": 1,
+    "fsa_stream_split_d_fifo_w64_d4_S": 1,
+    "fsa_stream_split_d_fifo_w64_d4_S_ShiftReg": 1,
+    "fsa_stream_split_d_fifo_w161_d2_S": 2,
+    "fsa_stream_split_d_fifo_w161_d2_S_ShiftReg": 2,
+    "fsa_stream_split_d_fifo_w64_d8_S": 2,
+    "fsa_stream_split_d_fifo_w64_d8_S_ShiftReg": 2,
+    "fsa_stream_split_d_fifo_w128_d8_S": 2,
+    "fsa_stream_split_d_fifo_w128_d8_S_ShiftReg": 2,
+    "fsa_stream_split_d_fifo_w32_d3_S": 1,
+    "fsa_stream_split_d_fifo_w32_d3_S_ShiftReg": 1,
+    "fsa_stream_split_d_fifo_w3_d3_S": 1,
+    "fsa_stream_split_d_fifo_w3_d3_S_ShiftReg": 1,
+    "fsa_stream_split_d_fifo_w32_d8_S": 2,
+    "fsa_stream_split_d_fifo_w32_d8_S_ShiftReg": 2,
+    "fsa_stream_split_d_start_for_gatherQueryTile_U0": 1,
+    "fsa_stream_split_d_start_for_gatherQueryTile_U0_ShiftReg": 1,
+    "fsa_stream_split_d_start_for_runQueryBlock_0_U0": 1,
+    "fsa_stream_split_d_start_for_runQueryBlock_0_U0_ShiftReg": 1,
+    "fsa_stream_split_d_start_for_runQueryBlock_1_U0": 1,
+    "fsa_stream_split_d_start_for_runQueryBlock_1_U0_ShiftReg": 1,
+    "fsa_stream_split_d_control_s_axi": 1,
+    "fsa_stream_split_d_k_gmem_m_axi": 1,
+    "fsa_stream_split_d_k_gmem_m_axi_load": 1,
+    "fsa_stream_split_d_k_gmem_m_axi_fifo": 5,
+    "fsa_stream_split_d_k_gmem_m_axi_srl": 5,
+    "fsa_stream_split_d_k_gmem_m_axi_mem": 5,
+    "fsa_stream_split_d_k_gmem_m_axi_reg_slice": 3,
+    "fsa_stream_split_d_k_gmem_m_axi_read": 1,
+    "fsa_stream_split_d_k_gmem_m_axi_burst_converter": 1,
+    "fsa_stream_split_d_o_gmem_m_axi": 1,
+    "fsa_stream_split_d_o_gmem_m_axi_store": 1,
+    "fsa_stream_split_d_o_gmem_m_axi_fifo": 10,
+    "fsa_stream_split_d_o_gmem_m_axi_srl": 10,
+    "fsa_stream_split_d_o_gmem_m_axi_mem": 10,
+    "fsa_stream_split_d_o_gmem_m_axi_write": 1,
+    "fsa_stream_split_d_o_gmem_m_axi_burst_converter": 1,
+    "fsa_stream_split_d_o_gmem_m_axi_reg_slice": 3,
+    "fsa_stream_split_d_o_gmem_m_axi_throttle": 1,
+    "fsa_stream_split_d_q_gmem_m_axi": 1,
+    "fsa_stream_split_d_q_gmem_m_axi_load": 1,
+    "fsa_stream_split_d_q_gmem_m_axi_fifo": 5,
+    "fsa_stream_split_d_q_gmem_m_axi_srl": 5,
+    "fsa_stream_split_d_q_gmem_m_axi_mem": 5,
+    "fsa_stream_split_d_q_gmem_m_axi_reg_slice": 3,
+    "fsa_stream_split_d_q_gmem_m_axi_read": 1,
+    "fsa_stream_split_d_q_gmem_m_axi_burst_converter": 1,
+    "fsa_stream_split_d_v_gmem_m_axi": 1,
+    "fsa_stream_split_d_v_gmem_m_axi_load": 1,
+    "fsa_stream_split_d_v_gmem_m_axi_fifo": 5,
+    "fsa_stream_split_d_v_gmem_m_axi_srl": 5,
+    "fsa_stream_split_d_v_gmem_m_axi_mem": 5,
+    "fsa_stream_split_d_v_gmem_m_axi_reg_slice": 3,
+    "fsa_stream_split_d_v_gmem_m_axi_read": 1,
+    "fsa_stream_split_d_v_gmem_m_axi_burst_converter": 1
+  },
+  "rtl_module_declarations": 160,
+  "warning_counts": {
+    "HLS 200-1995": 16,
+    "ANALYSIS 214-52": 4,
+    "SYN 201-103": 21,
+    "HLS 200-871": 1,
+    "HLS 200-1016": 1,
+    "HLS 200-1020": 1,
+    "RTGEN 206-101": 84
+  },
+  "summaries": [
+    "[stage12-summary] 28/28",
+    "[math-summary] 52/52",
+    "[bit-summary] 24/24"
+  ],
+  "critical_path": [
+    "WARNING: [HLS 200-1016] The critical path in module 'runSharedEngine_Pipeline_VITIS_LOOP_303_1' consists of the following:",
+    "\t'load' operation 16 bit ('state_v_1_0_load', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:416) on array 'state_v_1_0' [1229]  (0.683 ns)",
+    "\t'sparsemux' operation 16 bit ('b', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:416) [1233]  (0.453 ns)",
+    "\t'select' operation 16 bit ('operand_b', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:281) [1236]  (0.243 ns)",
+    "\t'sparsemux' operation 16 bit ('b', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:411) [1261]  (0.486 ns)",
+    "\t'call' operation 392 bit ('call_ret1', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:439) to 'runPeArray' [1392]  (6.096 ns)",
+    "",
+    "Resolution: For help on HLS 200-1016 see docs.xilinx.com/access/sources/dita/topic?Doc_Version=2024.2%20English&url=ug1448-hls-guidance&resourceid=200-1016.html"
+  ]
+}

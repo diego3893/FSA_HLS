@@ -6,7 +6,7 @@
 
 - 用户目标：先在4×4/head16把QK/ROW_SUM/PWL/PV实际发射II全部降到1并改善性能，达标后才测试16×16/head128；不进行CoSim。
 - 最新任务：用户要求“继续阶段1和2”，按已交付空间ROW_SUM等价口径恢复实现和CSim/CSynth。28笔固定输入/head消去/signed-zero及canary已加入，基线捕获准备提交1afc13e（DUT未改）。共享有限引擎、空间RS/PV阶段1及query batch阶段2候选已本地实现，正式旧DUT52数学/24旧严格通过，28笔3440word官方输出已冻结；M1候选CSim已通过全部原/新增检查，CSynth完成：共享循环II2、7.815ns，验收未过；第2轮准备Q广播和Acc输入寄存；当前日志docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md。
-- 当前本地/远端被测HEAD为2b0d51a（共享引擎及batch支持），官方M1候选CSim已通过52数学/24旧严格/28新严格及2非法，CSynth完成：共享循环II2、7.815ns，验收未过；第2轮准备Q广播和Acc输入寄存。阶段1同stub新增3440word差分0，数学52/52、旧严格19/24已知位差、exit1；正式新基线头已从1afc13e旧DUT冻结3440word，manifest保存来源/SHA。阶段0文档/证据已在1afc13e提交。
+- 当前本地/远端被测HEAD为f57e9ef（第2轮Q/负max广播及Acc输入寄存），上一轮2b0d51a（共享引擎及batch支持），官方M1候选CSim已通过52数学/24旧严格/28新严格及2非法，CSynth完成：共享循环II2、7.815ns，验收未过；第2轮准备Q广播和Acc输入寄存。阶段1同stub新增3440word差分0，数学52/52、旧严格19/24已知位差、exit1；正式新基线头已从1afc13e旧DUT冻结3440word，manifest保存来源/SHA。阶段0文档/证据已在1afc13e提交。
 - 被测代码：73110dc2d6eb799072c29fc4954f8f8d5427973b；仅将QK/ROW_SUM两处PIPELINE目标II5→1，未改变算术或状态。收尾文档d3245a3已推送；文档提交不算HLS重新测试。
 - 官方4配置流程11:58:47—12:02:27退出0：数学/严格位模式24/24及2笔非法长度保护通过；实际II3/3/1/1，顶层估算7.887ns，II与≤7.300ns时序门槛未通过。
 - 资源：DSP40/FF44855/LUT128938/BRAM18K8；实际2个PE块、2个Accumulator块，总16条PE乘法、4条Acc乘法和8条减法，未复制MAC。
@@ -67,7 +67,7 @@
 ## 6 证据与历史入口
 
 - 阶段0本地静态证据：docs/evidence/split_d_stage0_20261012/，包含模型、归档核对、逐拍CSV、A/B敏感性、96组部分预算和固定输入清单。对应[报告](docs/Split-D阶段0调度与账本_20261012.md)，没有新的数值或HLS验收。
-- 当前日志：[2026-10-12_1437_split_d_stage12_修改日志.md](docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md)。第1轮已闭合，完成轮数1；第2轮进行中；阶段1/2本地候选已实现，尚未官方验收。历史II1诊断为1148日志。
+- 当前日志：[2026-10-12_1437_split_d_stage12_修改日志.md](docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md)。第2轮已闭合，完成轮数2；第3轮PE输入寄存进行中；阶段1/2本地候选已实现，尚未官方验收。历史II1诊断为1148日志。
 - 最新交接：[Split-D数据流与II1优化交接方案_20261012.md](docs/Split-D数据流与II1优化交接方案_20261012.md)。本地FSA/两示例固定版本、互联网主来源、候选取舍、工作包与数值/II/性能验收；替代直接固定上下文数的下一步，未实施。
 - 当前完整证据：本地build/resume_nm37/ii1_round1_4x4/；远端build/split_d_73110dc_4x4_ii1_evidence_20261012/。247载荷SHA及92源码对73110dc已核对；tar SHA a41d69005492a12d863466e0163bffe5fe9e899c4efdc16ca8c946af37f15074。
 - 远端日志/tmp/codex_split_d_73110dc_ii1_4x4_20261012.log；压缩包/tmp/codex_split_d_73110dc_4x4_ii1_evidence_20261012.tar.gz，本地build/resume_nm37/ii1_round1_4x4.tar.gz。
@@ -102,4 +102,4 @@ RUN_CSIM=1 RUN_COSIM=0 EXPORT_IP=0 FSA_SPLIT_D_PE_DIM=4 FSA_SPLIT_D_HEAD_DIM=16 
 
 ## 9 对话接续摘要
 
-用户要求继续阶段1和2，4×4/head16、逐query原FP32顺序/FP16量化、总16PE/4Acc、≤7.300ns和正式CSim/CSynth合同不变。当前HEAD2b0d51a已正常推送并ff-only同步NM37，包含共享引擎及batch支持；当前正式配置M1，CSim52数学/24原严格/28新严格及保护区、2非法全部通过，CSynth完成：共享循环II2、7.815ns，验收未过；第2轮准备Q广播和Acc输入寄存。用户明确授权精确GitHub目标后推送成功，旧DUT官方CSim/CSynth完成（52/52数学、24/24旧严格、7.887ns），完整构建已归档。本地共享有限引擎已接入空间ROW_SUM/PV并保留屏障，阶段1数学52/52和新增3440word同stub差分全相同，旧严格19/24/exit1是5项已知stub差异。阶段2query batch、causal后缀和尾批调度已写入，默认容量1，可配置M；M6数学52/52及3440word同stub差分通过，M1批次泛化后功能复核也通过，PE模块latency4/II1已测，但完整反馈仍需核对；当前hop5/feedback6/Acc11，第2轮加Q/负max列广播、Acc输入寄存，本地M1/M6均52数学及3440word差分通过，最小M不可认定。官方新增golden头已冻结28笔3440word，来源manifest在docs/evidence/split_d_stage12_20261012/，不允许候选再生成。实际RTL确认两个共享引擎/PE/Acc；第1轮II2来自Q重复读端口、7.815ns来自O读取/选择＋Acc输入。下一步显式列Q广播＋Acc输入寄存，复测M1，再按实际路径验证最小M。CoSim/IP/16/板测/1024长测关闭。当前日志1437，第1轮未闭合，不宣称阶段1/2完成。
+用户要求继续阶段1和2，4×4/head16、逐query原FP32顺序/FP16量化、总16PE/4Acc、≤7.300ns和正式CSim/CSynth合同不变。当前HEADf57e9ef已正常推送并ff-only同步NM37，第2轮M1官方全功能通过、共享II1/depth46、顶层7.961ns仍违例。上一轮2b0d51a正式配置M1，CSim52数学/24原严格/28新严格及保护区、2非法全部通过，CSynth完成：共享循环II2、7.815ns，验收未过；第2轮准备Q广播和Acc输入寄存。用户明确授权精确GitHub目标后推送成功，旧DUT官方CSim/CSynth完成（52/52数学、24/24旧严格、7.887ns），完整构建已归档。本地共享有限引擎已接入空间ROW_SUM/PV并保留屏障，阶段1数学52/52和新增3440word同stub差分全相同，旧严格19/24/exit1是5项已知stub差异。阶段2query batch、causal后缀和尾批调度已写入，默认容量1，可配置M；M6数学52/52及3440word同stub差分通过，M1批次泛化后功能复核也通过，PE模块latency4/II1已测，但完整反馈仍需核对；当前hop5/feedback6/Acc11，第2轮加Q/负max列广播、Acc输入寄存，本地M1/M6均52数学及3440word差分通过，最小M不可认定；RTL解析必须允许缩进/属性前缀及多module，第1轮确认16PE乘法、4Acc乘法、8减法、2地址乘法。官方新增golden头已冻结28笔3440word，来源manifest在docs/evidence/split_d_stage12_20261012/，不允许候选再生成。实际RTL确认两个共享引擎/PE/Acc；第1轮II2来自Q重复读端口、7.815ns来自O读取/选择＋Acc输入。第2轮已解决Q端口/Acc输入路径，剩余V读取/选择＋PE输入为7.961ns；下一步纯PE输入寄存、核对hop5/反馈6覆盖，再验证最小M。CoSim/IP/16/板测/1024长测关闭。当前日志1437，第1轮未闭合，不宣称阶段1/2完成。

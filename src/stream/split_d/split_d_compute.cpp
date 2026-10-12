@@ -241,6 +241,29 @@ namespace detail{
         }
     }
 
+    /// @brief PE输入选择后的寄存边界，阻断V读取/mux与RawFMA组合路径。
+    void stagePeOperands(const PeState in_pe[PE_DIM][QUERY_BLOCK_COLS], const elem_t in_b[PE_DIM][QUERY_BLOCK_COLS], const acc_t in_c[PE_DIM][QUERY_BLOCK_COLS], PeState out_pe[PE_DIM][QUERY_BLOCK_COLS], elem_t out_b[PE_DIM][QUERY_BLOCK_COLS], acc_t out_c[PE_DIM][QUERY_BLOCK_COLS]){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1 style=stp
+        #pragma HLS LATENCY min=1 max=1
+        #pragma HLS ARRAY_PARTITION variable=in_pe complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=in_b complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=in_c complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=out_pe complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=out_b complete dim=0
+        #pragma HLS ARRAY_PARTITION variable=out_c complete dim=0
+        for(int row=0; row<PE_DIM; ++row){
+            #pragma HLS UNROLL
+            for(int col=0; col<QUERY_BLOCK_COLS; ++col){
+                #pragma HLS UNROLL
+                out_pe[row][col].reg = in_pe[row][col].reg;
+                out_pe[row][col].score_acc = accZero();
+                out_b[row][col] = in_b[row][col];
+                out_c[row][col] = in_c[row][col];
+            }
+        }
+    }
+
     void runSharedEngine(const SharedOperation operation, const unsigned first_context, const unsigned context_count, SharedEngineState& state){
         #pragma HLS INLINE off
         #pragma HLS ALLOCATION function instances=runPeArray limit=1
@@ -436,7 +459,14 @@ namespace detail{
                 }
             }
             // 唯一坐标求值所有者：全部phase仅选择上述输入，不复制RawFMA。
-            runPeArray(operands, operand_b, operand_c, operation==SharedOperation::PWL, computed);
+            PeState staged_pe[PE_DIM][QUERY_BLOCK_COLS];
+            elem_t staged_pe_b[PE_DIM][QUERY_BLOCK_COLS];
+            acc_t staged_pe_c[PE_DIM][QUERY_BLOCK_COLS];
+            #pragma HLS ARRAY_PARTITION variable=staged_pe complete dim=0
+            #pragma HLS ARRAY_PARTITION variable=staged_pe_b complete dim=0
+            #pragma HLS ARRAY_PARTITION variable=staged_pe_c complete dim=0
+            stagePeOperands(operands, operand_b, operand_c, staged_pe, staged_pe_b, staged_pe_c);
+            runPeArray(staged_pe, staged_pe_b, staged_pe_c, operation==SharedOperation::PWL, computed);
 
             acc_t acc_a[QUERY_BLOCK_COLS];
             acc_t acc_b[QUERY_BLOCK_COLS];
