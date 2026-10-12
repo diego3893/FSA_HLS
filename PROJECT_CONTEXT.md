@@ -2,7 +2,7 @@
 
 > 本文件只保留恢复任务所需的高信号状态。后续工作开始时先读取，并在关键结果或决策变化后原地更新。
 
-> **当前：2026-10-12 11:48恢复II=1性能迭代。**先在4×4/head16降低QK/ROW_SUM/PWL/PV实际循环II，保持原算术顺序/精度、16PE/4Acc及≤7.300ns；4达标后才测试16×16/head128。CoSim/IP/Vivado/板测关闭，1024长测不执行；无迭代上限。起始062fd74/HLS基线ebe529b，先把QK/ROW_SUM目标5改1获取真实反馈下限，新日志1148，闭环0轮。旧时序工作包已结束。
+> **当前：2026-10-12 12:18按用户要求暂停。**II1诊断第1轮已闭环，被测73110dc2d6eb799072c29fc4954f8f8d5427973b的4×4/head16官方CSim/CSynth于12:02:27退出0；数学/严格24/24及非法保护通过，QK/ROW_SUM实际II3、PWL/PV II1，顶层7.887ns超过7.300ns，未达验收。总16PE/4Acc、DSP40/FF44855/LUT128938/BRAM8，未复制MAC。用户已明确允许交错独立query上下文并增加状态存储，但该结构尚未实现或测试；第2轮未启动。先4达标才测16，CoSim/IP/Vivado/板测及1024长测关闭。12:18只读复核NM37无Vitis/Vivado/XSIM/run_hls进程；无等待中测试。结果与待恢复计划见1148日志；旧ebe529b时序基线保留。
 
 > **2026-10-11 23:25已完成测量（历史基线）：**16×16/head128仅CSim/CSynth测量已完成，被测71025ff，标准入口22:16:24—23:25:53退出0；官方原有22有效＋2非法CSim通过（数学22/22、0 errors、7分49秒），CSynth1小时50秒。两个16×8query块、256PE/16Acc实例已核对，DSP352=256＋32＋64，FF231597/LUT1221689/BRAM18K8；估算7.390ns超过7.300ns预算0.090ns，阶段II10/10/5/5未达目标5/5/1/1；PE latency9/II5。测量完成不等于16×16性能或RTL验收。第1轮1024长CSim按用户选择停止、33文件保留；1024留后续，没有1024硬件实测时间。本轮338文件证据已逐SHA核对，报告docs/综合报告/Split-D_16x16_head128_CSim与综合测量_20261011.md；原4×4IP/报告438文件快照、bit/LTX与52笔验收保留。用户随后仅恢复本地时序修改，禁止本版新测试；旧测量及原始证据保持。
 
@@ -34,7 +34,7 @@
 - 远端构建/CoSim/Vivado/板测的授权**不随git授权自动获得**；每次仍需明确轮次与范围。
 - Split-D使用独立顶层`fsa_stream_split_d`，保持Q/K/V/O四个64-bit AXI master bundle、AXI-Lite控制、VU37P器件、10ns时钟和2.7ns uncertainty。
 - 只允许总计`D×D`条PE RawFMA。阶段3允许按query列空间划分为两个`D×B`块，每块内QK/softmax/PV顺序复用，合计不得复制完整阵列；每个query列仍只允许一个Accumulator及倒数通路。
-- Split-D每个PE只保留一个FP16 `reg`和一个FP32 `score_acc`；禁止阵列外增加完整S/P副本。
+- 原Split-D基线每个PE仅有一份FP16 `reg`及FP32 `score_acc`，禁止额外完整S/P副本；2026-10-12用户明确允许本次II1候选交错独立query上下文并增加Q/S/P/m/l/O状态。仍保持总D×D PE及D个Accumulator、各query内部FMA/舍入顺序，须报告状态容量、有效吞吐及短序列填充成本；候选未实现。
 - 每列只允许一个Accumulator RawFMA通路；不得用复制PE阵列或Accumulator换吞吐。
 - 保持现有RawFMA、PWL精度、特殊值及舍入合同；不得用放宽误差掩盖问题。
 - 不恢复已造成RTL错误的`pe_pipeline/cmp_pipeline inter false`；不恢复Accumulator反馈DATAFLOW环或单actor写多个有限DMA请求FIFO。
@@ -150,7 +150,7 @@ Q/K/V AXI
 
 ## 7 当前工作集
 
-- 当前工作集：src/stream/split_d/split_d_compute.cpp、1148 II1迭代日志、本上下文。第1轮仅将QK/ROW_SUM目标II5改1，运算/顺序/状态不变，官方4综合待执行；保留旧ebe529b时序证据，AGENTS.md及无关未跟踪文件保留。
+- 当前工作集：src/stream/split_d/split_d_compute.cpp仅两处目标II5→1（已提交73110dc）；1148日志与本上下文保存闭环结果及暂停状态。独立query上下文尚未编码，build/ii1_original保存本轮源码用于后续差分；AGENTS.md及无关未跟踪文件保留。
 - 4×4归档工作集：`tools/split_d_nm37/`、20261011_1952日志、上板验收报告及`docs/evidence/split_d_nm37_dfbf82e_board/`。硬件dfbf82e、IP bf41d16、板测脚本fb06b16；完整52笔板测及新启动ILA/16MC状态已验收，物理/bit/LTX/下载证据已归档。自包含包build/resume_nm37/split_d_nm37_delivery_c59cbf4.tar.gz（含bit/正式IP/证据）已下载，340文件SHA校验通过；清单delivery_summary.json。用户AGENTS.md及无关未跟踪文件保留。
 
 - Split-D配置与类型：`include/fsa/stream/split_d/`
@@ -166,14 +166,14 @@ Q/K/V AXI
 - 当前分阶段方案：`docs/Split-D修正与TAPA启发的分阶段修改验收方案_20261009.md`；旧20260930计划与DeepSeek交接用于历史参考，冲突处以新方案的核查结果为准。
 - Split-D历史交接：`docs/split_d_implementation_plan_20260923/PROJECT_CONTEXT.md`（停止维护，不作为当前状态来源）
 - Split-D迁移交接：`docs/Split-D_FSA_DeepSeek迁移交接_20260929.md`（当前任务的第2优先级来源）
-- 服务器`hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1`最新生成物为ebe529b的16×16/head128 CSim/CSynth；4/16独立归档分别build/split_d_ebe529b_4x4_timing_evidence_20261012和build/split_d_ebe529b_16x16_timing_evidence_20261012。bf41d16正式4×4 HLS/IP保留于build/split_d_bf41d16_preserved_before_16x16_20261011；旧71025ff测量保留于build/split_d_71025ff_16x16_measure_evidence_20261011。历史b3e4957/OOC归档及DCP保留，不代表当前源码验收。
+- 服务器`hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1`最新生成物为73110dc的4×4/head16 CSim/CSynth，独立归档build/split_d_73110dc_4x4_ii1_evidence_20261012；ebe529b历史4/16独立归档分别build/split_d_ebe529b_4x4_timing_evidence_20261012和build/split_d_ebe529b_16x16_timing_evidence_20261012。bf41d16正式4×4 HLS/IP保留于build/split_d_bf41d16_preserved_before_16x16_20261011；旧71025ff测量保留于build/split_d_71025ff_16x16_measure_evidence_20261011。历史b3e4957/OOC归档及DCP保留，不代表当前源码验收。
 - 本地`build/fsa_stream_split_d_build/solution1/`是**拆分前**的旧生成物（最新`csynth.rpt`为2026-09-28 16:51，仍含已删除的`peArrayTask`/`accumulatorTask`/`KPN`模块），只能作为历史基线，**不得**用于描述当前源码。
 
 默认参数为`FSA_SPLIT_D_PE_DIM=4`、`FSA_SPLIT_D_HEAD_DIM=16`；目标参数为`16/128`。
 
 ## 8 下一步
 
-1. **当前II1工作包：**先4×4/16官方CSim/CSynth，取得目标1的真实反馈链/最小可达II；读完报告闭环分析后再结构优化。保持原trip count和实际cycle口径，不用假依赖或额外MAC掩盖。4实际II1、功能/时序/实例全部达标后才测16×16/128，CoSim/IP/实现/板测关闭。
+1. **当前暂停，等待用户恢复。**第1轮73110dc已闭环但II3/3/1/1及7.887ns未达标；不启动新测试。恢复后按用户已选方案实现独立query上下文交错和状态存储，保留逐query顺序FMA、MAC实例及接口/时钟；4配置补batch边界与短序列填充检查，核对完整批次及折算tile周期。4实际II1、功能/时序/实例全部达标后才测16×16/128；CoSim/IP/实现/板测关闭。
 2. **4×4上板基线已闭环。**保留dfbf82e同次实现bit/LTX与完整52笔板测证据；后续若研究板上性能，需新增纯核时间戳及明确吞吐口径，当前last_case_cycles包含完整自检。当前源码已有ROW_SUM修改，旧bitstream不能作为新候选的上板验收。
 3. **当前PV限制已由源码和调度确认：**每次仅r==row有有效V/累加值并只提交该行结果；D16/B8两个块合计每次16个有效MAC位置，PV每块每key tile需2048次PE调用（QK128次）。实际PE II5，N1024非因果PV发射下界419.4304ms，循环调度模型445.89056ms@100MHz，均非实测。减小B不减少调用次数；恢复后优先评估保持逐行FMA顺序的feature流水，再单独对照更小query块/物理插级，本轮未实施。
 4. 保留每块唯一PE/Acc共享层级和真实distance8反馈。源码状态复用不等于物理阶段寄存器完全复用。低风险死代码清理需独立范围和新4×4验证；stageAccumulatorResult仍被调用。
@@ -250,7 +250,7 @@ Q/K/V AXI
 
 ## 11 交接摘要
 
-**当前交接：**用户2026-10-12恢复II1优化，先4×4/16满足实际循环II1后再16×16/128测量。第1轮开始，起始062fd74、HLS基线ebe529b，QK/ROW_SUM目标5改1作真实反馈诊断，未叠加算术/状态改动。新1148日志，闭环0轮，4官方测试待执行；原4/16时序已通过7.300ns。CoSim/IP/Vivado/板测始终关闭，无轮数上限；既有Git/SSH授权持续，保护无关文件。
+**当前交接：**按用户“本轮测试结束后暂停”停止，已完成1轮证据分析。73110dc的4×4/head16功能/实例通过，II3/3/1/1、估算7.887ns，II及时序未验收；原ebe529b为7.300ns/II5/5/1/1基线。官方流程12:02:27结束，12:18只读确认无剩余测试；没有第2轮或16测试。用户选择四阶段II1并允许独立query上下文及新增状态，下一次恢复先实现批次交错，保留每query的FMA/量化顺序、MAC实例、接口和时钟，再检查4配置功能/实际II/时序/实例/批次边界及归一化吞吐，达标后才16。完整247载荷证据在build/resume_nm37/ii1_round1_4x4及远端build/split_d_73110dc_4x4_ii1_evidence_20261012，SHA与92源码已核对；日志docs/修改日志/2026-10-12_1148_split_d_ii1_修改日志.md。CoSim/IP/Vivado/板测关闭。暂停期间不沿用授权启动新测试。
 
 **此前测量（历史）：**71025ff于2026-10-11 23:25:53完成CSim/CSynth，7.390ns超预算、II10/10/5/5未达标；22有效＋2非法数学22/22、256PE/16Acc、DSP352/FF231597/LUT1221689/BRAM8。原第1轮1024长测受控停止、现场保留；4×4真实HBM上板基线及旧测量报告保持。其后本地修改931853d，本次用户明确恢复推送及CSim/CSynth，最新结果以上述ebe529b为准。
 
