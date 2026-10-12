@@ -1,0 +1,114 @@
+{
+  "block0_QK": {
+    "clock_ns": "7.048",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "16",
+        "Latency": "81",
+        "AbsoluteTimeLatency": "810",
+        "PipelineII": "5",
+        "PipelineDepth": "7",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block0_ROW_SUM": {
+    "clock_ns": "7.048",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "4",
+        "Latency": "20",
+        "AbsoluteTimeLatency": "200",
+        "PipelineII": "5",
+        "PipelineDepth": "6",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block0_PWL": {
+    "clock_ns": "7.048",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "8",
+        "Latency": "12",
+        "AbsoluteTimeLatency": "120",
+        "PipelineII": "1",
+        "PipelineDepth": "6",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block0_PV": {
+    "clock_ns": "7.299",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "80",
+        "Latency": "87",
+        "AbsoluteTimeLatency": "870",
+        "PipelineII": "1",
+        "PipelineDepth": "9",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block1_QK": {
+    "clock_ns": "7.048",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "16",
+        "Latency": "81",
+        "AbsoluteTimeLatency": "810",
+        "PipelineII": "5",
+        "PipelineDepth": "7",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block1_ROW_SUM": {
+    "clock_ns": "7.048",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "4",
+        "Latency": "20",
+        "AbsoluteTimeLatency": "200",
+        "PipelineII": "5",
+        "PipelineDepth": "6",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block1_PWL": {
+    "clock_ns": "7.048",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "8",
+        "Latency": "12",
+        "AbsoluteTimeLatency": "120",
+        "PipelineII": "1",
+        "PipelineDepth": "6",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block1_PV": {
+    "clock_ns": "7.299",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "80",
+        "Latency": "87",
+        "AbsoluteTimeLatency": "870",
+        "PipelineII": "1",
+        "PipelineDepth": "9",
+        "InstanceList": "\n"
+      }
+    ]
+  }
+}

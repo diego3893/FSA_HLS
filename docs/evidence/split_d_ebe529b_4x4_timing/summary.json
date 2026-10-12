@@ -1,0 +1,1202 @@
+{
+  "tested_commit": "ebe529be6f4d03f855add5f3fe745af9874fa9d4",
+  "configuration": {
+    "D": 4,
+    "H": 16
+  },
+  "solution": "/home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/fsa_stream_split_d_build/solution1",
+  "exit": "0",
+  "selected_instances": {
+    "fsa_stream_split_d_runQueryBlock_0_s": 1,
+    "fsa_stream_split_d_runAccumulatorColumns": 2,
+    "fsa_stream_split_d_mul_24ns_24ns_48_3_1": 4,
+    "fsa_stream_split_d_fsub_32ns_32ns_32_3_full_dsp_1": 8,
+    "fsa_stream_split_d_runPeArray": 2,
+    "fsa_stream_split_d_mul_11ns_11ns_22_2_1": 16,
+    "fsa_stream_split_d_runQueryBlock_1_s": 1
+  },
+  "warning_codes": {
+    "HLS 200-1995": 4,
+    "ANALYSIS 214-52": 8,
+    "SYN 201-103": 35,
+    "HLS 200-1020": 1,
+    "RTGEN 206-101": 96
+  },
+  "report_summary": {
+    "gatherQueryTile_Pipeline_1": {
+      "clock_ns": "1.792",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "66",
+        "Average-caseLatency": "66",
+        "Worst-caseLatency": "66",
+        "Best-caseRealTimeLatency": "0.660 us",
+        "Average-caseRealTimeLatency": "0.660 us",
+        "Worst-caseRealTimeLatency": "0.660 us",
+        "Interval-min": "65",
+        "Interval-max": "65"
+      },
+      "resources": {
+        "FF": 9,
+        "LUT": 56,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "stageAccumulatorResult": {
+      "clock_ns": "0.000",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "1",
+        "Average-caseLatency": "1",
+        "Worst-caseLatency": "1",
+        "Best-caseRealTimeLatency": "10.000 ns",
+        "Average-caseRealTimeLatency": "10.000 ns",
+        "Worst-caseRealTimeLatency": "10.000 ns",
+        "PipelineInitiationInterval": "1",
+        "PipelineDepth": "2",
+        "Interval-min": "1",
+        "Interval-max": "1"
+      },
+      "resources": {
+        "FF": 66,
+        "LUT": 2,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_300_25": {
+      "clock_ns": "7.048",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "14",
+        "Average-caseLatency": "14",
+        "Worst-caseLatency": "14",
+        "Best-caseRealTimeLatency": "0.140 us",
+        "Average-caseRealTimeLatency": "0.140 us",
+        "Worst-caseRealTimeLatency": "0.140 us",
+        "Interval-min": "9",
+        "Interval-max": "9"
+      },
+      "resources": {
+        "BRAM_18K": 0,
+        "FF": 529,
+        "LUT": 624,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_144_6_VITIS_LOOP_145_7": {
+      "clock_ns": "2.103",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "18",
+        "Average-caseLatency": "18",
+        "Worst-caseLatency": "18",
+        "Best-caseRealTimeLatency": "0.180 us",
+        "Average-caseRealTimeLatency": "0.180 us",
+        "Worst-caseRealTimeLatency": "0.180 us",
+        "Interval-min": "17",
+        "Interval-max": "17"
+      },
+      "resources": {
+        "FF": 14,
+        "LUT": 130,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_190_122": {
+      "clock_ns": "2.399",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "6",
+        "Average-caseLatency": "6",
+        "Worst-caseLatency": "6",
+        "Best-caseRealTimeLatency": "60.000 ns",
+        "Average-caseRealTimeLatency": "60.000 ns",
+        "Worst-caseRealTimeLatency": "60.000 ns",
+        "Interval-min": "5",
+        "Interval-max": "5"
+      },
+      "resources": {
+        "FF": 39,
+        "LUT": 325,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_13": {
+      "clock_ns": "2.788",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "15",
+        "Average-caseLatency": "15",
+        "Worst-caseLatency": "15",
+        "Best-caseRealTimeLatency": "0.150 us",
+        "Average-caseRealTimeLatency": "0.150 us",
+        "Worst-caseRealTimeLatency": "0.150 us",
+        "Interval-min": "14",
+        "Interval-max": "14"
+      },
+      "resources": {
+        "FF": 89,
+        "LUT": 406,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_162_1": {
+      "clock_ns": "7.048",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "22",
+        "Average-caseLatency": "22",
+        "Worst-caseLatency": "22",
+        "Best-caseRealTimeLatency": "0.220 us",
+        "Average-caseRealTimeLatency": "0.220 us",
+        "Worst-caseRealTimeLatency": "0.220 us",
+        "Interval-min": "21",
+        "Interval-max": "21"
+      },
+      "resources": {
+        "FF": 334,
+        "LUT": 167,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2": {
+      "clock_ns": "7.048",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "83",
+        "Average-caseLatency": "83",
+        "Worst-caseLatency": "83",
+        "Best-caseRealTimeLatency": "0.830 us",
+        "Average-caseRealTimeLatency": "0.830 us",
+        "Worst-caseRealTimeLatency": "0.830 us",
+        "Interval-min": "82",
+        "Interval-max": "82"
+      },
+      "resources": {
+        "FF": 667,
+        "LUT": 512,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_369_33": {
+      "clock_ns": "7.299",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "89",
+        "Average-caseLatency": "89",
+        "Worst-caseLatency": "89",
+        "Best-caseRealTimeLatency": "0.890 us",
+        "Average-caseRealTimeLatency": "0.890 us",
+        "Worst-caseRealTimeLatency": "0.890 us",
+        "Interval-min": "81",
+        "Interval-max": "81"
+      },
+      "resources": {
+        "FF": 1868,
+        "LUT": 2599,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "distributeQueryTile_Pipeline_VITIS_LOOP_501_3_VITIS_LOOP_506_4_VITIS_LOOP_507_5": {
+      "clock_ns": "7.300",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "90",
+        "Average-caseLatency": "8266",
+        "Worst-caseLatency": "16458",
+        "Best-caseRealTimeLatency": "0.900 us",
+        "Average-caseRealTimeLatency": "82.660 us",
+        "Worst-caseRealTimeLatency": "0.165 ms",
+        "Interval-min": "17",
+        "Interval-max": "16385"
+      },
+      "resources": {
+        "FF": 10111,
+        "LUT": 883,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "storeOutputTile_Pipeline_VITIS_LOOP_76_1": {
+      "clock_ns": "7.300",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "2",
+        "Average-caseLatency": "undef",
+        "Worst-caseLatency": "35",
+        "Best-caseRealTimeLatency": "20.000 ns",
+        "Average-caseRealTimeLatency": "undef",
+        "Worst-caseRealTimeLatency": "0.350 us",
+        "Interval-min": "1",
+        "Interval-max": "33"
+      },
+      "resources": {
+        "FF": 77,
+        "LUT": 115,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Pipeline_4": {
+      "clock_ns": "1.482",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "10",
+        "Average-caseLatency": "10",
+        "Worst-caseLatency": "10",
+        "Best-caseRealTimeLatency": "0.100 us",
+        "Average-caseRealTimeLatency": "0.100 us",
+        "Worst-caseRealTimeLatency": "0.100 us",
+        "Interval-min": "9",
+        "Interval-max": "9"
+      },
+      "resources": {
+        "FF": 6,
+        "LUT": 51,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_369_33": {
+      "clock_ns": "7.299",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "89",
+        "Average-caseLatency": "89",
+        "Worst-caseLatency": "89",
+        "Best-caseRealTimeLatency": "0.890 us",
+        "Average-caseRealTimeLatency": "0.890 us",
+        "Worst-caseRealTimeLatency": "0.890 us",
+        "Interval-min": "81",
+        "Interval-max": "81"
+      },
+      "resources": {
+        "FF": 1868,
+        "LUT": 2599,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_s": {
+      "clock_ns": "7.299",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "375",
+        "Average-caseLatency": "137349",
+        "Worst-caseLatency": "274577",
+        "Best-caseRealTimeLatency": "3.750 us",
+        "Average-caseRealTimeLatency": "1.373 ms",
+        "Worst-caseRealTimeLatency": "2.746 ms",
+        "Interval-min": "375",
+        "Interval-max": "274577"
+      },
+      "resources": {
+        "BRAM_18K": 0,
+        "DSP": 20,
+        "FF": 14926,
+        "LUT": 59952,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Outline_VITIS_LOOP_117_5": {
+      "clock_ns": "7.299",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "269",
+        "Average-caseLatency": "137217",
+        "Worst-caseLatency": "274433",
+        "Best-caseRealTimeLatency": "2.690 us",
+        "Average-caseRealTimeLatency": "1.372 ms",
+        "Worst-caseRealTimeLatency": "2.744 ms",
+        "Interval-min": "269",
+        "Interval-max": "274433"
+      },
+      "resources": {
+        "BRAM_18K": 0,
+        "DSP": 16,
+        "FF": 11029,
+        "LUT": 40844,
+        "URAM": 0
+      }
+    },
+    "cvtAtoE": {
+      "clock_ns": "7.120",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "2",
+        "Average-caseLatency": "2",
+        "Worst-caseLatency": "2",
+        "Best-caseRealTimeLatency": "20.000 ns",
+        "Average-caseRealTimeLatency": "20.000 ns",
+        "Worst-caseRealTimeLatency": "20.000 ns",
+        "PipelineInitiationInterval": "1",
+        "PipelineDepth": "3",
+        "Interval-min": "1",
+        "Interval-max": "1"
+      },
+      "resources": {
+        "FF": 35,
+        "LUT": 2,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_451_40": {
+      "clock_ns": "7.299",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "25",
+        "Average-caseLatency": "25",
+        "Worst-caseLatency": "25",
+        "Best-caseRealTimeLatency": "0.250 us",
+        "Average-caseRealTimeLatency": "0.250 us",
+        "Worst-caseRealTimeLatency": "0.250 us",
+        "Interval-min": "17",
+        "Interval-max": "17"
+      },
+      "resources": {
+        "FF": 92,
+        "LUT": 95,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "p_anonymous_namespace_ldexpByBits": {
+      "clock_ns": "6.840",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "0",
+        "Average-caseLatency": "0",
+        "Worst-caseLatency": "0",
+        "Best-caseRealTimeLatency": "0 ns",
+        "Average-caseRealTimeLatency": "0 ns",
+        "Worst-caseRealTimeLatency": "0 ns",
+        "PipelineInitiationInterval": "1",
+        "PipelineDepth": "1",
+        "Interval-min": "1",
+        "Interval-max": "1"
+      },
+      "resources": {
+        "FF": 0,
+        "LUT": 1284,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_451_40": {
+      "clock_ns": "7.299",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "25",
+        "Average-caseLatency": "25",
+        "Worst-caseLatency": "25",
+        "Best-caseRealTimeLatency": "0.250 us",
+        "Average-caseRealTimeLatency": "0.250 us",
+        "Worst-caseRealTimeLatency": "0.250 us",
+        "Interval-min": "17",
+        "Interval-max": "17"
+      },
+      "resources": {
+        "FF": 92,
+        "LUT": 95,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2": {
+      "clock_ns": "7.048",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "83",
+        "Average-caseLatency": "83",
+        "Worst-caseLatency": "83",
+        "Best-caseRealTimeLatency": "0.830 us",
+        "Average-caseRealTimeLatency": "0.830 us",
+        "Worst-caseRealTimeLatency": "0.830 us",
+        "Interval-min": "82",
+        "Interval-max": "82"
+      },
+      "resources": {
+        "FF": 667,
+        "LUT": 512,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "p_anonymous_namespace_begin_reciprocal": {
+      "clock_ns": "6.394",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "1",
+        "Average-caseLatency": "1",
+        "Worst-caseLatency": "1",
+        "Best-caseRealTimeLatency": "10.000 ns",
+        "Average-caseRealTimeLatency": "10.000 ns",
+        "Worst-caseRealTimeLatency": "10.000 ns",
+        "Interval-min": "1",
+        "Interval-max": "1"
+      },
+      "resources": {
+        "FF": 169,
+        "LUT": 783,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runPeArray": {
+      "clock_ns": "7.048",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "3",
+        "Average-caseLatency": "3",
+        "Worst-caseLatency": "3",
+        "Best-caseRealTimeLatency": "30.000 ns",
+        "Average-caseRealTimeLatency": "30.000 ns",
+        "Worst-caseRealTimeLatency": "30.000 ns",
+        "PipelineInitiationInterval": "1",
+        "PipelineDepth": "4",
+        "Interval-min": "1",
+        "Interval-max": "1"
+      },
+      "resources": {
+        "DSP": 8,
+        "FF": 4603,
+        "LUT": 29570,
+        "BRAM_18K": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_242_15": {
+      "clock_ns": "7.120",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "8",
+        "Average-caseLatency": "8",
+        "Worst-caseLatency": "8",
+        "Best-caseRealTimeLatency": "80.000 ns",
+        "Average-caseRealTimeLatency": "80.000 ns",
+        "Worst-caseRealTimeLatency": "80.000 ns",
+        "Interval-min": "5",
+        "Interval-max": "5"
+      },
+      "resources": {
+        "FF": 631,
+        "LUT": 546,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_Pipeline_2": {
+      "clock_ns": "1.792",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "34",
+        "Average-caseLatency": "34",
+        "Worst-caseLatency": "34",
+        "Best-caseRealTimeLatency": "0.340 us",
+        "Average-caseRealTimeLatency": "0.340 us",
+        "Worst-caseRealTimeLatency": "0.340 us",
+        "Interval-min": "33",
+        "Interval-max": "33"
+      },
+      "resources": {
+        "FF": 8,
+        "LUT": 63,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_190_12": {
+      "clock_ns": "2.399",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "6",
+        "Average-caseLatency": "6",
+        "Worst-caseLatency": "6",
+        "Best-caseRealTimeLatency": "60.000 ns",
+        "Average-caseRealTimeLatency": "60.000 ns",
+        "Worst-caseRealTimeLatency": "60.000 ns",
+        "Interval-min": "5",
+        "Interval-max": "5"
+      },
+      "resources": {
+        "FF": 39,
+        "LUT": 325,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_s": {
+      "clock_ns": "7.299",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "375",
+        "Average-caseLatency": "137349",
+        "Worst-caseLatency": "274577",
+        "Best-caseRealTimeLatency": "3.750 us",
+        "Average-caseRealTimeLatency": "1.373 ms",
+        "Worst-caseRealTimeLatency": "2.746 ms",
+        "Interval-min": "375",
+        "Interval-max": "274577"
+      },
+      "resources": {
+        "BRAM_18K": 0,
+        "DSP": 20,
+        "FF": 14958,
+        "LUT": 60101,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_90_1_VITIS_LOOP_91_2": {
+      "clock_ns": "2.092",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "10",
+        "Average-caseLatency": "10",
+        "Worst-caseLatency": "10",
+        "Best-caseRealTimeLatency": "0.100 us",
+        "Average-caseRealTimeLatency": "0.100 us",
+        "Worst-caseRealTimeLatency": "0.100 us",
+        "Interval-min": "9",
+        "Interval-max": "9"
+      },
+      "resources": {
+        "FF": 12,
+        "LUT": 136,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Pipeline_13": {
+      "clock_ns": "1.792",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "34",
+        "Average-caseLatency": "34",
+        "Worst-caseLatency": "34",
+        "Best-caseRealTimeLatency": "0.340 us",
+        "Average-caseRealTimeLatency": "0.340 us",
+        "Worst-caseRealTimeLatency": "0.340 us",
+        "Interval-min": "33",
+        "Interval-max": "33"
+      },
+      "resources": {
+        "FF": 8,
+        "LUT": 63,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_Pipeline_4": {
+      "clock_ns": "1.482",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "10",
+        "Average-caseLatency": "10",
+        "Worst-caseLatency": "10",
+        "Best-caseRealTimeLatency": "0.100 us",
+        "Average-caseRealTimeLatency": "0.100 us",
+        "Worst-caseRealTimeLatency": "0.100 us",
+        "Interval-min": "9",
+        "Interval-max": "9"
+      },
+      "resources": {
+        "FF": 6,
+        "LUT": 51,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "entry_proc": {
+      "clock_ns": "1.410",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "0",
+        "Average-caseLatency": "0",
+        "Worst-caseLatency": "0",
+        "Best-caseRealTimeLatency": "0 ns",
+        "Average-caseRealTimeLatency": "0 ns",
+        "Worst-caseRealTimeLatency": "0 ns",
+        "Interval-min": "0",
+        "Interval-max": "0"
+      },
+      "resources": {
+        "FF": 3,
+        "LUT": 29,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_1": {
+      "clock_ns": "2.788",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "15",
+        "Average-caseLatency": "15",
+        "Worst-caseLatency": "15",
+        "Best-caseRealTimeLatency": "0.150 us",
+        "Average-caseRealTimeLatency": "0.150 us",
+        "Worst-caseRealTimeLatency": "0.150 us",
+        "Interval-min": "14",
+        "Interval-max": "14"
+      },
+      "resources": {
+        "FF": 89,
+        "LUT": 406,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_90_1_VITIS_LOOP_91_2": {
+      "clock_ns": "2.092",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "10",
+        "Average-caseLatency": "10",
+        "Worst-caseLatency": "10",
+        "Best-caseRealTimeLatency": "0.100 us",
+        "Average-caseRealTimeLatency": "0.100 us",
+        "Worst-caseRealTimeLatency": "0.100 us",
+        "Interval-min": "9",
+        "Interval-max": "9"
+      },
+      "resources": {
+        "FF": 12,
+        "LUT": 136,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_474_43_VITIS_LOOP_475_44": {
+      "clock_ns": "2.785",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "34",
+        "Average-caseLatency": "34",
+        "Worst-caseLatency": "34",
+        "Best-caseRealTimeLatency": "0.340 us",
+        "Average-caseRealTimeLatency": "0.340 us",
+        "Worst-caseRealTimeLatency": "0.340 us",
+        "Interval-min": "33",
+        "Interval-max": "33"
+      },
+      "resources": {
+        "FF": 17,
+        "LUT": 185,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_300_25": {
+      "clock_ns": "7.048",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "14",
+        "Average-caseLatency": "14",
+        "Worst-caseLatency": "14",
+        "Best-caseRealTimeLatency": "0.140 us",
+        "Average-caseRealTimeLatency": "0.140 us",
+        "Worst-caseRealTimeLatency": "0.140 us",
+        "Interval-min": "9",
+        "Interval-max": "9"
+      },
+      "resources": {
+        "BRAM_18K": 0,
+        "FF": 529,
+        "LUT": 624,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_474_43_VITIS_LOOP_475_44": {
+      "clock_ns": "2.785",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "34",
+        "Average-caseLatency": "34",
+        "Worst-caseLatency": "34",
+        "Best-caseRealTimeLatency": "0.340 us",
+        "Average-caseRealTimeLatency": "0.340 us",
+        "Worst-caseRealTimeLatency": "0.340 us",
+        "Interval-min": "33",
+        "Interval-max": "33"
+      },
+      "resources": {
+        "FF": 17,
+        "LUT": 185,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_190_121": {
+      "clock_ns": "2.399",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "6",
+        "Average-caseLatency": "6",
+        "Worst-caseLatency": "6",
+        "Best-caseRealTimeLatency": "60.000 ns",
+        "Average-caseRealTimeLatency": "60.000 ns",
+        "Worst-caseRealTimeLatency": "60.000 ns",
+        "Interval-min": "5",
+        "Interval-max": "5"
+      },
+      "resources": {
+        "FF": 39,
+        "LUT": 325,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "distributeQueryTile": {
+      "clock_ns": "7.300",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "184",
+        "Average-caseLatency": "8360",
+        "Worst-caseLatency": "16552",
+        "Best-caseRealTimeLatency": "1.840 us",
+        "Average-caseRealTimeLatency": "83.600 us",
+        "Worst-caseRealTimeLatency": "0.166 ms",
+        "Interval-min": "184",
+        "Interval-max": "16552"
+      },
+      "resources": {
+        "FF": 10724,
+        "LUT": 1776,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "gatherQueryTile_Pipeline_VITIS_LOOP_526_1_VITIS_LOOP_527_2": {
+      "clock_ns": "2.494",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "66",
+        "Average-caseLatency": "66",
+        "Worst-caseLatency": "66",
+        "Best-caseRealTimeLatency": "0.660 us",
+        "Average-caseRealTimeLatency": "0.660 us",
+        "Worst-caseRealTimeLatency": "0.660 us",
+        "Interval-min": "65",
+        "Interval-max": "65"
+      },
+      "resources": {
+        "FF": 27,
+        "LUT": 195,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_242_15": {
+      "clock_ns": "7.120",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "8",
+        "Average-caseLatency": "8",
+        "Worst-caseLatency": "8",
+        "Best-caseRealTimeLatency": "80.000 ns",
+        "Average-caseRealTimeLatency": "80.000 ns",
+        "Worst-caseRealTimeLatency": "80.000 ns",
+        "Interval-min": "5",
+        "Interval-max": "5"
+      },
+      "resources": {
+        "FF": 631,
+        "LUT": 546,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "p_anonymous_namespace_normalize_and_round": {
+      "clock_ns": "6.576",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "0",
+        "Average-caseLatency": "0",
+        "Worst-caseLatency": "0",
+        "Best-caseRealTimeLatency": "0 ns",
+        "Average-caseRealTimeLatency": "0 ns",
+        "Worst-caseRealTimeLatency": "0 ns",
+        "Interval-min": "0",
+        "Interval-max": "0"
+      },
+      "resources": {
+        "FF": 0,
+        "LUT": 1274,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_190_12": {
+      "clock_ns": "2.399",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "6",
+        "Average-caseLatency": "6",
+        "Worst-caseLatency": "6",
+        "Best-caseRealTimeLatency": "60.000 ns",
+        "Average-caseRealTimeLatency": "60.000 ns",
+        "Worst-caseRealTimeLatency": "60.000 ns",
+        "Interval-min": "5",
+        "Interval-max": "5"
+      },
+      "resources": {
+        "FF": 39,
+        "LUT": 325,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_144_6_VITIS_LOOP_145_7": {
+      "clock_ns": "2.103",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "18",
+        "Average-caseLatency": "18",
+        "Worst-caseLatency": "18",
+        "Best-caseRealTimeLatency": "0.180 us",
+        "Average-caseRealTimeLatency": "0.180 us",
+        "Worst-caseRealTimeLatency": "0.180 us",
+        "Interval-min": "17",
+        "Interval-max": "17"
+      },
+      "resources": {
+        "FF": 14,
+        "LUT": 130,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Pipeline_2": {
+      "clock_ns": "1.792",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "34",
+        "Average-caseLatency": "34",
+        "Worst-caseLatency": "34",
+        "Best-caseRealTimeLatency": "0.340 us",
+        "Average-caseRealTimeLatency": "0.340 us",
+        "Worst-caseRealTimeLatency": "0.340 us",
+        "Interval-min": "33",
+        "Interval-max": "33"
+      },
+      "resources": {
+        "FF": 8,
+        "LUT": 63,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "reciprocalColumns": {
+      "clock_ns": "7.281",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "4",
+        "Average-caseLatency": "30",
+        "Worst-caseLatency": "42",
+        "Best-caseRealTimeLatency": "40.000 ns",
+        "Average-caseRealTimeLatency": "0.300 us",
+        "Worst-caseRealTimeLatency": "0.420 us",
+        "Interval-min": "4",
+        "Interval-max": "42"
+      },
+      "resources": {
+        "FF": 680,
+        "LUT": 3191,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "run": {
+      "clock_ns": "7.300",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "522",
+        "Average-caseLatency": "undef",
+        "Worst-caseLatency": "281315330",
+        "Best-caseRealTimeLatency": "5.220 us",
+        "Average-caseRealTimeLatency": "undef",
+        "Worst-caseRealTimeLatency": "2.813 sec",
+        "Interval-min": "522",
+        "Interval-max": "281315330"
+      },
+      "resources": {
+        "BRAM_18K": 0,
+        "DSP": 40,
+        "FF": 42319,
+        "LUT": 124524,
+        "URAM": 0
+      }
+    },
+    "runAccumulatorColumns": {
+      "clock_ns": "7.299",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "7",
+        "Average-caseLatency": "7",
+        "Worst-caseLatency": "7",
+        "Best-caseRealTimeLatency": "70.000 ns",
+        "Average-caseRealTimeLatency": "70.000 ns",
+        "Worst-caseRealTimeLatency": "70.000 ns",
+        "PipelineInitiationInterval": "1",
+        "PipelineDepth": "8",
+        "Interval-min": "1",
+        "Interval-max": "1"
+      },
+      "resources": {
+        "BRAM_18K": 0,
+        "DSP": 4,
+        "FF": 2542,
+        "LUT": 14232,
+        "URAM": 0
+      }
+    },
+    "distributeQueryTile_Pipeline_VITIS_LOOP_489_1_VITIS_LOOP_490_2": {
+      "clock_ns": "7.300",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "19",
+        "Average-caseLatency": "19",
+        "Worst-caseLatency": "19",
+        "Best-caseRealTimeLatency": "0.190 us",
+        "Average-caseRealTimeLatency": "0.190 us",
+        "Worst-caseRealTimeLatency": "0.190 us",
+        "Interval-min": "17",
+        "Interval-max": "17"
+      },
+      "resources": {
+        "FF": 214,
+        "LUT": 211,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_0_Pipeline_13": {
+      "clock_ns": "1.792",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "34",
+        "Average-caseLatency": "34",
+        "Worst-caseLatency": "34",
+        "Best-caseRealTimeLatency": "0.340 us",
+        "Average-caseRealTimeLatency": "0.340 us",
+        "Worst-caseRealTimeLatency": "0.340 us",
+        "Interval-min": "33",
+        "Interval-max": "33"
+      },
+      "resources": {
+        "FF": 8,
+        "LUT": 63,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "storeOutputTile": {
+      "clock_ns": "7.300",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "73",
+        "Average-caseLatency": "undef",
+        "Worst-caseLatency": "106",
+        "Best-caseRealTimeLatency": "0.730 us",
+        "Average-caseRealTimeLatency": "undef",
+        "Worst-caseRealTimeLatency": "1.060 us",
+        "Interval-min": "73",
+        "Interval-max": "106"
+      },
+      "resources": {
+        "FF": 214,
+        "LUT": 681,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_162_1": {
+      "clock_ns": "7.048",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "22",
+        "Average-caseLatency": "22",
+        "Worst-caseLatency": "22",
+        "Best-caseRealTimeLatency": "0.220 us",
+        "Average-caseRealTimeLatency": "0.220 us",
+        "Worst-caseRealTimeLatency": "0.220 us",
+        "Interval-min": "21",
+        "Interval-max": "21"
+      },
+      "resources": {
+        "FF": 334,
+        "LUT": 167,
+        "BRAM_18K": 0,
+        "DSP": 0,
+        "URAM": 0
+      }
+    },
+    "runController": {
+      "clock_ns": "7.300",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "521",
+        "Average-caseLatency": "undef",
+        "Worst-caseLatency": "281315329",
+        "Best-caseRealTimeLatency": "5.210 us",
+        "Average-caseRealTimeLatency": "undef",
+        "Worst-caseRealTimeLatency": "2.813 sec",
+        "Interval-min": "521",
+        "Interval-max": "281315329"
+      },
+      "resources": {
+        "BRAM_18K": 0,
+        "DSP": 40,
+        "FF": 42316,
+        "LUT": 124510,
+        "URAM": 0
+      }
+    },
+    "runQueryTile": {
+      "clock_ns": "7.300",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "518",
+        "Average-caseLatency": "undef",
+        "Worst-caseLatency": "274720",
+        "Best-caseRealTimeLatency": "5.180 us",
+        "Average-caseRealTimeLatency": "undef",
+        "Worst-caseRealTimeLatency": "2.747 ms",
+        "DataflowPipelineThroughput": "\n",
+        "Interval-min": "376",
+        "Interval-max": "274578"
+      },
+      "resources": {
+        "BRAM_18K": 0,
+        "DSP": 40,
+        "FF": 42187,
+        "LUT": 124256,
+        "URAM": 0
+      }
+    },
+    "gatherQueryTile": {
+      "clock_ns": "7.300",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "210",
+        "Average-caseLatency": "undef",
+        "Worst-caseLatency": "243",
+        "Best-caseRealTimeLatency": "2.100 us",
+        "Average-caseRealTimeLatency": "undef",
+        "Worst-caseRealTimeLatency": "2.430 us",
+        "Interval-min": "210",
+        "Interval-max": "243"
+      },
+      "resources": {
+        "BRAM_18K": 0,
+        "FF": 487,
+        "LUT": 1447,
+        "URAM": 0,
+        "DSP": 0
+      }
+    },
+    "runQueryBlock_0_Outline_VITIS_LOOP_117_5": {
+      "clock_ns": "7.299",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "269",
+        "Average-caseLatency": "137217",
+        "Worst-caseLatency": "274433",
+        "Best-caseRealTimeLatency": "2.690 us",
+        "Average-caseRealTimeLatency": "1.372 ms",
+        "Worst-caseRealTimeLatency": "2.744 ms",
+        "Interval-min": "269",
+        "Interval-max": "274433"
+      },
+      "resources": {
+        "BRAM_18K": 0,
+        "DSP": 16,
+        "FF": 11029,
+        "LUT": 40844,
+        "URAM": 0
+      }
+    },
+    "fsa_stream_split_d": {
+      "clock_ns": "7.300",
+      "overall": {
+        "unit": "clock cycles",
+        "Best-caseLatency": "1",
+        "Average-caseLatency": "undef",
+        "Worst-caseLatency": "281315331",
+        "Best-caseRealTimeLatency": "10.000 ns",
+        "Average-caseRealTimeLatency": "undef",
+        "Worst-caseRealTimeLatency": "2.813 sec",
+        "Interval-min": "2",
+        "Interval-max": "281315332"
+      },
+      "resources": {
+        "BRAM_18K": 8,
+        "DSP": 40,
+        "FF": 45881,
+        "LUT": 128820,
+        "URAM": 0
+      }
+    }
+  },
+  "scope": {
+    "csim": true,
+    "csynth": true,
+    "cosim": false,
+    "export_ip": false,
+    "vivado": false,
+    "board": false,
+    "long_csim": false
+  }
+}

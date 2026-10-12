@@ -1,0 +1,122 @@
+{
+  "block0_QK": {
+    "clock_ns": "7.272",
+    "report": "runQueryBlock_0_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_csynth.rpt",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "128",
+        "Latency": "1281",
+        "AbsoluteTimeLatency": "12810",
+        "PipelineII": "10",
+        "PipelineDepth": "12",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block0_ROW_SUM": {
+    "clock_ns": "7.272",
+    "report": "runQueryBlock_0_Pipeline_VITIS_LOOP_162_1_csynth.rpt",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "16",
+        "Latency": "160",
+        "AbsoluteTimeLatency": "1600",
+        "PipelineII": "10",
+        "PipelineDepth": "11",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block0_PWL": {
+    "clock_ns": "7.272",
+    "report": "runQueryBlock_0_Pipeline_VITIS_LOOP_300_25_csynth.rpt",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "8",
+        "Latency": "53",
+        "AbsoluteTimeLatency": "530",
+        "PipelineII": "5",
+        "PipelineDepth": "17",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block0_PV": {
+    "clock_ns": "7.299",
+    "report": "runQueryBlock_0_Pipeline_VITIS_LOOP_369_33_csynth.rpt",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "2176",
+        "Latency": "10886",
+        "AbsoluteTimeLatency": "108860",
+        "PipelineII": "5",
+        "PipelineDepth": "12",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block1_QK": {
+    "clock_ns": "7.272",
+    "report": "runQueryBlock_1_Pipeline_VITIS_LOOP_109_1_VITIS_LOOP_110_2_csynth.rpt",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "128",
+        "Latency": "1281",
+        "AbsoluteTimeLatency": "12810",
+        "PipelineII": "10",
+        "PipelineDepth": "12",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block1_ROW_SUM": {
+    "clock_ns": "7.272",
+    "report": "runQueryBlock_1_Pipeline_VITIS_LOOP_162_1_csynth.rpt",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "16",
+        "Latency": "160",
+        "AbsoluteTimeLatency": "1600",
+        "PipelineII": "10",
+        "PipelineDepth": "11",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block1_PWL": {
+    "clock_ns": "7.272",
+    "report": "runQueryBlock_1_Pipeline_VITIS_LOOP_300_25_csynth.rpt",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "8",
+        "Latency": "53",
+        "AbsoluteTimeLatency": "530",
+        "PipelineII": "5",
+        "PipelineDepth": "17",
+        "InstanceList": "\n"
+      }
+    ]
+  },
+  "block1_PV": {
+    "clock_ns": "7.299",
+    "report": "runQueryBlock_1_Pipeline_VITIS_LOOP_369_33_csynth.rpt",
+    "loops": [
+      {
+        "Slack": "7.30",
+        "TripCount": "2176",
+        "Latency": "10886",
+        "AbsoluteTimeLatency": "108860",
+        "PipelineII": "5",
+        "PipelineDepth": "12",
+        "InstanceList": "\n"
+      }
+    ]
+  }
+}

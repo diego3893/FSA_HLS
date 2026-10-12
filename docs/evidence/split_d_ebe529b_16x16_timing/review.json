@@ -1,0 +1,41 @@
+{
+  "tested_commit": "ebe529be6f4d03f855add5f3fe745af9874fa9d4",
+  "configuration": {
+    "D": 16,
+    "H": 128,
+    "B": 8
+  },
+  "source_files_sha_verified": 92,
+  "manifest_payload_files_verified": 338,
+  "archive_file_count": 339,
+  "archive_sha256": "fbe94010a3d66624efd6d63fcb3c936f0d573b9367092be0434111aa5dec9011",
+  "timing_budget_ns": 7.3,
+  "clock_ns": 7.3,
+  "old_top_clock_ns": 7.39,
+  "row_sum_clock_ns": 7.272,
+  "old_row_sum_clock_ns": 7.39,
+  "dsp_accounting": {
+    "PE": 256,
+    "Accumulator": 32,
+    "fsub": 64,
+    "total": 352
+  },
+  "all_report_clocks_within_budget": true,
+  "scope": {
+    "csim": true,
+    "csynth": true,
+    "cosim": false,
+    "export_ip": false,
+    "vivado": false,
+    "board": false,
+    "long_csim": false
+  },
+  "resources_vs_71025ff": {
+    "DSP_delta": 0,
+    "FF_delta": -32,
+    "LUT_delta": -8576,
+    "BRAM_18K_delta": 0
+  },
+  "top_latency_unchanged": true,
+  "functional_scope": "CSim math22/22 and illegal-length guards; no16 bit-exact baseline or RTL verification"
+}

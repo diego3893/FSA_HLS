@@ -1,0 +1,21 @@
+{
+  "tested_commit": "ebe529be6f4d03f855add5f3fe745af9874fa9d4",
+  "source_files_verified": 92,
+  "archive_sha256": "fe9b575ad774099e7934ae2bbad88670d8c64842c69481c5c347c5cdd9c403cf",
+  "clock_ns": 7.3,
+  "timing_budget_ns": 7.3,
+  "dsp_accounting": {
+    "PE": 16,
+    "Accumulator": 8,
+    "fsub": 16,
+    "total": 40
+  },
+  "scope": {
+    "csim": true,
+    "csynth": true,
+    "cosim": false,
+    "export_ip": false
+  },
+  "manifest_payload_files_verified": 247,
+  "archive_file_count": 248
+}
