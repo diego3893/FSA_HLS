@@ -36,13 +36,13 @@ namespace detail{
     /**
      * @brief runPeArray的目标发射间隔，不是一次求值的latency。
      *
-     * 已验收未分块4×4的实际II=1、latency=3。阶段3的D×B实例须重新
-     * 验收；16×16的遗留默认5尚未验证，不能据此保证PWL/PV II=1。
+     * 4配置共享实例已验收II1；16配置也请求流水服务II1，实际latency、
+     * II和完整反馈距离须由各配置综合验收，不以此常量作为性能证据。
      */
 #ifdef FSA_SPLIT_D_PE_ARRAY_II
     constexpr int PE_ARRAY_II = FSA_SPLIT_D_PE_ARRAY_II;
 #else
-    constexpr int PE_ARRAY_II = PE_DIM <= 4 ? 1 : 5;
+    constexpr int PE_ARRAY_II = 1;
 #endif
 
     void peBankMacUnit(
