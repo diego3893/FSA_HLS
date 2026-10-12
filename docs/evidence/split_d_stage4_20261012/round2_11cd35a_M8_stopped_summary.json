@@ -1,0 +1,134 @@
+{
+  "commit": "11cd35a29b7caf490109a06d504b35f3246f1fa9",
+  "D": 16,
+  "H": 128,
+  "L_MAX": 1024,
+  "contexts": 8,
+  "pe_hop": 7,
+  "qk_feedback": 8,
+  "score_commit_distance": 1,
+  "acc_hop": 11,
+  "status": "user_authorized_controlled_stop_after_excessive_csynth_time",
+  "run_exit": 1,
+  "run_start": "2026-10-12T22:11:30+08:00",
+  "run_end": "2026-10-13T01:33:59+08:00",
+  "elapsed_seconds": 12149,
+  "stage4_cases": 32,
+  "stage4_words": 85824,
+  "summaries": [
+    "[stage4-summary] 32/32",
+    "[math-summary] 32/32"
+  ],
+  "csim_pass": true,
+  "csynth_completed": false,
+  "csynth_xml_count": 0,
+  "reports": {},
+  "rtl_counts": null,
+  "hardware_acceptance": "unverified",
+  "warning_counts": {
+    "HLS 200-1995": 16,
+    "HLS 200-960": 2
+  },
+  "warning_lines": [
+    "WARNING: [HLS 200-1995] There were 686,656 instructions in the design after the 'Compile/Link' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 3,474,080 instructions in the design after the 'Unroll/Inline' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 2,794,347 instructions in the design after the 'Unroll/Inline (step 2)' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 2,685,190 instructions in the design after the 'Unroll/Inline (step 3)' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 2,440,303 instructions in the design after the 'Unroll/Inline (step 4)' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 6,861,689 instructions in the design after the 'Array/Struct' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 2,559,343 instructions in the design after the 'Array/Struct (step 2)' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 2,559,351 instructions in the design after the 'Array/Struct (step 3)' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 2,559,169 instructions in the design after the 'Array/Struct (step 4)' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 2,567,444 instructions in the design after the 'Array/Struct (step 5)' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 2,326,118 instructions in the design after the 'Performance' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 2,305,999 instructions in the design after the 'Performance (step 2)' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 2,285,318 instructions in the design after the 'Performance (step 3)' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 2,282,518 instructions in the design after the 'Performance (step 4)' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 2,294,066 instructions in the design after the 'HW Transforms' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-1995] There were 2,194,401 instructions in the design after the 'HW Transforms (step 2)' phase of compilation. See the Design Size Report for more details: /home/zhangchenxuan/FSA_HLS/hls/fsa_stream_split_d/build/solution1/syn/report/csynth_design_size.rpt",
+    "WARNING: [HLS 200-960] Cannot flatten loop 'VITIS_LOOP_103_2' (/home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_controller.cpp:103:31) in function 'fsa::split_d::detail::runQueryBlock<1>' the outer loop is not a perfect loop because there is nontrivial logic before entering the inner loop.",
+    "WARNING: [HLS 200-960] Cannot flatten loop 'VITIS_LOOP_103_2' (/home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_controller.cpp:103:31) in function 'fsa::split_d::detail::runQueryBlock<0>' the outer loop is not a perfect loop because there is nontrivial logic before entering the inner loop."
+  ],
+  "ii_violations_observed_before_stop": [],
+  "critical_paths_observed_before_stop": [],
+  "last_main_log_before_stop": "2026-10-12T23:25:47+08:00",
+  "pending_phase": "build-ssdm transform entered 2026-10-12T23:24:00+08:00; no completion record before SIGTERM",
+  "phase_wait_seconds_approx": 7799,
+  "m1_reference_elapsed_seconds": 5512,
+  "m1_reference_build_ssdm_seconds": 416.1,
+  "diagnosis": "Compiler transform complexity suspected; CPU activity alone does not establish useful progress. No confirmed deadlock, resource exhaustion, scheduling II failure or final RAM mapping.",
+  "stop_reason": "User selected controlled stop and pause after examining runtime comparison. Original runner had no automatic timeout.",
+  "archive_remote": "/home/zhangchenxuan/FSA_HLS/build/split_d_stage4_11cd35a_M8_bram_stopped_20261013",
+  "unexecuted": [
+    "N1024 CSim",
+    "CoSim",
+    "IP export",
+    "Vivado",
+    "board test"
+  ],
+  "model_outputs_generated": false,
+  "next_iteration_started": false,
+  "compiler_ir_comparison": {
+    "M1": {
+      "report_path": "build/split_d_stage4_6f0b40d_M1_20261012/build/solution1/syn/report/csynth_design_size.rpt",
+      "sha256": "e6db4901d7e5159001f76fb15046dbbc9f75df7d734f7d6967d1df5755753623",
+      "fsa_stream_split_d": [
+        {
+          "compile_link": 686344,
+          "unroll_inline": 2367343,
+          "array_struct": 2407899,
+          "performance": 2103079,
+          "hw_transforms": 2015112
+        }
+      ],
+      "runPeArray": [
+        {
+          "compile_link": 118404,
+          "unroll_inline": 903609,
+          "array_struct": 790605,
+          "performance": 686619,
+          "hw_transforms": 676296
+        },
+        {
+          "compile_link": 118404,
+          "unroll_inline": 903609,
+          "array_struct": 790605,
+          "performance": 686619,
+          "hw_transforms": 676296
+        }
+      ]
+    },
+    "M8": {
+      "report_path": "build/split_d_stage4_11cd35a_M8_bram_stopped_20261013/build/solution1/syn/report/csynth_design_size.rpt",
+      "sha256": "fabbf4e94d1c16c4faf07d939215e6e13f0448ffd485c6355fae477f288e5a32",
+      "fsa_stream_split_d": [
+        {
+          "compile_link": 686656,
+          "unroll_inline": 2440303,
+          "array_struct": 2567444,
+          "performance": 2282518,
+          "hw_transforms": 2194401
+        }
+      ],
+      "runPeArray": [
+        {
+          "compile_link": 118404,
+          "unroll_inline": 903609,
+          "array_struct": 790605,
+          "performance": 686619,
+          "hw_transforms": 676296
+        },
+        {
+          "compile_link": 118404,
+          "unroll_inline": 903609,
+          "array_struct": 790605,
+          "performance": 686619,
+          "hw_transforms": 676296
+        }
+      ]
+    },
+    "scope": "Compiler instructions and callgraph; function call counts do not prove physical RTL operator replication."
+  },
+  "hw_transform_instruction_growth_percent": 8.897,
+  "build_ssdm_elapsed_ratio_lower_bound": 18.743
+}
