@@ -91,7 +91,8 @@ if {$RUN_CSIM} {
         # Optimize only host C simulation; synthesis flags and hardware are unchanged.
         csim_design -O
     } else {
-        csim_design
+        # Optimize the host executable only; hardware synthesis CFLAGS stay identical.
+        csim_design -O
     }
 }
 

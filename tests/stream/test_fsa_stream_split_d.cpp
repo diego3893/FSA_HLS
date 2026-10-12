@@ -11,6 +11,7 @@
 #include <vector>
 #include <utils/x_hls_utils.h>
 #include "split_d_stage12_baseline.hpp"
+#include "split_d_stage4_baseline.hpp"
 
 namespace{
 
@@ -1498,6 +1499,64 @@ namespace{
      * 输入构造与提交分开，是为了让定向用例（online重标定、跨块基向量、
      * PWL分段边界）能显式构造矩阵，而不是只能从随机分布生成。
      */
+    unsigned stage4_cases_checked = 0;
+    unsigned stage4_cases_passed = 0;
+
+    const Stage4BitCase* findStage4Case(const char* name, const unsigned length, const bool causal){
+        for(unsigned index=0; index<STAGE4_BIT_CASE_COUNT; ++index){
+            const Stage4BitCase& entry = STAGE4_BIT_CASES[index];
+            if(std::strcmp(name, entry.name)==0 && length==entry.length && causal==entry.causal){
+                return &entry;
+            }
+        }
+        return nullptr;
+    }
+
+    bool checkStage4Baseline(const char* name, const unsigned length, const bool causal){
+        if(PE_DIM!=16 || HEAD_DIM!=128){
+            return true;
+        }
+        const dma_word_t* inputs[3] = {q_memory, k_memory, v_memory};
+        const unsigned input_words = length*(unsigned)QKV_WORDS_PER_TOKEN;
+        const unsigned output_words = length*(unsigned)O_WORDS_PER_TOKEN;
+        ++stage4_cases_checked;
+        if(std::getenv("FSA_SPLIT_D_CAPTURE_STAGE4") != nullptr){
+            for(int plane=0; plane<3; ++plane){
+                for(unsigned word=0; word<input_words; ++word){
+                    std::cout << "[stage4-input] " << name << " " << length << " " << causal
+                        << " " << plane << " " << word << " " << std::hex << inputs[plane][word].to_uint64() << std::dec << "\n";
+                }
+            }
+            for(unsigned word=0; word<output_words; ++word){
+                std::cout << "[stage4-word] " << name << " " << length << " " << causal
+                    << " " << word << " " << std::hex << o_memory[word].to_uint64() << std::dec << "\n";
+            }
+            ++stage4_cases_passed;
+            return true;
+        }
+        const Stage4BitCase* entry = findStage4Case(name, length, causal);
+        if(entry == nullptr){
+            std::cerr << "stage4 missing frozen baseline: " << name << " N=" << length << "\n";
+            return false;
+        }
+        for(int plane=0; plane<3; ++plane){
+            for(unsigned word=0; word<input_words; ++word){
+                if(inputs[plane][word].to_uint64() != STAGE4_BIT_INPUTS[entry->input_offset+(unsigned)plane*input_words+word]){
+                    std::cerr << "stage4 input mismatch: " << name << " plane=" << plane << " word=" << word << "\n";
+                    return false;
+                }
+            }
+        }
+        for(unsigned word=0; word<output_words; ++word){
+            if(o_memory[word].to_uint64() != STAGE4_BIT_WORDS[entry->output_offset+word]){
+                std::cerr << "stage4 bit mismatch: " << name << " N=" << length << " causal=" << causal << " word=" << word << "\n";
+                return false;
+            }
+        }
+        ++stage4_cases_passed;
+        return true;
+    }
+
     bool runCaseWithInput(
         const char* name,
         const unsigned length,
@@ -1559,7 +1618,8 @@ namespace{
             ++mathematical_cases_passed;
         }
         const bool baseline_pass = checkPackedBaseline(name, length, causal);
-        return mathematical_pass && baseline_pass;
+        const bool stage4_pass = checkStage4Baseline(name, length, causal);
+        return mathematical_pass && baseline_pass && stage4_pass;
     }
 
     bool runCase(
@@ -1653,6 +1713,22 @@ namespace{
 
         // 固定历史基线的真实FP16输入，消除宿主随机分布/half转换差异。
         restoreBaselineInputs(name, length, causal, q, k, v);
+        if(PE_DIM==16 && HEAD_DIM==128 && std::getenv("FSA_SPLIT_D_CAPTURE_STAGE4")==nullptr){
+            const Stage4BitCase* entry = findStage4Case(name, length, causal);
+            if(entry != nullptr){
+                std::vector<std::vector<elem_t>>* matrices[3] = {&q, &k, &v};
+                const unsigned words = length*(unsigned)QKV_WORDS_PER_TOKEN;
+                for(int plane=0; plane<3; ++plane){
+                    for(unsigned token=0; token<length; ++token){
+                        for(int feature=0; feature<HEAD_DIM; ++feature){
+                            const unsigned word = token*(unsigned)QKV_WORDS_PER_TOKEN+(unsigned)(feature/QKV_ELEMS_PER_WORD);
+                            (*matrices[plane])[token][feature] = fsa::dma_unpack_elem(
+                                (dma_word_t)STAGE4_BIT_INPUTS[entry->input_offset+(unsigned)plane*words+word], feature%QKV_ELEMS_PER_WORD);
+                        }
+                    }
+                }
+            }
+        }
         return runCaseWithInput(name, length, causal, pattern, q, k, v);
     }
 
@@ -1690,7 +1766,7 @@ namespace{
                 std::cout << "[stage12-word] " << name << " " << length << " " << causal
                     << " " << word << " " << std::hex << o_memory[word].to_uint64() << std::dec << "\n";
             }
-        }else{
+        }else if(PE_DIM==4 && HEAD_DIM==16){
             bool found = false;
             for(unsigned index=0; index<STAGE12_BIT_CASE_COUNT; ++index){
                 const Stage12BitCase& entry = STAGE12_BIT_CASES[index];
@@ -1867,6 +1943,23 @@ int main(){
     ) && passed;
 
     unsigned expected_math_cases = PE_DIM==4 && HEAD_DIM==16 ? 24U : 22U;
+    if(PE_DIM==16 && HEAD_DIM==128){
+        // 固定M8邻域；后续按实测反馈选择容量时补对应邻域，不删旧用例。
+        const unsigned lengths[3] = {112, 128, 144};
+        for(int index=0; index<3; ++index){
+            passed = runStage12Case("stage4-fixed", lengths[index], false, 0) && passed;
+            passed = runStage12Case("stage4-fixed", lengths[index], true, 0) && passed;
+        }
+        passed = runStage12Case("stage4-cancel", 33U, false, 1) && passed;
+        passed = runStage12Case("stage4-cancel", 33U, true, 1) && passed;
+        passed = runStage12Case("stage4-signed-zero", 33U, false, 2) && passed;
+        passed = runStage12Case("stage4-signed-zero", 33U, true, 2) && passed;
+        expected_math_cases += 10U;
+        std::cout << "[stage4-summary] " << stage4_cases_passed << "/" << stage4_cases_checked << "\n";
+        if(stage4_cases_checked!=32U || stage4_cases_passed!=32U){
+            passed = false;
+        }
+    }
     if(PE_DIM==4 && HEAD_DIM==16){
         const unsigned stage12_lengths[12] = {3, 4, 5, 8, 9, 12, 16, 20, 24, 28, 32, 36};
         for(int index=0; index<12; ++index){
