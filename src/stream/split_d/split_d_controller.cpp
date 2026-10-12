@@ -153,11 +153,13 @@ namespace detail{
                         }
                     }
                     state.tile_has_value[ctx][col] = has_value;
-                    state.next_max[ctx][col] = has_value
-                        ? (state.history_valid[ctx][col] ? finiteAccMax(state.running_max[ctx][col], tile_max) : tile_max)
-                        : state.running_max[ctx][col];
+                    const acc_t previous_max = state.running_max[ctx][col];
+                    const acc_t next_max = has_value
+                        ? (state.history_valid[ctx][col] ? finiteAccMax(previous_max, tile_max) : tile_max)
+                        : previous_max;
+                    state.next_max[ctx][col] = next_max;
                     state.alpha_delta[ctx][col] = state.history_valid[ctx][col] && has_value
-                        ? accSub(state.running_max[ctx][col], state.next_max[ctx][col]) : accZero();
+                        ? accSub(previous_max, next_max) : accZero();
                 }
             }
             runSharedEngine(SharedOperation::ALPHA_SCALE, first_context, active_contexts, state);

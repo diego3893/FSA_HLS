@@ -6,12 +6,12 @@
 
 - 用户任务：“继续阶段1和2”。仅4×4/head16；功能/原FP32顺序与FP16量化、总16PE/4Acc、实际服务II1、VU37P/10ns/2.7ns/≤7.300ns。用户已明确允许精确GitHub仓库fsa_split_D推送及NM37同步标准CSim/CSynth；CoSim/IP/16/板测/1024长测关闭，无轮数上限。
 - 被测DUT提交902838ec6a2cefd24368e7be42e82d6ca29bc28f，第4轮M1诊断完整通过：数学52/52、旧严格24/24、新严格28/28、输出canary/2非法；正确S真实依赖下共享II1/depth46、顶层7.300ns，DSP40/FF71968/LUT148213/BRAM8/URAM0。阶段1已通过约定CSim/CSynth门槛。
-- 当前准备第5轮默认M7验证阶段2；DUT默认容量7、PE年龄6、QK发射间距7、S提交距离1、Acc年龄11。标准Tcl关闭engine参数环境覆盖后测试默认源码路径；M7最小性及RAM/bank完整路径尚待该正式构建，不以M1代替M7。
+- 第5轮默认M7功能/时序通过但实际共享II2；probability_ready RAM首命中反馈和max重复读端口失败。第6轮将56bit/worker标志全部寄存、max局部复用，准备默认M7再验证；DUT默认容量7、PE年龄6、QK发射间距7、S提交距离1、Acc年龄11。标准Tcl关闭engine参数环境覆盖后测试默认源码路径；M7最小性及RAM/bank完整路径尚待该正式构建，不以M1代替M7。
 - 数值基线1afc13e保持73110dc DUT未改，官方28笔3440word已固定于tests/stream/split_d_stage12_baseline.hpp；来源/SHA在official_baseline_manifest.json，禁止候选改golden。完整N24/28/32覆盖M7−1/M7/M7＋1，N36覆盖尾批；全部52笔数学/52笔严格与2非法不收窄。
 - 有限DATAFLOW distributor→两个D×B worker→gather；Q整批先装载、KV每key tile广播一次，causal只处理合法query tile后缀，尾batch显式计数并按原query顺序汇聚。单一PE/Acc所有者，空间ROW_SUM/PV保持key顺序，P完整/L完整两道屏障及phase排空保留。
 - 第1轮Q重复读取端口II2/Acc输入7.815ns，第2轮Q/负max广播及Acc输入寄存使工具II1但V→PE7.961ns，第3轮PE输入寄存达7.300ns但age5真实依赖导致II2。审查纠正了前三轮错误的S distance：必须feedback−hop而非整个发射间距；此前II报告不能作为最终正确依赖验收。第4轮age6/反馈7/S距离1实际II1通过。
 - 实际RTL完整递归（处理属性/缩进/多module/参数实例）确认16PE乘法/4Acc乘法/8减法；寄存helper无新MAC。所有实际构建按commit归档；第4轮额外保存精确源码快照。top latency仍未知，只允许报告明确范围的HLS阶段/模块预测预算，禁止冒充RTL/板上实测。
-- 本地stub M1/M6/M7数学52/52及新增3440word差分0，旧严格19/24/exit1为5项已知差异，不能代替官方。当前日志1437，已闭合4轮，第5轮准备中；阶段2未完成。
+- 本地stub M1/M6/M7数学52/52及新增3440word差分0，旧严格19/24/exit1为5项已知差异，不能代替官方。当前日志1437，已闭合5轮，第6轮小标志寄存/max读取修复中；阶段2未完成。
 
 ## 2 授权、验收与禁止事项
 
@@ -67,7 +67,7 @@
 ## 6 证据与历史入口
 
 - 阶段0本地静态证据：docs/evidence/split_d_stage0_20261012/，包含模型、归档核对、逐拍CSV、A/B敏感性、96组部分预算和固定输入清单。对应[报告](docs/Split-D阶段0调度与账本_20261012.md)，没有新的数值或HLS验收。
-- 当前日志：[2026-10-12_1437_split_d_stage12_修改日志.md](docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md)。第2轮已闭合，完成轮数2；第3轮PE输入寄存进行中；阶段1/2本地候选已实现，尚未官方验收。历史II1诊断为1148日志。
+- 当前日志：[2026-10-12_1437_split_d_stage12_修改日志.md](docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md)。已闭合5轮，第4轮M1阶段1通过，第5轮默认M7标志RAM反馈II2，第6轮修复中；阶段2未验收。历史II1诊断为1148日志。
 - 最新交接：[Split-D数据流与II1优化交接方案_20261012.md](docs/Split-D数据流与II1优化交接方案_20261012.md)。本地FSA/两示例固定版本、互联网主来源、候选取舍、工作包与数值/II/性能验收；替代直接固定上下文数的下一步，未实施。
 - 当前完整证据：本地build/resume_nm37/ii1_round1_4x4/；远端build/split_d_73110dc_4x4_ii1_evidence_20261012/。247载荷SHA及92源码对73110dc已核对；tar SHA a41d69005492a12d863466e0163bffe5fe9e899c4efdc16ca8c946af37f15074。
 - 远端日志/tmp/codex_split_d_73110dc_ii1_4x4_20261012.log；压缩包/tmp/codex_split_d_73110dc_4x4_ii1_evidence_20261012.tar.gz，本地build/resume_nm37/ii1_round1_4x4.tar.gz。
@@ -102,4 +102,4 @@ RUN_CSIM=1 RUN_COSIM=0 EXPORT_IP=0 FSA_SPLIT_D_PE_DIM=4 FSA_SPLIT_D_HEAD_DIM=16 
 
 ## 9 对话接续摘要
 
-用户继续阶段1和2，已明确授权精确GitHub仓库/分支推送及NM37标准CSim/CSynth；不再询问。4×4/head16、逐queryFP32顺序/FP16量化、16PE/4Acc、VU37P/10ns/2.7ns/7.300ns合同不变，CoSim/IP/16/板测/1024关闭。当前被测DUT902838e，第4轮M1在正确S距离1下全功能52数学/24旧严格/28新严格及保护区/2非法通过，共享实际II1/depth46、顶层7.300ns、DSP40/FF71968/LUT148213/BRAM8，RTL16PE乘法/4Acc乘法/8减法；阶段1通过。PEhop6/反馈7/S提交距离=feedback−hop=1/Acc年龄11，默认容量候选7。阶段2下一步正式测试默认M7（unset所有engine参数和capture），读取多context RAM的真实反馈/端口/时序/实例，不能用M1通过代替。已有N24/28/32和N36的28笔固定官方输出3440word，来源1afc13e旧DUT，不能再生golden或放宽容差。前三轮S距离曾错用整个反馈，已如实纠正；历史II仅诊断，阶段4是真实依赖通过。所有构建按commit归档，902另有源码快照，top latency未知，需分开真实有效token与空槽/重启开销，只作有范围的HLS预算，不能宣称完整事务/RTL/板上实测。当前1437日志，闭合4轮，第5轮准备；阶段2未完成。用户AGENTS.md、.tmprun/、旧local_math_stubs_check.log始终保留不提交。每次SSH显式source~/.bashrc和Vitis设置先于set-u，LF末尾补LF再pipe，标准run_hls.sh不可替换。
+用户继续阶段1和2，已明确授权精确GitHub仓库/分支推送及NM37标准CSim/CSynth；不再询问。4×4/head16、逐queryFP32顺序/FP16量化、16PE/4Acc、VU37P/10ns/2.7ns/7.300ns合同不变，CoSim/IP/16/板测/1024关闭。当前被测DUT902838e，第4轮M1在正确S距离1下全功能52数学/24旧严格/28新严格及保护区/2非法通过，共享实际II1/depth46、顶层7.300ns、DSP40/FF71968/LUT148213/BRAM8，RTL16PE乘法/4Acc乘法/8减法；阶段1通过。PEhop6/反馈7/S提交距离=feedback−hop=1/Acc年龄11，默认容量候选7。阶段2下一步正式测试默认M7（unset所有engine参数和capture），读取多context RAM的真实反馈/端口/时序/实例，不能用M1通过代替。已有N24/28/32和N36的28笔固定官方输出3440word，来源1afc13e旧DUT，不能再生golden或放宽容差。前三轮S距离曾错用整个反馈，已如实纠正；历史II仅诊断，阶段4是真实依赖通过。所有构建按commit归档，902另有源码快照，top latency未知，需分开真实有效token与空槽/重启开销，只作有范围的HLS预算，不能宣称完整事务/RTL/板上实测。当前1437日志，闭合5轮；第5轮7ba2741默认M7全部功能/7.300ns/16PE4Acc通过，但probability_ready RAM反馈导致共享II2和max重复读端口II2。第6轮只把56bit/worker首命中标志全partition为寄存器、max单读局部复用，准备默认M7重测；阶段2未完成。用户AGENTS.md、.tmprun/、旧local_math_stubs_check.log始终保留不提交。每次SSH显式source~/.bashrc和Vitis设置先于set-u，LF末尾补LF再pipe，标准run_hls.sh不可替换。

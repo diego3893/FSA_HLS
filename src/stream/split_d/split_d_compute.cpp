@@ -278,8 +278,8 @@ namespace detail{
         #pragma HLS ARRAY_PARTITION variable=state.score complete dim=3
         #pragma HLS ARRAY_PARTITION variable=state.score_valid complete dim=2
         #pragma HLS ARRAY_PARTITION variable=state.score_valid complete dim=3
-        #pragma HLS ARRAY_PARTITION variable=state.probability_ready complete dim=2
-        #pragma HLS ARRAY_PARTITION variable=state.probability_ready complete dim=3
+        // 首次命中标志仍按piece顺序反馈；小标志全寄存以消除RAM读写延迟。
+        #pragma HLS ARRAY_PARTITION variable=state.probability_ready complete dim=0
         #pragma HLS ARRAY_PARTITION variable=state.output_acc complete dim=2
         #pragma HLS ARRAY_PARTITION variable=state.running_sum complete dim=2
         #pragma HLS ARRAY_PARTITION variable=state.next_max complete dim=2
