@@ -4,14 +4,16 @@
 
 ## 1 当前状态与任务
 
-- 用户目标：先在4×4/head16把QK/ROW_SUM/PWL/PV实际发射II全部降到1并改善性能，达标后才测试16×16/head128；不进行CoSim。
-- 最新任务：用户要求“继续阶段1和2”，按已交付空间ROW_SUM等价口径恢复实现和CSim/CSynth。28笔固定输入/head消去/signed-zero及canary已加入，基线捕获准备提交1afc13e（DUT未改）。共享有限引擎、空间RS/PV阶段1及query batch阶段2候选已本地实现，正式旧DUT52数学/24旧严格通过，28笔3440word官方输出已冻结；M1候选CSim已通过全部原/新增检查，CSynth完成：共享循环II2、7.815ns，验收未过；第2轮准备Q广播和Acc输入寄存；当前日志docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md。
-- 当前本地/远端被测HEAD为f57e9ef（第2轮Q/负max广播及Acc输入寄存），上一轮2b0d51a（共享引擎及batch支持），官方M1候选CSim已通过52数学/24旧严格/28新严格及2非法，CSynth完成：共享循环II2、7.815ns，验收未过；第2轮准备Q广播和Acc输入寄存。阶段1同stub新增3440word差分0，数学52/52、旧严格19/24已知位差、exit1；正式新基线头已从1afc13e旧DUT冻结3440word，manifest保存来源/SHA。阶段0文档/证据已在1afc13e提交。
-- 被测代码：73110dc2d6eb799072c29fc4954f8f8d5427973b；仅将QK/ROW_SUM两处PIPELINE目标II5→1，未改变算术或状态。收尾文档d3245a3已推送；文档提交不算HLS重新测试。
-- 官方4配置流程11:58:47—12:02:27退出0：数学/严格位模式24/24及2笔非法长度保护通过；实际II3/3/1/1，顶层估算7.887ns，II与≤7.300ns时序门槛未通过。
-- 资源：DSP40/FF44855/LUT128938/BRAM18K8；实际2个PE块、2个Accumulator块，总16条PE乘法、4条Acc乘法和8条减法，未复制MAC。
-- 用户已明确选择“四阶段都到II1，允许交错独立query上下文并增加状态存储”。新增Q/S/P/m/l/O上下文允许，逐query的FMA/量化顺序及MAC实例数保持；交错结构尚未实现。
-- CoSim、IP导出、Vivado、板测、16配置及1024长测均未在本轮执行。没有1024序列硬件实测延迟。
+- 用户最新任务：“继续阶段1和2”。仅4×4/head16的共享空间RS/PV、QK独立query交错、实际II1和≤7.300ns；CoSim/IP/16/板测/1024长测关闭。用户已明确授权正常推送git@github.com:diego3893/FSA_HLS.git的fsa_split_D及NM37同步测试；早前自动审批阻塞已解除。
+- 当前本地/远端HEAD3b8eeba3a70faf76b6efd708318394452d469920，第3轮M1正式CSim/CSynth。官方52/52数学、24/24原严格、28/28新严格及2非法/输出canary已通过，CSynth进行中；新增PE输入寄存的完整反馈/时序尚未验收。
+- 基线准备1afc13e保持73110dc DUT未改，官方52数学/24旧严格/28笔输出捕获完成；28笔3440word已固定在tests/stream/split_d_stage12_baseline.hpp，禁止从候选重新生成。来源manifest在docs/evidence/split_d_stage12_20261012/，旧DUT7.887ns/DSP40/FF44855/LUT128938/BRAM8复现。
+- 第1轮2b0d51a：全部功能通过、唯一MAC通过，Q重复RAM读取导致共享II2/depth45，O读取/选择＋Acc输入7.815ns，验收未过。第2轮f57e9ef：Q/负max列广播、Acc输入寄存消除端口II2及Acc路径，共享II1/depth46，但V读取/选择＋PE输入7.961ns，验收仍未过；DSP40/FF70246/LUT147299/BRAM8。
+- 依赖审查修正：前三轮state.score RAW distance错误填了完整QK发射间距，成熟S写→下一次读实际距离是feedback−hop；第4轮已改true distance=SCORE_COMMIT_DISTANCE（7−6=1），此前II1工具结果不能作为正确依赖的最终验收。CSim/实例/时序结论不受影响。
+- 第3轮3b8eeba在输入选择之后增加纯PE寄存级；当前第4轮候选hop6/QK反馈7/Acc年龄11、默认容量7。PE模块latency4/II1、Acc latency7/II1来自第2轮，新增PE输入一级后完整反馈须实测决定最小M，不能直接固定6/8。
+- 架构：有限DATAFLOW distributor→两D×B worker→gather；每worker单一共享引擎/PE/Acc调用点；Q批装载、KV每key tile广播一次、causal按合法query tile后缀处理、尾批计数显式。空间ROW_SUM/PV保持key顺序、原量化及P完整和L完整两道屏障，全部环槽排空后换phase。
+- 第1/2轮完整RTL解析带属性/缩进、多module及参数实例，从top递归确认16条PE乘法、4条Acc乘法、8条减法及2地址乘法；不能只凭函数定义或DSP证明。根JSON与完整服务器构建均按commit归档。
+- 本地M1/M6数学52/52、3440word与旧同stub差分0，旧严格19/24/exit1是已知5项stub差异，具体首差异与旧日志完全一致；本地不能代替官方严格/综合。
+- 当前日志docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md；闭合轮数3，第4轮进行中，无用户轮数上限。尚未正式验收阶段1/2；下一步读第3轮完整调度/时序/RTL证据，达标后验证最小M的满/尾批与真实有效发射预算。
 
 ## 2 授权、验收与禁止事项
 
@@ -102,4 +104,4 @@ RUN_CSIM=1 RUN_COSIM=0 EXPORT_IP=0 FSA_SPLIT_D_PE_DIM=4 FSA_SPLIT_D_HEAD_DIM=16 
 
 ## 9 对话接续摘要
 
-用户要求继续阶段1和2，4×4/head16、逐query原FP32顺序/FP16量化、总16PE/4Acc、≤7.300ns和正式CSim/CSynth合同不变。当前HEADf57e9ef已正常推送并ff-only同步NM37，第2轮M1官方全功能通过、共享II1/depth46、顶层7.961ns仍违例。上一轮2b0d51a正式配置M1，CSim52数学/24原严格/28新严格及保护区、2非法全部通过，CSynth完成：共享循环II2、7.815ns，验收未过；第2轮准备Q广播和Acc输入寄存。用户明确授权精确GitHub目标后推送成功，旧DUT官方CSim/CSynth完成（52/52数学、24/24旧严格、7.887ns），完整构建已归档。本地共享有限引擎已接入空间ROW_SUM/PV并保留屏障，阶段1数学52/52和新增3440word同stub差分全相同，旧严格19/24/exit1是5项已知stub差异。阶段2query batch、causal后缀和尾批调度已写入，默认容量1，可配置M；M6数学52/52及3440word同stub差分通过，M1批次泛化后功能复核也通过，PE模块latency4/II1已测，但完整反馈仍需核对；当前hop5/feedback6/Acc11，第2轮加Q/负max列广播、Acc输入寄存，本地M1/M6均52数学及3440word差分通过，最小M不可认定；RTL解析必须允许缩进/属性前缀及多module，第1轮确认16PE乘法、4Acc乘法、8减法、2地址乘法。官方新增golden头已冻结28笔3440word，来源manifest在docs/evidence/split_d_stage12_20261012/，不允许候选再生成。实际RTL确认两个共享引擎/PE/Acc；第1轮II2来自Q重复读端口、7.815ns来自O读取/选择＋Acc输入。第2轮已解决Q端口/Acc输入路径，剩余V读取/选择＋PE输入为7.961ns；下一步纯PE输入寄存、核对hop5/反馈6覆盖，再验证最小M。CoSim/IP/16/板测/1024长测关闭。当前日志1437，第1轮未闭合，不宣称阶段1/2完成。
+继续用户的阶段1和2，4×4/head16、原FP32 FMA順序/FP16量化、总16PE/4Acc、VU37P/10ns/2.7ns/≤7.300ns合同不变。用户明确授权精确GitHub仓库/分支推送及NM37同步标准CSim/CSynth，不再询问。1afc13e旧DUT官方基线已冻结28笔3440word，fixture和来源manifest已提交，不能从候选改golden。当前HEAD3b8eeba已推送/ff-only，M1官方52数学/24旧严格/28新严格及保护检查全通过，CSynth进行中；日志/tmp/codex_split_d_stage1_3b8eeba_M1_20261012.log，第3轮已闭合：7.300ns通过但distance5真实PE结果依赖导致II2；第4轮候选hop6/反馈7/默认M7，尚未正式验证。前两轮功能/实例通过：2b0d51a因Q重复读II2和Acc输入7.815ns失败，f57e9ef通过Q/负max广播与Acc输入寄存使共享II1/depth46，但剩余V输入→PE为7.961ns。第3轮增加PE输入寄存，仍hop5/反馈6/Acc11，必须读实际完整路径确认是否覆盖，再选最小M并正式验证batch。额外审查发现前三轮S的RAW距离错误用了全反馈，现纠正为feedback−hop=1 true；此前II结果只作历史诊断，最终必须重新验证。RTL解析需允许属性/缩进/多module，前两轮16PE乘法/4Acc乘法/8减法/2地址乘法。空间RS/PV保留P与L屏障，causal不新增未来tile更新，batch按原query次序汇聚。默认容量候选改为7，正式先用Tcl显式M1验证，再默认M7验证；7尚未认定；本地M6已52数学/3440word差分通过，但最小M尚不可认定。当前1437日志，完成轮数3，阶段1/2未验收。CoSim/IP/16/板测/1024长测关闭；用户AGENTS.md、.tmprun/和旧local_math_stubs_check.log均保留不提交。所有未来SSH显式source~/.bashrc/工具环境，LF脚本末尾补LF后pipe再exit，source工具设置先于set-u；标准入口run_hls.sh不可替换。

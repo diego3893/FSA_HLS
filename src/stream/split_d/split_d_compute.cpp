@@ -331,7 +331,8 @@ namespace detail{
             #pragma HLS DEPENDENCE variable=pe_elem inter RAW distance=FSA_SPLIT_D_PE_HOP_CYCLES true
             #pragma HLS DEPENDENCE variable=pe_hit inter RAW distance=FSA_SPLIT_D_PE_HOP_CYCLES true
             #pragma HLS DEPENDENCE variable=acc_result inter RAW distance=FSA_SPLIT_D_ACC_HOP_CYCLES true
-            #pragma HLS DEPENDENCE variable=state.score inter RAW distance=FSA_SPLIT_D_QK_FEEDBACK_CYCLES true
+            // 完整反馈为PE环槽＋S提交/读取，不把distance误填成完整QK间距。
+            #pragma HLS DEPENDENCE variable=state.score inter RAW distance=SCORE_COMMIT_DISTANCE true
             // PV/归一化在本次有限调用中每个(context,feature)只读和提交一次。
             // 下一key tile须等待函数排空，不存在本循环内的output_acc RAW反馈。
             #pragma HLS DEPENDENCE variable=state.output_acc inter RAW false

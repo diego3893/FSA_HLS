@@ -17,15 +17,16 @@
 #define FSA_SPLIT_D_HEAD_DIM 16
 #endif
 
-// 阶段1先用单query tile上下文；阶段2按实测完整反馈距离选择容量。
+// 第3轮证明5拍结果年龄不足；6拍成熟＋下一拍S读取对应最小候选M7。
+// 最终容量仍须按完整路径的实际II验收；M1由正式Tcl显式配置诊断。
 #ifndef FSA_SPLIT_D_QUERY_CONTEXTS
-#define FSA_SPLIT_D_QUERY_CONTEXTS 1
+#define FSA_SPLIT_D_QUERY_CONTEXTS 7
 #endif
 #ifndef FSA_SPLIT_D_PE_HOP_CYCLES
-#define FSA_SPLIT_D_PE_HOP_CYCLES 5
+#define FSA_SPLIT_D_PE_HOP_CYCLES 6
 #endif
 #ifndef FSA_SPLIT_D_QK_FEEDBACK_CYCLES
-#define FSA_SPLIT_D_QK_FEEDBACK_CYCLES 6
+#define FSA_SPLIT_D_QK_FEEDBACK_CYCLES 7
 #endif
 #ifndef FSA_SPLIT_D_ACC_HOP_CYCLES
 #define FSA_SPLIT_D_ACC_HOP_CYCLES 11
@@ -59,6 +60,8 @@ namespace split_d{
     constexpr int SHARED_PE_HOP = FSA_SPLIT_D_PE_HOP_CYCLES;
     constexpr int QK_FEEDBACK_CYCLES = FSA_SPLIT_D_QK_FEEDBACK_CYCLES;
     constexpr int SHARED_ACC_HOP = FSA_SPLIT_D_ACC_HOP_CYCLES;
+    // S写回发生在PE成熟迭代；下次读取不能把整个发射间距当成写后读距离。
+    constexpr int SCORE_COMMIT_DISTANCE = QK_FEEDBACK_CYCLES-SHARED_PE_HOP;
 
     /// @brief 每个空间块拥有的query列数；D及token tile步长保持原值。
     constexpr int QUERY_BLOCK_COLS = FSA_SPLIT_D_QUERY_BLOCK_COLS;
