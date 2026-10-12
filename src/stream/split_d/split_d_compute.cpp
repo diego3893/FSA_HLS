@@ -222,6 +222,25 @@ namespace detail{
         stageAccumulatorResult(computed, result);
     }
 
+    /// @brief Acc输入mux后的真实寄存边界；不执行算术或增加MAC。
+    void stageAccumulatorOperands(const acc_t in_a[QUERY_BLOCK_COLS], const acc_t in_b[QUERY_BLOCK_COLS], const acc_t in_c[QUERY_BLOCK_COLS], acc_t out_a[QUERY_BLOCK_COLS], acc_t out_b[QUERY_BLOCK_COLS], acc_t out_c[QUERY_BLOCK_COLS]){
+        #pragma HLS INLINE off
+        #pragma HLS PIPELINE II=1 style=stp
+        #pragma HLS LATENCY min=1 max=1
+        #pragma HLS ARRAY_PARTITION variable=in_a complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=in_b complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=in_c complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=out_a complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=out_b complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=out_c complete dim=1
+        for(int col=0; col<QUERY_BLOCK_COLS; ++col){
+            #pragma HLS UNROLL
+            out_a[col] = in_a[col];
+            out_b[col] = in_b[col];
+            out_c[col] = in_c[col];
+        }
+    }
+
     void runSharedEngine(const SharedOperation operation, const unsigned first_context, const unsigned context_count, SharedEngineState& state){
         #pragma HLS INLINE off
         #pragma HLS ALLOCATION function instances=runPeArray limit=1
@@ -279,7 +298,10 @@ namespace detail{
         unsigned stream_context = first_context;
         unsigned stream_feature = 0;
 
+        constexpr int max_issue_gap = QUERY_CONTEXTS>QK_FEEDBACK_CYCLES ? QUERY_CONTEXTS : QK_FEEDBACK_CYCLES;
+        constexpr int max_cycles = HEAD_DIM*max_issue_gap+PE_DIM*SHARED_PE_HOP+SHARED_ACC_HOP;
         for(unsigned cycle=0; cycle<cycles; ++cycle){
+            #pragma HLS LOOP_TRIPCOUNT min=1 max=max_cycles
             #pragma HLS PIPELINE II=1
             // 真依赖显式保留：slot读的是HOP拍前写入的结果。
             #pragma HLS DEPENDENCE variable=pe_acc inter RAW distance=FSA_SPLIT_D_PE_HOP_CYCLES true
@@ -354,6 +376,19 @@ namespace detail{
                 column_input = {true, stream_context, stream_feature};
             }
 
+            // QK行标签虽语义相同，综合未能合并逐行RAM读取；在列端只读一次。
+            elem_t q_broadcast[QUERY_BLOCK_COLS];
+            acc_t negative_max[QUERY_BLOCK_COLS];
+            #pragma HLS ARRAY_PARTITION variable=q_broadcast complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=negative_max complete dim=1
+            for(int col=0; col<QUERY_BLOCK_COLS; ++col){
+                #pragma HLS UNROLL
+                q_broadcast[col] = qk && issue_index<vector_items && issue_context<context_count
+                    ? state.q[first_context+issue_context][col][issue_index] : elemZero();
+                // SUB_MAX也显式按列广播，增加context时不为D行重复读max或复制减法。
+                negative_max[col] = operation==SharedOperation::SUB_MAX && issue_index<vector_items && issue_context<context_count
+                    ? accSub(accZero(), state.next_max[first_context+issue_context][col]) : accZero();
+            }
             PeState operands[PE_DIM][QUERY_BLOCK_COLS];
             elem_t operand_b[PE_DIM][QUERY_BLOCK_COLS];
             acc_t operand_c[PE_DIM][QUERY_BLOCK_COLS];
@@ -372,7 +407,7 @@ namespace detail{
                     acc_t c = accZero();
                     if(token.valid){
                         if(qk){
-                            a = state.q[token.context][col][token.index];
+                            a = q_broadcast[col];
                             b = state.k[row][token.index];
                             c = state.score[token.context][row][col];
                         }else{
@@ -385,7 +420,7 @@ namespace detail{
                             }else if(operation==SharedOperation::SUB_MAX){
                                 b = elemOne();
                                 c = state.score_valid[token.context][row][col]
-                                    ? accSub(accZero(), state.next_max[token.context][col]) : accZero();
+                                    ? negative_max[col] : accZero();
                             }else if(operation==SharedOperation::SCALE){
                                 b = fp_struct<elem_t>((ap_uint<16>)ATTENTION_SCALE_ELEM_BITS).to_ieee();
                             }else{
@@ -435,7 +470,14 @@ namespace detail{
                 }
             }
             // 列Accumulator同样只有一个调用点；ROW_SUM/L先排空，再开始PV。
-            runAccumulatorColumns(operation==SharedOperation::ALPHA_PWL, acc_a, acc_b, acc_c, acc_computed);
+            acc_t staged_a[QUERY_BLOCK_COLS];
+            acc_t staged_b[QUERY_BLOCK_COLS];
+            acc_t staged_c[QUERY_BLOCK_COLS];
+            #pragma HLS ARRAY_PARTITION variable=staged_a complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=staged_b complete dim=1
+            #pragma HLS ARRAY_PARTITION variable=staged_c complete dim=1
+            stageAccumulatorOperands(acc_a, acc_b, acc_c, staged_a, staged_b, staged_c);
+            runAccumulatorColumns(operation==SharedOperation::ALPHA_PWL, staged_a, staged_b, staged_c, acc_computed);
 
             // 所有旧槽均已读完，再统一写入新结果/control。
             for(int row=0; row<PE_DIM; ++row){
