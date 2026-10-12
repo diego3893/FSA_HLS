@@ -108,7 +108,7 @@ namespace detail{
         // 外层明确保留dim/D轮；每轮依次消费D个特征。
         for(int block=0; block<DIM_BLOCKS; ++block){
             for(int lane=0; lane<PE_DIM; ++lane){
-                #pragma HLS PIPELINE II=5
+                #pragma HLS PIPELINE II=1
                 const int feature = block*PE_DIM+lane;
                 elem_t operand_b[PE_DIM][QUERY_BLOCK_COLS];
                 acc_t operand_c[PE_DIM][QUERY_BLOCK_COLS];
@@ -160,7 +160,7 @@ namespace detail{
         #pragma HLS ARRAY_PARTITION variable=row_sum complete dim=1
 
         for(int row=0; row<PE_DIM; ++row){
-            #pragma HLS PIPELINE II=5
+            #pragma HLS PIPELINE II=1
             elem_t operand_b[PE_DIM][QUERY_BLOCK_COLS];
             acc_t operand_c[PE_DIM][QUERY_BLOCK_COLS];
             PeMacUnitOutput pe_result[PE_DIM][QUERY_BLOCK_COLS];
