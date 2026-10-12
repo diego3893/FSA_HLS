@@ -282,10 +282,8 @@ namespace detail{
         #pragma HLS ARRAY_PARTITION variable=state.probability_ready complete dim=0
         #pragma HLS ARRAY_PARTITION variable=state.output_acc complete dim=2
         #pragma HLS ARRAY_PARTITION variable=state.running_sum complete dim=2
-        #pragma HLS ARRAY_PARTITION variable=state.next_max complete dim=2
-        #pragma HLS ARRAY_PARTITION variable=state.alpha_delta complete dim=2
+        #pragma HLS ARRAY_PARTITION variable=state.running_max complete dim=2
         #pragma HLS ARRAY_PARTITION variable=state.alpha complete dim=2
-        #pragma HLS ARRAY_PARTITION variable=state.inverse_sum complete dim=2
 
         acc_t pe_acc[PE_DIM][SHARED_PE_HOP][QUERY_BLOCK_COLS];
         elem_t pe_elem[PE_DIM][SHARED_PE_HOP][QUERY_BLOCK_COLS];
@@ -414,7 +412,7 @@ namespace detail{
                     ? state.q[first_context+issue_context][col][issue_index] : elemZero();
                 // SUB_MAX也显式按列广播，增加context时不为D行重复读max或复制减法。
                 negative_max[col] = operation==SharedOperation::SUB_MAX && issue_index<vector_items && issue_context<context_count
-                    ? accSub(accZero(), state.next_max[first_context+issue_context][col]) : accZero();
+                    ? accSub(accZero(), state.running_max[first_context+issue_context][col]) : accZero();
             }
             PeState operands[PE_DIM][QUERY_BLOCK_COLS];
             elem_t operand_b[PE_DIM][QUERY_BLOCK_COLS];
@@ -489,11 +487,11 @@ namespace detail{
                     const unsigned ctx = column_input.context;
                     if(operation==SharedOperation::ALPHA_SCALE){
                         acc_a[col] = (acc_t)ATTENTION_SCALE_ACC_VALUE;
-                        acc_b[col] = state.alpha_delta[ctx][col];
+                        acc_b[col] = state.alpha[ctx][col];
                     }else if(operation==SharedOperation::ALPHA_PWL){
                         acc_a[col] = state.alpha[ctx][col];
                     }else if(operation==SharedOperation::NORMALIZE){
-                        acc_a[col] = state.inverse_sum[ctx][col];
+                        acc_a[col] = state.alpha[ctx][col];
                         acc_b[col] = state.output_acc[ctx][col][column_input.index];
                     }else{
                         acc_a[col] = state.alpha[ctx][col];

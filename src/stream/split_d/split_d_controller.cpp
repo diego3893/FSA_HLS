@@ -157,13 +157,17 @@ namespace detail{
                     const acc_t next_max = has_value
                         ? (state.history_valid[ctx][col] ? finiteAccMax(previous_max, tile_max) : tile_max)
                         : previous_max;
-                    state.next_max[ctx][col] = next_max;
-                    state.alpha_delta[ctx][col] = state.history_valid[ctx][col] && has_value
+                    state.alpha[ctx][col] = state.history_valid[ctx][col] && has_value
                         ? accSub(previous_max, next_max) : accZero();
+                    state.running_max[ctx][col] = next_max;
                 }
             }
-            runSharedEngine(SharedOperation::ALPHA_SCALE, first_context, active_contexts, state);
-            runSharedEngine(SharedOperation::ALPHA_PWL, first_context, active_contexts, state);
+            // 首key之前没有历史L/O，旧alpha计算结果随后总被覆盖为零。
+            // 只省略这两次有限调用；L/O的原RawFMA及量化位置保持不变。
+            if(key_tile != 0U){
+                runSharedEngine(SharedOperation::ALPHA_SCALE, first_context, active_contexts, state);
+                runSharedEngine(SharedOperation::ALPHA_PWL, first_context, active_contexts, state);
+            }
             for(unsigned ctx=first_context; ctx<header.context_count; ++ctx){
                 for(int col=0; col<QUERY_BLOCK_COLS; ++col){
                     #pragma HLS UNROLL
@@ -201,14 +205,14 @@ namespace detail{
                 for(int col=0; col<QUERY_BLOCK_COLS; ++col){
                     #pragma HLS UNROLL
                     if(state.tile_has_value[ctx][col]){
-                        state.running_max[ctx][col] = state.next_max[ctx][col];
                         state.history_valid[ctx][col] = true;
                     }
                 }
             }
         }
         for(unsigned ctx=0; ctx<header.context_count; ++ctx){
-            reciprocalColumns(state.running_sum[ctx], state.inverse_sum[ctx]);
+            // 所有key tile的L/O更新均已结束，alpha槽不再保存缩放系数。
+            reciprocalColumns(state.running_sum[ctx], state.alpha[ctx]);
         }
         runSharedEngine(SharedOperation::NORMALIZE, 0, header.context_count, state);
         for(unsigned ctx=0; ctx<header.context_count; ++ctx){

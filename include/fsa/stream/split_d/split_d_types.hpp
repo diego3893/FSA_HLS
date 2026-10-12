@@ -68,10 +68,9 @@ namespace split_d{
         acc_t output_acc[QUERY_CONTEXTS][QUERY_BLOCK_COLS][HEAD_DIM];
         acc_t running_max[QUERY_CONTEXTS][QUERY_BLOCK_COLS];
         acc_t running_sum[QUERY_CONTEXTS][QUERY_BLOCK_COLS];
-        acc_t next_max[QUERY_CONTEXTS][QUERY_BLOCK_COLS];
-        acc_t alpha_delta[QUERY_CONTEXTS][QUERY_BLOCK_COLS];
+        // phase屏障之间依次保存alpha差值、缩放值、alpha；全部key处理完
+        // 后保存倒数。旧max被读完后直接写回running_max，不保留第二份。
         acc_t alpha[QUERY_CONTEXTS][QUERY_BLOCK_COLS];
-        acc_t inverse_sum[QUERY_CONTEXTS][QUERY_BLOCK_COLS];
         bool history_valid[QUERY_CONTEXTS][QUERY_BLOCK_COLS];
         bool tile_has_value[QUERY_CONTEXTS][QUERY_BLOCK_COLS];
     };
