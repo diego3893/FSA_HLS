@@ -1,11 +1,11 @@
 # FSA HLS Project Context
 
-> 2026-10-12压缩版。只维护仓库根目录本文件；历史全文可从Git提交d3245a3恢复，实验过程保留于原报告、修改日志和证据目录。当前暂停；本次压缩不启动修改或测试。
+> 2026-10-12压缩版，已补本地源码与联网调研交接。只维护仓库根目录本文件；历史全文可从Git提交d3245a3恢复，实验过程保留于原报告、修改日志和证据目录。计算实施仍暂停；本次仅编写方案。
 
 ## 1 当前状态与任务
 
 - 用户目标：先在4×4/head16把QK/ROW_SUM/PWL/PV实际发射II全部降到1并改善性能，达标后才测试16×16/head128；不进行CoSim。
-- 最新指令：“本轮测试结束后暂停”。第1轮已结束并完成分析，第2轮未启动。2026-10-12 12:18只读确认NM37无Vitis/Vivado/XSIM/run_hls进程；这是当时快照，不代表后续实时状态。
+- 最新任务：在交错实现前读取本地FSA、Split-D与两组示例，联网调研并编写后续对话的交接方案；不恢复实现或测试。第1轮已结束，第2轮未启动。2026-10-12 12:18只读确认NM37无Vitis/Vivado/XSIM/run_hls进程；这是当时快照，不代表后续实时状态。
 - 被测代码：73110dc2d6eb799072c29fc4954f8f8d5427973b；仅将QK/ROW_SUM两处PIPELINE目标II5→1，未改变算术或状态。收尾文档d3245a3已推送；文档提交不算HLS重新测试。
 - 官方4配置流程11:58:47—12:02:27退出0：数学/严格位模式24/24及2笔非法长度保护通过；实际II3/3/1/1，顶层估算7.887ns，II与≤7.300ns时序门槛未通过。
 - 资源：DSP40/FF44855/LUT128938/BRAM18K8；实际2个PE块、2个Accumulator块，总16条PE乘法、4条Acc乘法和8条减法，未复制MAC。
@@ -55,16 +55,17 @@
 
 ## 5 恢复后的第一步（仅计划）
 
-1. 用户恢复后继续1148日志，先实现独立query批次交错；初步4配置8个上下文，16配置16个上下文尚待综合证据，不是已验证参数。
-2. QK按feature→query context发射、ROW_SUM按row→context、PWL按piece→context；PV在现有8feature上下文上交错query，共享原MAC。上下文状态维尽量用RAM，避免全分区面积激增。
-3. 分发Q按context，batch内K/V只读一次共享；每query保留原key/feature顺序。causal未来key tile及无效context不得提交额外m/l/O更新，防止额外零FMA改变位模式；汇聚按context/global query输出。
-4. 补4配置batch边界、尾部、causal及跨批次测试，保留24项位模式金标准；build/ii1_original已保存73110dc源码供本地差分。新用例数量尚未改变。
-5. 先本地静态/数学/差分，再官方4配置CSim/CSynth；检查实际四阶段II1、≤7.300ns、总16PE/4Acc及新增状态/归一化性能。不靠空槽、更大trip count或额外MAC制造表面II1。
-6. 4全部满足后，同候选才测16/128，核对22有效＋2非法、四阶段II、256PE/16Acc、时序/资源和warning；16的PE目标II5需评估改1的调度风险。CoSim/IP/Vivado/板测与1024长测继续关闭。
+1. 以[数据流与II1优化交接方案](docs/Split-D数据流与II1优化交接方案_20261012.md)为新入口，先完成工作包0的逐拍调度、数值顺序与有效MAC/存储账本，不直接实施固定8/16上下文。原交错授权仍有效，具体架构尚未确定。
+2. 新推荐是同坐标唯一求值的有限共享引擎：优先评估ROW_SUM/PV沿key行传递FP32部分和；QK比较最少query上下文与feature-chunk空间归约。后者有H/D次装Q、部分和返回与填充成本，小D未必更快。
+3. 原FSA的Q仅在QK驻留，每个key tile仍重装Q，softmax改写为S/P；Python限制head宽匹配阵列行，不能直接当作H>D的实现。gemm_hls用独立C地址覆盖反馈，不证明同一累加变量每拍更新。
+4. 空间chunk必须将前chunk的FP32部分和作为下一chunk首个FMA输入，不能独立局部求和后相加。当前PV每调用仅一key行有效，II1仍有约1/D有效MAC率；先核对有效吞吐，不能仅追pragma。
+5. 如空间ROW_SUM删除旧D次循环，须在实施前由用户确认连续合法token服务II与遍历latency的等价验收口径；不能自动宣布原四阶段II1完成。先4功能/位模式/实例/7.300ns与有效周期，再同候选16；所有测试仍待恢复。
+6. build/ii1_original保留供差分，原4配置24项位模式冻结；16需补固定输入旧源码差分。CoSim/IP/Vivado/板测与1024长测保持关闭。当前不使用TAPA工具链，物理方案留后续授权。
 
 ## 6 证据与历史入口
 
 - 当前日志：[2026-10-12_1148_split_d_ii1_修改日志.md](docs/修改日志/2026-10-12_1148_split_d_ii1_修改日志.md)。已闭环1轮，验收未通过，待恢复方案未实施。
+- 最新交接：[Split-D数据流与II1优化交接方案_20261012.md](docs/Split-D数据流与II1优化交接方案_20261012.md)。本地FSA/两示例固定版本、互联网主来源、候选取舍、工作包与数值/II/性能验收；替代直接固定上下文数的下一步，未实施。
 - 当前完整证据：本地build/resume_nm37/ii1_round1_4x4/；远端build/split_d_73110dc_4x4_ii1_evidence_20261012/。247载荷SHA及92源码对73110dc已核对；tar SHA a41d69005492a12d863466e0163bffe5fe9e899c4efdc16ca8c946af37f15074。
 - 远端日志/tmp/codex_split_d_73110dc_ii1_4x4_20261012.log；压缩包/tmp/codex_split_d_73110dc_4x4_ii1_evidence_20261012.tar.gz，本地build/resume_nm37/ii1_round1_4x4.tar.gz。
 - 时序基线：[0850日志](docs/修改日志/2026-10-12_0850_split_d_critical_path_修改日志.md)，docs/evidence/split_d_ebe529b_{4x4,16x16}_timing/；远端build/split_d_ebe529b_{4x4,16x16}_timing_evidence_20261012/。
@@ -98,4 +99,4 @@ RUN_CSIM=1 RUN_COSIM=0 EXPORT_IP=0 FSA_SPLIT_D_PE_DIM=4 FSA_SPLIT_D_HEAD_DIM=16 
 
 ## 9 对话接续摘要
 
-本对话从核查TAPA及DeepSeek交接开始，已修测试判错与实例证据、完成两个query空间块、OOC对照及4×4真实HBM上板。16×16/head128的CSim/CSynth暴露II与时序问题，随后广播修复达到7.300ns，但吞吐未改善。最新任务是四阶段II1；仅改pragma的73110dc得到4配置II3/3/1/1和7.887ns，功能/实例通过、性能未验收。用户已选独立query上下文交错、允许增加状态、保持原MAC与逐query算术顺序；此方案尚未实现。用户要求本轮结束后暂停，已执行。恢复时从第5节开始，先4达标再16，不CoSim；本次上下文压缩不表示恢复任务。旧详细全文在d3245a3，当前日志和证据在第6节。
+本对话从核查TAPA及DeepSeek交接开始，已修测试判错与实例证据、完成两个query空间块、OOC对照及4×4真实HBM上板。16/128广播修复达到7.300ns，但吞吐未改善。四阶段II1诊断73110dc得到4配置II3/3/1/1和7.887ns，功能/实例通过、性能未验收，交错未实施，计算任务已暂停。用户随后要求实现前读取FSA、Split-D与两示例并联网形成交接方案；本次仅完成调研文档。新入口见第5/6节：先调度账本，再比较最少query交错与空间部分和，关注PV低有效MAC率；原FSA每key tile重装Q，不能理想化为永驻Q。保持原MAC、数值、时钟与4先16后合同；空间ROW_SUM的II等价口径待实施前明确，不CoSim。旧详细全文在d3245a3。
