@@ -1,0 +1,22 @@
+{
+  "tested_commit": "02b16663c14b84fda80446376385c04fce596656",
+  "summary": "round10_02b1666_defaultM8_summary.json",
+  "scope": "HLS schedule prediction; not RTL or measured attention latency",
+  "M": 8,
+  "pe_hop": 7,
+  "feedback": 8,
+  "score_commit_distance": 1,
+  "acc_hop": 11,
+  "module_fixed_overhead": 49,
+  "numeric_state_per_global_context_bytes": 576,
+  "numeric_state_total_bytes": 4608,
+  "packed_flags_total_bytes": 40,
+  "fixed_duplicated_KV_bytes": 512,
+  "ring_source_payload_ceiling_bytes": 1495.75,
+  "token_orders": {
+    "QK": "feature then context",
+    "PWL": "piece then context",
+    "PV": "context then feature"
+  },
+  "minimum_full_issue_contexts_for_this_verified_feedback": 8
+}
