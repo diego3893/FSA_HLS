@@ -17,6 +17,20 @@
 #define FSA_SPLIT_D_HEAD_DIM 16
 #endif
 
+// 阶段1先用单query tile上下文；阶段2按实测完整反馈距离选择容量。
+#ifndef FSA_SPLIT_D_QUERY_CONTEXTS
+#define FSA_SPLIT_D_QUERY_CONTEXTS 1
+#endif
+#ifndef FSA_SPLIT_D_PE_HOP_CYCLES
+#define FSA_SPLIT_D_PE_HOP_CYCLES 5
+#endif
+#ifndef FSA_SPLIT_D_QK_FEEDBACK_CYCLES
+#define FSA_SPLIT_D_QK_FEEDBACK_CYCLES 6
+#endif
+#ifndef FSA_SPLIT_D_ACC_HOP_CYCLES
+#define FSA_SPLIT_D_ACC_HOP_CYCLES 9
+#endif
+
 #ifndef FSA_SPLIT_D_QUERY_BLOCK_COLS
 #define FSA_SPLIT_D_QUERY_BLOCK_COLS \
     ((FSA_SPLIT_D_PE_DIM>=2 && FSA_SPLIT_D_PE_DIM%2==0) \
@@ -41,6 +55,10 @@ namespace split_d{
 
     /// @brief 完整Q/K/V向量维度。
     constexpr int HEAD_DIM = FSA_SPLIT_D_HEAD_DIM;
+    constexpr int QUERY_CONTEXTS = FSA_SPLIT_D_QUERY_CONTEXTS;
+    constexpr int SHARED_PE_HOP = FSA_SPLIT_D_PE_HOP_CYCLES;
+    constexpr int QK_FEEDBACK_CYCLES = FSA_SPLIT_D_QK_FEEDBACK_CYCLES;
+    constexpr int SHARED_ACC_HOP = FSA_SPLIT_D_ACC_HOP_CYCLES;
 
     /// @brief 每个空间块拥有的query列数；D及token tile步长保持原值。
     constexpr int QUERY_BLOCK_COLS = FSA_SPLIT_D_QUERY_BLOCK_COLS;
@@ -61,6 +79,10 @@ namespace split_d{
         (MAX_SEQUENCE_LENGTH+PE_DIM-1)/PE_DIM;
 
     static_assert(PE_DIM>0, "Split-D PE维度必须大于0");
+    static_assert(QUERY_CONTEXTS>0, "query上下文容量必须大于0");
+    static_assert(SHARED_PE_HOP>0 && QK_FEEDBACK_CYCLES>SHARED_PE_HOP,
+                  "QK必须在PE结果提交后的下一拍或更晚读取同一S");
+    static_assert(SHARED_ACC_HOP>0, "Accumulator结果必须经过有限年龄槽");
     static_assert(QUERY_BLOCK_COLS>0 && QUERY_BLOCK_COLS<=PE_DIM,
                   "query块宽必须在1至D之间");
     static_assert(PE_DIM%QUERY_BLOCK_COLS==0,

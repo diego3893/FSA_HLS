@@ -5,8 +5,8 @@
 ## 1 当前状态与任务
 
 - 用户目标：先在4×4/head16把QK/ROW_SUM/PWL/PV实际发射II全部降到1并改善性能，达标后才测试16×16/head128；不进行CoSim。
-- 最新任务：用户要求“继续阶段1和2”，按已交付空间ROW_SUM等价口径恢复实现和CSim/CSynth。当前先补28笔固定输入/head消去/signed-zero用例及合法输出canary，在未改73110dc计算源码上捕获官方独立回归输出，再建立共享引擎。新计算候选尚未生成；当前日志docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md。
-- 当前本地HEAD为420ec4632f71300ff3df6601722b1de0bb552297，计算相关文件对73110dc无diff；阶段0重新核对247归档载荷、92份LF规范化源码SHA，以及22份ebe529b报告对HEAD的一致性。阶段0文件当前为本地文档产物，不是新的被测提交。
+- 最新任务：用户要求“继续阶段1和2”，按已交付空间ROW_SUM等价口径恢复实现和CSim/CSynth。28笔固定输入/head消去/signed-zero及canary已加入，基线捕获准备提交1afc13e（DUT未改）。共享有限引擎、空间RS/PV阶段1及query batch阶段2候选已本地实现，正式旧DUT52数学/24旧严格通过，28笔3440word官方输出已冻结；候选CSim/CSynth尚未执行；当前日志docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md。
+- 当前本地HEAD为1afc13e（基线捕获准备），候选DUT改动未提交。阶段1同stub新增3440word差分0，数学52/52、旧严格19/24已知位差、exit1；正式新基线头已从1afc13e旧DUT冻结3440word，manifest保存来源/SHA。阶段0文档/证据已在1afc13e提交。
 - 被测代码：73110dc2d6eb799072c29fc4954f8f8d5427973b；仅将QK/ROW_SUM两处PIPELINE目标II5→1，未改变算术或状态。收尾文档d3245a3已推送；文档提交不算HLS重新测试。
 - 官方4配置流程11:58:47—12:02:27退出0：数学/严格位模式24/24及2笔非法长度保护通过；实际II3/3/1/1，顶层估算7.887ns，II与≤7.300ns时序门槛未通过。
 - 资源：DSP40/FF44855/LUT128938/BRAM18K8；实际2个PE块、2个Accumulator块，总16条PE乘法、4条Acc乘法和8条减法，未复制MAC。
@@ -15,7 +15,7 @@
 
 ## 2 授权、验收与禁止事项
 
-- 用户本次明确恢复阶段1、2，Git/SSH/标准CSim/CSynth闭环授权有效；在阶段0具体提案后继续实施按其ROW_SUM口径进行。阶段3/4及CoSim/IP/板测不由本次恢复指令启动。
+- 用户本次明确恢复阶段1、2；原自动审批因缺少精确上传目标授权而拒绝；用户现已明确允许该GitHub仓库/分支推送及NM37同步测试，阻塞解除。在阶段0具体提案后继续实施按其ROW_SUM口径进行。阶段3/4及CoSim/IP/板测不由本次恢复指令启动。
 - 保持独立顶层fsa_stream_split_d、四路64-bit AXI master和AXI-Lite、VU37P器件、100MHz/10ns时钟、2.7ns uncertainty；不修改FSA-main或生产顶层fsa_stream。
 - 每配置总D×D条PE RawFMA、D条Accumulator及既有倒数通路；允许两个D×B空间query块，禁止复制计算通路换吞吐。源码函数唯一、ALLOCATION或总DSP单项均不足以证明实例数。
 - 保持FP16×FP16＋FP32 PE、FP32 Accumulator、RawFMA特殊值/舍入、PWL及FP32 max→FP16→SUB_MAX→SCALE→PWL量化顺序；不改变金标准/0.03容差、不重排逐query归约。
@@ -54,7 +54,7 @@
 - 阶段4auto内部OOC setup＋0.230/hold＋0.010ns；hard区域setup−0.081ns，被拒绝。用户曾把min0ns边界hold留完整系统，真实系统现已闭合；旧OOC失败不删除，16尚无物理验收。
 - 生产fsa_stream历史CSim/CSynth/CoSim通过，SA主循环II1、7.300ns；无IP/物理/板测，保持不改。
 
-## 5 阶段0结论与下一步（实施待恢复）
+## 5 阶段0结论与当前候选
 
 1. 阶段0已完成，入口为[阶段0调度与账本](docs/Split-D阶段0调度与账本_20261012.md)，原[交接方案](docs/Split-D数据流与II1优化交接方案_20261012.md)继续提供数值、实例与时钟合同。模型复现为python docs/evidence/split_d_stage0_20261012/stage0_model.py；不运行DUT或HLS。
 2. 决策：优先同坐标唯一求值的有限共享引擎＋空间ROW_SUM/PV，阶段1保留P完成及ROW_SUM/L完成屏障。4/16、假设hop4/Acc7时RS/PV窗口61拍，P装载再加假设1拍；后续去屏障窗口39拍，尚未实施或综合。
@@ -62,12 +62,12 @@
 4. 4配置每context Q/S/P/O/m/l保守payload512B，M4为2048B；flag/tag、FIFO、额外副本另算。当前满tile QK/RS/PV有用归约528MAC；空间候选减少丢弃行，不能靠复制MAC。masked/tail key原零FMA保留，原本不存在的causal未来tile不得新增L/O更新。
 5. 96组预算仅含QK、RS/L/PV/O和理想KV冷装载，不是完整attention周期；未知softmax、倒数/归一化、输出、控制及AXI开销保留。N20 causal的固定3＋2批次部分预算优于4＋1，阶段3应比较尾部batch划分，不因增加M宣称无条件改善。
 6. 用户已在具体提案后要求继续阶段1、2，实施按报告第10节空间ROW_SUM II等价口径：旧循环N/A、逐key顺序FMA、连续合法token服务II和真实事务间隔分开报告；单context没有每拍ROW_SUM需求，不能空发token验收。
-7. 原4配置24项位模式冻结；新增16组固定输入配方/SHA已给出，尚未加入测试台/生成输出golden，边界用例及最终事务数在运行前固定。16仍需独立旧源码固定输入差分，且历史PE II5必须先解决；只有4全部达标才测试16。CoSim/IP/Vivado/板测/1024长测关闭。
+7. 原4配置24项位模式冻结；新增16组固定输入配方/SHA已给出，已增加28笔测试、52笔数学总数，官方28笔3440word已从1afc13e未改DUT冻结；本地同stub差分只用于候选检查。16仍需独立旧源码固定输入差分，且历史PE II5必须先解决；只有4全部达标才测试16。CoSim/IP/Vivado/板测/1024长测关闭。
 
 ## 6 证据与历史入口
 
 - 阶段0本地静态证据：docs/evidence/split_d_stage0_20261012/，包含模型、归档核对、逐拍CSV、A/B敏感性、96组部分预算和固定输入清单。对应[报告](docs/Split-D阶段0调度与账本_20261012.md)，没有新的数值或HLS验收。
-- 当前日志：[2026-10-12_1148_split_d_ii1_修改日志.md](docs/修改日志/2026-10-12_1148_split_d_ii1_修改日志.md)。已闭环1轮，验收未通过，待恢复方案未实施。
+- 当前日志：[2026-10-12_1437_split_d_stage12_修改日志.md](docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md)。第1轮进行中，完成轮数0；阶段1/2本地候选已实现，尚未官方验收。历史II1诊断为1148日志。
 - 最新交接：[Split-D数据流与II1优化交接方案_20261012.md](docs/Split-D数据流与II1优化交接方案_20261012.md)。本地FSA/两示例固定版本、互联网主来源、候选取舍、工作包与数值/II/性能验收；替代直接固定上下文数的下一步，未实施。
 - 当前完整证据：本地build/resume_nm37/ii1_round1_4x4/；远端build/split_d_73110dc_4x4_ii1_evidence_20261012/。247载荷SHA及92源码对73110dc已核对；tar SHA a41d69005492a12d863466e0163bffe5fe9e899c4efdc16ca8c946af37f15074。
 - 远端日志/tmp/codex_split_d_73110dc_ii1_4x4_20261012.log；压缩包/tmp/codex_split_d_73110dc_4x4_ii1_evidence_20261012.tar.gz，本地build/resume_nm37/ii1_round1_4x4.tar.gz。
@@ -88,7 +88,7 @@
 ## 8 工作集、环境与复现
 
 - 本地根C:/Users/30130/Desktop/workstation/FlashAttention/FSA_HLS；远端FSA-FPGA-NM37-tailBox:/home/zhangchenxuan/FSA_HLS；分支fsa_split_D，origin git@github.com:diego3893/FSA_HLS.git。
-- 主要文件：include/fsa/stream/split_d/；src/stream/split_d/{split_d_controller,split_d_compute,split_d_dma,fsa_stream_split_d}.cpp；tests/stream/test_fsa_stream_split_d.cpp；hls/fsa_stream_split_d/run_hls.tcl、run_hls.sh。阶段0工作集为docs/Split-D阶段0调度与账本_20261012.md及docs/evidence/split_d_stage0_20261012/；DUT未改。
+- 主要文件：include/fsa/stream/split_d/；src/stream/split_d/{split_d_controller,split_d_compute,split_d_dma,fsa_stream_split_d}.cpp；tests/stream/test_fsa_stream_split_d.cpp；hls/fsa_stream_split_d/run_hls.tcl、run_hls.sh。阶段0工作集为docs/Split-D阶段0调度与账本_20261012.md及docs/evidence/split_d_stage0_20261012/；当前DUT候选已改但未提交。
 - 本地工具tools/local_split_d_check.cmd 4 16：MinGW＋仓库third_party/vitis_hls/include（含ap_int.h），FSA_LOCAL_MATH_STUBS/HLS_NO_XIL_FPO_LIB。数学24/24、严格19/24、exit1为既有5项stub位差，不能声称严格通过或替代官方验证。
 - 每次SSH显式Bash加载~/.bashrc和/opt/Xilinx_2024.2/Vitis/2024.2/settings64.sh，再set -euo pipefail；先set-u会因settings读取未定义PYTHONPATH失败。PS脚本去CR并追加LF；原生Windows OpenSSH，避免MSYS signal pipe问题。
 - Vitis HLS2024.2，xcvu37p_CIV-fsvh2892-2-e。下面命令仅供用户恢复后使用：
@@ -102,4 +102,4 @@ RUN_CSIM=1 RUN_COSIM=0 EXPORT_IP=0 FSA_SPLIT_D_PE_DIM=4 FSA_SPLIT_D_HEAD_DIM=16 
 
 ## 9 对话接续摘要
 
-历史双query空间块及4×4真实HBM验收保留，但不能为新结构背书；73110dc当前仍为II3/3/1/1、7.887ns。用户本次只恢复并完成阶段0：当前420ec46计算源码与73110dc一致，247载荷/92源码SHA及22份旧基线报告核对通过，逐拍调度和MAC/状态账本已交付。假设完整反馈4拍时优先最少query交错，满M4 QK67拍；空间QK80/92拍且开销敏感。先共享引擎＋保留屏障的空间RS/PV，再QK/PWL收口；模型不是实现或综合结果。下一步先认可空间ROW_SUM服务II等价口径并恢复阶段1。原FP32顺序、FP16量化、MAC数量、7.300ns和4先16后合同保持，所有HLS及物理测试仍未恢复。旧详细全文在d3245a3。
+用户要求继续阶段1和2，4×4/head16、逐query原FP32顺序/FP16量化、总16PE/4Acc、≤7.300ns和正式CSim/CSynth合同不变。当前HEAD1afc13e只提交旧DUT基线捕获准备、28笔新增输入、stage0证据和日志；远端已ff-only同步到1afc13e。用户明确授权精确GitHub目标后推送成功，旧DUT官方CSim/CSynth完成（52/52数学、24/24旧严格、7.887ns），完整构建已归档。本地共享有限引擎已接入空间ROW_SUM/PV并保留屏障，阶段1数学52/52和新增3440word同stub差分全相同，旧严格19/24/exit1是5项已知stub差异。阶段2query batch、causal后缀和尾批调度已写入，默认容量1，可配置M；M6数学52/52及3440word同stub差分通过，M1批次泛化后功能复核也通过，hop5/feedback6/Acc9都尚待实际综合，最小M不可认定。官方新增golden头已冻结28笔3440word，来源manifest在docs/evidence/split_d_stage12_20261012/，不允许候选再生成。下一步提交并验证阶段1容量1（同一候选已支持batch），依据报告修订阶段2最小容量。CoSim/IP/16/板测/1024长测关闭。当前日志1437，第1轮未闭合，不宣称阶段1/2完成。

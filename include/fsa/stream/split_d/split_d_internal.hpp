@@ -15,6 +15,9 @@ namespace detail{
 
     constexpr int PV_INTERLEAVE = 8;
 
+    /// @brief 单个有限phase执行；共享引擎内部只有一个PE和一个Acc调用点。
+    void runSharedEngine(SharedOperation operation, unsigned first_context, unsigned context_count, SharedEngineState& state);
+
     /**
      * @brief 遗留bank接口的行数与节点个数，当前runPeArray不使用该接口。
      *

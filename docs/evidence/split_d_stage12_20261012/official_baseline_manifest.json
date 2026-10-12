@@ -1,0 +1,33 @@
+{
+  "capture_commit": "1afc13e92d328fa9cc0328be91c74c92e43be319",
+  "unchanged_dut_commit": "73110dc2d6eb799072c29fc4954f8f8d5427973b",
+  "tool": "Vitis HLS 2024.2 5238294",
+  "configuration": {
+    "pe_dim": 4,
+    "head_dim": 16,
+    "max_sequence_length": 4096,
+    "clock_ns": 10,
+    "uncertainty_ns": 2.7,
+    "csim": true,
+    "csynth": true,
+    "cosim": false,
+    "export_ip": false
+  },
+  "cases": 28,
+  "words": 3440,
+  "official_extracted_output_sha256": "9196b6e3593d5c7e785c7d403a3528122efaeb2381b3d290b23db73cc7341841",
+  "official_complete_log_sha256": "52fdacffc0c278b99b1feb338aefe2cf204588ae4250efbdcfb52f626b818204",
+  "fixture_sha256": "afafd1cc9d46db25e85a5e706406a3b367e319d4629a7210a613484d36e25230",
+  "remote_archive": "/home/zhangchenxuan/FSA_HLS/build/split_d_stage12_baseline_1afc13e_20261012",
+  "local_extracted_output": "build\\resume_nm37\\stage12_baseline_1afc13e\\official_words.log",
+  "math_summary": "52/52",
+  "old_strict_summary": "24/24",
+  "baseline_clock_ns": 7.887,
+  "baseline_resources": {
+    "DSP": 40,
+    "FF": 44855,
+    "LUT": 128938,
+    "BRAM_18K": 8,
+    "URAM": 0
+  }
+}

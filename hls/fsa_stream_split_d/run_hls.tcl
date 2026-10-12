@@ -1,8 +1,8 @@
 set RUN_CSIM 1
-set RUN_COSIM 1
-set EXPORT_IP 1
+set RUN_COSIM 0
+set EXPORT_IP 0
 
-# Keep the standard full-flow defaults; explicit scope overrides must be 0/1.
+# CSim/CSynth are the default scope; optional scope overrides must be 0/1.
 foreach SWITCH {RUN_CSIM RUN_COSIM EXPORT_IP} {
     if {[info exists ::env($SWITCH)]} {
         if {$::env($SWITCH) ni {0 1}} { error "$SWITCH must be 0 or 1" }
@@ -30,6 +30,16 @@ if {[info exists ::env(FSA_MAX_SEQUENCE_LENGTH)]} {
 set QKV_DEPTH [expr {$MAX_SEQUENCE_LENGTH*$HEAD_DIM/4}]
 set O_DEPTH [expr {$MAX_SEQUENCE_LENGTH*$HEAD_DIM/2}]
 set CFLAGS "-std=c++14 -I[file join $PROJECT_ROOT include] -DFSA_SPLIT_D_PE_DIM=$PE_DIM -DFSA_SPLIT_D_HEAD_DIM=$HEAD_DIM -DFSA_MAX_SEQUENCE_LENGTH=$MAX_SEQUENCE_LENGTH -DFSA_SPLIT_D_DMA_AXI_QKV_DEPTH=$QKV_DEPTH -DFSA_SPLIT_D_DMA_AXI_O_DEPTH=$O_DEPTH"
+# Forward only explicit finite-engine configuration, identically to DUT and TB.
+foreach PARAM {FSA_SPLIT_D_QUERY_CONTEXTS FSA_SPLIT_D_PE_HOP_CYCLES FSA_SPLIT_D_QK_FEEDBACK_CYCLES FSA_SPLIT_D_ACC_HOP_CYCLES} {
+    if {[info exists ::env($PARAM)]} {
+        if {![string is integer -strict $::env($PARAM)] || $::env($PARAM)<1} {
+            error "$PARAM must be a positive integer"
+        }
+        append CFLAGS " -D$PARAM=$::env($PARAM)"
+        puts "FSA Split-D engine: $PARAM=$::env($PARAM)"
+    }
+}
 set TB_CFLAGS $CFLAGS
 set LONG_CSIM_TEST 0
 if {[info exists ::env(FSA_SPLIT_D_LONG_CSIM_TEST)]} {
