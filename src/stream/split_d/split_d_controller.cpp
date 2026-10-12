@@ -309,18 +309,22 @@ namespace detail{
     void runController(const dma_word_t q_address[MAX_QKV_WORDS], const dma_word_t k_address[MAX_QKV_WORDS], const dma_word_t v_address[MAX_QKV_WORDS], dma_word_t o_address[MAX_O_WORDS], const unsigned length, const bool causal){
         #pragma HLS INLINE off
         const unsigned query_tiles = (length+(unsigned)PE_DIM-1U)/(unsigned)PE_DIM;
-        for(unsigned query_tile=0; query_tile<query_tiles; query_tile+=(unsigned)QUERY_CONTEXTS){
+        // 最少batch数不变，小batch前置：causal模式减少重复KV前缀装载，
+        // 所有query仍按原顺序输出；每个query内部的key/feature顺序不变。
+        const unsigned remainder = query_tiles%(unsigned)QUERY_CONTEXTS;
+        const unsigned first_batch = remainder==0U ? (unsigned)QUERY_CONTEXTS : remainder;
+        for(unsigned query_tile=0; query_tile<query_tiles;){
             #pragma HLS LOOP_TRIPCOUNT min=1 max=MAX_SEQUENCE_TILES
             QueryTileHeader header;
             header.query_base = query_tile*(unsigned)PE_DIM;
-            const unsigned remaining_tiles = query_tiles-query_tile;
-            header.context_count = remaining_tiles<(unsigned)QUERY_CONTEXTS ? remaining_tiles : (unsigned)QUERY_CONTEXTS;
+            header.context_count = query_tile==0U ? first_batch : (unsigned)QUERY_CONTEXTS;
             const unsigned remaining = length-header.query_base;
             header.active_queries = remaining<header.context_count*(unsigned)PE_DIM ? remaining : header.context_count*(unsigned)PE_DIM;
             header.key_tiles = causal ? query_tile+header.context_count : query_tiles;
             header.length = length;
             header.causal = causal;
             detail::runQueryTile(q_address, k_address, v_address, o_address, header);
+            query_tile += header.context_count;
         }
     }
 

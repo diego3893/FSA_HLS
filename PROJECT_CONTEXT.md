@@ -1,10 +1,10 @@
 # FSA HLS Project Context
 
-> 2026-10-12压缩版，阶段0、1、2均已完成；4配置的CSim/CSynth闭环已验收。只维护仓库根目录本文件；历史全文可从Git提交d3245a3恢复。
+> 2026-10-12压缩版，阶段0、1、2均已完成；用户现已恢复阶段3的4配置供数/状态/尾批优化。只维护仓库根目录本文件；历史全文可从Git提交d3245a3恢复。
 
 ## 1 当前状态与任务
 
-- 用户任务：“继续阶段1和2”。仅4×4/head16；功能/原FP32顺序与FP16量化、总16PE/4Acc、实际服务II1、VU37P/10ns/2.7ns/≤7.300ns。用户已明确允许精确GitHub仓库fsa_split_D推送及NM37同步标准CSim/CSynth；CoSim/IP/16/板测/1024长测关闭，无轮数上限。
+- 用户任务：“继续阶段3”。仅4×4/head16，先tail-only消融再状态生命周期复用/首key alpha冗余消除；与阶段2同输入/模型/资源对照。功能/原FP32顺序与FP16量化、16PE/4Acc、实际服务II1、VU37P/10ns/2.7ns/≤7.300ns不变。持续授权同仓库/分支推送及NM37标准CSim/CSynth；CoSim/IP/16/板测/1024长测关闭，无轮数上限。当前日志1842，第1轮开始。
 - 被测DUT提交902838ec6a2cefd24368e7be42e82d6ca29bc28f，第4轮M1诊断完整通过：数学52/52、旧严格24/24、新严格28/28、输出canary/2非法；正确S真实依赖下共享II1/depth46、顶层7.300ns，DSP40/FF71968/LUT148213/BRAM8/URAM0。阶段1已通过约定CSim/CSynth门槛。
 - 阶段2最终被测代码`02b16663c14b84fda80446376385c04fce596656`已通过默认M8正式CSim/CSynth：容量8、PE年龄7、QK反馈8、S提交距离1、Acc年龄11。数学52/52、旧严格24/24、新严格28/28及保护检查通过；共享实际II1/depth46、顶层7.300ns、DSP40/FF105482/LUT180509/BRAM8/URAM0，实际16PE/4Acc/8减法。阶段1、2完成。
 - 数值基线1afc13e保持73110dc DUT未改，官方28笔3440word已固定于tests/stream/split_d_stage12_baseline.hpp；来源/SHA在official_baseline_manifest.json，禁止候选改golden。完整N24/28/32覆盖M7−1/M7/M7＋1，N36覆盖尾批；全部52笔数学/52笔严格与2非法不收窄。
@@ -15,7 +15,7 @@
 
 ## 2 授权、验收与禁止事项
 
-- 用户本次明确恢复阶段1、2；原自动审批因缺少精确上传目标授权而拒绝；用户现已明确允许该GitHub仓库/分支推送及NM37同步测试，阻塞解除。在阶段0具体提案后继续实施按其ROW_SUM口径进行。阶段3/4及CoSim/IP/板测不由本次恢复指令启动。
+- 用户本次明确恢复阶段3；已明确允许该GitHub仓库/分支推送及NM37同步测试，授权未撤回。沿用阶段0空间ROW_SUM口径；阶段4和CoSim/IP/板测不由本次指令启动。
 - 保持独立顶层fsa_stream_split_d、四路64-bit AXI master和AXI-Lite、VU37P器件、100MHz/10ns时钟、2.7ns uncertainty；不修改FSA-main或生产顶层fsa_stream。
 - 每配置总D×D条PE RawFMA、D条Accumulator及既有倒数通路；允许两个D×B空间query块，禁止复制计算通路换吞吐。源码函数唯一、ALLOCATION或总DSP单项均不足以证明实例数。
 - 保持FP16×FP16＋FP32 PE、FP32 Accumulator、RawFMA特殊值/舍入、PWL及FP32 max→FP16→SUB_MAX→SCALE→PWL量化顺序；不改变金标准/0.03容差、不重排逐query归约。
@@ -75,7 +75,7 @@
 - [修正与TAPA启发方案](docs/Split-D修正与TAPA启发的分阶段修改验收方案_20261009.md)、[阶段1/2验收](docs/综合报告/Split-D阶段1与2验收_20261010.md)、[阶段3验收](docs/综合报告/Split-D阶段3空间分块验收_20261010.md)、[阶段4物理对照](docs/综合报告/Split-D阶段4物理对照_20261010.md)。
 - [4×4真实HBM上板验收](docs/综合报告/Split-D_4x4真实HBM上板验收_20261011.md)、[1952板测日志](docs/修改日志/2026-10-11_1952_split_d_4x4_board_修改日志.md)、[1316实现日志](docs/修改日志/2026-10-10_1316_split_d_4x4_complete_修改日志.md)。工具tools/split_d_nm37/，证据docs/evidence/split_d_nm37_dfbf82e_board/；本地340文件自包含包build/resume_nm37/split_d_nm37_delivery_c59cbf4.tar.gz。
 - [16/128旧测量](docs/综合报告/Split-D_16x16_head128_CSim与综合测量_20261011.md)，docs/evidence/split_d_71025ff_16x16/。NM37原理图docs/NM37_SCH_220331.pdf。
-- 远端标准solution1最新是73110dc的4配置，运行会覆盖；必须按commit归档取证。本地build/fsa_stream_split_d_build/solution1是2026-09-28拆分前旧产物，不用于描述当前源码。
+- 远端标准solution1最新是阶段2的02b1666默认M8构建，运行会覆盖；已按commit归档，每轮须再核对。本地build/fsa_stream_split_d_build/solution1是2026-09-28拆分前旧产物，不用于描述当前源码。
 
 ## 7 不能重复的错误
 
@@ -88,7 +88,7 @@
 ## 8 工作集、环境与复现
 
 - 本地根C:/Users/30130/Desktop/workstation/FlashAttention/FSA_HLS；远端FSA-FPGA-NM37-tailBox:/home/zhangchenxuan/FSA_HLS；分支fsa_split_D，origin git@github.com:diego3893/FSA_HLS.git。
-- 主要文件：include/fsa/stream/split_d/；src/stream/split_d/{split_d_controller,split_d_compute,split_d_dma,fsa_stream_split_d}.cpp；tests/stream/test_fsa_stream_split_d.cpp；hls/fsa_stream_split_d/run_hls.tcl、run_hls.sh。阶段0账本已提交；阶段1、2最终报告和证据正在完成本次文档提交，不再修改DUT。
+- 主要文件：include/fsa/stream/split_d/；src/stream/split_d/{split_d_controller,split_d_compute,split_d_dma,fsa_stream_split_d}.cpp；tests/stream/test_fsa_stream_split_d.cpp；hls/fsa_stream_split_d/run_hls.tcl、run_hls.sh。阶段1、2报告已由271d30f发布；阶段3第1轮只改controller为小batch前置，本地数学52/52及3440word差分0，待正式HLS验证。
 - 本地工具tools/local_split_d_check.cmd 4 16：MinGW＋仓库third_party/vitis_hls/include（含ap_int.h），FSA_LOCAL_MATH_STUBS/HLS_NO_XIL_FPO_LIB。数学24/24、严格19/24、exit1为既有5项stub位差，不能声称严格通过或替代官方验证。
 - 每次SSH显式Bash加载~/.bashrc和/opt/Xilinx_2024.2/Vitis/2024.2/settings64.sh，再set -euo pipefail；先set-u会因settings读取未定义PYTHONPATH失败。PS脚本去CR并追加LF；原生Windows OpenSSH，避免MSYS signal pipe问题。
 - Vitis HLS2024.2，xcvu37p_CIV-fsvh2892-2-e。下面命令仅供用户恢复后使用：
@@ -102,4 +102,4 @@ RUN_CSIM=1 RUN_COSIM=0 EXPORT_IP=0 FSA_SPLIT_D_PE_DIM=4 FSA_SPLIT_D_HEAD_DIM=16 
 
 ## 9 对话接续摘要
 
-用户要求继续阶段1和2；4×4/head16的目标现已完成。阶段1被测`902838e`的M1空间ROW_SUM/PV、官方功能、唯一16PE/4Acc、共享II1和7.300ns通过。阶段2最终被测`02b16663c14b84fda80446376385c04fce596656`，默认M8/hop7/feedback8/S距离1/Acc11，官方数学52/52、旧严格24/24、新严格28/28、保护区/2非法通过，共享II1/depth46、顶层7.300ns、DSP40/FF105482/LUT180509/BRAM8，RTL16PE/4Acc/8减法，无II/时序违例。M8满批8次计算调用预算880拍，对`ebe529b`同组件1880拍减少53.2%；M1为670对235拍，短批退化185.1%，causal尾batch也已逐项报告。最终报告和CSV在docs/综合报告及docs/evidence/split_d_stage12_20261012/。top latency仍undef，当前只声明CSim/CSynth和调度预测；CoSim/IP/16/Vivado/板测/1024未执行。用户AGENTS.md、.tmprun/、旧local_math_stubs_check.log保持不提交。
+用户现要求继续阶段3。阶段1、2已由代码02b1666和报告271d30f验收，默认M8/hop7/feedback8/S距离1/Acc11、共享II1/depth46、顶层7.300ns、16PE/4Acc、官方52数学/24旧严格/28新严格保持。阶段3日志为2026-10-12_1842_split_d_stage3_修改日志.md；第1轮仅改变runController小batch前置（N36由8＋1改1＋8），本地数学52/52及3440word差分0，原stub严格19/24不变。NM37预检tracked clean/HEAD02b1666，未跟踪产物保留；待提交/push/ff-only精确HEAD标准CSim/CSynth。第1轮闭合后再做next_max/inverse_sum生命周期复用及首key冗余alpha调用消除。对照同输入/模型/资源，top latency仍undef；CoSim/IP/16/Vivado/板测/1024关闭，未设轮数上限，Git/SSH持续授权不重复询问。用户AGENTS.md、.tmprun/、旧local_math_stubs_check.log不提交。
