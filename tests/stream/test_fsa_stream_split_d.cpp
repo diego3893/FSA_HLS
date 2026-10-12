@@ -1516,6 +1516,12 @@ namespace{
         if(PE_DIM!=16 || HEAD_DIM!=128){
             return true;
         }
+#if defined(FSA_SPLIT_D_LONG_CSIM_TEST) && FSA_SPLIT_D_LONG_CSIM_TEST
+        // 可选长测试保留原数学/保护检查；短测试冻结不包含1024输出。
+        if(length==1024U && std::strcmp(name, "paper-shape-noncausal")==0){
+            return true;
+        }
+#endif
         const dma_word_t* inputs[3] = {q_memory, k_memory, v_memory};
         const unsigned input_words = length*(unsigned)QKV_WORDS_PER_TOKEN;
         const unsigned output_words = length*(unsigned)O_WORDS_PER_TOKEN;

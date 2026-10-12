@@ -4,7 +4,9 @@
 
 ## 1 当前状态与任务
 
-- 2026-10-12T20:20+08:00最新用户指令恢复阶段4：16×16/head128，随后明确不跑1024长测试。CSim/CSynth及既有Git/SSH授权持续；CoSim/IP/Vivado/板测仍关闭。当前日志2026-10-12_2020_split_d_stage4_修改日志.md；先补16旧源码独立冻结输出，再重新验PE服务/hop/反馈/M/bank。下面阶段3“16关闭/不启动”的文字属于此前边界，已被本次16恢复覆盖。最大长度仍4096，含1024支持，LONG_CSIM_TEST=0。
+- 22:08阶段4第1轮已闭环：官方6f0b40d M1/16/128，数学32/32、旧官方85824输出字严格差分0，top7.300ns、共享实际II1/Depth46、PE数组lat4/II1、Acc lat7/II1，RTL256PE/16Acc/32减法。DSP356、FF483088、LUT1418632超过1303680约8.8%，BRAM8；尚不能交付。归档build/split_d_stage4_6f0b40d_M1_20261012，run21:58:39/exit0。第2轮改D16 Q/K/V/O ram_t2p/bram/latency1、S/P ram_2p/lutram/latency1（bank和生命周期不变），验证默认M8/hop7/feedback8/Acc11＋L_MAX1024；等待推送正式冻结header和新源码。新增资源容量验收门槛。下方M1“仍运行”的旧接续记录已由本条覆盖。
+
+- 2026-10-12T20:20+08:00最新用户指令恢复阶段4：16×16/head128，随后明确不跑1024长测试。CSim/CSynth及既有Git/SSH授权持续；CoSim/IP/Vivado/板测仍关闭。当前日志2026-10-12_2020_split_d_stage4_修改日志.md；先补16旧源码独立冻结输出，再重新验PE服务/hop/反馈/M/bank。下面阶段3“16关闭/不启动”的文字属于此前边界，已被本次16恢复覆盖。第1轮旧基线/服务诊断L_MAX4096，最终验收显式L_MAX1024；LONG_CSIM_TEST=0。
 
 - 用户任务：“继续阶段3”已完成。仅4×4/head16，小batch前置＋状态生命周期复用/首key alpha冗余消除，经两轮同输入/模型/资源消融验收。原FP32顺序/FP16量化、16PE/4Acc、实际II1、VU37P/10ns/2.7ns/7.300ns保持。持续授权同仓库/分支推送及NM37标准CSim/CSynth；CoSim/IP/16/板测/1024长测关闭。日志1842，无轮数上限。
 - 阶段3最终被测16fa1525332110188544031350e806d54dcfd90c：官方数学52/52、旧严格24/24、新严格28/28及保护检查通过；II1/depth46、7.300ns、DSP40/FF103620/LUT179562/BRAM8，RTL16PE/4Acc/8减法。尾批消融cd7d064同门槛通过，FF105480/LUT180448。小batch前置经DP1至1024tile证明；N36 causal模型12230→7492拍、KV17→10；N3为670→548但仍高于ebe529b235。删除next_max/alpha_delta/inverse_sum，payload4608→4224B（−8.3%）。两轮精确归档build/split_d_stage3_{cd7d064_tail,16fa152_state}_20261012/；本地3440word差分0，stub19/24限制不变。阶段3完成，不自动启动16迁移。
@@ -106,6 +108,10 @@ RUN_CSIM=1 RUN_COSIM=0 EXPORT_IP=0 FSA_SPLIT_D_PE_DIM=4 FSA_SPLIT_D_HEAD_DIM=16 
 
 ## 9 对话接续摘要
 
-最新工作为阶段4，进行中。第1轮建立16测试冻结：22原有效＋2非法保持，追加固定N112/128/144因果/非因果、N33消去/带符号零，共32有效。既有testbench新增捕获/差分；独立旧源码ebe529b生成输出，候选不得生成自身golden。标准Tcl仅优化宿主CSim（-O），不改变综合CFLAGS。禁止N1024测试、CoSim/IP/Vivado/板测。下段为阶段3已完成历史摘要。
+最新22:08：第1轮已完成，完整数据见第1节首条及日志2020。关键限制是LUT超容量；第2轮存储绑定候选已写入controller/compute，Q/K/V/O BRAM＋S/P LUTRAM，仅D16；本地16/128/M8/L_MAX1024数学32/32、对官方严格21/32（同11项stub位差），与旧同stub全部85824字差分0已确认。待审查/推送任务路径（含从旧官方生成的32项冻结头），远端标准入口CAPTURE_STAGE4=unset，全部engine覆盖unset，D16/H128/L_MAX1024、LONG_CSIM=0。M1标量mul_32s_7ns_32_1_1总2个解释额外4DSP，不是复制MAC。下方是较早过程记录，不表示M1仍在运行。
+
+最新工作为阶段4，进行中。第1轮建立16测试冻结：22原有效＋2非法保持，追加固定N112/128/144因果/非因果、N33消去/带符号零，共32有效。f7e2839测试/Tcl叠加独立旧源码ebe529b，远端build/split_d_stage4_baseline_source_20261012；正式旧基线PID2129143。M1诊断6f0b40d只改变16 PE服务目标5→1，hop7/反馈8/Acc11待实际报告验收，PID2129587。日志/tmp/codex_split_d_stage4_{baseline,6f0b40d_M1}_20261012.log；两者CAPTURE_STAGE4=1事后差分，最终候选必须unset并使用冻结header。本地16 M8数学32/32/exit0，捕获不能作旧golden。第1轮未闭环，下一轮不得提前启动；既有testbench新增捕获/差分。标准Tcl仅优化宿主CSim（-O），不改变综合CFLAGS。最终验收L_MAX1024，禁止N1024测试、CoSim/IP/Vivado/板测。下段为阶段3已完成历史摘要。
+
+21:16新增已确认：旧官方32/32 CSim完成，精确核对baseline vitis_hls PID2129335后TERM停止其重复综合，RUN_EXIT1属受控退出，不是功能失败；旧综合引用既有ebe529b报告。当前M1官方数学32/32，与旧官方128736输入字/85824输出字全部差分0；tests/stream/split_d_stage4_baseline.hpp已从旧官方冻结，manifest/freeze_stage4.py在docs/evidence/split_d_stage4_20261012/。M1 CSynth仍运行，尚无最终调度/时序/资源，不能宣布阶段4通过。当前M8本地与旧本地全部输入输出差分0；两者各数学32/32、对官方严格21/32，相同11项stub差异。tools/local_split_d_check.cmd加-O2（宿主限定，无fast-math），本地日志build/local_split_d_check/stage4_*。最终header/M8配置还未推送，本地HEAD6f0b40d；保留未提交当前日志/上下文/生成证据/TB长用例兼容guard。第1轮等待M1完整CSynth后闭环，再以实际报告决定M/hop并推送正式默认配置及冻结基线。
 
 用户要求阶段3，现已完成2轮官方闭环。最终代码16fa1525332110188544031350e806d54dcfd90c：M8/hop7/feedback8/S距离1/Acc11，官方数学52/52、旧严格24/24、新严格28/28及保护检查，II1/depth46/顶层7.300ns，DSP40/FF103620/LUT179562/BRAM8，RTL16PE/4Acc/8减法；无II/时序违例。小batch前置（N36为1＋8）、running_max/alpha复用删除3份列数组、首key省略两次冗余alpha，数值payload4608→4224B。阶段2基线02b1666及tail-only cd7d064同输入消融保留；N36 causal模型12230→7492拍（−38.7%）、KV17→10，N3为670→548但对ebe529b235仍退化。报告Split-D阶段3_供数状态与尾批验收_20261012.md、日志1842、证据docs/evidence/split_d_stage3_20261012/由最终文档提交交付；远端build/split_d_stage3_{cd7d064_tail,16fa152_state}_20261012/均精确归档。源码测试闭环已结束，不再改DUT或重跑测试。top latency仍undef；CoSim/IP/16/Vivado/板测/1024关闭，阶段4须用户继续后重新选择16服务/hop/M/bank。Git/SSH持续授权；实际生成目录fsa_stream_split_d_build，用户AGENTS.md、.tmprun/、旧stub日志不提交。

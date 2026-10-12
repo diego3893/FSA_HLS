@@ -284,6 +284,16 @@ namespace detail{
         #pragma HLS ARRAY_PARTITION variable=state.running_sum complete dim=2
         #pragma HLS ARRAY_PARTITION variable=state.running_max complete dim=2
         #pragma HLS ARRAY_PARTITION variable=state.alpha complete dim=2
+#if FSA_SPLIT_D_PE_DIM==16
+        #pragma HLS ARRAY_PARTITION variable=state.k cyclic factor=DMA_ELEMS_PER_WORD dim=2
+        #pragma HLS ARRAY_PARTITION variable=state.v cyclic factor=DMA_ELEMS_PER_WORD dim=2
+        #pragma HLS BIND_STORAGE variable=state.q type=ram_t2p impl=bram latency=1
+        #pragma HLS BIND_STORAGE variable=state.k type=ram_t2p impl=bram latency=1
+        #pragma HLS BIND_STORAGE variable=state.v type=ram_t2p impl=bram latency=1
+        #pragma HLS BIND_STORAGE variable=state.output_acc type=ram_t2p impl=bram latency=1
+        #pragma HLS BIND_STORAGE variable=state.score type=ram_2p impl=lutram latency=1
+        #pragma HLS BIND_STORAGE variable=state.reg type=ram_2p impl=lutram latency=1
+#endif
 
         acc_t pe_acc[PE_DIM][SHARED_PE_HOP][QUERY_BLOCK_COLS];
         elem_t pe_elem[PE_DIM][SHARED_PE_HOP][QUERY_BLOCK_COLS];

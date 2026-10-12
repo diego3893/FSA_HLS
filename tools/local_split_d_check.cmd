@@ -11,16 +11,18 @@ rem The testbench now also checks a strict official Vitis bit baseline.
 rem Local math stubs are not bit-identical for every case: inspect math-summary
 rem and bit-summary separately. Any bit mismatch still returns a nonzero exit.
 rem
-rem Usage:  tools\local_split_d_check.cmd [PE_DIM] [HEAD_DIM] [QUERY_CONTEXTS]
-rem Defaults: 4 16 8
+rem Usage:  tools\local_split_d_check.cmd [PE_DIM] [HEAD_DIM] [QUERY_CONTEXTS] [MAX_SEQUENCE_LENGTH]
+rem Defaults: 4 16 8 4096
 setlocal enabledelayedexpansion
 
 set PE_DIM=%~1
 set HEAD_DIM=%~2
 set QUERY_CONTEXTS=%~3
+set MAX_SEQUENCE_LENGTH=%~4
 if "%PE_DIM%"=="" set PE_DIM=4
 if "%HEAD_DIM%"=="" set HEAD_DIM=16
 if "%QUERY_CONTEXTS%"=="" set QUERY_CONTEXTS=8
+if "%MAX_SEQUENCE_LENGTH%"=="" set MAX_SEQUENCE_LENGTH=4096
 
 set SCRIPT_DIR=%~dp0
 set ROOT=%SCRIPT_DIR%..
@@ -41,11 +43,13 @@ set SOURCES=src\stream\split_d\split_d_dma.cpp ^
  src\stream\fp32_raw_fma.cpp ^
  tests\stream\test_fsa_stream_split_d.cpp
 
-echo [local-check] PE_DIM=%PE_DIM% HEAD_DIM=%HEAD_DIM% QUERY_CONTEXTS=%QUERY_CONTEXTS%
-g++ -std=c++14 -Wall -Wextra -Wno-unknown-pragmas -Wno-unused-parameter ^
+echo [local-check] PE_DIM=%PE_DIM% HEAD_DIM=%HEAD_DIM% QUERY_CONTEXTS=%QUERY_CONTEXTS% L_MAX=%MAX_SEQUENCE_LENGTH%
+rem Optimize the host check only; no fast-math and no synthesis flags change.
+g++ -std=c++14 -O2 -Wall -Wextra -Wno-unknown-pragmas -Wno-unused-parameter ^
  -Iinclude -isystem third_party\vitis_hls\include ^
  -DFSA_LOCAL_MATH_STUBS -DHLS_NO_XIL_FPO_LIB ^
  -DFSA_SPLIT_D_PE_DIM=%PE_DIM% -DFSA_SPLIT_D_HEAD_DIM=%HEAD_DIM% -DFSA_SPLIT_D_QUERY_CONTEXTS=%QUERY_CONTEXTS% ^
+ -DFSA_MAX_SEQUENCE_LENGTH=%MAX_SEQUENCE_LENGTH% ^
  %SOURCES% ^
  -o "%OUTDIR%\split_d_check_%PE_DIM%x%HEAD_DIM%.exe"
 if errorlevel 1 (

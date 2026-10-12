@@ -88,6 +88,17 @@ namespace detail{
         #pragma HLS ARRAY_PARTITION variable=state.score complete dim=2
         #pragma HLS ARRAY_PARTITION variable=state.score complete dim=3
         #pragma HLS ARRAY_PARTITION variable=state.output_acc complete dim=2
+#if FSA_SPLIT_D_PE_DIM==16
+        // 大配置按query/key坐标与DMA四lane分bank；每bank保留双口BRAM。
+        // 仅改变存储实现，装载顺序、FP32递推和phase排空协议不变。
+        #pragma HLS BIND_STORAGE variable=state.q type=ram_t2p impl=bram latency=1
+        #pragma HLS BIND_STORAGE variable=state.k type=ram_t2p impl=bram latency=1
+        #pragma HLS BIND_STORAGE variable=state.v type=ram_t2p impl=bram latency=1
+        #pragma HLS BIND_STORAGE variable=state.output_acc type=ram_t2p impl=bram latency=1
+        // 八context小bank使用分布式RAM，保留S/P槽的原生命周期。
+        #pragma HLS BIND_STORAGE variable=state.score type=ram_2p impl=lutram latency=1
+        #pragma HLS BIND_STORAGE variable=state.reg type=ram_2p impl=lutram latency=1
+#endif
         for(unsigned ctx=0; ctx<header.context_count; ++ctx){
             for(int col=0; col<QUERY_BLOCK_COLS; ++col){
                 state.running_max[ctx][col] = accMinimum();
