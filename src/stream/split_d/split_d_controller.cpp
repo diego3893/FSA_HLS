@@ -190,7 +190,7 @@ namespace detail{
                     for(int col=0; col<QUERY_BLOCK_COLS; ++col){
                         #pragma HLS UNROLL
                         state.reg[ctx][row][col] = state.score_valid[ctx][row][col] && state.probability_ready[ctx][row][col]
-                            ? (elem_t)state.score[ctx][row][col] : elemZero();
+                            ? viewAasE(state.score[ctx][row][col]) : elemZero();
                     }
                 }
             }

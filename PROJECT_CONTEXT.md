@@ -11,7 +11,7 @@
 - 有限DATAFLOW distributor→两个D×B worker→gather；Q整批先装载、KV每key tile广播一次，causal只处理合法query tile后缀，尾batch显式计数并按原query顺序汇聚。单一PE/Acc所有者，空间ROW_SUM/PV保持key顺序，P完整/L完整两道屏障及phase排空保留。
 - 第1轮Q重复读取端口II2/Acc输入7.815ns，第2轮Q/负max广播及Acc输入寄存使工具II1但V→PE7.961ns，第3轮PE输入寄存达7.300ns但age5真实依赖导致II2。审查纠正了前三轮错误的S distance：必须feedback−hop而非整个发射间距；此前II报告不能作为最终正确依赖验收。第4轮age6/反馈7/S距离1实际II1通过。
 - 实际RTL完整递归（处理属性/缩进/多module/参数实例）确认16PE乘法/4Acc乘法/8减法；寄存helper无新MAC。所有实际构建按commit归档；第4轮额外保存精确源码快照。top latency仍未知，只允许报告明确范围的HLS阶段/模块预测预算，禁止冒充RTL/板上实测。
-- 本地stub M1/M6/M7数学52/52及新增3440word差分0，旧严格19/24/exit1为5项已知差异，不能代替官方。当前日志1437，已闭合8轮，第7轮M8真实II1但PWL转换写回7.625ns；第8轮4728bed时序7.300ns但条件helper使pe_hit distance7不足、共享II2；第9轮数据转换与命中控制分离进行中；阶段2未完成。
+- 本地stub各候选数学52/52及新增3440word差分0，旧严格19/24/exit1为5项已知差异，不能代替官方。当前日志1437，已闭合9轮：第7轮M8实际II1但PWL数值转换写回7.625ns；第8、9轮转换helper恢复7.300ns却分别延长pe_hit/pe_elem反馈而II2。第10轮改用viewEasA/viewAasE在score槽暂存最终FP16 P位模式，删除数值往返，进行中；阶段2未完成。
 
 ## 2 授权、验收与禁止事项
 
@@ -67,7 +67,7 @@
 ## 6 证据与历史入口
 
 - 阶段0本地静态证据：docs/evidence/split_d_stage0_20261012/，包含模型、归档核对、逐拍CSV、A/B敏感性、96组部分预算和固定输入清单。对应[报告](docs/Split-D阶段0调度与账本_20261012.md)，没有新的数值或HLS验收。
-- 当前日志：[2026-10-12_1437_split_d_stage12_修改日志.md](docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md)。已闭合8轮，第4轮阶段1通过，第7轮M8 II1但7.625ns，第8轮7.300ns但条件转换helper使II2；第9轮分离转换与命中控制进行中；阶段2未验收。历史II1诊断为1148日志。
+- 当前日志：[2026-10-12_1437_split_d_stage12_修改日志.md](docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md)。已闭合9轮，第4轮阶段1通过；第7轮M8 II1但7.625ns，第8、9轮7.300ns但转换helper使反馈II2；第10轮以位模式暂存替代数值往返进行中，阶段2未验收。历史II1诊断为1148日志。
 - 最新交接：[Split-D数据流与II1优化交接方案_20261012.md](docs/Split-D数据流与II1优化交接方案_20261012.md)。本地FSA/两示例固定版本、互联网主来源、候选取舍、工作包与数值/II/性能验收；替代直接固定上下文数的下一步，未实施。
 - 当前完整证据：本地build/resume_nm37/ii1_round1_4x4/；远端build/split_d_73110dc_4x4_ii1_evidence_20261012/。247载荷SHA及92源码对73110dc已核对；tar SHA a41d69005492a12d863466e0163bffe5fe9e899c4efdc16ca8c946af37f15074。
 - 远端日志/tmp/codex_split_d_73110dc_ii1_4x4_20261012.log；压缩包/tmp/codex_split_d_73110dc_4x4_ii1_evidence_20261012.tar.gz，本地build/resume_nm37/ii1_round1_4x4.tar.gz。
