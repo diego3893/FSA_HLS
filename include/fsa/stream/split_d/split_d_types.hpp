@@ -44,11 +44,17 @@ namespace split_d{
         QK, SUB_MAX, SCALE, PWL, ROW_SUM, PV, ALPHA_SCALE, ALPHA_PWL, NORMALIZE
     };
 
+    constexpr int tokenBitsForBound(int bound){
+        return bound<=2 ? 1 : 1+tokenBitsForBound((bound+1)/2);
+    }
+    constexpr int TOKEN_INDEX_BOUND = HEAD_DIM>exp2PWLPieces
+        ? HEAD_DIM : exp2PWLPieces;
+
     /// @brief control和RawFMA结果在相同年龄环槽中推进；不是外部握手通道。
     struct SharedToken{
         bool valid;
-        unsigned context;
-        unsigned index;
+        ap_uint<tokenBitsForBound(QUERY_CONTEXTS)> context;
+        ap_uint<tokenBitsForBound(TOKEN_INDEX_BOUND)> index;
     };
 
     /**

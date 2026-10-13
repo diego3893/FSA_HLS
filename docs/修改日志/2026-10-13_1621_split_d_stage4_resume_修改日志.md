@@ -29,7 +29,8 @@
 | 轮次 | 被测提交 | 修改摘要 | 本地结果 | 远端结果 | 状态 |
 |---:|---|---|---|---|---|
 | 1 | `0bfd6d2` | 静态审查与初始化生命周期优化 | 数学32/32、旧stub全字一致 | 官方CSim32/32、CSynth完成，II1/7.300ns，LUT超限 | 完成，容量失败 |
-| 2 | 待定 | 基于实际LUT分解优化PE/状态选择 | 待定 | 待定 | 待实施 |
+| 2 | `69ea82d` | 简化PE规格化与exp2分段逻辑 | 214560行全字一致，独立PE边界测试通过 | 官方CSim32/32、CSynth完成，II1/7.300ns，LUT超限 | 完成，容量失败 |
+| 3 | 待远端测试 | 窄化控制令牌与PE宽移位 | 214560行全字一致，独立PE边界测试通过 | 待运行 | 本地候选 |
 
 ## 5 第1轮
 
@@ -85,3 +86,16 @@
 - `src/stream/pe_raw_fma.cpp`：c非零分支直接用24bit前导零数推导最高位指数及规格化移位量，删除逐位优先查找；exp2余数严格小于整数单位，分段编号只取乘8整数部分的3位，删除14bit双向动态移位后的冗余饱和判断。保留同一RawFMA、DSP乘法、所有特殊值与舍入路径；这只是一项面积候选，综合收益尚未知。
 - 本地16/128/M8/L_MAX1024 capture与第1轮旧stub的128736输入字和85824输出字共214560行逐行相同，数学32/32、stage4严格32/32（capture模式）。独立PE RawFMA测试通过30000随机MAC、24480对齐边界、4608规格化边界、4596 exp2缩放边界及特殊值；D4/H16数学52/52、新严格28/28、旧stub严格19/24保持既有5项差异。编译无新增项目源码warning；这些仍不代替官方Vitis逐位与CSynth。
 - 下一步：只提交本任务源码、日志、报告及摘要；NM37精确同步后标准入口完整CSim/CSynth，LONG_CSIM_TEST=0、CoSim/IP/Vivado/板测关闭。若LUT仍超限，依据实际表达式/状态选择分解决定下一次结构修改，不靠延长预算掩盖容量失败。
+- 第2轮提交`69ea82ddb7d56fd91d5d279c91d4af1f608831a8`已推送`origin/fsa_split_D`，仅含任务文件，用户的`AGENTS.md`、`.tmprun/`和旧stub日志保留。NM37预检tracked干净、无活动HLS进程，ff-only后HEAD精确一致；2026-10-13T18:31:41+08:00启动标准CSim/CSynth，归档`build/split_d_stage4_resume_69ea82d_M8_pe_area_20261013/`，源码SHA、start及run.log已写入，待exit/end及完整build。
+- 独立枚举全部65536个FP16位模式，除NaN/Inf外有49152个非零小数余数，新的3位piece公式与原饱和/双向移位公式逐一相同；这是算术等价附加证据，仍以官方CSim为功能门槛。
+- 第2轮官方CSim于约18:47完成：数学32/32、冻结逐位32/32、0 errors，csim_design耗时00:15:12。18:47进入CSynth；II/时序/实例与面积尚无结论，不能使用第1轮硬件结果代替。
+- 19:12前端`Optimization and Transform`完成：本轮1374.42秒，第1轮1570.02秒，缩短约12.5%；`HW Transforms`指令2074594，第1轮2196706，减少约5.6%。这些只是编译规模与耗时证据，不能换算成LUT节省。可综合性检查已完成，后续调度和最终报告仍待观察。
+- 待验证的下一轮静态线索：第1轮共享循环RTL中`pe_control_context_127`是32位，而本配置有效context仅0..7；`pe_control_index_127`是10位，而已发射的feature/piece索引仅0..127。年龄环及流水寄存有多份副本。若第2轮仍超容量，可按编译期容量窄化`SharedToken`字段并重跑功能、II/时序/资源；此处不推断LUT节省，候选准备见第7节。
+- 第2轮2026-10-13T20:02:50+08:00结束，RUN_EXIT0、墙钟5469秒（1小时31分9秒），比第1轮少668秒。官方数学/冻结逐位32/32，CSim0 errors；完整CSynth共享循环Final II1/Depth47、PE服务II1/Depth5、Accumulator服务II1/Depth8，无II Violation/critical路径告警，顶层估算7.300ns。RTL两路各128PE与8Accumulator，合计256PE/16Accumulator；Q/K/V/O BRAM、S/reg LUTRAM映射维持。DSP356、FF685278、BRAM_18K360、URAM0。
+- 顶层LUT1653532/1303680，仍超349852（约26.84%）；相比第1轮恰少27080。每路worker减13540LUT，完全对应各自PE阵列472970→459430LUT，共享引擎642368→628828、Accumulator56794不变；PE阵列单路仍超过SLR434560LUT。第2轮面积门槛失败，不生成门槛后的性能模型。证据：远端完整归档`build/split_d_stage4_resume_69ea82d_M8_pe_area_20261013/`含exit/end/source SHA及build；本地`docs/evidence/split_d_stage4_20261013/stage4_resume_69ea82d_summary.json`，`csynth_completed=true`。原始XML/RTL以远端归档为准。
+
+## 7 第3轮候选与本地验证
+
+- 第2轮生成中的`runPeArray`模块报告显示每worker459430LUT，第1轮472970LUT，暂减少13540LUT/worker；每worker仍高于单SLR的434560LUT。此时顶层CSynth尚未完成，不能把局部差分当作顶层结论。
+- 已在本地工作树尝试窄化`SharedToken`的context和index至编译期所需位宽；对`shiftRightJam27`与FP32缩放的guard/sticky处理改为16/8/4/2/1位固定移位级，避免54/48位动态右移。第2轮远端仍精确运行`69ea82d`，这些新改动不在被测提交内。
+- 本地独立RawFMA测试通过30000随机MAC、24480对齐边界、4608规格化边界、4596exp2缩放边界及特殊值。16/128/M8/L_MAX1024数学32/32，capture模式stage4严格32/32；与第2轮旧stub的128736输入字及85824输出字共214560行逐行相同。4/16/M8数学52/52，stage12严格28/28，对旧stub严格19/24与第2轮相同。尚未运行候选的官方Vitis CSim/CSynth，不能判断II、时序、RTL资源或容量。

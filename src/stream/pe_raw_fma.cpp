@@ -95,15 +95,32 @@ namespace{
         if(shift>=27){
             return value!=0 ? (ap_uint<27>)1 : (ap_uint<27>)0;
         }
-        // {value, 27'b0}右移后，高27位是商，低27位保存所有丢弃位。
-        // 用丢弃位归约生成sticky，去掉动态掩码减一的进位链。
-        // 上面的边界判断保证distance在1..26内，窄化不会截断有效移位量。
-        ap_uint<54> extended = 0;
-        extended.range(53, 27) = value;
+        // 每级固定移位只保留27位商；丢弃位持续汇入sticky。
+        // distance在1..26内，五级16/8/4/2/1覆盖全部有效移位量。
         const ap_uint<5> distance = shift;
-        const ap_uint<54> shifted = extended >> distance;
-        ap_uint<27> result = shifted.range(53, 27);
-        result[0] = result[0] || (shifted.range(26, 0)!=0);
+        ap_uint<27> result = value;
+        bool sticky = false;
+        if(distance[4]){
+            sticky = sticky || result.range(15, 0)!=0;
+            result = result >> 16;
+        }
+        if(distance[3]){
+            sticky = sticky || result.range(7, 0)!=0;
+            result = result >> 8;
+        }
+        if(distance[2]){
+            sticky = sticky || result.range(3, 0)!=0;
+            result = result >> 4;
+        }
+        if(distance[1]){
+            sticky = sticky || result.range(1, 0)!=0;
+            result = result >> 2;
+        }
+        if(distance[0]){
+            sticky = sticky || result[0];
+            result = result >> 1;
+        }
+        result[0] = result[0] || sticky;
         return result;
     }
 
@@ -385,15 +402,33 @@ namespace{
             return bits;
         }
         // 此分支的new_exponent<=0；上面的边界检查保证移位量在1..24。
-        // 拼接低24位零后一次右移，同时得到商、guard和其余丢弃位。
-        // 避免动态mask减一、halfway移位及宽余数比较串到输出路径。
+        // 24位有效数后接1位guard，逐级固定右移并归约丢弃位。
+        // 高24位是商、最低位是guard，sticky记录更低的所有位。
         const ap_uint<5> distance = right_shift;
-        ap_uint<48> extended = 0;
-        extended.range(47, 24) = significand;
-        const ap_uint<48> aligned = extended >> distance;
-        ap_uint<25> shifted = aligned.range(47, 24);
-        const bool guard = aligned[23];
-        const bool sticky = aligned.range(22, 0)!=0;
+        ap_uint<25> aligned = (ap_uint<25>)significand << 1;
+        bool sticky = false;
+        if(distance[4]){
+            sticky = sticky || aligned.range(15, 0)!=0;
+            aligned = aligned >> 16;
+        }
+        if(distance[3]){
+            sticky = sticky || aligned.range(7, 0)!=0;
+            aligned = aligned >> 8;
+        }
+        if(distance[2]){
+            sticky = sticky || aligned.range(3, 0)!=0;
+            aligned = aligned >> 4;
+        }
+        if(distance[1]){
+            sticky = sticky || aligned.range(1, 0)!=0;
+            aligned = aligned >> 2;
+        }
+        if(distance[0]){
+            sticky = sticky || aligned[0];
+            aligned = aligned >> 1;
+        }
+        ap_uint<25> shifted = aligned.range(24, 1);
+        const bool guard = aligned[0];
         const bool round_up = guard && (sticky || shifted[0]);
         if(round_up){
             shifted = shifted+1;
