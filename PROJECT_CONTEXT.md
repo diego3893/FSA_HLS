@@ -4,7 +4,7 @@
 
 ## 1 当前状态与任务
 
-- 阶段4已恢复，未完成验收。本次新日志docs/修改日志/2026-10-13_1621_split_d_stage4_resume_修改日志.md，第1轮进行中；修改worker整结构零初始化为活跃context的L/O/history/max显式初始化，Q/K/V/S/P首次读取前覆盖；标准run_hls.sh新增可选FSA_HLS_TIMEOUT_SECONDS，本轮设置7200秒工具墙钟预算。静态生命周期审查及本地检查完成，远端待执行。历史第2轮：第2轮被测11cd35a29b7caf490109a06d504b35f3246f1fa9，默认M8/hop7/feedback8/Acc11、D16/H128/L_MAX1024，capture关闭，LONG_CSIM0/CoSim0/IP0。官方数学32/32、严格32/32、85824输出字、保护/2非法通过；CSynth在build-ssdm阶段异常耗时，经用户明确选择于2026-10-13T01:33:59+08:00受控停止、RUN_EXIT1。总3小时22分29秒，无最终综合XML，II/时序/实际RAM/RTL实例/资源未验收。历史runner和HLS均退出；本次恢复另起新轮，不复用停止产物作为验收。完整140MB归档build/split_d_stage4_11cd35a_M8_bram_stopped_20261013/；源码RAM绑定未被实际硬件报告证明。
+- 阶段4继续迭代，未完成验收。恢复第1轮0bfd6d2已由NM37标准入口完整CSim/CSynth验证：官方数学/逐位32/32，主循环与PE/Acc服务II1，7.300ns，真实256PE/16Acc、Q/K/V/O BRAM；但LUT1680612/1303680超限28.91%，不能交付。该轮18:11:41结束，RUN_EXIT0/6137秒，归档build/split_d_stage4_resume_0bfd6d2_M8_init_20261013/，本地摘要docs/evidence/split_d_stage4_20261013/stage4_resume_0bfd6d2_summary.json。第2轮已在源码中针对PE最高位优先查找和exp2分段宽移位做等价改写；本地16配置214560输入/输出行与第1轮一致，独立RawFMA随机/边界测试通过，D4数学52/52；尚未提交或跑官方远端。沿用M8/hop7/feedback8/Acc11、D16/H128/L_MAX1024、LONG_CSIM0；CoSim/IP/Vivado/板测关闭。上轮11cd35a的3小时22分停止是未完成综合的历史事实，具体根因仍未证明；本轮完成不等于已隔离其根因。当前修改日志docs/修改日志/2026-10-13_1621_split_d_stage4_resume_修改日志.md。
 - 阶段4第1轮已闭环：6f0b40d M1/16/128官方32项全数值与逐位通过，top7.300ns、共享II1/Depth46、256PE/16Acc/32减法；DSP356、FF483088、LUT1418632超过1303680约8.8%，BRAM8。完整归档build/split_d_stage4_6f0b40d_M1_20261012，21:58:39/exit0。M1不能交付，第2轮也未证明最终M8硬件门槛通过。
 
 - 2026-10-12T20:20+08:00最新用户指令恢复阶段4：16×16/head128，随后明确不跑1024长测试。CSim/CSynth及既有Git/SSH授权持续；CoSim/IP/Vivado/板测仍关闭。当前日志2026-10-12_2020_split_d_stage4_修改日志.md；先补16旧源码独立冻结输出，再重新验PE服务/hop/反馈/M/bank。下面阶段3“16关闭/不启动”的文字属于此前边界，已被本次16恢复覆盖。第1轮旧基线/服务诊断L_MAX4096，最终验收显式L_MAX1024；LONG_CSIM_TEST=0。

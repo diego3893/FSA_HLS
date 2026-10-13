@@ -84,18 +84,6 @@ namespace{
         return fields;
     }
 
-    int highestBit24(const ap_uint<24> value){
-        #pragma HLS INLINE
-        int highest = -1;
-        for(int bit=23; bit>=0; --bit){
-            #pragma HLS UNROLL
-            if(highest<0 && value[bit]){
-                highest = bit;
-            }
-        }
-        return highest;
-    }
-
     ap_uint<27> shiftRightJam27(
         const ap_uint<27> value,
         const int shift
@@ -155,13 +143,14 @@ namespace{
             return result;
         }
 
-        const int c_highest = highestBit24(c.significand);
-        const int c_top = c.lsb_exponent+c_highest;
+        // 此处c非零；直接以前导零数生成最高位指数与规格化移位量。
+        const ap_uint<5> c_left_shift = c.significand.countLeadingZeros();
+        const int c_top = c.lsb_exponent+23-(int)c_left_shift;
         const int common_top = product_top>c_top ? product_top : c_top;
 
         ap_uint<27> product_aligned = product_normalized;
         ap_uint<27> c_aligned =
-            (ap_uint<27>)c.significand << (26-c_highest);
+            (ap_uint<27>)c.significand << (3+(int)c_left_shift);
         product_aligned = shiftRightJam27(
             product_aligned, common_top-product_top
         );
@@ -347,14 +336,13 @@ namespace{
             prepared.fractional.significand = remainder;
             prepared.fractional.lsb_exponent = binary_scale;
 
-            const int piece_shift = binary_scale+3;
-            ap_uint<14> piece_value = piece_shift>=0
-                ? (ap_uint<14>)remainder << piece_shift
-                : (ap_uint<14>)remainder >> (-piece_shift);
-            if(piece_value>=8){
-                piece_value = 7;
+            // 余数严格小于一个整数单位，乘8后的整数部分只有3位。
+            const int fractional_bits = -binary_scale;
+            if(fractional_bits > 3){
+                prepared.piece = (ap_uint<3>)(remainder >> (fractional_bits-3));
+            }else{
+                prepared.piece = (ap_uint<3>)(remainder << (3-fractional_bits));
             }
-            prepared.piece = piece_value.range(2, 0);
         }
         return prepared;
     }

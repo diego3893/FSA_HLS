@@ -28,7 +28,8 @@
 
 | 轮次 | 被测提交 | 修改摘要 | 本地结果 | 远端结果 | 状态 |
 |---:|---|---|---|---|---|
-| 1 | 待定 | 静态审查与初始化生命周期优化 | 待执行 | 待执行 | 进行中 |
+| 1 | `0bfd6d2` | 静态审查与初始化生命周期优化 | 数学32/32、旧stub全字一致 | 官方CSim32/32、CSynth完成，II1/7.300ns，LUT超限 | 完成，容量失败 |
+| 2 | 待定 | 基于实际LUT分解优化PE/状态选择 | 待定 | 待定 | 待实施 |
 
 ## 5 第1轮
 
@@ -51,3 +52,36 @@
 - NM37预检：根/分支/origin正确，HEAD11cd35a，tracked干净；已有未跟踪工具产物保留，无vitis_hls/vitis-run活动进程。无拉取冲突。
 - 原始本地检查日志：build/local_stage4_resume_{16,4,capture}.log。未执行官方测试前不宣称逐位/II/时序或资源通过。
 - 本地Git Bash语法检查因MSYS命名对象权限0xC0000022未启动，未得到语法结果；改为NM37拉取后先bash -n和非法预算输入检查，通过后才启动HLS。git diff --check通过。
+- 16:28远端已ff-only同步0bfd6d2b4710321589d590afb86d53701f9a74dc，bash -n及非法预算输入检查通过。但预检set-u未在加载Xilinx settings前关闭，触发PYTHONPATH未绑定，尚未启动HLS。纠正为加载settings前set +u，加载后再set -euo pipefail；属于本轮环境重试，不算新迭代。
+
+### 远端测试
+
+- 被测提交：0bfd6d2b4710321589d590afb86d53701f9a74dc；源码SHA已保存。
+- 已显式加载.bashrc与Xilinx settings，开始2026-10-13T16:29:24+08:00；当前进行中。
+- 命令：RUN_CSIM=1 RUN_COSIM=0 EXPORT_IP=0 FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128 FSA_MAX_SEQUENCE_LENGTH=1024 FSA_SPLIT_D_LONG_CSIM_TEST=0 FSA_HLS_TIMEOUT_SECONDS=7200 ./run_hls.sh fsa_stream_split_d。
+- unset全部engine覆盖及capture，默认M8/hop7/反馈8/Acc11。标准入口未替换Tcl或testbench。
+- 远端证据：build/split_d_stage4_resume_0bfd6d2_M8_init_20261013/{COMMIT,source.sha256,start.txt,run.log}；结束后保存exit/end及完整build。
+- 本轮分析尚未闭合，不能开始第2轮实现或声称达标。
+- 官方CSim已完成：数学32/32、逐位32/32、0 errors；官方csim_design记录00:15:11。capture关闭，全部冻结输入和85824输出字直接核对；初始化修改的C功能门槛通过。当前进入CSynth，硬件门槛仍待结果。
+- 只读证据工具extract_resume_summary.py已通过AST检查，并在旧M1完整归档重现256PE/16Acc；它要求本轮exit记录、完整csynth完成标记、顶层XML与RTL同时存在才标记CSynth完成。旧归档缺少exit.txt时保守标记false，不改写旧综合成功结论。配置来自官方Tcl默认及override输出，不能套用新参数到历史结果。
+- 提取器历史对照中发现属性清理误识别always @(*)，已加排除并重新核对：167个module声明一致，历史130类已统计节点差分0，256PE/16Acc不变；新增26类计数为带同一行属性的sparsemux，旧计数未含这些辅助实例。本次不以辅助mux数量替代实际资源报告。
+- 16:47官方Unroll/Inline最终指令2340869，上轮2440303，计算减少4.075%；尚未进入上轮待定异常的build-ssdm阶段，不能据此宣布解决耗时。
+- 16:53官方Array/Struct峰值4842955，上轮6861689，计算减少29.420%；简化后2461763，上轮2559169。支持整结构初始化放大中间表示的判断，尚不能证明上轮build-ssdm根因、最终耗时或RAM/容量达标。
+- 后续仅候选计划：若本轮仍不能完成或不达硬件门槛，依据UG1399运行时间建议评估标量PE独立流水函数边界，减少单个展开作用域的IR对象；保留每坐标实例与算术逻辑，必须重新核对服务II、反馈、时序与完整RTL。当前不修改下一轮源码。
+- 资料补充：https://docs.amd.com/r/2024.2-English/ug1399-vitis-hls/Function-Inlining；https://docs.amd.com/r/2024.2-English/ug1399-vitis-hls/Function-Pipelining。明确INLINE off可阻止自动内联，函数流水会展开其内部及下级循环；这只是候选依据，不证明HLS一定保持所需256PE并行。
+- 17:12完成前端Compiling Optimization and Transform，耗时1570.02秒；HW Transforms(step2)指令2097063，上轮2194401，约少4.44%。此时尚未完成调度，不能据此推断最终资源。
+- 17:20后进入循环/函数优化及依赖分析；`runPeArray`内if-conversion信息769条，与上轮相同。PE年龄环RAW距离7与现有hop7一致，不将普通依赖枚举计作II违例。17:27仍无最终XML，测试继续，保留7200秒工具预算。
+- 用户17:30要求暂停对话但保持远端进程，未停止作业；17:51恢复后只读确认同一被测提交、同一作业仍在运行。官方调度日志现已给出主循环`VITIS_LOOP_334_1` Final II=1/Depth47、`runPeArray` Final II=1/Depth5、`runAccumulatorColumns` Final II=1/Depth8，无II Violation。17:52转入`runSharedEngine`函数调度，最终XML/RTL尚无，不能宣称完整CSynth或资源通过。
+- 第1轮最终结束2026-10-13T18:11:41+08:00，RUN_EXIT0，墙钟6137秒（1小时42分17秒），标准CSynth耗时1小时25分58秒，峰值工具内存22.002GB。前次3小时22分钟未完成的症状没有在本轮重复；但两轮源码与工具路径不同，不能据此单独证明上次根因就是整结构初始化。
+- 官方数学/冻结逐位32/32、85824输出字，CSim0 errors。共享主循环PipelineII1、runPeArray/Accumulator服务interval1，无II违例或关键路径告警，顶层估算7.300ns；完整RTL递归256PE/16Accumulator，Q/K/V/O使用block RAM，S/reg使用distributed RAM。BRAM_18K360/4032、DSP356/9024、FF673002/2607360、URAM0/960通过。
+- 顶层LUT1680612/1303680，超376932（约28.91%），因此阶段4容量门槛失败，不生成通过门槛后才允许的性能模型；顶层latency仍undef。两路worker各834896LUT，其中各自共享引擎642368、PE阵列472970、Accumulator56794。PE阵列两路合计945940LUT；M1与M8对照中PE/Accumulator面积不变，每路worker增加130996LUT，其中共享引擎增加61348。下一轮应同时关注PE算术与M8状态选择，不把函数边界编译优化等同于面积优化。
+- 证据：远端`build/split_d_stage4_resume_0bfd6d2_M8_init_20261013/`含完整build/run.log/exit/end/source SHA；本地`docs/evidence/split_d_stage4_20261013/stage4_resume_0bfd6d2_summary.json`由只读提取器生成，`csynth_completed=true`。原始XML/RTL以远端归档为准。RTGEN估算共享引擎控制状态最大扇出11656，只是未来物理风险，不是本阶段已测布线结论。
+
+## 6 第2轮
+
+### 修改前判断与实际修改
+
+- 完整资源分解：PE阵列每worker472970LUT，其中表达式406408、选择器35200。表达式表中54bit右移共41216LUT、48bit右移19072LUT；逐位最高位查找形成的25输入选择器每PE约123LUT。M8增加的worker面积约130996LUT/路；单纯缩短CSynth运行时间或改变函数边界不足以解决376932LUT的总超限。
+- `src/stream/pe_raw_fma.cpp`：c非零分支直接用24bit前导零数推导最高位指数及规格化移位量，删除逐位优先查找；exp2余数严格小于整数单位，分段编号只取乘8整数部分的3位，删除14bit双向动态移位后的冗余饱和判断。保留同一RawFMA、DSP乘法、所有特殊值与舍入路径；这只是一项面积候选，综合收益尚未知。
+- 本地16/128/M8/L_MAX1024 capture与第1轮旧stub的128736输入字和85824输出字共214560行逐行相同，数学32/32、stage4严格32/32（capture模式）。独立PE RawFMA测试通过30000随机MAC、24480对齐边界、4608规格化边界、4596 exp2缩放边界及特殊值；D4/H16数学52/52、新严格28/28、旧stub严格19/24保持既有5项差异。编译无新增项目源码warning；这些仍不代替官方Vitis逐位与CSynth。
+- 下一步：只提交本任务源码、日志、报告及摘要；NM37精确同步后标准入口完整CSim/CSynth，LONG_CSIM_TEST=0、CoSim/IP/Vivado/板测关闭。若LUT仍超限，依据实际表达式/状态选择分解决定下一次结构修改，不靠延长预算掩盖容量失败。
