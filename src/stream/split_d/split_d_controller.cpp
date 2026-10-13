@@ -76,7 +76,9 @@ namespace detail{
         #pragma HLS ALLOCATION function instances=detail::runSharedEngine limit=1
         const QueryTileHeader header = headers.read();
         const unsigned offset = (unsigned)(BLOCK_ID*QUERY_BLOCK_COLS);
-        SharedEngineState state{};
+        // 本batch首次读取前只需清零L/O/history；Q/K/V/S/P由装载或phase覆盖。
+        // 避免整结构初始化为这些RAM增加无用写入；每次调用仍显式重建历史。
+        SharedEngineState state;
         #pragma HLS ARRAY_PARTITION variable=state.q complete dim=2
         #pragma HLS ARRAY_PARTITION variable=state.q cyclic factor=DMA_ELEMS_PER_WORD dim=3
         #pragma HLS ARRAY_PARTITION variable=state.k complete dim=1
@@ -101,7 +103,21 @@ namespace detail{
 #endif
         for(unsigned ctx=0; ctx<header.context_count; ++ctx){
             for(int col=0; col<QUERY_BLOCK_COLS; ++col){
+                #pragma HLS UNROLL
                 state.running_max[ctx][col] = accMinimum();
+                state.running_sum[ctx][col] = accZero();
+                state.history_valid[ctx][col] = false;
+            }
+            for(int feature=0; feature<HEAD_DIM; ++feature){
+                #pragma HLS PIPELINE II=1
+                for(int col=0; col<QUERY_BLOCK_COLS; ++col){
+                    #pragma HLS UNROLL
+                    state.output_acc[ctx][col][feature] = accZero();
+                }
+            }
+        }
+        for(unsigned ctx=0; ctx<header.context_count; ++ctx){
+            for(int col=0; col<QUERY_BLOCK_COLS; ++col){
                 for(int word=0; word<QKV_WORDS_PER_TOKEN; ++word){
                     #pragma HLS PIPELINE II=1
                     const dma_word_t packed = q_input.read();

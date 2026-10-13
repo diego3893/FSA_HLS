@@ -52,11 +52,27 @@ fi
 
 cd "$PROJECT_ROOT"
 
+# 可选的单轮墙钟预算；超时返回124，不能视为综合失败或验收通过。
+# 在标准入口管理工具进程组，避免恢复诊断时再次无限等待。
+HLS_TIMEOUT_PREFIX=()
+if [[ -n "${FSA_HLS_TIMEOUT_SECONDS:-}" ]]; then
+    if [[ ! "$FSA_HLS_TIMEOUT_SECONDS" =~ ^[1-9][0-9]*$ ]]; then
+        echo "[ERROR] FSA_HLS_TIMEOUT_SECONDS必须为正整数。" >&2
+        exit 1
+    fi
+    if ! command -v timeout >/dev/null 2>&1; then
+        echo "[ERROR] 设置了墙钟预算但找不到timeout。" >&2
+        exit 1
+    fi
+    HLS_TIMEOUT_PREFIX=(timeout --signal=TERM --kill-after=30s "${FSA_HLS_TIMEOUT_SECONDS}s")
+    echo "[HLS] 工具墙钟预算：${FSA_HLS_TIMEOUT_SECONDS}秒"
+fi
+
 # Vitis 2024.2推荐vitis-run；旧环境则自动回退到vitis_hls。
 if command -v vitis-run >/dev/null 2>&1; then
-    vitis-run --mode hls --tcl "$TCL_FILE"
+    "${HLS_TIMEOUT_PREFIX[@]}" vitis-run --mode hls --tcl "$TCL_FILE"
 elif command -v vitis_hls >/dev/null 2>&1; then
-    vitis_hls -f "$TCL_FILE"
+    "${HLS_TIMEOUT_PREFIX[@]}" vitis_hls -f "$TCL_FILE"
 else
     echo "[ERROR] 找不到vitis-run或vitis_hls，请先加载Vitis环境。" >&2
     exit 1
