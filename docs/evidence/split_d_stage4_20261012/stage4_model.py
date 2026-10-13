@@ -30,6 +30,8 @@ for resource in ["LUT", "FF", "DSP", "BRAM_18K", "URAM"]:
     assert values[0] <= values[1], f"{resource} exceeds target device capacity"
 assert summary["rtl_counts"]["fsa_stream_split_d_mul_11ns_11ns_22_2_1"] == 256
 assert summary["rtl_counts"]["fsa_stream_split_d_mul_24ns_24ns_48_3_1"] == 16
+assert sum(count for name, count in summary["rtl_counts"].items()
+           if "_fsub_32ns_32ns_32_" in name) == 32
 D, H = 16, 128
 M, hop, feedback, acc = (summary[key] for key in ["contexts", "pe_hop", "qk_feedback", "acc_hop"])
 overhead = int(shared["Best-caseLatency"][0])-1

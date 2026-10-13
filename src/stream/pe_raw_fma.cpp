@@ -61,7 +61,7 @@ namespace{
             fields.lsb_exponent = -24;
         }else{
             fields.significand = ((ap_uint<11>)1 << 10) | mantissa;
-            fields.lsb_exponent = (int)exponent-25;
+            fields.lsb_exponent = (ap_int<6>)exponent-(ap_int<6>)25;
         }
         return fields;
     }
@@ -83,15 +83,12 @@ namespace{
             fields.lsb_exponent = -149;
         }else{
             fields.significand = ((ap_uint<24>)1 << 23) | mantissa;
-            fields.lsb_exponent = (int)exponent-150;
+            fields.lsb_exponent = (ap_int<9>)exponent-(ap_int<9>)150;
         }
         return fields;
     }
 
-    ap_uint<27> shiftRightJam27(
-        const ap_uint<27> value,
-        const ap_uint<9> shift
-    ){
+    ap_uint<27> shiftRightJam27(const ap_uint<27> value, const ap_uint<9> shift){
         #pragma HLS INLINE
         if(shift == 0){
             return value;
@@ -363,10 +360,7 @@ namespace{
         return bits;
     }
 
-    ap_uint<32> scaleFloatByPowerOfTwo(
-        ap_uint<32> bits,
-        const ap_int<17> exponent
-    ){
+    ap_uint<32> scaleFloatByPowerOfTwo(ap_uint<32> bits, const ap_int<17> exponent){
         #pragma HLS INLINE
         const ap_uint<8> old_exponent = bits.range(30, 23);
         const ap_uint<23> mantissa = bits.range(22, 0);

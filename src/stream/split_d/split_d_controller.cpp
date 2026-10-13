@@ -167,67 +167,85 @@ namespace detail{
                     }
                 }
             }
-            runSharedEngine(SharedOperation::QK, first_context, active_contexts, state);
-            for(unsigned ctx=first_context; ctx<header.context_count; ++ctx){
-                for(int col=0; col<QUERY_BLOCK_COLS; ++col){
-                    #pragma HLS UNROLL
-                    acc_t tile_max = accMinimum();
-                    bool has_value = false;
-                    for(int row=0; row<PE_DIM; ++row){
-                        if(state.score_valid[ctx][row][col]){
-                            tile_max = has_value ? finiteAccMax(tile_max, state.score[ctx][row][col]) : state.score[ctx][row][col];
-                            has_value = true;
+            // 把全部key-tile phase收敛到一个共享引擎调用点；每次调用排空后
+            // 才准备下一phase，保持QK、alpha、P及ROW_SUM/L屏障原有顺序。
+            for(int phase=0; phase<8; ++phase){
+                #pragma HLS UNROLL off=true
+                if(phase == 1){
+                    for(unsigned ctx=first_context; ctx<header.context_count; ++ctx){
+                        for(int col=0; col<QUERY_BLOCK_COLS; ++col){
+                            #pragma HLS UNROLL
+                            acc_t tile_max = accMinimum();
+                            bool has_value = false;
+                            for(int row=0; row<PE_DIM; ++row){
+                                if(state.score_valid[ctx][row][col]){
+                                    tile_max = has_value ? finiteAccMax(tile_max, state.score[ctx][row][col]) : state.score[ctx][row][col];
+                                    has_value = true;
+                                }
+                            }
+                            state.tile_has_value[ctx][col] = has_value;
+                            const acc_t previous_max = state.running_max[ctx][col];
+                            const acc_t next_max = has_value
+                                ? (state.history_valid[ctx][col] ? finiteAccMax(previous_max, tile_max) : tile_max)
+                                : previous_max;
+                            state.alpha[ctx][col] = state.history_valid[ctx][col] && has_value
+                                ? accSub(previous_max, next_max) : accZero();
+                            state.running_max[ctx][col] = next_max;
                         }
                     }
-                    state.tile_has_value[ctx][col] = has_value;
-                    const acc_t previous_max = state.running_max[ctx][col];
-                    const acc_t next_max = has_value
-                        ? (state.history_valid[ctx][col] ? finiteAccMax(previous_max, tile_max) : tile_max)
-                        : previous_max;
-                    state.alpha[ctx][col] = state.history_valid[ctx][col] && has_value
-                        ? accSub(previous_max, next_max) : accZero();
-                    state.running_max[ctx][col] = next_max;
                 }
-            }
-            // 首key之前没有历史L/O，旧alpha计算结果随后总被覆盖为零。
-            // 只省略这两次有限调用；L/O的原RawFMA及量化位置保持不变。
-            if(key_tile != 0U){
-                runSharedEngine(SharedOperation::ALPHA_SCALE, first_context, active_contexts, state);
-                runSharedEngine(SharedOperation::ALPHA_PWL, first_context, active_contexts, state);
-            }
-            for(unsigned ctx=first_context; ctx<header.context_count; ++ctx){
-                for(int col=0; col<QUERY_BLOCK_COLS; ++col){
-                    #pragma HLS UNROLL
-                    if(!state.history_valid[ctx][col]){
-                        state.alpha[ctx][col] = accZero();
-                    }else if(!state.tile_has_value[ctx][col]){
-                        state.alpha[ctx][col] = (acc_t)1.0F;
+                if(phase == 3){
+                    for(unsigned ctx=first_context; ctx<header.context_count; ++ctx){
+                        for(int col=0; col<QUERY_BLOCK_COLS; ++col){
+                            #pragma HLS UNROLL
+                            if(!state.history_valid[ctx][col]){
+                                state.alpha[ctx][col] = accZero();
+                            }else if(!state.tile_has_value[ctx][col]){
+                                state.alpha[ctx][col] = (acc_t)1.0F;
+                            }
+                        }
+                        // 完整S得到后只在这里量化一次。
+                        for(int row=0; row<PE_DIM; ++row){
+                            for(int col=0; col<QUERY_BLOCK_COLS; ++col){
+                                #pragma HLS UNROLL
+                                state.reg[ctx][row][col] = state.score_valid[ctx][row][col] ? cvtAtoE(state.score[ctx][row][col]) : elemZero();
+                            }
+                        }
                     }
                 }
-                // 完整S得到后仅在此处执行一次FP32到FP16量化。
-                for(int row=0; row<PE_DIM; ++row){
-                    for(int col=0; col<QUERY_BLOCK_COLS; ++col){
-                        #pragma HLS UNROLL
-                        state.reg[ctx][row][col] = state.score_valid[ctx][row][col] ? cvtAtoE(state.score[ctx][row][col]) : elemZero();
+                if(phase == 6){
+                    for(unsigned ctx=first_context; ctx<header.context_count; ++ctx){
+                        for(int row=0; row<PE_DIM; ++row){
+                            #pragma HLS UNROLL
+                            for(int col=0; col<QUERY_BLOCK_COLS; ++col){
+                                #pragma HLS UNROLL
+                                state.reg[ctx][row][col] = state.score_valid[ctx][row][col] && state.probability_ready[ctx][row][col]
+                                    ? viewAasE(state.score[ctx][row][col]) : elemZero();
+                            }
+                        }
                     }
                 }
-            }
-            runSharedEngine(SharedOperation::SUB_MAX, first_context, active_contexts, state);
-            runSharedEngine(SharedOperation::SCALE, first_context, active_contexts, state);
-            runSharedEngine(SharedOperation::PWL, first_context, active_contexts, state);
-            for(unsigned ctx=first_context; ctx<header.context_count; ++ctx){
-                for(int row=0; row<PE_DIM; ++row){
-                    #pragma HLS UNROLL
-                    for(int col=0; col<QUERY_BLOCK_COLS; ++col){
-                        #pragma HLS UNROLL
-                        state.reg[ctx][row][col] = state.score_valid[ctx][row][col] && state.probability_ready[ctx][row][col]
-                            ? viewAasE(state.score[ctx][row][col]) : elemZero();
-                    }
+                SharedOperation phase_operation = SharedOperation::QK;
+                if(phase == 1){
+                    phase_operation = SharedOperation::ALPHA_SCALE;
+                }else if(phase == 2){
+                    phase_operation = SharedOperation::ALPHA_PWL;
+                }else if(phase == 3){
+                    phase_operation = SharedOperation::SUB_MAX;
+                }else if(phase == 4){
+                    phase_operation = SharedOperation::SCALE;
+                }else if(phase == 5){
+                    phase_operation = SharedOperation::PWL;
+                }else if(phase == 6){
+                    phase_operation = SharedOperation::ROW_SUM;
+                }else if(phase == 7){
+                    phase_operation = SharedOperation::PV;
+                }
+                // 首key没有历史L/O，两次alpha运算保持原有跳过行为。
+                if(key_tile!=0U || (phase!=1 && phase!=2)){
+                    runSharedEngine(phase_operation, first_context, active_contexts, state);
                 }
             }
-            // P完整、ROW_SUM/L完整两道屏障都保留，PV随后使用稳定P。
-            runSharedEngine(SharedOperation::ROW_SUM, first_context, active_contexts, state);
-            runSharedEngine(SharedOperation::PV, first_context, active_contexts, state);
             for(unsigned ctx=first_context; ctx<header.context_count; ++ctx){
                 for(int col=0; col<QUERY_BLOCK_COLS; ++col){
                     #pragma HLS UNROLL
