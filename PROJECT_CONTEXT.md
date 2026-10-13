@@ -1,13 +1,13 @@
 # FSA HLS Project Context
 
-> 2026-10-13状态：阶段0、1、2、3均已完成；4×4配置供数/状态/尾批优化已通过CSim/CSynth。用户于2026-10-13明确恢复阶段4：先静态检查与资料调研，修改后继续CSim/CSynth，最终验收目标保持。上轮长耗时为待定异常，尚未证明根因。只维护仓库根目录本文件；历史全文可从Git提交d3245a3恢复。
+> 2026-10-14状态：阶段0、1、2、3均已完成；阶段4恢复迭代第5轮已完整CSim/CSynth，因LUT超容量仍未通过。用户要求本轮结束后暂停，现已暂停，不启动第6轮。历史长耗时为待定异常，尚未证明根因。只维护仓库根目录本文件；历史全文可从Git提交d3245a3恢复。
 
 ## 1 当前状态与任务
 
-- 阶段4仍未完成。恢复第1轮0bfd6d2与第2轮69ea82d均官方数学/冻结逐位32/32、共享/PE/Acc II1和7.300ns，但LUT1680612、1653532超VU37P容量1303680。第3轮cedd052完整结束：分级移位使PE深度5→6、共享II2、FP32减法32→24，LUT1585534仍超281854；归档和摘要完整。第4轮`b9d61f2`撤回分级移位并定宽，2026-10-13T23:39:39+08:00完整结束，RUN_EXIT0/5541秒、官方数学/逐位32/32、共享/PE/Acc II1、7.300ns、256PE/16Acc/32减法、Q/K/V/O为BRAM，DSP356/FF512868/BRAM360通过；LUT1576750仍超273070。归档build/split_d_stage4_resume_b9d61f2_M8_width_20261013/build，摘要docs/evidence/split_d_stage4_20261013/stage4_resume_b9d61f2_summary.json。第5轮本地候选合并phase调用点并显式禁止展开，另收窄解包指数运算，独立393216次PE逐位对照及16/128/M8本地214561行stage4捕获等价，待提交/正式HLS。L_MAX1024但LONG_CSIM0，CoSim/IP/Vivado/板测关闭；旧11cd35a的3小时22分停止根因仍未证明。当前日志docs/修改日志/2026-10-13_1621_split_d_stage4_resume_修改日志.md。
+- 阶段4仍未完成。第5轮被测`d53df16ef10588bbc356e43616a711e8990e9bd1`将8个key-tile phase收敛到一个未展开的共享引擎调用点，并收窄PE解包指数运算。本地393216次PE逐位对照、16/128/M8数学/严格32/32及214561行stage4捕获等价后推送；NM37官方CSim/CSynth于2026-10-13T23:47:54+08:00启动、2026-10-14T01:05:53+08:00结束，RUN_EXIT0/归档复制exit0/4679秒。官方数学/冻结逐位32/32、共享II1/depth46、PEII1/depth5、AccII1/depth8、7.300ns、RTL256PE/16Acc/32减法、Q/K/V/O为BRAM，DSP356/FF502632/BRAM360通过；LUT1531724超VU37P容量1303680达228044。相较第4轮1576750LUT减少45026，两路worker各减少22513LUT，核心模块面积不变；容量门槛失败，性能模型拒绝生成。完整归档`build/split_d_stage4_resume_d53df16_M8_phase_20261013/`，官方摘要`docs/evidence/split_d_stage4_20261013/stage4_resume_d53df16_summary.json`。L_MAX1024但LONG_CSIM0，CoSim/IP/Vivado/板测关闭；远端无活动HLS进程。用户要求本轮后暂停，未启动第6轮。旧11cd35a的3小时22分停止根因仍未证明。当前日志`docs/修改日志/2026-10-13_1621_split_d_stage4_resume_修改日志.md`。
 - 阶段4第1轮已闭环：6f0b40d M1/16/128官方32项全数值与逐位通过，top7.300ns、共享II1/Depth46、256PE/16Acc/32减法；DSP356、FF483088、LUT1418632超过1303680约8.8%，BRAM8。完整归档build/split_d_stage4_6f0b40d_M1_20261012，21:58:39/exit0。M1不能交付，第2轮也未证明最终M8硬件门槛通过。
 
-- 2026-10-12T20:20+08:00最新用户指令恢复阶段4：16×16/head128，随后明确不跑1024长测试。CSim/CSynth及既有Git/SSH授权持续；CoSim/IP/Vivado/板测仍关闭。当前日志2026-10-12_2020_split_d_stage4_修改日志.md；先补16旧源码独立冻结输出，再重新验PE服务/hop/反馈/M/bank。下面阶段3“16关闭/不启动”的文字属于此前边界，已被本次16恢复覆盖。第1轮旧基线/服务诊断L_MAX4096，最终验收显式L_MAX1024；LONG_CSIM_TEST=0。
+- 2026-10-12T20:20+08:00历史指令恢复阶段4：16×16/head128，随后明确不跑1024长测试。CSim/CSynth及既有Git/SSH授权用于已完成轮次；CoSim/IP/Vivado/板测仍关闭。历史日志2026-10-12_2020_split_d_stage4_修改日志.md记录16旧源码独立冻结输出与PE服务/hop/反馈/M/bank核查。下面阶段3“16关闭/不启动”的文字属于此前边界，已被16恢复覆盖。第1轮旧基线/服务诊断L_MAX4096，最终验收显式L_MAX1024；LONG_CSIM_TEST=0。
 
 - 用户任务：“继续阶段3”已完成。仅4×4/head16，小batch前置＋状态生命周期复用/首key alpha冗余消除，经两轮同输入/模型/资源消融验收。原FP32顺序/FP16量化、16PE/4Acc、实际II1、VU37P/10ns/2.7ns/7.300ns保持。持续授权同仓库/分支推送及NM37标准CSim/CSynth；CoSim/IP/16/板测/1024长测关闭。日志1842，无轮数上限。
 - 阶段3最终被测16fa1525332110188544031350e806d54dcfd90c：官方数学52/52、旧严格24/24、新严格28/28及保护检查通过；II1/depth46、7.300ns、DSP40/FF103620/LUT179562/BRAM8，RTL16PE/4Acc/8减法。尾批消融cd7d064同门槛通过，FF105480/LUT180448。小batch前置经DP1至1024tile证明；N36 causal模型12230→7492拍、KV17→10；N3为670→548但仍高于ebe529b235。删除next_max/alpha_delta/inverse_sum，payload4608→4224B（−8.3%）。两轮精确归档build/split_d_stage3_{cd7d064_tail,16fa152_state}_20261012/；本地3440word差分0，stub19/24限制不变。阶段3完成，不自动启动16迁移。
@@ -22,7 +22,7 @@
 ## 2 授权、验收与禁止事项
 
 - 用户本次明确恢复阶段4；已明确允许该GitHub仓库/分支推送及NM37同步测试，授权未撤回。沿用阶段0空间ROW_SUM口径；CoSim/IP/板测未恢复。
-- 最新指令：用户要求恢复迭代，先静态检查、查阅资料、修改后测试，沿用阶段4最终合同；此前停止与暂停保留为历史决定，本次明确恢复覆盖暂停要求。持久心跳自动化曾被审批拒绝且未创建，不用其他定时机制绕过。
+- 最新指令：用户要求当前第5轮结束后暂停；已完成并暂停，不启动新一轮。此前恢复迭代、静态检查、查阅资料、修改后测试的授权已用于本轮；未来继续阶段4须以用户新的恢复指令为准。持久心跳自动化曾被审批拒绝且未创建，不用其他定时机制绕过。
 - 保持独立顶层fsa_stream_split_d、四路64-bit AXI master和AXI-Lite、VU37P器件、100MHz/10ns时钟、2.7ns uncertainty；不修改FSA-main或生产顶层fsa_stream。
 - 每配置总D×D条PE RawFMA、D条Accumulator及既有倒数通路；允许两个D×B空间query块，禁止复制计算通路换吞吐。源码函数唯一、ALLOCATION或总DSP单项均不足以证明实例数。
 - 保持FP16×FP16＋FP32 PE、FP32 Accumulator、RawFMA特殊值/舍入、PWL及FP32 max→FP16→SUB_MAX→SCALE→PWL量化顺序；不改变金标准/0.03容差、不重排逐query归约。
@@ -30,7 +30,7 @@
 - 真实依赖不能标DEPENDENCE false。单元latency与II不同：依赖距离×II需覆盖完整反馈路径，并满足服务能力；交错后的发射II1不等于同一query每拍反馈。
 - 每轮读取精确commit的功能、时序、阶段循环II/trip count/cycles、warning、RTL层次/运算符、资源后闭环。不以流程exit0宣称性能通过，也不沿用旧bitstream验收新源码。
 - 标准入口仅仓库run_hls.sh；禁止替代Tcl、wrapper、临时testbench或收窄覆盖规避失败。允许在既有测试台补强覆盖；证据提取不替代测试流程。
-- 当前恢复范围限16/128的CSim＋CSynth，RUN_COSIM=0/EXPORT_IP=0/LONG_CSIM=0。L_MAX1024但不执行N1024测试，最大有效N144；默认Tcl包含CoSim/IP，执行时必须显式关闭。本次恢复无轮数上限，继续至验收或明确阻塞；不跑N1024长测试。
+- 本次恢复范围限16/128的CSim＋CSynth，RUN_COSIM=0/EXPORT_IP=0/LONG_CSIM=0。L_MAX1024但不执行N1024测试，最大有效N144；默认Tcl包含CoSim/IP，执行时必须显式关闭。用户现要求第5轮后暂停，覆盖此前无轮数上限的迭代指令；不跑N1024长测试。
 - 不force push、reset/stash/checkout丢弃、git clean或批量暂存；只提交审查过的任务路径。保留用户AGENTS.md修改、.tmprun/、docs/evidence/split_d_9c49789_4x4/local_math_stubs_check.log及远端无关文件。
 - C/C++和Markdown格式遵循用户最新AGENTS.md；函数签名与左花括号同一行，if/for括号前不加空格，逗号后空格；中文与英文/数字/行内代码之间不额外加空格。
 
@@ -74,7 +74,7 @@
 ## 6 证据与历史入口
 
 - 阶段0本地静态证据：docs/evidence/split_d_stage0_20261012/，包含模型、归档核对、逐拍CSV、A/B敏感性、96组部分预算和固定输入清单。对应[报告](docs/Split-D阶段0调度与账本_20261012.md)，没有新的数值或HLS验收。
-- 当前日志：[阶段4日志2020](docs/修改日志/2026-10-12_2020_split_d_stage4_修改日志.md)，2轮结果分析闭环，第2轮综合未完成后按用户要求暂停；[阶段4报告](docs/综合报告/Split-D阶段4_16x16_head128_II1与存储验收_20261012.md)，证据docs/evidence/split_d_stage4_20261012/。阶段3日志1842闭合2轮，[供数状态与尾批验收](docs/综合报告/Split-D阶段3_供数状态与尾批验收_20261012.md)。
+- 当前日志：[阶段4恢复日志1621](docs/修改日志/2026-10-13_1621_split_d_stage4_resume_修改日志.md)闭合5轮，最新完整摘要`docs/evidence/split_d_stage4_20261013/stage4_resume_d53df16_summary.json`；[阶段4报告](docs/综合报告/Split-D阶段4_16x16_head128_II1与存储验收_20261012.md)。历史[阶段4日志2020](docs/修改日志/2026-10-12_2020_split_d_stage4_修改日志.md)记载11cd35a综合未完成后的受控停止。阶段3日志1842闭合2轮，[供数状态与尾批验收](docs/综合报告/Split-D阶段3_供数状态与尾批验收_20261012.md)。
 - 阶段1、2日志[1437](docs/修改日志/2026-10-12_1437_split_d_stage12_修改日志.md)闭合10轮；第4轮阶段1、第10轮阶段2通过。[阶段1与2报告](docs/综合报告/Split-D阶段1与2_共享引擎与II1验收_20261012.md)。历史II1诊断为1148日志。
 - 实施来源：[Split-D数据流与II1优化交接方案_20261012.md](docs/Split-D数据流与II1优化交接方案_20261012.md)。本地FSA/两示例固定版本、互联网主来源、候选取舍、工作包与数值/II/性能验收已转化为阶段0账本和阶段1、2实现。
 - 阶段1、2完整证据：本地docs/evidence/split_d_stage12_20261012/；远端build/split_d_stage2_02b1666_defaultM8_20261012/。机器摘要、调度脚本、满批/短批预算、逐拍token表和序列预算均已归档。
@@ -83,7 +83,7 @@
 - [修正与TAPA启发方案](docs/Split-D修正与TAPA启发的分阶段修改验收方案_20261009.md)、[阶段1/2验收](docs/综合报告/Split-D阶段1与2验收_20261010.md)、[阶段3验收](docs/综合报告/Split-D阶段3空间分块验收_20261010.md)、[阶段4物理对照](docs/综合报告/Split-D阶段4物理对照_20261010.md)。
 - [4×4真实HBM上板验收](docs/综合报告/Split-D_4x4真实HBM上板验收_20261011.md)、[1952板测日志](docs/修改日志/2026-10-11_1952_split_d_4x4_board_修改日志.md)、[1316实现日志](docs/修改日志/2026-10-10_1316_split_d_4x4_complete_修改日志.md)。工具tools/split_d_nm37/，证据docs/evidence/split_d_nm37_dfbf82e_board/；本地340文件自包含包build/resume_nm37/split_d_nm37_delivery_c59cbf4.tar.gz。
 - [16/128旧测量](docs/综合报告/Split-D_16x16_head128_CSim与综合测量_20261011.md)，docs/evidence/split_d_71025ff_16x16/。NM37原理图docs/NM37_SCH_220331.pdf。
-- 远端标准build/solution1当前是11cd35a停止后的部分构建，完整复制于build/split_d_stage4_11cd35a_M8_bram_stopped_20261013/；无最终综合报告。用户现已恢复，新构建必须先核对提交并保留旧归档。本地build/fsa_stream_split_d_build/solution1是2026-09-28拆分前旧产物，不用于描述当前源码。
+- 远端当前标准构建属于第5轮`d53df16`，专属完整归档在`build/split_d_stage4_resume_d53df16_M8_phase_20261013/`；旧11cd35a停止轮次的部分归档保留在`build/split_d_stage4_11cd35a_M8_bram_stopped_20261013/`。本地`build/fsa_stream_split_d_build/solution1`是2026-09-28拆分前旧产物，不用于描述当前源码。
 
 ## 7 不能重复的错误
 
@@ -110,7 +110,7 @@ RUN_CSIM=1 RUN_COSIM=0 EXPORT_IP=0 FSA_SPLIT_D_PE_DIM=4 FSA_SPLIT_D_HEAD_DIM=16 
 
 ## 9 对话接续摘要
 
-阶段0至3已完成，阶段4尚未完成验收。用户2026-10-13明确恢复；恢复第1、2轮均完整CSim/CSynth且II1/7.300ns/逐位32/32，但LUT仍超容量。第3轮本地候选待官方验证，不跑N1024长测试。下列文字保存旧11cd35a停止轮次的历史证据，不代表当前被测提交。
+阶段0至3已完成，阶段4因LUT超容量尚未完成验收。2026-10-14最新第5轮`d53df16`完整官方CSim/CSynth通过功能、II、时序、RTL实例和BRAM映射，但顶层LUT1531724超VU37P容量228044；用户要求本轮结束后暂停，现已暂停、不启动第6轮。不跑N1024长测试。下列文字保存旧11cd35a停止轮次的历史证据，不代表当前被测提交。
 
 第2轮实际2026-10-12T22:11:30→2026-10-13T01:33:59+08:00，共12149秒（3小时22分29秒）、RUN_EXIT1。23:24进入build-ssdm，约7799秒仍未完成，M1对应416.1秒；CPU活动不足以证明有效推进，早先继续等待的判断已纠正。用户选择立即停止后核对精确PID/Tcl，仅TERM2134149；HLS/runner和只读监视均已退出。无自动超时配置，不将受控终止等同数值失败。ptrace采样曾被服务器拒绝，未attach，不提权。
 

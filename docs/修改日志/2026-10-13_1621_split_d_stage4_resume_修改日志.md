@@ -2,12 +2,12 @@
 
 ## 1 本次调用信息
 
-- 开始时间：2026-10-13T16:21+08:00；状态：进行中。
+- 开始时间：2026-10-13T16:21+08:00；状态：第5轮已完成并按用户要求暂停，阶段4容量验收仍未通过。
 - 用户要求：将上轮CSynth耗时视为待定异常，先静态检查、查阅资料、修改，再继续测试；最终目标沿用阶段4。
 - 仓库：C:/Users/30130/Desktop/workstation/FlashAttention/FSA_HLS；远端FSA-FPGA-NM37-tailBox:/home/zhangchenxuan/FSA_HLS。
 - 分支：fsa_split_D；起始HEAD：229177c9478654a262a79450052d02ff2ab11ac4；起始DUT：11cd35a29b7caf490109a06d504b35f3246f1fa9。
 - 工具：Vitis HLS2024.2；每次SSH显式Bash加载~/.bashrc，测试另加载/opt/Xilinx_2024.2/Vitis/2024.2/settings64.sh。
-- 迭代上限未设置；本次恢复覆盖此前暂停要求。沿用任务源码/测试/文档普通提交推送、NM37精确提交CSim/CSynth及证据收集授权。
+- 原恢复调用未设置轮数上限；用户随后要求第5轮结束后暂停，现已执行，不启动第6轮。沿用任务源码/测试/文档普通提交推送、NM37精确提交CSim/CSynth及证据收集授权。
 
 ## 2 验收合同
 
@@ -123,3 +123,16 @@
 - 第4轮官方23:22前已调度共享主循环`VITIS_LOOP_334_1` Final II=1/depth47、`runPeArray`服务II1/depth5、`runAccumulatorColumns`服务II1/depth8，未见II Violation；这只闭合调度门槛，最终7.300ns、资源、存储和RTL实例须等待完整CSynth/XML，远端仍运行。
 - 第4轮2026-10-13T23:39:39+08:00结束，RUN_EXIT0、专属归档复制exit0、墙钟5541秒（1小时32分21秒）；完整XML/RTL均在`build/split_d_stage4_resume_b9d61f2_M8_width_20261013/build`。只读提取的[官方摘要](../evidence/split_d_stage4_20261013/stage4_resume_b9d61f2_summary.json)显示`csynth_completed=true`，官方数学/冻结逐位32/32、无II违例或关键路径告警，共享II1/depth47、PE服务II1/depth5、Acc服务II1/depth8、顶层7.300ns。RTL递归256PE乘法/16Acc乘法/32FP32减法，worker报告Q/K/V/O为BRAM、score/reg为LUTRAM；DSP356/FF512868/BRAM_18K360/URAM0通过，LUT1576750/1303680超273070（20.95%），阶段4仍失败，性能模型因LUT门槛按预期拒绝生成。两worker各782965LUT、PE阵列各421926LUT；相较第2轮同II1结构，顶层减少76782LUT，每worker PE阵列减少37504LUT，单PE阵列低于单SLR434560LUT，但整体仍超容量。与第3轮II2结构不可直接按总LUT推定优化幅度。
 - 据第4轮最终面积，决定正式提交第5轮候选：phase循环唯一共享引擎调用点、显式禁止展开，并把半/单精度解包指数减常量定宽；保持其他算术和M8配置。预期改善以资源报告为准，不用110592LUT历史选择器账本当成实测节省。继续标准NM37官方CSim/CSynth，N1024长测试保持关闭。
+- 第5轮提交`d53df16ef10588bbc356e43616a711e8990e9bd1`已推送`origin/fsa_split_D`；NM37预检无活动HLS、tracked干净、ff-only至精确提交。2026-10-13T23:47:54+08:00启动同一标准16/128/M8/L_MAX1024、LONG_CSIM0、CoSim/IP关闭、7200秒预算的CSim/CSynth；归档`build/split_d_stage4_resume_d53df16_M8_phase_20261013/`含COMMIT、72条source SHA、start和runner，结束后保存run.log/exit/end/完整build。当前远端运行中。
+- 下一候选研究、未改DUT：AMD UG1399的[Operator Configuration](https://docs.amd.com/r/2024.2-English/ug1399-vitis-hls/Operator-Configuration)允许单精度浮点`fmadd`及DSP实现；独立宿主诊断对1315933个有限值Half×Half＋Float三元组比较现有RawFMA与`std::fma`的FP32位模式，差分0。该诊断不覆盖特殊值、PWL缩放、官方Vitis CSim或硬件FMA精度/次正规数与II/面积，不能直接替换当前自定义RawFMA；仅在第5轮仍超容量时考虑小规模综合探针。
+- 标准浮点IP的直接替换还存在明确语义风险：AMD当前[PG109次正规数说明](https://docs.amd.com/r/en-US/pg109-xfft/Denormalized-Numbers)称Floating-Point Operator内核将次正规输入视为带符号零；本项目旧RawFMA在FP32次正规输入/输出及特殊值上有冻结逐位合同。因此宿主`std::fma`零差异不能推出该IP逐位等价，不能以其面积潜力跳过官方逐位与硬件行为核对。
+
+## 10 第5轮官方结果与暂停
+
+- 被测精确提交`d53df16ef10588bbc356e43616a711e8990e9bd1`；NM37标准入口2026-10-13T23:47:54+08:00启动、2026-10-14T01:05:53+08:00结束，墙钟4679秒（1小时17分59秒），`run_exit=0`、专属归档复制exit0，归档`build/split_d_stage4_resume_d53df16_M8_phase_20261013/`含源码SHA、run.log、完整XML/RTL。归档记录的72条源码SHA在远端逐条核验通过；结束后无活动HLS进程。
+- [官方摘要](../evidence/split_d_stage4_20261013/stage4_resume_d53df16_summary.json)由专属完整归档只读提取，`csynth_completed=true`。官方数学32/32、冻结逐位32/32（85824个输出字）、CSim0 errors；无II Violation或HLS200-1016关键路径告警。共享主循环Final II1/depth46、PE服务II1/depth5、Accumulator服务II1/depth8，顶层估算7.300ns。
+- RTL递归统计为256个PE11×11乘法、16个Accumulator24×24乘法、32个FP32减法；两路worker报告中Q/K/V/O实例均映射到BRAM，其中V实例复用命名为`state_k_RAM_T2P_BRAM_1R1W`的内存模块类型。总DSP356、FF502632、BRAM_18K360、URAM0均未超器件容量。
+- 工具告警`HLS 200-1020`将`start_for_gatherQueryTile_U0`控制FIFO深度增至3；这是综合生成的start控制通道，未将其误算进源码payload FIFO账本。另有`RTGEN 206-101`悬空AXI输出端口置0告警，未见II违例或HLS200-1016关键路径告警；本阶段未做CoSim验证动态背压。
+- 顶层LUT1531724/1303680，超228044（17.49%）；相较第4轮1576750减少45026（2.86%）。两路worker各782965→760452LUT，各减少22513；`runSharedEngine`、`runPeArray`、`runAccumulatorColumns`分别保持590437、421926、56794LUT不变。因此本轮phase调用点修改主要减少worker周边逻辑，未降低共享算术核心面积，阶段4容量门槛仍失败。
+- `stage4_model.py`对第5轮完整摘要在LUT容量断言处按预期拒绝，未生成短序列/部分性能预算。当前尚无顶层完整事务latency、CoSim/IP/Vivado/板测，N1024长CSim未运行；不把服务II1直接解释为完整attention加速。
+- 用户要求本轮结束后暂停：已完成第5轮结果提取、归档核验和文档更新；不启动第6轮、不修改远端DUT或关闭无关进程。阶段4留待用户以后明确恢复。
