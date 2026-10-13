@@ -1,0 +1,3484 @@
+{
+  "commit": "cedd052d3803de46451b0141fa4fb581551274e4",
+  "run_exit": 0,
+  "D": 16,
+  "H": 128,
+  "L_MAX": 1024,
+  "contexts": 8,
+  "pe_hop": 7,
+  "qk_feedback": 8,
+  "score_commit_distance": 1,
+  "acc_hop": 11,
+  "configuration_scope": "Engine defaults plus official Tcl overrides; verify archived source SHA",
+  "csim_pass": true,
+  "csynth_completed": true,
+  "reports": {
+    "csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.300",
+        "1.410",
+        "7.300",
+        "7.300",
+        "7.300",
+        "3.032",
+        "3.159",
+        "2.870",
+        "5.808",
+        "0.000",
+        "0.000",
+        "7.214",
+        "0.000",
+        "6.840",
+        "0.000",
+        "7.299",
+        "7.299",
+        "7.299",
+        "7.165",
+        "7.120",
+        "7.120",
+        "1.654",
+        "1.654",
+        "6.394",
+        "2.788",
+        "6.576",
+        "7.281",
+        "2.788",
+        "2.788",
+        "2.788",
+        "2.788",
+        "2.788",
+        "2.788",
+        "2.788",
+        "7.281",
+        "3.402",
+        "7.299",
+        "3.032",
+        "3.159",
+        "2.870",
+        "5.808",
+        "7.165",
+        "7.120",
+        "1.654",
+        "1.654",
+        "3.402",
+        "7.299",
+        "1.732",
+        "2.487",
+        "7.300",
+        "7.300",
+        "7.300",
+        "7.300",
+        "7.300",
+        "7.300",
+        "7.300"
+      ],
+      "Best-caseLatency": [
+        "undef",
+        "0",
+        "586",
+        "586",
+        "1176",
+        "undef",
+        "undef",
+        "514",
+        "undef",
+        "1",
+        "1",
+        "5",
+        "1",
+        "0",
+        "1",
+        "7",
+        "48",
+        "51",
+        "undef",
+        "2",
+        "undef",
+        "undef",
+        "undef",
+        "1",
+        "15",
+        "0",
+        "1",
+        "15",
+        "15",
+        "15",
+        "15",
+        "15",
+        "15",
+        "15",
+        "16",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "514",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "2050",
+        "2050",
+        "2",
+        "73",
+        "4179",
+        "undef",
+        "undef",
+        "undef",
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef",
+        "0",
+        "4170",
+        "32842",
+        "37016",
+        "undef",
+        "undef",
+        "514",
+        "undef",
+        "1",
+        "1",
+        "5",
+        "1",
+        "0",
+        "1",
+        "7",
+        "2340",
+        "2343",
+        "undef",
+        "2",
+        "undef",
+        "undef",
+        "undef",
+        "1",
+        "15",
+        "0",
+        "1",
+        "15",
+        "15",
+        "15",
+        "15",
+        "15",
+        "15",
+        "15",
+        "176",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "514",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "2050",
+        "2050",
+        "1027",
+        "1098",
+        "27268",
+        "undef",
+        "undef",
+        "undef",
+        "undef"
+      ],
+      "Interval-min": [
+        "undef"
+      ],
+      "Interval-max": [
+        "undef"
+      ],
+      "PipelineII": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "2",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "PipelineDepth": [
+        "74",
+        "74",
+        "1",
+        "2",
+        "2",
+        "1",
+        "2",
+        "2",
+        "6",
+        "2",
+        "1",
+        "2",
+        "8",
+        "47",
+        "9",
+        "3",
+        "6",
+        "2",
+        "2",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "2",
+        "undef",
+        "20 ~ 180",
+        "1",
+        "2",
+        "2",
+        "1",
+        "9",
+        "6",
+        "2",
+        "2",
+        "2",
+        "undef",
+        "20 ~ 180",
+        "1",
+        "2",
+        "3",
+        "2127 ~ 3152",
+        "undef"
+      ],
+      "Latency": [
+        "584 ~ 4168",
+        "584 ~ 32840",
+        "undef",
+        "undef",
+        "512",
+        "undef",
+        "46 ~ 2338",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "13",
+        "13",
+        "13",
+        "13",
+        "13",
+        "13",
+        "13",
+        "13",
+        "undef",
+        "undef",
+        "20 ~ ?",
+        "undef",
+        "undef",
+        "512",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "20 ~ ?",
+        "2048",
+        "2048",
+        "0 ~ 1025",
+        "2127 ~ 25216",
+        "undef"
+      ],
+      "TripCount": [
+        "\n                            ",
+        "\n                            ",
+        "undef",
+        "undef",
+        "512",
+        "undef",
+        "\n                            ",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "13",
+        "13",
+        "13",
+        "13",
+        "13",
+        "13",
+        "13",
+        "13",
+        "undef",
+        "\n                            ",
+        "undef",
+        "undef",
+        "undef",
+        "512",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "undef",
+        "\n                            ",
+        "undef",
+        "2048",
+        "2048",
+        "\n                            ",
+        "\n                            ",
+        "\n                            "
+      ],
+      "DSP": [
+        "340",
+        "9024",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "128",
+        "0",
+        "0",
+        "0",
+        "16",
+        "152",
+        "154",
+        "16",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "170",
+        "0",
+        "0",
+        "0",
+        "0",
+        "16",
+        "0",
+        "0",
+        "0",
+        "0",
+        "170",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "340",
+        "340",
+        "340",
+        "340"
+      ],
+      "FF": [
+        "523382",
+        "2607360",
+        "3",
+        "5246",
+        "10124",
+        "15736",
+        "82",
+        "97",
+        "24",
+        "1058",
+        "6402",
+        "6274",
+        "96642",
+        "770",
+        "0",
+        "258",
+        "9940",
+        "185322",
+        "185454",
+        "16874",
+        "35",
+        "27476",
+        "195",
+        "67",
+        "169",
+        "89",
+        "0",
+        "99",
+        "89",
+        "89",
+        "89",
+        "89",
+        "89",
+        "89",
+        "89",
+        "1692",
+        "104",
+        "250951",
+        "82",
+        "97",
+        "24",
+        "1058",
+        "16874",
+        "27476",
+        "195",
+        "67",
+        "104",
+        "250951",
+        "14",
+        "42",
+        "84",
+        "223",
+        "946",
+        "519681",
+        "519817",
+        "519820",
+        "523382"
+      ],
+      "LUT": [
+        "1585534",
+        "1303680",
+        "29",
+        "591",
+        "924",
+        "1643",
+        "281",
+        "368",
+        "152",
+        "18242",
+        "2",
+        "2",
+        "474022",
+        "2",
+        "1284",
+        "2",
+        "56794",
+        "595791",
+        "596277",
+        "33078",
+        "2",
+        "7094",
+        "7924",
+        "116",
+        "783",
+        "406",
+        "1274",
+        "1330",
+        "406",
+        "406",
+        "406",
+        "406",
+        "406",
+        "406",
+        "406",
+        "6450",
+        "429",
+        "787357",
+        "281",
+        "368",
+        "152",
+        "18274",
+        "33078",
+        "7094",
+        "7924",
+        "116",
+        "429",
+        "787389",
+        "66",
+        "218",
+        "215",
+        "781",
+        "3521",
+        "1580909",
+        "1581222",
+        "1581236",
+        "1585534"
+      ],
+      "BRAM_18K": [
+        "360",
+        "4032",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "176",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "176",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "352",
+        "352",
+        "352",
+        "360"
+      ],
+      "URAM": [
+        "0",
+        "960",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ]
+    },
+    "cvtAtoE_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.120"
+      ],
+      "Best-caseLatency": [
+        "2"
+      ],
+      "Worst-caseLatency": [
+        "2"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "3"
+      ],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "35",
+        "2607360"
+      ],
+      "LUT": [
+        "2",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "distributeQueryTile_Pipeline_VITIS_LOOP_262_1_VITIS_LOOP_263_2_VITIS_LOOP_264_3_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.300"
+      ],
+      "Best-caseLatency": [
+        "586"
+      ],
+      "Worst-caseLatency": [
+        "4170"
+      ],
+      "Interval-min": [
+        "513"
+      ],
+      "Interval-max": [
+        "4097"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "74"
+      ],
+      "Latency": [
+        "\n"
+      ],
+      "TripCount": [
+        "\n"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "5246",
+        "2607360"
+      ],
+      "LUT": [
+        "591",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "distributeQueryTile_Pipeline_VITIS_LOOP_276_4_VITIS_LOOP_281_5_VITIS_LOOP_282_6_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.300"
+      ],
+      "Best-caseLatency": [
+        "586"
+      ],
+      "Worst-caseLatency": [
+        "32842"
+      ],
+      "Interval-min": [
+        "513"
+      ],
+      "Interval-max": [
+        "32769"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "74"
+      ],
+      "Latency": [
+        "\n"
+      ],
+      "TripCount": [
+        "\n"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "10124",
+        "2607360"
+      ],
+      "LUT": [
+        "924",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "distributeQueryTile_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.300"
+      ],
+      "Best-caseLatency": [
+        "1176"
+      ],
+      "Worst-caseLatency": [
+        "37016"
+      ],
+      "Interval-min": [
+        "1176"
+      ],
+      "Interval-max": [
+        "37016"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "15736",
+        "2607360"
+      ],
+      "LUT": [
+        "1643",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "entry_proc_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "1.410"
+      ],
+      "Best-caseLatency": [
+        "0"
+      ],
+      "Worst-caseLatency": [
+        "0"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "3",
+        "2607360"
+      ],
+      "LUT": [
+        "29",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "fsa_stream_split_d_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.300"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "undef"
+      ],
+      "Interval-max": [
+        "undef"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "340",
+        "9024"
+      ],
+      "FF": [
+        "523382",
+        "2607360"
+      ],
+      "LUT": [
+        "1585534",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "360",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "gatherQueryTile_Pipeline_1_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "1.732"
+      ],
+      "Best-caseLatency": [
+        "2050"
+      ],
+      "Worst-caseLatency": [
+        "2050"
+      ],
+      "Interval-min": [
+        "2049"
+      ],
+      "Interval-max": [
+        "2049"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ],
+      "Latency": [
+        "2048"
+      ],
+      "TripCount": [
+        "2048"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "14",
+        "2607360"
+      ],
+      "LUT": [
+        "66",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "gatherQueryTile_Pipeline_VITIS_LOOP_302_2_VITIS_LOOP_303_3_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "2.487"
+      ],
+      "Best-caseLatency": [
+        "2050"
+      ],
+      "Worst-caseLatency": [
+        "2050"
+      ],
+      "Interval-min": [
+        "2049"
+      ],
+      "Interval-max": [
+        "2049"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [
+        "2048"
+      ],
+      "TripCount": [
+        "2048"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "42",
+        "2607360"
+      ],
+      "LUT": [
+        "218",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "gatherQueryTile_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.300"
+      ],
+      "Best-caseLatency": [
+        "4179"
+      ],
+      "Worst-caseLatency": [
+        "27268"
+      ],
+      "Interval-min": [
+        "4179"
+      ],
+      "Interval-max": [
+        "27268"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [
+        "\n"
+      ],
+      "TripCount": [
+        "\n"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "946",
+        "2607360"
+      ],
+      "LUT": [
+        "3521",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "p_anonymous_namespace_begin_reciprocal_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "6.394"
+      ],
+      "Best-caseLatency": [
+        "1"
+      ],
+      "Worst-caseLatency": [
+        "1"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "169",
+        "2607360"
+      ],
+      "LUT": [
+        "783",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "p_anonymous_namespace_divider_tick_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.281"
+      ],
+      "Best-caseLatency": [
+        "1"
+      ],
+      "Worst-caseLatency": [
+        "1"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "99",
+        "2607360"
+      ],
+      "LUT": [
+        "1330",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "p_anonymous_namespace_ldexpByBits_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "6.840"
+      ],
+      "Best-caseLatency": [
+        "0"
+      ],
+      "Worst-caseLatency": [
+        "0"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "1"
+      ],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "0",
+        "2607360"
+      ],
+      "LUT": [
+        "1284",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "p_anonymous_namespace_normalize_and_round_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "6.576"
+      ],
+      "Best-caseLatency": [
+        "0"
+      ],
+      "Worst-caseLatency": [
+        "0"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "0",
+        "2607360"
+      ],
+      "LUT": [
+        "1274",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_12_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "2.788"
+      ],
+      "Best-caseLatency": [
+        "15"
+      ],
+      "Worst-caseLatency": [
+        "15"
+      ],
+      "Interval-min": [
+        "14"
+      ],
+      "Interval-max": [
+        "14"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ],
+      "Latency": [
+        "13"
+      ],
+      "TripCount": [
+        "13"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "89",
+        "2607360"
+      ],
+      "LUT": [
+        "406",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_13_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "2.788"
+      ],
+      "Best-caseLatency": [
+        "15"
+      ],
+      "Worst-caseLatency": [
+        "15"
+      ],
+      "Interval-min": [
+        "14"
+      ],
+      "Interval-max": [
+        "14"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ],
+      "Latency": [
+        "13"
+      ],
+      "TripCount": [
+        "13"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "89",
+        "2607360"
+      ],
+      "LUT": [
+        "406",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_14_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "2.788"
+      ],
+      "Best-caseLatency": [
+        "15"
+      ],
+      "Worst-caseLatency": [
+        "15"
+      ],
+      "Interval-min": [
+        "14"
+      ],
+      "Interval-max": [
+        "14"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ],
+      "Latency": [
+        "13"
+      ],
+      "TripCount": [
+        "13"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "89",
+        "2607360"
+      ],
+      "LUT": [
+        "406",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_15_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "2.788"
+      ],
+      "Best-caseLatency": [
+        "15"
+      ],
+      "Worst-caseLatency": [
+        "15"
+      ],
+      "Interval-min": [
+        "14"
+      ],
+      "Interval-max": [
+        "14"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ],
+      "Latency": [
+        "13"
+      ],
+      "TripCount": [
+        "13"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "89",
+        "2607360"
+      ],
+      "LUT": [
+        "406",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_16_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "2.788"
+      ],
+      "Best-caseLatency": [
+        "15"
+      ],
+      "Worst-caseLatency": [
+        "15"
+      ],
+      "Interval-min": [
+        "14"
+      ],
+      "Interval-max": [
+        "14"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ],
+      "Latency": [
+        "13"
+      ],
+      "TripCount": [
+        "13"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "89",
+        "2607360"
+      ],
+      "LUT": [
+        "406",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_17_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "2.788"
+      ],
+      "Best-caseLatency": [
+        "15"
+      ],
+      "Worst-caseLatency": [
+        "15"
+      ],
+      "Interval-min": [
+        "14"
+      ],
+      "Interval-max": [
+        "14"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ],
+      "Latency": [
+        "13"
+      ],
+      "TripCount": [
+        "13"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "89",
+        "2607360"
+      ],
+      "LUT": [
+        "406",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_18_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "2.788"
+      ],
+      "Best-caseLatency": [
+        "15"
+      ],
+      "Worst-caseLatency": [
+        "15"
+      ],
+      "Interval-min": [
+        "14"
+      ],
+      "Interval-max": [
+        "14"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ],
+      "Latency": [
+        "13"
+      ],
+      "TripCount": [
+        "13"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "89",
+        "2607360"
+      ],
+      "LUT": [
+        "406",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_1_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "2.788"
+      ],
+      "Best-caseLatency": [
+        "15"
+      ],
+      "Worst-caseLatency": [
+        "15"
+      ],
+      "Interval-min": [
+        "14"
+      ],
+      "Interval-max": [
+        "14"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ],
+      "Latency": [
+        "13"
+      ],
+      "TripCount": [
+        "13"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "89",
+        "2607360"
+      ],
+      "LUT": [
+        "406",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "reciprocalColumns_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.281"
+      ],
+      "Best-caseLatency": [
+        "16"
+      ],
+      "Worst-caseLatency": [
+        "176"
+      ],
+      "Interval-min": [
+        "16"
+      ],
+      "Interval-max": [
+        "176"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "1692",
+        "2607360"
+      ],
+      "LUT": [
+        "6450",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runAccumulatorColumns_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.299"
+      ],
+      "Best-caseLatency": [
+        "7"
+      ],
+      "Worst-caseLatency": [
+        "7"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "8"
+      ],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "16",
+        "9024"
+      ],
+      "FF": [
+        "9940",
+        "2607360"
+      ],
+      "LUT": [
+        "56794",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runController_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.300"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "undef"
+      ],
+      "Interval-max": [
+        "undef"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "\n"
+      ],
+      "DSP": [
+        "340",
+        "9024"
+      ],
+      "FF": [
+        "519817",
+        "2607360"
+      ],
+      "LUT": [
+        "1581222",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "352",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runPeArray_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.214"
+      ],
+      "Best-caseLatency": [
+        "5"
+      ],
+      "Worst-caseLatency": [
+        "5"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "6"
+      ],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "128",
+        "9024"
+      ],
+      "FF": [
+        "96642",
+        "2607360"
+      ],
+      "LUT": [
+        "474022",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_104_1_VITIS_LOOP_111_3_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "3.032"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "82",
+        "2607360"
+      ],
+      "LUT": [
+        "281",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_119_5_VITIS_LOOP_120_6_VITIS_LOOP_121_7_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "3.159"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "97",
+        "2607360"
+      ],
+      "LUT": [
+        "368",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_136_10_VITIS_LOOP_137_11_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "2.870"
+      ],
+      "Best-caseLatency": [
+        "514"
+      ],
+      "Worst-caseLatency": [
+        "514"
+      ],
+      "Interval-min": [
+        "513"
+      ],
+      "Interval-max": [
+        "513"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [
+        "512"
+      ],
+      "TripCount": [
+        "512"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "24",
+        "2607360"
+      ],
+      "LUT": [
+        "152",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_152_13_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "5.808"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "1058",
+        "2607360"
+      ],
+      "LUT": [
+        "18242",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_171_16_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.165"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "9"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "16",
+        "9024"
+      ],
+      "FF": [
+        "16874",
+        "2607360"
+      ],
+      "LUT": [
+        "33078",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_198_19_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.120"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "6"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "27476",
+        "2607360"
+      ],
+      "LUT": [
+        "7094",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_218_23_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "1.654"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "195",
+        "2607360"
+      ],
+      "LUT": [
+        "7924",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_231_26_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "1.654"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "67",
+        "2607360"
+      ],
+      "LUT": [
+        "116",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_245_29_VITIS_LOOP_246_30_VITIS_LOOP_247_31_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "3.402"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "104",
+        "2607360"
+      ],
+      "LUT": [
+        "429",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_0_s_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.299"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "undef"
+      ],
+      "Interval-max": [
+        "undef"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [
+        "undef",
+        "\n"
+      ],
+      "TripCount": [
+        "\n",
+        "undef"
+      ],
+      "DSP": [
+        "170",
+        "9024"
+      ],
+      "FF": [
+        "250951",
+        "2607360"
+      ],
+      "LUT": [
+        "787357",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "176",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_104_1_VITIS_LOOP_111_3_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "3.032"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "82",
+        "2607360"
+      ],
+      "LUT": [
+        "281",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_119_5_VITIS_LOOP_120_6_VITIS_LOOP_121_7_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "3.159"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "97",
+        "2607360"
+      ],
+      "LUT": [
+        "368",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_136_10_VITIS_LOOP_137_11_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "2.870"
+      ],
+      "Best-caseLatency": [
+        "514"
+      ],
+      "Worst-caseLatency": [
+        "514"
+      ],
+      "Interval-min": [
+        "513"
+      ],
+      "Interval-max": [
+        "513"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [
+        "512"
+      ],
+      "TripCount": [
+        "512"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "24",
+        "2607360"
+      ],
+      "LUT": [
+        "152",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_152_13_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "5.808"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "1"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "1058",
+        "2607360"
+      ],
+      "LUT": [
+        "18274",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_171_16_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.165"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "9"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "16",
+        "9024"
+      ],
+      "FF": [
+        "16874",
+        "2607360"
+      ],
+      "LUT": [
+        "33078",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_198_19_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.120"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "6"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "27476",
+        "2607360"
+      ],
+      "LUT": [
+        "7094",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_218_23_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "1.654"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "195",
+        "2607360"
+      ],
+      "LUT": [
+        "7924",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_231_26_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "1.654"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "67",
+        "2607360"
+      ],
+      "LUT": [
+        "116",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_245_29_VITIS_LOOP_246_30_VITIS_LOOP_247_31_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "3.402"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "0"
+      ],
+      "Interval-max": [
+        "0"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [
+        "undef"
+      ],
+      "TripCount": [
+        "undef"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "104",
+        "2607360"
+      ],
+      "LUT": [
+        "429",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryBlock_1_s_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.299"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "undef"
+      ],
+      "Interval-max": [
+        "undef"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [
+        "undef",
+        "\n"
+      ],
+      "TripCount": [
+        "\n",
+        "undef"
+      ],
+      "DSP": [
+        "170",
+        "9024"
+      ],
+      "FF": [
+        "250951",
+        "2607360"
+      ],
+      "LUT": [
+        "787389",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "176",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runQueryTile_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.300"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "undef"
+      ],
+      "Interval-max": [
+        "undef"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "340",
+        "9024"
+      ],
+      "FF": [
+        "519681",
+        "2607360"
+      ],
+      "LUT": [
+        "1580909",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "352",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runSharedEngine_Pipeline_VITIS_LOOP_334_1_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.299"
+      ],
+      "Best-caseLatency": [
+        "48"
+      ],
+      "Worst-caseLatency": [
+        "2340"
+      ],
+      "Interval-min": [
+        "4"
+      ],
+      "Interval-max": [
+        "2296"
+      ],
+      "PipelineII": [
+        "2"
+      ],
+      "PipelineDepth": [
+        "47"
+      ],
+      "Latency": [
+        "\n"
+      ],
+      "TripCount": [
+        "\n"
+      ],
+      "DSP": [
+        "152",
+        "9024"
+      ],
+      "FF": [
+        "185322",
+        "2607360"
+      ],
+      "LUT": [
+        "595791",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "runSharedEngine_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.299"
+      ],
+      "Best-caseLatency": [
+        "51"
+      ],
+      "Worst-caseLatency": [
+        "2343"
+      ],
+      "Interval-min": [
+        "51"
+      ],
+      "Interval-max": [
+        "2343"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "154",
+        "9024"
+      ],
+      "FF": [
+        "185454",
+        "2607360"
+      ],
+      "LUT": [
+        "596277",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "run_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.300"
+      ],
+      "Best-caseLatency": [
+        "undef"
+      ],
+      "Worst-caseLatency": [
+        "undef"
+      ],
+      "Interval-min": [
+        "undef"
+      ],
+      "Interval-max": [
+        "undef"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "340",
+        "9024"
+      ],
+      "FF": [
+        "519820",
+        "2607360"
+      ],
+      "LUT": [
+        "1581236",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "352",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "stageAccumulatorOperands_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "0.000"
+      ],
+      "Best-caseLatency": [
+        "1"
+      ],
+      "Worst-caseLatency": [
+        "1"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "770",
+        "2607360"
+      ],
+      "LUT": [
+        "2",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "stageAccumulatorResult_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "0.000"
+      ],
+      "Best-caseLatency": [
+        "1"
+      ],
+      "Worst-caseLatency": [
+        "1"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "258",
+        "2607360"
+      ],
+      "LUT": [
+        "2",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "stagePeArrayResult_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "0.000"
+      ],
+      "Best-caseLatency": [
+        "1"
+      ],
+      "Worst-caseLatency": [
+        "1"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "6274",
+        "2607360"
+      ],
+      "LUT": [
+        "2",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "stagePeOperands_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "0.000"
+      ],
+      "Best-caseLatency": [
+        "1"
+      ],
+      "Worst-caseLatency": [
+        "1"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [
+        "2"
+      ],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "6402",
+        "2607360"
+      ],
+      "LUT": [
+        "2",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "storeOutputTile_Pipeline_VITIS_LOOP_76_1_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.300"
+      ],
+      "Best-caseLatency": [
+        "2"
+      ],
+      "Worst-caseLatency": [
+        "1027"
+      ],
+      "Interval-min": [
+        "1"
+      ],
+      "Interval-max": [
+        "1025"
+      ],
+      "PipelineII": [
+        "1"
+      ],
+      "PipelineDepth": [
+        "3"
+      ],
+      "Latency": [
+        "\n"
+      ],
+      "TripCount": [
+        "\n"
+      ],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "84",
+        "2607360"
+      ],
+      "LUT": [
+        "215",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    },
+    "storeOutputTile_csynth.xml": {
+      "EstimatedClockPeriod": [
+        "7.300"
+      ],
+      "Best-caseLatency": [
+        "73"
+      ],
+      "Worst-caseLatency": [
+        "1098"
+      ],
+      "Interval-min": [
+        "73"
+      ],
+      "Interval-max": [
+        "1098"
+      ],
+      "PipelineII": [],
+      "PipelineDepth": [],
+      "Latency": [],
+      "TripCount": [],
+      "DSP": [
+        "0",
+        "9024"
+      ],
+      "FF": [
+        "223",
+        "2607360"
+      ],
+      "LUT": [
+        "781",
+        "1303680"
+      ],
+      "BRAM_18K": [
+        "0",
+        "4032"
+      ],
+      "URAM": [
+        "0",
+        "960"
+      ]
+    }
+  },
+  "report_sha256": {
+    "csynth.xml": "4ea9d2f99c62715fba021abf0d54599d0ef676cb4dfb0868176ce7fc5c85f9a4",
+    "cvtAtoE_csynth.xml": "19ce9095990b9ee7e34cf3e1d94f67a7ea9e805e296a1f8643fb327cef0639fd",
+    "distributeQueryTile_Pipeline_VITIS_LOOP_262_1_VITIS_LOOP_263_2_VITIS_LOOP_264_3_csynth.xml": "a67ada682ddba6108c919348e2b9b3cbae18fc2807485ee6be12e8e987bdd605",
+    "distributeQueryTile_Pipeline_VITIS_LOOP_276_4_VITIS_LOOP_281_5_VITIS_LOOP_282_6_csynth.xml": "8a39109ec81fa8542449054b2896622a1bea0cf938611ed5dde2aac7603d5f62",
+    "distributeQueryTile_csynth.xml": "192ce5027d421590b48f0f38c32b941026b5fe984b40bb0fc0a5a4b03716768d",
+    "entry_proc_csynth.xml": "1f1f0fd11c37e591be1da19991b8b47b4bcb73d589027a30fd814a73eac61f9f",
+    "fsa_stream_split_d_csynth.xml": "c8e81dfa3e4abef55ed878661c8e86346bfa13a05e2346007b91b7e409d0128a",
+    "gatherQueryTile_Pipeline_1_csynth.xml": "8c4b44b574aaa17e7e860919db547ea64f1faa23609af9e77a0ee140f2f5e99b",
+    "gatherQueryTile_Pipeline_VITIS_LOOP_302_2_VITIS_LOOP_303_3_csynth.xml": "ff8a91c6c1cfe02e5d5360b9b2624aa8080daf16d8e3e16afe228c26763d5fca",
+    "gatherQueryTile_csynth.xml": "1e093fb7282d0cbb223106c1e0c0950737fa8b37ee49babd9ec591e0c3226fc6",
+    "p_anonymous_namespace_begin_reciprocal_csynth.xml": "9c5843acd8a3d80ca403e23c919935e9a9f1df541cbd1640446a11eac4b3f3a2",
+    "p_anonymous_namespace_divider_tick_csynth.xml": "b6df37b5f1569be4526f0bf087e71e5056a653024967b9dc6d84a6f7fb9ff9e3",
+    "p_anonymous_namespace_ldexpByBits_csynth.xml": "228879e92b09c19a535c0da4b36809b5cb87cd5841b49ebc3eb8b9af649745d9",
+    "p_anonymous_namespace_normalize_and_round_csynth.xml": "914f0c7d557a3e4ecfb5e8df04d8e644796c4962b525ed60cf6d82270c0fbcca",
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_12_csynth.xml": "af944f3ccbcaebf24772255d19d95f2f6980443435c7ee06a0d9b55a285ea39c",
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_13_csynth.xml": "8432a537115eed84374398060167236c3a6119646f23ede1a5a717aee3e794c0",
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_14_csynth.xml": "1675a9f57bdeea9d3abd6ae37514cba33e44505215993df90a1e7c59d392548a",
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_15_csynth.xml": "b2928ca5d1011cf711f24f4cc630700ec51ab0e72138c3b63e054c076c19516c",
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_16_csynth.xml": "28bca58ac513e0bd1d389774ad519a1271febb43b5499c496b09fa4fc4c6db91",
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_17_csynth.xml": "8afbf33d40fd49f368adef21e77424b0f69ae15c622bc4f02d7f68f88c166d68",
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_18_csynth.xml": "97b1179db2cc5a403a440d0e7560912723f284974242034b79486c38f49c730c",
+    "reciprocalColumns_Pipeline_VITIS_LOOP_369_1_csynth.xml": "acab589162fb77a8ff3510a774f58060731da708cd09f340804c1c6c9d228707",
+    "reciprocalColumns_csynth.xml": "eaa355bcca231f0b4a2827dd3a61998759132352a2ddaf99b6a064fbb5d06338",
+    "runAccumulatorColumns_csynth.xml": "6cfa6f0a2402078b4f4a3d9f81451a1a8c900a6f7c3748abef5f16584ce38479",
+    "runController_csynth.xml": "b8d3dfa16a63700eaf3be67d955959665deb4e0e634c0ef51a04d6d79f01364a",
+    "runPeArray_csynth.xml": "ebdb6785afd0312965958130f92859931280fb6ce64768a8ecb170e2606f4c09",
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_104_1_VITIS_LOOP_111_3_csynth.xml": "1cec3fb731f532497cb4a9364c86a501f968afb4bf58cddc88f145c1fc86d18a",
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_119_5_VITIS_LOOP_120_6_VITIS_LOOP_121_7_csynth.xml": "fb2ef3a39a389e49475e19fa777851d317abbe765c142b7f2aee968528a868e0",
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_136_10_VITIS_LOOP_137_11_csynth.xml": "e3f4225d9168faec7efd3407d2b1338d4b9aeccffcfc67969f1fcd64a24a9a65",
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_152_13_csynth.xml": "d73898fa6b12f8e5b41831ab21c3d8d4f0fb36a0c152748861c640e499bb4c52",
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_171_16_csynth.xml": "f544a17b38c1140c7177358448aee9c7c91c43b759395c39139e95a7ee15836b",
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_198_19_csynth.xml": "a1b9f45df6067ea8cf9e10f751e600b55623587a1e678ea86730a556545b7a8c",
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_218_23_csynth.xml": "03d90cd0dcc1cceba30998195f1fdc44f08eaf67335ad55531cefa4aab93fcfb",
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_231_26_csynth.xml": "1d2a64b4daae7fa7f54f6898563ee0b29740486c1aaa024df08e2e2df2e03e7f",
+    "runQueryBlock_0_Pipeline_VITIS_LOOP_245_29_VITIS_LOOP_246_30_VITIS_LOOP_247_31_csynth.xml": "93737eacc3bd76703fbfa6eb905e88c275b9cc0359eae95d6f5f2fcf5230aa64",
+    "runQueryBlock_0_s_csynth.xml": "7d8cb0e583c0c6249e4ac5b4df00953194eca284d36ff631c669a6d98e9b5da9",
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_104_1_VITIS_LOOP_111_3_csynth.xml": "7c49f86eaaa7ad02888f8c8310904a38a8764cacad3bd4ffb25395a0f2853f45",
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_119_5_VITIS_LOOP_120_6_VITIS_LOOP_121_7_csynth.xml": "d8f082b4125cb05d4d696dde7b84b398af5552c22438ed755dbcbba60c552415",
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_136_10_VITIS_LOOP_137_11_csynth.xml": "2e4707bb48453ca9ba1ac61d67dbe4faaf8c28600ffff38a7a68ed614af9a203",
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_152_13_csynth.xml": "fe66286a8579c058b6b0aba7b92966aaa26c15ace57d790701b6e23b86f3fe75",
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_171_16_csynth.xml": "130822dec60b5726517dba58869c070e039c15d7285bad08d904b3d5a85e3e7e",
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_198_19_csynth.xml": "85a3c257dcf7e8083ceb6ad064b1ef4ad450fa1cb3b8ba004ef3cf06a8119f7e",
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_218_23_csynth.xml": "743db390655e099f5ac8e2e5d80286f0628d0beb55958df5ad6b26024ab4c912",
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_231_26_csynth.xml": "e5f155433d538876be30a91ad86d63860b943cfd9bbe7535e5cd2913479a4b17",
+    "runQueryBlock_1_Pipeline_VITIS_LOOP_245_29_VITIS_LOOP_246_30_VITIS_LOOP_247_31_csynth.xml": "a26f12519ee9573664c1a9e565c535642d6c77ffbe0d97a746c7998ce1504049",
+    "runQueryBlock_1_s_csynth.xml": "8c23502f31d9062f922f37b957a6dc1cbbfef15f71f4a6a9d5a5231f3cec77f6",
+    "runQueryTile_csynth.xml": "7980891dcc3165d227ec58eb4d6e3768fd33b854aa3806c28439610cd6613ec6",
+    "runSharedEngine_Pipeline_VITIS_LOOP_334_1_csynth.xml": "08b62953f92fdfc6c8c24eeb6cbbe9e6a9e912957fa3b7374a5c537fe84e8de0",
+    "runSharedEngine_csynth.xml": "747e377afe72634233ccd751981c10d1ac222202e6eb8b31751b0a9c1a6741d7",
+    "run_csynth.xml": "d0c90e57cd3265651d52c8fed216b546812415e1bf13443ed83dcc303ac0dd8a",
+    "stageAccumulatorOperands_csynth.xml": "d59a8447b083d40473a72b0a9d9ed469eb1c354aba64d412b3b8e256af51d56c",
+    "stageAccumulatorResult_csynth.xml": "eae0eec14e25cb7bd3d264570adf0efa68f337746a807b8e8663f2f3c1d079f7",
+    "stagePeArrayResult_csynth.xml": "d86860e34492413eec6fc32446ced7996e1c693a27fc584332239176cc75507f",
+    "stagePeOperands_csynth.xml": "98753873ff79f8d0513ed5211e0e4fa847710236c6f6cde4d48f27b431de39f3",
+    "storeOutputTile_Pipeline_VITIS_LOOP_76_1_csynth.xml": "ed8806a67c4cc2f243a93cf048c844baf3cd43d38e28f8a83b6d7774e3929276",
+    "storeOutputTile_csynth.xml": "c51976f8a2017d78f39e54b950613a07c6b9ee10318f09d83aaaf8c14d77cbce"
+  },
+  "rtl_counts": {
+    "fsa_stream_split_d": 1,
+    "fsa_stream_split_d_run": 1,
+    "fsa_stream_split_d_runController": 1,
+    "fsa_stream_split_d_runQueryTile": 1,
+    "fsa_stream_split_d_entry_proc": 1,
+    "fsa_stream_split_d_distributeQueryTile": 1,
+    "fsa_stream_split_d_distributeQueryTile_Pipeline_VITIS_LOOP_262_1_VITIS_LOOP_263_2_VITIS_LOOP_264_3": 1,
+    "fsa_stream_split_d_flow_control_loop_pipe_sequential_init": 41,
+    "fsa_stream_split_d_distributeQueryTile_Pipeline_VITIS_LOOP_276_4_VITIS_LOOP_281_5_VITIS_LOOP_282_6": 1,
+    "fsa_stream_split_d_runQueryBlock_0_s": 1,
+    "fsa_stream_split_d_runQueryBlock_0_s_state_q_RAM_T2P_BRAM_1R1W": 64,
+    "fsa_stream_split_d_runQueryBlock_0_s_state_k_RAM_T2P_BRAM_1R1W": 256,
+    "fsa_stream_split_d_runQueryBlock_0_s_state_reg_RAM_2P_LUTRAM_1R1W": 256,
+    "fsa_stream_split_d_runQueryBlock_0_s_state_score_RAM_2P_LUTRAM_1R1W": 256,
+    "fsa_stream_split_d_runQueryBlock_0_s_state_score_valid_RAM_AUTO_1R1W": 128,
+    "fsa_stream_split_d_runQueryBlock_0_s_state_output_acc_RAM_T2P_BRAM_1R1W": 16,
+    "fsa_stream_split_d_runQueryBlock_0_s_state_running_max_RAM_AUTO_1R1W": 8,
+    "fsa_stream_split_d_runQueryBlock_0_s_state_running_sum_RAM_AUTO_1R1W": 16,
+    "fsa_stream_split_d_runQueryBlock_0_s_state_alpha_RAM_AUTO_1R1W": 16,
+    "fsa_stream_split_d_runQueryBlock_0_s_state_history_valid_RAM_AUTO_1R1W": 8,
+    "fsa_stream_split_d_runQueryBlock_0_s_state_tile_has_value_RAM_AUTO_1R1W": 8,
+    "fsa_stream_split_d_runSharedEngine": 2,
+    "fsa_stream_split_d_runSharedEngine_Pipeline_VITIS_LOOP_334_1": 2,
+    "fsa_stream_split_d_runSharedEngine_Pipeline_VITIS_LOOP_334_1_slopes_ROM_AUTO_1R": 2,
+    "fsa_stream_split_d_runSharedEngine_Pipeline_VITIS_LOOP_334_1_fsa_anonymous_namespace_EXP2_PWL_INdEe": 2,
+    "fsa_stream_split_d_stagePeOperands": 2,
+    "fsa_stream_split_d_stageAccumulatorOperands": 2,
+    "fsa_stream_split_d_runPeArray": 2,
+    "fsa_stream_split_d_stagePeArrayResult": 2,
+    "fsa_stream_split_d_sparsemux_7_2_16_1_1": 512,
+    "fsa_stream_split_d_sparsemux_7_2_11_1_1": 768,
+    "fsa_stream_split_d_sparsemux_7_2_3_1_1": 256,
+    "fsa_stream_split_d_mul_11ns_11ns_22_2_1": 256,
+    "fsa_stream_split_d_sparsemux_7_2_24_1_1": 272,
+    "fsa_stream_split_d_ctlz_22_22_1_1": 256,
+    "fsa_stream_split_d_ctlz_24_24_1_1": 272,
+    "fsa_stream_split_d_sparsemux_7_2_27_1_1": 768,
+    "fsa_stream_split_d_sparsemux_7_2_28_1_1": 256,
+    "fsa_stream_split_d_ctlz_27_27_1_1": 256,
+    "fsa_stream_split_d_sparsemux_7_2_9_1_1": 256,
+    "fsa_stream_split_d_sparsemux_15_6_32_1_1": 256,
+    "fsa_stream_split_d_sparsemux_13_5_32_1_1": 258,
+    "fsa_stream_split_d_sparsemux_13_5_16_1_1": 288,
+    "fsa_stream_split_d_runAccumulatorColumns": 2,
+    "fsa_stream_split_d_runAccumulatorColumns_fsa_anonymous_namespace_ACC_EXP2_PWL_SLOPE_BITS_ROM_AUTbkb": 2,
+    "fsa_stream_split_d_runAccumulatorColumns_fsa_anonymous_namespace_ACC_EXP2_PWL_INTERCEPT_BITS_ROMcud": 2,
+    "fsa_stream_split_d_p_anonymous_namespace_ldexpByBits": 16,
+    "fsa_stream_split_d_sparsemux_11_4_32_1_1": 480,
+    "fsa_stream_split_d_stageAccumulatorResult": 2,
+    "fsa_stream_split_d_mul_24ns_24ns_48_3_1": 16,
+    "fsa_stream_split_d_sparsemux_7_2_31_1_1": 16,
+    "fsa_stream_split_d_ctlz_48_48_1_1": 16,
+    "fsa_stream_split_d_sparsemux_7_2_51_1_1": 64,
+    "fsa_stream_split_d_sparsemux_7_2_52_1_1": 16,
+    "fsa_stream_split_d_ctlz_51_51_1_1": 16,
+    "fsa_stream_split_d_sparsemux_19_8_32_1_1": 16,
+    "fsa_stream_split_d_fsub_32ns_32ns_32_3_full_dsp_1": 24,
+    "fsa_stream_split_d_sparsemux_15_3_16_1_1": 256,
+    "fsa_stream_split_d_urem_32ns_4ns_3_36_1": 2,
+    "fsa_stream_split_d_urem_32ns_4ns_3_36_1_divider": 2,
+    "fsa_stream_split_d_urem_32ns_5ns_4_36_1": 2,
+    "fsa_stream_split_d_urem_32ns_5ns_4_36_1_divider": 2,
+    "fsa_stream_split_d_sparsemux_9_2_16_1_1": 80,
+    "fsa_stream_split_d_sparsemux_15_3_1_1_1": 288,
+    "fsa_stream_split_d_sparsemux_15_3_3_1_1": 32,
+    "fsa_stream_split_d_sparsemux_15_3_7_1_1": 32,
+    "fsa_stream_split_d_sparsemux_15_3_32_1_1": 512,
+    "fsa_stream_split_d_sparsemux_23_4_1_1_1": 2,
+    "fsa_stream_split_d_sparsemux_23_4_3_1_1": 2,
+    "fsa_stream_split_d_sparsemux_23_4_7_1_1": 2,
+    "fsa_stream_split_d_sparsemux_23_4_32_1_1": 16,
+    "fsa_stream_split_d_sparsemux_17_3_1_1_1": 512,
+    "fsa_stream_split_d_sparsemux_7_2_32_1_1": 34,
+    "fsa_stream_split_d_sparsemux_9_3_32_1_1": 32,
+    "fsa_stream_split_d_mul_32s_7ns_32_1_1": 2,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_104_1_VITIS_LOOP_111_3": 1,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_119_5_VITIS_LOOP_120_6_VITIS_LOOP_121_7": 1,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_136_10_VITIS_LOOP_137_11": 1,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_152_13": 1,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_171_16": 1,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_198_19": 1,
+    "fsa_stream_split_d_cvtAtoE": 256,
+    "fsa_stream_split_d_sptohp_32ns_16_1_no_dsp_1": 256,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_231_26": 1,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_218_23": 1,
+    "fsa_stream_split_d_reciprocalColumns": 2,
+    "fsa_stream_split_d_p_anonymous_namespace_begin_reciprocal": 2,
+    "fsa_stream_split_d_reciprocalColumns_Pipeline_VITIS_LOOP_369_1": 2,
+    "fsa_stream_split_d_p_anonymous_namespace_divider_tick": 2,
+    "fsa_stream_split_d_p_anonymous_namespace_normalize_and_round": 2,
+    "fsa_stream_split_d_sparsemux_9_3_1_1_1": 2,
+    "fsa_stream_split_d_sparsemux_7_2_1_1_1": 2,
+    "fsa_stream_split_d_reciprocalColumns_Pipeline_VITIS_LOOP_369_12": 2,
+    "fsa_stream_split_d_reciprocalColumns_Pipeline_VITIS_LOOP_369_13": 2,
+    "fsa_stream_split_d_reciprocalColumns_Pipeline_VITIS_LOOP_369_14": 2,
+    "fsa_stream_split_d_reciprocalColumns_Pipeline_VITIS_LOOP_369_15": 2,
+    "fsa_stream_split_d_reciprocalColumns_Pipeline_VITIS_LOOP_369_16": 2,
+    "fsa_stream_split_d_reciprocalColumns_Pipeline_VITIS_LOOP_369_17": 2,
+    "fsa_stream_split_d_reciprocalColumns_Pipeline_VITIS_LOOP_369_18": 2,
+    "fsa_stream_split_d_fcmp_32ns_32ns_1_1_no_dsp_1": 2,
+    "fsa_stream_split_d_runQueryBlock_0_Pipeline_VITIS_LOOP_245_29_VITIS_LOOP_246_30_VITIS_LOOP_247_31": 1,
+    "fsa_stream_split_d_sparsemux_17_3_32_1_1": 2,
+    "fsa_stream_split_d_runQueryBlock_1_s": 1,
+    "fsa_stream_split_d_runQueryBlock_1_s_state_score_valid_RAM_AUTO_1R1W": 128,
+    "fsa_stream_split_d_runQueryBlock_1_s_state_running_max_RAM_AUTO_1R1W": 8,
+    "fsa_stream_split_d_runQueryBlock_1_s_state_history_valid_RAM_AUTO_1R1W": 8,
+    "fsa_stream_split_d_runQueryBlock_1_s_state_tile_has_value_RAM_AUTO_1R1W": 8,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_104_1_VITIS_LOOP_111_3": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_119_5_VITIS_LOOP_120_6_VITIS_LOOP_121_7": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_136_10_VITIS_LOOP_137_11": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_152_13": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_171_16": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_198_19": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_231_26": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_218_23": 1,
+    "fsa_stream_split_d_runQueryBlock_1_Pipeline_VITIS_LOOP_245_29_VITIS_LOOP_246_30_VITIS_LOOP_247_31": 1,
+    "fsa_stream_split_d_gatherQueryTile": 1,
+    "fsa_stream_split_d_gatherQueryTile_normalized_RAM_AUTO_1R1W": 16,
+    "fsa_stream_split_d_gatherQueryTile_Pipeline_1": 1,
+    "fsa_stream_split_d_gatherQueryTile_Pipeline_VITIS_LOOP_302_2_VITIS_LOOP_303_3": 1,
+    "fsa_stream_split_d_storeOutputTile": 1,
+    "fsa_stream_split_d_storeOutputTile_Pipeline_VITIS_LOOP_76_1": 1,
+    "fsa_stream_split_d_sparsemux_33_4_32_1_1": 2,
+    "fsa_stream_split_d_fifo_w64_d4_S": 1,
+    "fsa_stream_split_d_fifo_w64_d4_S_ShiftReg": 1,
+    "fsa_stream_split_d_fifo_w161_d2_S": 2,
+    "fsa_stream_split_d_fifo_w161_d2_S_ShiftReg": 2,
+    "fsa_stream_split_d_fifo_w64_d8_S": 2,
+    "fsa_stream_split_d_fifo_w64_d8_S_ShiftReg": 2,
+    "fsa_stream_split_d_fifo_w128_d8_S": 2,
+    "fsa_stream_split_d_fifo_w128_d8_S_ShiftReg": 2,
+    "fsa_stream_split_d_fifo_w32_d3_S": 1,
+    "fsa_stream_split_d_fifo_w32_d3_S_ShiftReg": 1,
+    "fsa_stream_split_d_fifo_w4_d3_S": 1,
+    "fsa_stream_split_d_fifo_w4_d3_S_ShiftReg": 1,
+    "fsa_stream_split_d_fifo_w8_d3_S": 1,
+    "fsa_stream_split_d_fifo_w8_d3_S_ShiftReg": 1,
+    "fsa_stream_split_d_fifo_w32_d8_S": 2,
+    "fsa_stream_split_d_fifo_w32_d8_S_ShiftReg": 2,
+    "fsa_stream_split_d_start_for_gatherQueryTile_U0": 1,
+    "fsa_stream_split_d_start_for_gatherQueryTile_U0_ShiftReg": 1,
+    "fsa_stream_split_d_start_for_runQueryBlock_0_U0": 1,
+    "fsa_stream_split_d_start_for_runQueryBlock_0_U0_ShiftReg": 1,
+    "fsa_stream_split_d_start_for_runQueryBlock_1_U0": 1,
+    "fsa_stream_split_d_start_for_runQueryBlock_1_U0_ShiftReg": 1,
+    "fsa_stream_split_d_control_s_axi": 1,
+    "fsa_stream_split_d_k_gmem_m_axi": 1,
+    "fsa_stream_split_d_k_gmem_m_axi_load": 1,
+    "fsa_stream_split_d_k_gmem_m_axi_fifo": 5,
+    "fsa_stream_split_d_k_gmem_m_axi_srl": 5,
+    "fsa_stream_split_d_k_gmem_m_axi_mem": 5,
+    "fsa_stream_split_d_k_gmem_m_axi_reg_slice": 3,
+    "fsa_stream_split_d_k_gmem_m_axi_read": 1,
+    "fsa_stream_split_d_k_gmem_m_axi_burst_converter": 1,
+    "fsa_stream_split_d_o_gmem_m_axi": 1,
+    "fsa_stream_split_d_o_gmem_m_axi_store": 1,
+    "fsa_stream_split_d_o_gmem_m_axi_fifo": 10,
+    "fsa_stream_split_d_o_gmem_m_axi_srl": 10,
+    "fsa_stream_split_d_o_gmem_m_axi_mem": 10,
+    "fsa_stream_split_d_o_gmem_m_axi_write": 1,
+    "fsa_stream_split_d_o_gmem_m_axi_burst_converter": 1,
+    "fsa_stream_split_d_o_gmem_m_axi_reg_slice": 3,
+    "fsa_stream_split_d_o_gmem_m_axi_throttle": 1,
+    "fsa_stream_split_d_q_gmem_m_axi": 1,
+    "fsa_stream_split_d_q_gmem_m_axi_load": 1,
+    "fsa_stream_split_d_q_gmem_m_axi_fifo": 5,
+    "fsa_stream_split_d_q_gmem_m_axi_srl": 5,
+    "fsa_stream_split_d_q_gmem_m_axi_mem": 5,
+    "fsa_stream_split_d_q_gmem_m_axi_reg_slice": 3,
+    "fsa_stream_split_d_q_gmem_m_axi_read": 1,
+    "fsa_stream_split_d_q_gmem_m_axi_burst_converter": 1,
+    "fsa_stream_split_d_v_gmem_m_axi": 1,
+    "fsa_stream_split_d_v_gmem_m_axi_load": 1,
+    "fsa_stream_split_d_v_gmem_m_axi_fifo": 5,
+    "fsa_stream_split_d_v_gmem_m_axi_srl": 5,
+    "fsa_stream_split_d_v_gmem_m_axi_mem": 5,
+    "fsa_stream_split_d_v_gmem_m_axi_reg_slice": 3,
+    "fsa_stream_split_d_v_gmem_m_axi_read": 1,
+    "fsa_stream_split_d_v_gmem_m_axi_burst_converter": 1
+  },
+  "rtl_module_declarations": 190,
+  "warning_counts": {
+    "HLS 200-1995": 16,
+    "HLS 214-358": 2,
+    "ANALYSIS 214-52": 16,
+    "SYN 201-103": 24,
+    "HLS 200-880": 1,
+    "HLS 200-1020": 1,
+    "RTGEN 206-101": 84
+  },
+  "summaries": [
+    "[stage4-summary] 32/32",
+    "[math-summary] 32/32"
+  ],
+  "ii_violations": [
+    "WARNING: [HLS 200-880] The II Violation in module 'runSharedEngine_Pipeline_VITIS_LOOP_334_1' (loop 'VITIS_LOOP_334_1'): Unable to enforce a carried dependence constraint (II = 1, distance = 7, offset = 0) between 'store' operation 0 bit ('pe_hit_write_ln532', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:532) of variable 'computed.out_exp2', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:481 on local variable 'pe_hit', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:300 and 'load' operation 1 bit ('pe_hit_load', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:389) on local variable 'pe_hit', /home/zhangchenxuan/FSA_HLS/src/stream/split_d/split_d_compute.cpp:300."
+  ],
+  "critical_paths": [],
+  "stage4_cases": 32,
+  "stage4_words": 85824,
+  "stage4_word_scope": "Complete frozen short regression; manifest/source SHA must be verified separately",
+  "archive_remote": "/home/zhangchenxuan/FSA_HLS/build/split_d_stage4_resume_cedd052_M8_token_shift_20261013",
+  "unexecuted": [
+    "N1024 CSim",
+    "CoSim",
+    "IP export",
+    "Vivado",
+    "board test"
+  ],
+  "start": "2026-10-13T20:14:20+08:00",
+  "end": "2026-10-13T21:53:35+08:00",
+  "elapsed_seconds": 5955.0,
+  "design_size_sha256": "18de9660c2ea53b681ec3f18e1da91d3975d3d8c218518037c649b4506552af5",
+  "transform_elapsed_seconds": [
+    "117.44",
+    "81.23",
+    "1.01",
+    "238.71",
+    "137.27",
+    "933.87",
+    "10.11"
+  ]
+}
