@@ -11,7 +11,8 @@ namespace{
         bool infinity = false;
         bool nan = false;
         ap_uint<11> significand = 0;
-        int lsb_exponent = -24;
+        // FP16有限数的最低有效位指数为-24..5。
+        ap_int<6> lsb_exponent = -24;
     };
 
     struct FloatFields{
@@ -20,13 +21,15 @@ namespace{
         bool infinity = false;
         bool nan = false;
         ap_uint<24> significand = 0;
-        int lsb_exponent = -149;
+        // FP32有限数的最低有效位指数为-149..104。
+        ap_int<9> lsb_exponent = -149;
     };
 
     struct NormalizedSum{
         bool sign = false;
         bool zero = true;
-        int top_exponent = 0;
+        // 规格化与进位后的最高位指数落在9位有符号范围内。
+        ap_int<9> top_exponent = 0;
         // bit26是隐藏位，bit2/1/0分别为guard/round/sticky。
         ap_uint<27> significand = 0;
     };
@@ -35,7 +38,8 @@ namespace{
         // 小数部分直接以精确的significand*2^lsb_exponent传递，
         // 不重新打包成FP16，也不在DSP输入路径增加规格化移位。
         HalfFields fractional{};
-        int integer = 0;
+        // FP16整数部分的绝对值不超过65504。
+        ap_int<17> integer = 0;
         ap_uint<3> piece = 0;
         bool force_zero = false;
     };
@@ -57,7 +61,7 @@ namespace{
             fields.lsb_exponent = -24;
         }else{
             fields.significand = ((ap_uint<11>)1 << 10) | mantissa;
-            fields.lsb_exponent = (int)exponent-25;
+            fields.lsb_exponent = (ap_int<6>)exponent-(ap_int<6>)25;
         }
         return fields;
     }
@@ -79,40 +83,24 @@ namespace{
             fields.lsb_exponent = -149;
         }else{
             fields.significand = ((ap_uint<24>)1 << 23) | mantissa;
-            fields.lsb_exponent = (int)exponent-150;
+            fields.lsb_exponent = (ap_int<9>)exponent-(ap_int<9>)150;
         }
         return fields;
     }
 
-    int highestBit24(const ap_uint<24> value){
+    ap_uint<27> shiftRightJam27(const ap_uint<27> value, const ap_uint<9> shift){
         #pragma HLS INLINE
-        int highest = -1;
-        for(int bit=23; bit>=0; --bit){
-            #pragma HLS UNROLL
-            if(highest<0 && value[bit]){
-                highest = bit;
-            }
-        }
-        return highest;
-    }
-
-    ap_uint<27> shiftRightJam27(
-        const ap_uint<27> value,
-        const int shift
-    ){
-        #pragma HLS INLINE
-        if(shift<=0){
+        if(shift == 0){
             return value;
         }
         if(shift>=27){
             return value!=0 ? (ap_uint<27>)1 : (ap_uint<27>)0;
         }
-        // {value, 27'b0}右移后，高27位是商，低27位保存所有丢弃位。
-        // 用丢弃位归约生成sticky，去掉动态掩码减一的进位链。
-        // 上面的边界判断保证distance在1..26内，窄化不会截断有效移位量。
+        // 拼接低27位零后右移，高27位为商，低位归约为sticky。
+        // 这里保留第2轮的单级路径；分级移位在第3轮使PE深度增加。
+        const ap_uint<5> distance = shift;
         ap_uint<54> extended = 0;
         extended.range(53, 27) = value;
-        const ap_uint<5> distance = shift;
         const ap_uint<54> shifted = extended >> distance;
         ap_uint<27> result = shifted.range(53, 27);
         result[0] = result[0] || (shifted.range(26, 0)!=0);
@@ -127,11 +115,7 @@ namespace{
         return bits;
     }
 
-    NormalizedSum addFiniteProduct(
-        const HalfFields& a,
-        const HalfFields& b,
-        const FloatFields& c
-    ){
+    NormalizedSum addFiniteProduct(const HalfFields& a, const HalfFields& b, const FloatFields& c){
         #pragma HLS INLINE
         NormalizedSum result{};
         const bool product_sign = a.sign^b.sign;
@@ -143,10 +127,11 @@ namespace{
         // finiteRawFma只在乘积非零时进入这里。直接用前导零数同时生成
         // 乘积最高位指数和规格化左移量，避免DSP后串联22位优先编码器。
         const ap_uint<5> product_left_shift = product.countLeadingZeros();
-        const int product_top =
-            a.lsb_exponent+b.lsb_exponent+21-(int)product_left_shift;
+        const ap_int<9> product_top =
+            (ap_int<9>)a.lsb_exponent+(ap_int<9>)b.lsb_exponent+
+            (ap_int<9>)21-(ap_int<9>)product_left_shift;
         const ap_uint<27> product_normalized =
-            (ap_uint<27>)product << (5+(int)product_left_shift);
+            (ap_uint<27>)product << ((ap_uint<6>)5+product_left_shift);
         if(c.zero){
             result.sign = product_sign;
             result.zero = false;
@@ -155,29 +140,33 @@ namespace{
             return result;
         }
 
-        const int c_highest = highestBit24(c.significand);
-        const int c_top = c.lsb_exponent+c_highest;
-        const int common_top = product_top>c_top ? product_top : c_top;
+        // 此处c非零；直接以前导零数生成最高位指数与规格化移位量。
+        const ap_uint<5> c_left_shift = c.significand.countLeadingZeros();
+        const ap_int<9> c_top = c.lsb_exponent+(ap_int<9>)23-
+            (ap_int<9>)c_left_shift;
+        const ap_uint<27> c_normalized =
+            (ap_uint<27>)c.significand << ((ap_uint<6>)3+c_left_shift);
+        // 先按指数和有效数排序，仅较小值需要右移并生成sticky。
+        const bool product_larger = product_top>c_top ||
+            (product_top==c_top && product_normalized>=c_normalized);
+        const ap_int<9> common_top = product_larger ? product_top : c_top;
+        const ap_uint<27> larger_normalized = product_larger
+            ? product_normalized : c_normalized;
+        const ap_uint<27> smaller_normalized = product_larger
+            ? c_normalized : product_normalized;
+        const ap_uint<9> exponent_gap = (ap_uint<9>)(product_larger
+            ? product_top-c_top : c_top-product_top);
+        const ap_uint<27> smaller_aligned =
+            shiftRightJam27(smaller_normalized, exponent_gap);
 
-        ap_uint<27> product_aligned = product_normalized;
-        ap_uint<27> c_aligned =
-            (ap_uint<27>)c.significand << (26-c_highest);
-        product_aligned = shiftRightJam27(
-            product_aligned, common_top-product_top
-        );
-        c_aligned = shiftRightJam27(c_aligned, common_top-c_top);
-
+        const bool same_sign = product_sign==c.sign;
         ap_uint<28> magnitude = 0;
-        if(product_sign==c.sign){
-            magnitude = (ap_uint<28>)product_aligned+c_aligned;
-            result.sign = product_sign;
-        }else if(product_aligned>=c_aligned){
-            magnitude = (ap_uint<28>)product_aligned-c_aligned;
-            result.sign = product_sign;
+        if(same_sign){
+            magnitude = (ap_uint<28>)larger_normalized+smaller_aligned;
         }else{
-            magnitude = (ap_uint<28>)c_aligned-product_aligned;
-            result.sign = c.sign;
+            magnitude = (ap_uint<28>)larger_normalized-smaller_aligned;
         }
+        result.sign = (same_sign || product_larger) ? product_sign : c.sign;
 
         if(magnitude==0){
             result.zero = true;
@@ -187,7 +176,7 @@ namespace{
 
         result.zero = false;
         if(magnitude[27]){
-            result.top_exponent = common_top+1;
+            result.top_exponent = common_top+(ap_int<2>)1;
             result.significand = magnitude.range(27, 1);
             result.significand[0] =
                 result.significand[0] || magnitude[0];
@@ -196,7 +185,7 @@ namespace{
             // 此分支的low非零，27位前导零数就是规格化所需的0..26位移。
             // 直接使用HLS的ctlz，避免最高位编码后再串联26-highest减法。
             const ap_uint<5> left_shift = low.countLeadingZeros();
-            result.top_exponent = common_top-(int)left_shift;
+            result.top_exponent = common_top-(ap_int<9>)left_shift;
             result.significand = low << left_shift;
         }
         return result;
@@ -210,12 +199,12 @@ namespace{
             return zero;
         }
 
-        int exponent = value.top_exponent;
+        ap_int<9> exponent = value.top_exponent;
         ap_uint<27> significand = value.significand;
         bool subnormal = false;
         if(exponent < -126){
             significand = shiftRightJam27(
-                significand, -126-exponent
+                significand, (ap_uint<9>)((ap_int<9>)-126-exponent)
             );
             exponent = -126;
             subnormal = true;
@@ -272,7 +261,8 @@ namespace{
             return result;
         }
 
-        const int exponent = (int)exponent_bits-127;
+        const ap_int<9> exponent =
+            (ap_int<9>)exponent_bits-(ap_int<9>)127;
         if(exponent>15){
             result.range(14, 10) = 0x1f;
             return result;
@@ -287,7 +277,7 @@ namespace{
                 rounded = rounded+1;
             }
 
-            int half_exponent = exponent+15;
+            ap_int<6> half_exponent = exponent+(ap_int<5>)15;
             if(rounded[10]){
                 rounded = 0;
                 ++half_exponent;
@@ -316,19 +306,19 @@ namespace{
         }
 
         ap_uint<11> significand = mantissa;
-        int binary_scale = -24;
+        ap_int<6> binary_scale = -24;
         if(exponent_bits!=0){
             significand[10] = 1;
-            binary_scale = (int)exponent_bits-25;
+            binary_scale = (ap_int<6>)exponent_bits-(ap_int<6>)25;
         }
 
         ap_uint<16> integer_magnitude = 0;
         ap_uint<11> remainder = 0;
         if(binary_scale>=0){
             integer_magnitude =
-                (ap_uint<16>)significand << binary_scale;
+                (ap_uint<16>)significand << (ap_uint<3>)binary_scale;
         }else{
-            const int right_shift = -binary_scale;
+            const ap_uint<5> right_shift = (ap_uint<5>)(-binary_scale);
             if(right_shift>=11){
                 remainder = significand;
             }else{
@@ -339,7 +329,8 @@ namespace{
             }
         }
         prepared.integer = sign
-            ? -(int)integer_magnitude : (int)integer_magnitude;
+            ? (ap_int<17>)(-(ap_int<17>)integer_magnitude)
+            : (ap_int<17>)integer_magnitude;
 
         if(remainder!=0){
             prepared.fractional.sign = sign;
@@ -347,14 +338,15 @@ namespace{
             prepared.fractional.significand = remainder;
             prepared.fractional.lsb_exponent = binary_scale;
 
-            const int piece_shift = binary_scale+3;
-            ap_uint<14> piece_value = piece_shift>=0
-                ? (ap_uint<14>)remainder << piece_shift
-                : (ap_uint<14>)remainder >> (-piece_shift);
-            if(piece_value>=8){
-                piece_value = 7;
+            // 余数严格小于一个整数单位，乘8后的整数部分只有3位。
+            const ap_uint<5> fractional_bits = (ap_uint<5>)(-binary_scale);
+            if(fractional_bits > 3){
+                prepared.piece =
+                    (ap_uint<3>)(remainder >> (ap_uint<5>)(fractional_bits-3));
+            }else{
+                prepared.piece =
+                    (ap_uint<3>)(remainder << (ap_uint<2>)(3-fractional_bits));
             }
-            prepared.piece = piece_value.range(2, 0);
         }
         return prepared;
     }
@@ -366,10 +358,7 @@ namespace{
         return bits;
     }
 
-    ap_uint<32> scaleFloatByPowerOfTwo(
-        ap_uint<32> bits,
-        const int exponent
-    ){
+    ap_uint<32> scaleFloatByPowerOfTwo(ap_uint<32> bits, const ap_int<17> exponent){
         #pragma HLS INLINE
         const ap_uint<8> old_exponent = bits.range(30, 23);
         const ap_uint<23> mantissa = bits.range(22, 0);
@@ -377,7 +366,8 @@ namespace{
             return bits;
         }
 
-        const int new_exponent = (int)old_exponent+exponent;
+        const ap_int<18> new_exponent =
+            (ap_int<18>)old_exponent+(ap_int<18>)exponent;
         if(new_exponent>0 && new_exponent<255){
             bits.range(30, 23) = (ap_uint<8>)new_exponent;
             return bits;
@@ -391,14 +381,15 @@ namespace{
         ap_uint<24> significand = 0;
         significand[23] = 1;
         significand.range(22, 0) = mantissa;
-        const int right_shift = 1-new_exponent;
+        const ap_uint<18> right_shift =
+            (ap_uint<18>)((ap_int<18>)1-new_exponent);
         if(right_shift>24){
             bits.range(30, 0) = 0;
             return bits;
         }
         // 此分支的new_exponent<=0；上面的边界检查保证移位量在1..24。
-        // 拼接低24位零后一次右移，同时得到商、guard和其余丢弃位。
-        // 避免动态mask减一、halfway移位及宽余数比较串到输出路径。
+        // 拼接低24位零后右移，得到商、guard和其余丢弃位。
+        // 保留第2轮路径，避免分级移位增加PE流水深度。
         const ap_uint<5> distance = right_shift;
         ap_uint<48> extended = 0;
         extended.range(47, 24) = significand;
