@@ -11,11 +11,13 @@
 - **Confirmed:**`ebe529b`的16×16/head128官方CSim/CSynth通过；LUT1,213,113、FF231,565、DSP352、BRAM_18K8、估算时钟7.300ns，两个16×8 worker，总256PE/16列Accumulator。顶层transaction latency为undef；未做16×16 CoSim、IP、Vivado或板测。原始摘要在备份分支`docs/evidence/split_d_ebe529b_16x16_timing/summary.json`。
 - **Confirmed:**先前II1阶段4的`d53df16`为LUT1,531,724，超VU37P的1,303,680；该版本不能作为容量合格实现。其共享PE局部II1不能证明端到端性能。
 - **Current assessment:**基线两个128PE RawFMA块是面积主因；旧相近报告每块约459,128LUT。基线PV每轮只利用16/256个MAC位置，性能改进应优先考虑跨feature调度，但要保存逐key行浮点顺序，且不能让额外状态把LUT推过容量。
-- **Plan:**第1轮先移植在旧工作树已做本地逐位验证的RawFMA指数位宽和单对齐移位候选，然后用官方CSim/CSynth核对真实资源与关键路径。若面积或时序不利，回退候选、转向更小的局部变化。
+- **Confirmed:**第1轮`0349e7f`官方16×16/head128 CSim/CSynth于2026-10-14 12:09 +08:00完成，退出0，约45分20秒。顶层LUT1,052,453（基线−160,660，−13.24%）、FF234,051、DSP352、BRAM_18K8、估算时钟7.300ns；PE服务II5、PV循环10,888周期均未改善。当前尚未同时满足性能和资源目标。
+- **Plan:**第2轮将PV改为8个feature上下文斜向wave调度，利用同一次PE调用的不同行；数值顺序由独立原型逐位验证，本地16×16数学22/22通过。下一步以官方CSim/CSynth核对真实PV周期和额外LUT。
 
 ## Current Working Set
 
-- `src/stream/pe_raw_fma.cpp`：第1轮候选，从备份提交移植并删除未测DSP实验宏。新旧`ebe529b` PE已独立对照1,393,216组逐位全等。
+- `src/stream/pe_raw_fma.cpp`：第1轮已测PE精简，新旧`ebe529b` PE独立对照1,393,216组逐位全等。
+- `src/stream/split_d/split_d_controller.cpp`：第2轮PV跨feature wavefront，待官方验证。
 - `docs/修改日志/2026-10-14_1107_split_d_baseline_opt_修改日志.md`：本轮研究记录。
 - `hls/fsa_stream_split_d/run_hls.tcl`：本轮不改；官方入口`./run_hls.sh fsa_stream_split_d`，设置`RUN_COSIM=0 EXPORT_IP=0 FSA_SPLIT_D_PE_DIM=16 FSA_SPLIT_D_HEAD_DIM=128`。
 - `build/baseline_opt_logs/`：忽略的本地编译与差分日志；`third_party/vitis_hls/include/`在本工作树是从原工作树复制的忽略依赖。
@@ -31,15 +33,15 @@
 
 - **Confirmed local:**PE旧/新源码差分1,393,216向量，FP32/FP16/exp2命中逐位全等；独立PE顶层30,000随机及边界测试通过。
 - **Confirmed local:**16×16/head128整机数学22/22通过。本地4×4/head16数学24/24通过，但严格位模式19/24；这是已知MinGW数学替身与官方Vitis差异，本轮不能据此判官方位模式结果。
-- **To verify:**当前候选尚未官方CSim/CSynth；没有新LUT、FF、DSP、BRAM、周期或RTL实例数据。远端SSH预检在沙箱内因无法访问用户SSH配置而未完成，需尝试获准的非沙箱调用。
+- **Confirmed remote:**`0349e7f`官方16×16/head128 CSim数学22/22、CSynth完成；顶层LUT1,052,453，PV循环10,888周期。远端原始日志`logs/round1_16x16_csim_csynth.log`。
+- **In progress local:**第2轮PV改动已完成；16×16/head128数学22/22，退出0；4×4/head16数学24/24、严格位模式19/24，属于已有MinGW替身差异，待官方CSim判定。
 
 ## Next Actions
 
-1. 完成第1轮日志的本地验证记录，核对任务diff并提交到优化分支。
-2. 用已授权的SSH配置做只读远端预检；若远端干净，在不覆盖原分支及构建证据的前提下同步精确提交并用标准入口跑16×16官方CSim/CSynth。
-3. 比较相同配置下LUT与主要循环周期。若PE精简仅减面积而不提速，再设计PV跨feature并行，控制额外上下文数量并做同口径对照。
-4. 写独立报告，清楚区分本地数学测试、HLS估算、RTL/板测与论文指标。
+1. 提交第2轮PV改动和研究日志；在NM37隔离工作树核对精确提交后运行同配置CSim/CSynth，不重复启动。
+2. 比较LUT、时钟和PV循环周期；若超器件容量或性能不降，回退/缩小PV wavefront。
+3. 完成独立报告，清楚区分本地数学测试、HLS估算、RTL/板测与论文指标，提交/推送最终日志。
 
 ## Context Handoff Summary
 
-原状态已在Git备份分支`68638e3`保存。优化分支从`ebe529b`干净开始，当前仅移植PE算术精简；本地数值已通过，远端综合仍待执行。最先做日志、提交、远端预检；不得把未测候选称为资源或性能提升。用户不再要求II1，也不希望运行N1024长测试。
+原状态已在Git备份分支`68638e3`保存并推送。优化分支从`ebe529b`开始，第1轮`0349e7f`通过官方CSim/CSynth，LUT降低13.24%但PV周期不变；第2轮wavefront源码及本地16×16数学已通过，待远端核对。用户不再要求II1，也不希望运行N1024长测试。
