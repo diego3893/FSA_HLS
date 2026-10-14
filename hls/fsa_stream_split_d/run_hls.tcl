@@ -40,6 +40,13 @@ foreach PARAM {FSA_SPLIT_D_QUERY_CONTEXTS FSA_SPLIT_D_PE_HOP_CYCLES FSA_SPLIT_D_
         puts "FSA Split-D engine: $PARAM=$::env($PARAM)"
     }
 }
+foreach PARAM {FSA_SPLIT_D_DSP_NORMALIZE FSA_SPLIT_D_DSP_MAGNITUDE} {
+    if {[info exists ::env($PARAM)]} {
+        if {$::env($PARAM) ni {0 1}} { error "$PARAM must be 0 or 1" }
+        append CFLAGS " -D$PARAM=$::env($PARAM)"
+        puts "FSA Split-D PE mapping: $PARAM=$::env($PARAM)"
+    }
+}
 set TB_CFLAGS $CFLAGS
 set LONG_CSIM_TEST 0
 if {[info exists ::env(FSA_SPLIT_D_LONG_CSIM_TEST)]} {

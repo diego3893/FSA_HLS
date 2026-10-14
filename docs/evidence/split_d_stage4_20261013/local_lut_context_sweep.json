@@ -1,0 +1,137 @@
+{
+  "scope": "Local diagnostic; no CSynth was run on the candidate or intermediate M values",
+  "anchors": {
+    "m1_commit": "6f0b40d5f5d4fd12de9a5645321fd584119eb872",
+    "m1_lut": 1418632,
+    "m1_l_max": 4096,
+    "m1_bram18": 8,
+    "m8_commit": "0bfd6d2b4710321589d590afb86d53701f9a74dc",
+    "m8_lut": 1680612,
+    "m8_l_max": 1024,
+    "m8_bram18": 360,
+    "latest_m8_commit": "d53df16ef10588bbc356e43616a711e8990e9bd1",
+    "latest_m8_lut": 1531724,
+    "capacity_lut": 1303680,
+    "observed_m1_to_m8_delta_lut": 261980,
+    "observed_delta_per_context_lut": 37425.71428571428,
+    "observed_worker0_delta_lut": 130996,
+    "observed_shared_engine_delta_per_worker_lut": 61348,
+    "observed_pe_array_delta_per_worker_lut": 0,
+    "legacy_tile_shared_cycles": 12427,
+    "gross_selected_expression_lut": 122880,
+    "gross_selected_expression_components": {
+      "one_alignment_shift": 41216,
+      "three_normalization_shifts": 54784,
+      "historical_magnitude_add_sub": 26880
+    },
+    "latest_m8_lut_if_selected_expression_rows_vanished": 1408844,
+    "latest_m8_gap_if_selected_expression_rows_vanished": 105164
+  },
+  "limitations": [
+    "M1 and M8 anchor commits also differ in L_MAX, BRAM binding and state initialization; context slope is confounded.",
+    "Linear extrapolation ignores width thresholds, bank changes, logic sharing and placement effects.",
+    "The PE source candidate has no CSynth result. Gross eliminated shift-operator LUT is not a top-level saving or a rigorous bound.",
+    "The selected-expression accounting imagines their reported LUT rows disappear for free; it does not predict actual DSP mapping or top-level LUT.",
+    "Cycle ratios cover eight shared-compute calls for a later key tile only; they exclude AXI, controller, first-key and full transaction latency.",
+    "Legacy shared-compute reference is a different L_MAX=4096 design and is not a full Attention latency comparison.",
+    "The accepted design must independently pass official bitwise CSim, II, timing, RTL-instance, BRAM and resource gates."
+  ],
+  "rows": [
+    {
+      "contexts": 1,
+      "qk_issue_gap_cycles": 8,
+      "gross_qk_internal_holes_per_key": 889,
+      "diagnostic_lut": 1269744,
+      "diagnostic_headroom_lut": 33936,
+      "gross_shift_operator_credit_lut": 41216,
+      "diagnostic_lut_if_full_gross_credit": 1228528,
+      "later_key_shared_cycles_per_query_tile": 1846.0,
+      "later_key_shared_cycles_ratio_to_m8": 5.2,
+      "later_key_shared_cycles_ratio_to_legacy": 0.149
+    },
+    {
+      "contexts": 2,
+      "qk_issue_gap_cycles": 8,
+      "gross_qk_internal_holes_per_key": 762,
+      "diagnostic_lut": 1307170,
+      "diagnostic_headroom_lut": -3490,
+      "gross_shift_operator_credit_lut": 41216,
+      "diagnostic_lut_if_full_gross_credit": 1265954,
+      "later_key_shared_cycles_per_query_tile": 994.0,
+      "later_key_shared_cycles_ratio_to_m8": 2.8,
+      "later_key_shared_cycles_ratio_to_legacy": 0.08
+    },
+    {
+      "contexts": 3,
+      "qk_issue_gap_cycles": 8,
+      "gross_qk_internal_holes_per_key": 635,
+      "diagnostic_lut": 1344595,
+      "diagnostic_headroom_lut": -40915,
+      "gross_shift_operator_credit_lut": 41216,
+      "diagnostic_lut_if_full_gross_credit": 1303379,
+      "later_key_shared_cycles_per_query_tile": 710.0,
+      "later_key_shared_cycles_ratio_to_m8": 2.0,
+      "later_key_shared_cycles_ratio_to_legacy": 0.057
+    },
+    {
+      "contexts": 4,
+      "qk_issue_gap_cycles": 8,
+      "gross_qk_internal_holes_per_key": 508,
+      "diagnostic_lut": 1382021,
+      "diagnostic_headroom_lut": -78341,
+      "gross_shift_operator_credit_lut": 41216,
+      "diagnostic_lut_if_full_gross_credit": 1340805,
+      "later_key_shared_cycles_per_query_tile": 568.0,
+      "later_key_shared_cycles_ratio_to_m8": 1.6,
+      "later_key_shared_cycles_ratio_to_legacy": 0.046
+    },
+    {
+      "contexts": 5,
+      "qk_issue_gap_cycles": 8,
+      "gross_qk_internal_holes_per_key": 381,
+      "diagnostic_lut": 1419447,
+      "diagnostic_headroom_lut": -115767,
+      "gross_shift_operator_credit_lut": 41216,
+      "diagnostic_lut_if_full_gross_credit": 1378231,
+      "later_key_shared_cycles_per_query_tile": 482.8,
+      "later_key_shared_cycles_ratio_to_m8": 1.36,
+      "later_key_shared_cycles_ratio_to_legacy": 0.039
+    },
+    {
+      "contexts": 6,
+      "qk_issue_gap_cycles": 8,
+      "gross_qk_internal_holes_per_key": 254,
+      "diagnostic_lut": 1456873,
+      "diagnostic_headroom_lut": -153193,
+      "gross_shift_operator_credit_lut": 41216,
+      "diagnostic_lut_if_full_gross_credit": 1415657,
+      "later_key_shared_cycles_per_query_tile": 426.0,
+      "later_key_shared_cycles_ratio_to_m8": 1.2,
+      "later_key_shared_cycles_ratio_to_legacy": 0.034
+    },
+    {
+      "contexts": 7,
+      "qk_issue_gap_cycles": 8,
+      "gross_qk_internal_holes_per_key": 127,
+      "diagnostic_lut": 1494298,
+      "diagnostic_headroom_lut": -190618,
+      "gross_shift_operator_credit_lut": 41216,
+      "diagnostic_lut_if_full_gross_credit": 1453082,
+      "later_key_shared_cycles_per_query_tile": 385.429,
+      "later_key_shared_cycles_ratio_to_m8": 1.086,
+      "later_key_shared_cycles_ratio_to_legacy": 0.031
+    },
+    {
+      "contexts": 8,
+      "qk_issue_gap_cycles": 8,
+      "gross_qk_internal_holes_per_key": 0,
+      "diagnostic_lut": 1531724,
+      "diagnostic_headroom_lut": -228044,
+      "gross_shift_operator_credit_lut": 41216,
+      "diagnostic_lut_if_full_gross_credit": 1490508,
+      "later_key_shared_cycles_per_query_tile": 355.0,
+      "later_key_shared_cycles_ratio_to_m8": 1.0,
+      "later_key_shared_cycles_ratio_to_legacy": 0.029
+    }
+  ]
+}

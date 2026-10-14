@@ -115,11 +115,7 @@ namespace{
         return bits;
     }
 
-    NormalizedSum addFiniteProduct(
-        const HalfFields& a,
-        const HalfFields& b,
-        const FloatFields& c
-    ){
+    NormalizedSum addFiniteProduct(const HalfFields& a, const HalfFields& b, const FloatFields& c){
         #pragma HLS INLINE
         NormalizedSum result{};
         const bool product_sign = a.sign^b.sign;
@@ -134,8 +130,16 @@ namespace{
         const ap_int<9> product_top =
             (ap_int<9>)a.lsb_exponent+(ap_int<9>)b.lsb_exponent+
             (ap_int<9>)21-(ap_int<9>)product_left_shift;
+#if defined(FSA_SPLIT_D_DSP_NORMALIZE) && FSA_SPLIT_D_DSP_NORMALIZE
+        // 乘以one-hot因子与左移逐位等价；仅实验性地把乘法绑定DSP。
+        const ap_uint<27> product_scale =
+            (ap_uint<27>)1 << ((ap_uint<6>)5+product_left_shift);
+        ap_uint<27> product_normalized = (ap_uint<27>)product*product_scale;
+        #pragma HLS BIND_OP variable=product_normalized op=mul impl=dsp latency=1
+#else
         const ap_uint<27> product_normalized =
             (ap_uint<27>)product << ((ap_uint<6>)5+product_left_shift);
+#endif
         if(c.zero){
             result.sign = product_sign;
             result.zero = false;
@@ -148,27 +152,46 @@ namespace{
         const ap_uint<5> c_left_shift = c.significand.countLeadingZeros();
         const ap_int<9> c_top = c.lsb_exponent+(ap_int<9>)23-
             (ap_int<9>)c_left_shift;
-        const ap_int<9> common_top = product_top>c_top ? product_top : c_top;
-
-        ap_uint<27> product_aligned = product_normalized;
-        ap_uint<27> c_aligned =
+#if defined(FSA_SPLIT_D_DSP_NORMALIZE) && FSA_SPLIT_D_DSP_NORMALIZE
+        const ap_uint<27> c_scale =
+            (ap_uint<27>)1 << ((ap_uint<6>)3+c_left_shift);
+        ap_uint<27> c_normalized = (ap_uint<27>)c.significand*c_scale;
+        #pragma HLS BIND_OP variable=c_normalized op=mul impl=dsp latency=1
+#else
+        const ap_uint<27> c_normalized =
             (ap_uint<27>)c.significand << ((ap_uint<6>)3+c_left_shift);
-        product_aligned = shiftRightJam27(
-            product_aligned, (ap_uint<9>)(common_top-product_top)
-        );
-        c_aligned = shiftRightJam27(c_aligned, (ap_uint<9>)(common_top-c_top));
+#endif
+        // 先按指数和有效数排序，仅较小值需要右移并生成sticky。
+        const bool product_larger = product_top>c_top ||
+            (product_top==c_top && product_normalized>=c_normalized);
+        const ap_int<9> common_top = product_larger ? product_top : c_top;
+        const ap_uint<27> larger_normalized = product_larger
+            ? product_normalized : c_normalized;
+        const ap_uint<27> smaller_normalized = product_larger
+            ? c_normalized : product_normalized;
+        const ap_uint<9> exponent_gap = (ap_uint<9>)(product_larger
+            ? product_top-c_top : c_top-product_top);
+        const ap_uint<27> smaller_aligned =
+            shiftRightJam27(smaller_normalized, exponent_gap);
 
+        const bool same_sign = product_sign==c.sign;
+#if defined(FSA_SPLIT_D_DSP_MAGNITUDE) && FSA_SPLIT_D_DSP_MAGNITUDE
+        ap_uint<28> sum_magnitude =
+            (ap_uint<28>)larger_normalized+smaller_aligned;
+        #pragma HLS BIND_OP variable=sum_magnitude op=add impl=dsp latency=1
+        ap_uint<28> diff_magnitude =
+            (ap_uint<28>)larger_normalized-smaller_aligned;
+        #pragma HLS BIND_OP variable=diff_magnitude op=sub impl=dsp latency=0
+        const ap_uint<28> magnitude = same_sign ? sum_magnitude : diff_magnitude;
+#else
         ap_uint<28> magnitude = 0;
-        if(product_sign==c.sign){
-            magnitude = (ap_uint<28>)product_aligned+c_aligned;
-            result.sign = product_sign;
-        }else if(product_aligned>=c_aligned){
-            magnitude = (ap_uint<28>)product_aligned-c_aligned;
-            result.sign = product_sign;
+        if(same_sign){
+            magnitude = (ap_uint<28>)larger_normalized+smaller_aligned;
         }else{
-            magnitude = (ap_uint<28>)c_aligned-product_aligned;
-            result.sign = c.sign;
+            magnitude = (ap_uint<28>)larger_normalized-smaller_aligned;
         }
+#endif
+        result.sign = (same_sign || product_larger) ? product_sign : c.sign;
 
         if(magnitude==0){
             result.zero = true;
@@ -188,7 +211,14 @@ namespace{
             // 直接使用HLS的ctlz，避免最高位编码后再串联26-highest减法。
             const ap_uint<5> left_shift = low.countLeadingZeros();
             result.top_exponent = common_top-(ap_int<9>)left_shift;
+#if defined(FSA_SPLIT_D_DSP_NORMALIZE) && FSA_SPLIT_D_DSP_NORMALIZE
+            const ap_uint<27> sum_scale = (ap_uint<27>)1 << left_shift;
+            ap_uint<27> normalized_low = low*sum_scale;
+            #pragma HLS BIND_OP variable=normalized_low op=mul impl=dsp latency=1
+            result.significand = normalized_low;
+#else
             result.significand = low << left_shift;
+#endif
         }
         return result;
     }
